@@ -1,7 +1,10 @@
 import speck as sp
 
 import numpy as np
-
+import os
+import random
+import numpy as np
+import tensorflow as tf
 from pickle import dump
 
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
@@ -13,6 +16,11 @@ from keras.regularizers import l2
 
 bs = 5000;
 wdir = './freshly_trained_nets/'
+def set_seed(seed):
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
 
 def cyclic_lr(num_epochs, high_lr, low_lr):
   res = lambda i: low_lr + ((num_epochs-1) - i % num_epochs)/(num_epochs-1) * (high_lr - low_lr);
@@ -55,7 +63,8 @@ def make_resnet(num_blocks=2, num_filters=32, num_outputs=1, d1=64, d2=64, word_
   model = Model(inputs=inp, outputs=out);
   return(model);
 
-def train_speck_distinguisher(num_epochs, num_rounds=7, depth=1):
+def train_speck_distinguisher(num_epochs, num_rounds=7, depth=1, seed=0):
+    set_seed(seed)
     #create the network
     net = make_resnet(depth=depth, reg_param=10**-5);
     net.compile(optimizer='adam',loss='mse',metrics=['acc']);
