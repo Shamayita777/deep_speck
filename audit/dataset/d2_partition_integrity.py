@@ -16,6 +16,7 @@ Author: Shamayita Moitra
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pyexpat import features
 from typing import Any, Dict, Optional
 from collections import Counter
 import hashlib
@@ -408,13 +409,27 @@ def audit_binary_near_duplicates(
     """
 
     features = partition.features
+    MAX_NEAR_DUPLICATE_SAMPLES = 50_000
+
+    sampled = False
+
+    if len(features) > MAX_NEAR_DUPLICATE_SAMPLES:
+
+        rng = np.random.default_rng(42)
+
+        indices = rng.choice(
+            len(features),
+            MAX_NEAR_DUPLICATE_SAMPLES,
+            replace=False,
+        )
+
+        features = features[indices]
+
+        sampled = True
 
     n = len(features)
-
     near_duplicate_pairs = 0
-
     distance_distribution = {}
-
     for i in range(n):
 
         for j in range(i + 1, n):
@@ -438,10 +453,15 @@ def audit_binary_near_duplicates(
 
         "metric": "hamming",
 
-        "algorithm": "pairwise_exact",
+        "algorithm": (
+            "pairwise_exact_subset"
+            if sampled
+            else "pairwise_exact"
+        ),
 
         "threshold": threshold,
-
+        "sampled": sampled,
+        "evaluated_samples": n,
         "near_duplicate_pairs": near_duplicate_pairs,
 
         "distance_distribution": distance_distribution,
