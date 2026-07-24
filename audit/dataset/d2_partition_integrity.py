@@ -409,7 +409,7 @@ def audit_binary_near_duplicates(
     """
 
     features = partition.features
-    MAX_NEAR_DUPLICATE_SAMPLES = 50_000
+    MAX_NEAR_DUPLICATE_SAMPLES = 1000
 
     sampled = False
 
