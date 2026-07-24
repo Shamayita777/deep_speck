@@ -1,0 +1,150 @@
+{
+    "results": {
+        "partitions": {
+            "train": {
+                "duplicates": {
+                    "total_samples": 10000000,
+                    "unique_samples": 10000000,
+                    "duplicate_samples": 0,
+                    "duplicate_groups": 0,
+                    "maximum_multiplicity": 1,
+                    "collision_rate": 0.0
+                },
+                "near_duplicates": {
+                    "representation": "binary",
+                    "metric": "hamming",
+                    "algorithm": "pairwise_exact_subset",
+                    "threshold": 1,
+                    "sampled": true,
+                    "evaluated_samples": 1000,
+                    "near_duplicate_pairs": 0,
+                    "distance_distribution": {
+                        "32": 49417,
+                        "36": 29855,
+                        "38": 16210,
+                        "30": 43851,
+                        "24": 6982,
+                        "29": 37497,
+                        "28": 30335,
+                        "40": 7007,
+                        "34": 43589,
+                        "37": 22904,
+                        "39": 10854,
+                        "35": 37737,
+                        "31": 47912,
+                        "26": 16519,
+                        "33": 47620,
+                        "27": 23170,
+                        "25": 11186,
+                        "21": 1149,
+                        "41": 4019,
+                        "23": 4087,
+                        "43": 1122,
+                        "44": 558,
+                        "20": 563,
+                        "42": 2337,
+                        "22": 2198,
+                        "19": 248,
+                        "46": 99,
+                        "45": 248,
+                        "17": 44,
+                        "16": 12,
+                        "47": 47,
+                        "18": 93,
+                        "48": 16,
+                        "15": 6,
+                        "49": 4,
+                        "51": 1,
+                        "14": 2,
+                        "50": 1,
+                        "53": 1
+                    }
+                },
+                "labels": {
+                    "label_conflicts": 0,
+                    "consistent": true
+                },
+                "metadata": {}
+            },
+            "validation": {
+                "duplicates": {
+                    "total_samples": 1000000,
+                    "unique_samples": 1000000,
+                    "duplicate_samples": 0,
+                    "duplicate_groups": 0,
+                    "maximum_multiplicity": 1,
+                    "collision_rate": 0.0
+                },
+                "near_duplicates": {
+                    "representation": "binary",
+                    "metric": "hamming",
+                    "algorithm": "pairwise_exact_subset",
+                    "threshold": 1,
+                    "sampled": true,
+                    "evaluated_samples": 1000,
+                    "near_duplicate_pairs": 0,
+                    "distance_distribution": {
+                        "31": 47804,
+                        "24": 6868,
+                        "33": 47495,
+                        "29": 37741,
+                        "27": 23188,
+                        "30": 43526,
+                        "28": 30712,
+                        "35": 37390,
+                        "41": 4134,
+                        "32": 49282,
+                        "37": 22985,
+                        "34": 43645,
+                        "25": 11200,
+                        "23": 4061,
+                        "26": 16226,
+                        "38": 16313,
+                        "20": 563,
+                        "36": 30101,
+                        "21": 1144,
+                        "42": 2244,
+                        "40": 6930,
+                        "39": 11029,
+                        "43": 1199,
+                        "22": 2280,
+                        "18": 133,
+                        "44": 552,
+                        "47": 54,
+                        "19": 255,
+                        "46": 99,
+                        "45": 249,
+                        "16": 21,
+                        "48": 16,
+                        "50": 4,
+                        "17": 42,
+                        "15": 9,
+                        "49": 5,
+                        "14": 1
+                    }
+                },
+                "labels": {
+                    "label_conflicts": 0,
+                    "consistent": true
+                },
+                "metadata": {}
+            }
+        },
+        "partition_overlap": {
+            "train_vs_validation": {
+                "overlap": {
+                    "overlap_samples": 0,
+                    "overlap_percentage": 0.0
+                }
+            }
+        }
+    },
+    "certificate": {
+        "Feature Duplicates": "PASS",
+        "Feature Leakage": "PASS",
+        "Metadata Integrity": "NOT APPLICABLE",
+        "Near Duplicates": "PASS",
+        "Label Consistency": "PASS",
+        "Overall": "PASS"
+    }
+}
