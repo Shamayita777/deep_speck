@@ -785,14 +785,12 @@ def generate_gohr_training_data(
     """
 
     X_train, Y_train = sp.make_train_data(
-        #10**7,
-        10000,
+        10**7,
         num_rounds,
     )
 
     X_validation, Y_validation = sp.make_train_data(
-        #10**6,
-        1000,
+        10**6,
         num_rounds,
     )
 
