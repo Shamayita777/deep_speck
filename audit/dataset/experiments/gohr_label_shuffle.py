@@ -8,11 +8,9 @@ the Label Shuffle perturbation.
 
 import speck as sp
 
-from adapters.gohr import GohrAdapter
+from audit.dataset.adapters.gohr import GohrAdapter
 
-from audit.dataset.d4_controlled_perturbation import (
-    LabelShufflePerturbation,
-)
+from audit.dataset.perturbations.lable_shuffle import LabelShufflePerturbation
 
 from audit.dataset.d4_controlled_perturbation import (
     run_perturbation,

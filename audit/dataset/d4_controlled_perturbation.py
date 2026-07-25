@@ -30,7 +30,7 @@ from abc import ABC, abstractmethod
 
 from typing import Any
 
-
+from dataclasses import dataclass, asdict
 # ============================================================
 # Phase 1
 # Perturbation Interface
@@ -228,9 +228,6 @@ def run_perturbation(
 # ============================================================
 # Evaluation
 # ============================================================
-
-from dataclasses import dataclass
-
 
 @dataclass
 class EvaluationResult:
