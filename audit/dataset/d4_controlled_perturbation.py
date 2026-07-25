@@ -30,7 +30,7 @@ from abc import ABC, abstractmethod
 
 from typing import Any
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 # ============================================================
 # Phase 1
 # Perturbation Interface
@@ -102,16 +102,13 @@ class PerturbationResult:
 # ============================================================
 
 import time
-from typing import Callable
-
 
 def run_perturbation(
     *,
     perturbation: Perturbation,
     features: Any,
     labels: Any,
-    trainer: Callable[[Any, Any], Any],
-    evaluator: Callable[[Any], float],
+    adapter: Any,
     notes: str = "",
 ) -> PerturbationResult:
     """
@@ -132,12 +129,8 @@ def run_perturbation(
     labels
         Original labels.
 
-    trainer
-        Callable that trains and returns a model.
-
-    evaluator
-        Callable that evaluates a trained model and
-        returns a scalar performance score.
+    adapter
+        Dataset adapter for training and evaluating models.
 
     notes
         Optional experiment notes.
@@ -154,15 +147,56 @@ def run_perturbation(
     # Baseline
     # --------------------------------------------------------
 
-    baseline_model = trainer(
-        features,
-        labels,
-    )
+    import json
 
-    baseline_score = evaluator(
-        baseline_model,
-    )
+    from pathlib import Path
 
+    evidence_dir = Path("audit/dataset/evidence/d4")
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+
+    status_file = evidence_dir / "baseline_status.json"
+    model_file = evidence_dir / "baseline_model.keras"
+
+    if status_file.exists() and model_file.exists():
+
+        print("Loading existing baseline...")
+
+        baseline_model = adapter.load(model_file)
+
+        with open(status_file) as fp:
+            status = json.load(fp)
+
+        baseline_score = status["baseline_score"]
+
+    else:
+
+        print("Training baseline...")
+
+        baseline_model = adapter.train(
+            features,
+            labels,
+        )
+
+        baseline_score = adapter.evaluate(
+            baseline_model,
+        )
+
+        adapter.save(model_file)
+
+        with open(status_file, "w") as fp:
+            json.dump(
+                {
+                    "completed": True,
+                    "baseline_score": baseline_score,
+                    "num_rounds": adapter.num_rounds,
+                    "depth": adapter.depth,
+                    "epochs": adapter.epochs,
+                    "batch_size": adapter.batch_size,
+                    "seed": adapter.seed,
+                },
+                fp,
+                indent=4,
+            )
     # --------------------------------------------------------
     # Controlled perturbation
     # --------------------------------------------------------
@@ -174,12 +208,12 @@ def run_perturbation(
         )
     )
 
-    perturbed_model = trainer(
+    perturbed_model = adapter.train(
         perturbed_features,
         perturbed_labels,
     )
 
-    perturbed_score = evaluator(
+    perturbed_score = adapter.evaluate(
         perturbed_model,
     )
 
@@ -306,9 +340,6 @@ def evaluate_result(
 # ============================================================
 # Certificate
 # ============================================================
-
-from dataclasses import asdict
-
 
 def generate_certificate(
     result: PerturbationResult,

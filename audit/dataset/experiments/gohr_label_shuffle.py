@@ -106,9 +106,7 @@ def main():
 
         labels=train_y,
 
-        trainer=adapter.train,
-
-        evaluator=adapter.evaluate,
+        adapter=adapter,
 
         notes=(
             "Gohr neural distinguisher "
