@@ -1,0 +1,14 @@
+{
+    "audit_dimension": "Controlled Perturbation",
+    "perturbation": "label_shuffle",
+    "baseline_score": 0.9288110136985779,
+    "perturbed_score": 0.49984800815582275,
+    "absolute_difference": -0.4289630055427551,
+    "relative_difference": -46.18409980245607,
+    "runtime": 30178.354305634002,
+    "decision": "SIGNIFICANT_CHANGE",
+    "observed_effect": true,
+    "threshold": 20.0,
+    "rationale": "Perturbation produced a measurable performance change.",
+    "notes": "Gohr neural distinguisher under label shuffle perturbation."
+}

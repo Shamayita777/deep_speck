@@ -1,0 +1,9 @@
+{
+    "completed": true,
+    "baseline_score": 0.9288110136985779,
+    "num_rounds": 5,
+    "depth": 10,
+    "epochs": 200,
+    "batch_size": 5000,
+    "seed": 0
+}
