@@ -1,0 +1,90 @@
+"""
+Cryptographic Evidence Reporting
+================================
+
+Pretty terminal reporting for Cryptographic Evidence audits.
+
+Responsibilities
+----------------
+• Format audit results
+• Display evaluation decisions
+• Produce human-readable terminal output
+
+This module performs presentation only.
+"""
+
+from __future__ import annotations
+
+from .results import (
+    CryptographicTestResult,
+    EvaluationResult,
+)
+
+
+class ReportGenerator:
+    """
+    Generates terminal reports.
+    """
+
+    LINE = "=" * 70
+
+    def generate(
+        self,
+        result: CryptographicTestResult,
+        evaluation: EvaluationResult,
+    ) -> str:
+        """
+        Generate a formatted terminal report.
+        """
+
+        report = [
+            self.LINE,
+            "CRYPTOGRAPHIC EVIDENCE AUDIT REPORT",
+            self.LINE,
+            "",
+            f"Test                 : {result.test_name}",
+            f"Decision             : {evaluation.decision.value}",
+            "",
+            "Performance",
+            "-----------",
+            f"Baseline Score       : {result.baseline_score:.6f}",
+            f"Test Score           : {result.test_score:.6f}",
+            f"Performance Drop     : {result.performance_drop:.6f}",
+            f"Relative Difference  : {result.relative_difference * 100:.2f}%",
+            "",
+            "Evaluation",
+            "----------",
+            f"Threshold            : {evaluation.threshold:.6f}",
+            f"Observed Effect      : {evaluation.observed_effect:.6f}",
+            f"Rationale            : {evaluation.rationale}",
+            "",
+            "Execution",
+            "---------",
+            f"Runtime (seconds)    : {result.runtime:.3f}",
+            f"Timestamp            : {result.timestamp.isoformat()}",
+            "",
+            self.LINE,
+        ]
+
+        return "\n".join(report)
+
+    def print(
+        self,
+        result: CryptographicTestResult,
+        evaluation: EvaluationResult,
+    ) -> None:
+        """
+        Print a formatted terminal report.
+        """
+
+        print(self.generate(result, evaluation))
+
+    @property
+    def name(self) -> str:
+        return "Report Generator"
+
+    @property
+    def description(self) -> str:
+        return (
+            "Produces human-readable audit reports."
+        )

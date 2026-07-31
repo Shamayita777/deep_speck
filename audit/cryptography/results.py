@@ -1,0 +1,258 @@
+"""
+Cryptographic Evidence Framework
+================================
+
+Framework-level result objects shared by all Cryptographic
+Evidence (CE) audit procedures.
+
+This module defines immutable result structures representing
+the outcome of cryptographic audit experiments. These classes
+are intentionally independent of any particular cryptographic
+primitive, machine-learning model, dataset, or research paper.
+
+The framework separates:
+
+    • Experimental measurements
+        (CryptographicTestResult)
+
+from
+
+    • Scientific interpretation
+        (EvaluationResult)
+
+This separation allows different evaluation policies to be
+applied without modifying the underlying experimental record.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from typing import Any
+
+
+# ============================================================
+# Evaluation Decision
+# ============================================================
+
+
+class EvaluationDecision(Enum):
+    """
+    Scientific decision produced after evaluating a
+    cryptographic audit result.
+    """
+
+    SUPPORTED = "SUPPORTED"
+
+    NOT_SUPPORTED = "NOT_SUPPORTED"
+
+    INCONCLUSIVE = "INCONCLUSIVE"
+
+
+# ============================================================
+# Experimental Result
+# ============================================================
+
+
+@dataclass(frozen=True, slots=True)
+class CryptographicTestResult:
+    """
+    Immutable result produced by a cryptographic audit
+    experiment.
+
+    This class stores only experimentally observed values.
+    No scientific interpretation is performed here.
+    """
+
+    test_name: str
+
+    baseline_score: float
+
+    test_score: float
+
+    performance_drop: float
+
+    relative_difference: float
+
+    runtime: float
+
+    notes: str = ""
+
+    timestamp: datetime = field(
+        default_factory=datetime.utcnow,
+    )
+
+    # --------------------------------------------------------
+    # Convenience Properties
+    # --------------------------------------------------------
+
+    #@property
+    #def performance_drop(self) -> float:
+        #"""
+        #Positive percentage degradation.
+
+        #Returns
+        #-------
+        #float
+        #"""
+
+        #return max(
+            #0.0,
+            #-self.relative_difference,
+        #)
+
+    #@property
+    #def performance_gain(self) -> float:
+        #"""
+        #Positive percentage improvement.
+
+        #Returns
+        #-------
+        #float
+        #"""
+
+        #return max(
+            #0.0,
+            #self.relative_difference,
+        #)
+
+    @property
+    def changed(self) -> bool:
+        """
+        Whether any measurable performance change
+        occurred.
+        """
+
+        return self.performance_drop != 0.0
+
+    # --------------------------------------------------------
+    # Serialization
+    # --------------------------------------------------------
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the result into a serializable
+        dictionary.
+        """
+
+        return {
+
+            "test_name": self.test_name,
+
+            "baseline_score": self.baseline_score,
+
+            "test_score": self.test_score,
+
+            "performance_drop": self.performance_drop,
+
+            "relative_difference": self.relative_difference,
+
+            "runtime": self.runtime,
+
+            "notes": self.notes,
+
+            "timestamp": self.timestamp.isoformat(),
+        }
+
+    # --------------------------------------------------------
+    # Display
+    # --------------------------------------------------------
+
+    def __str__(self) -> str:
+
+        return (
+
+            f"{self.test_name}"
+
+            f" | Baseline={self.baseline_score:.6f}"
+
+            f" | Test={self.test_score:.6f}"
+
+            f" | Δ={self.relative_difference * 100:.2f}%"
+
+        )
+
+
+# ============================================================
+# Scientific Evaluation
+# ============================================================
+
+
+@dataclass(frozen=True, slots=True)
+class EvaluationResult:
+    """
+    Scientific interpretation of a cryptographic audit.
+
+    Unlike CryptographicTestResult, this class contains
+    conclusions rather than raw measurements.
+    """
+
+    decision: EvaluationDecision
+
+    rationale: str
+
+    threshold: float
+
+    observed_effect: float
+
+    def to_dict(self) -> dict[str, Any]:
+        """
+        Convert the evaluation into a serializable
+        dictionary.
+        """
+
+        return {
+
+            "decision": self.decision.value,
+
+            "rationale": self.rationale,
+
+            "threshold": self.threshold,
+
+            "observed_effect": self.observed_effect,
+
+        }
+
+    @property
+    def supported(self) -> bool:
+        """
+        Whether the hypothesis is supported.
+        """
+
+        return (
+            self.decision
+            is EvaluationDecision.SUPPORTED
+        )
+
+    @property
+    def inconclusive(self) -> bool:
+        """
+        Whether the experiment is inconclusive.
+        """
+
+        return (
+            self.decision
+            is EvaluationDecision.INCONCLUSIVE
+        )
+
+    @property
+    def rejected(self) -> bool:
+        """
+        Whether the hypothesis is not supported.
+        """
+
+        return (
+            self.decision
+            is EvaluationDecision.NOT_SUPPORTED
+        )
+
+    def __str__(self) -> str:
+
+        return (
+
+            f"{self.decision.value}"
+
+            f" ({self.rationale})"
+
+        )

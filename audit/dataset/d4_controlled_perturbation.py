@@ -18,8 +18,6 @@ Certificate
 Reporting
         ↓
 JSON
-        ↓
-main()
 """
 
 # ============================================================
@@ -176,6 +174,7 @@ def run_perturbation(
             features,
             labels,
         )
+        
 
         baseline_score = adapter.evaluate(
             baseline_model,
