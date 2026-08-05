@@ -30,6 +30,17 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
+from enum import Enum
+
+class EvidenceDirection(Enum):
+    """
+    Indicates whether larger or smaller observed effects
+    provide stronger support for the experimental hypothesis.
+    """
+
+    HIGHER_IS_BETTER = "HIGHER_IS_BETTER"
+
+    LOWER_IS_BETTER = "LOWER_IS_BETTER"
 
 class CryptographicTest(ABC):
     """
@@ -70,6 +81,7 @@ class CryptographicTest(ABC):
         name: str,
         description: str,
         hypothesis: str,
+        evidence_direction: EvidenceDirection,
     ) -> None:
         """
         Initialise a cryptographic audit test.
@@ -89,6 +101,47 @@ class CryptographicTest(ABC):
         self.name = name
         self.description = description
         self.hypothesis = hypothesis
+        self.evidence_direction = evidence_direction
+
+    # ---------------------------------------------------------
+    # Scientific Interpretation
+    # ---------------------------------------------------------
+
+    @property
+    def supported_rationale(self) -> str:
+        """
+        Scientific interpretation when the hypothesis is
+        supported.
+        """
+        return (
+            "Observed evidence exceeds the support threshold."
+        )
+
+    @property
+    def inconclusive_rationale(self) -> str:
+        """
+        Scientific interpretation when the evidence is
+        inconclusive.
+        """
+        return (
+            "Observed evidence is insufficient for strong "
+            "support."
+        )
+
+    @property
+    def unsupported_rationale(self) -> str:
+        """
+        Scientific interpretation when the hypothesis is not
+        supported.
+        """
+        return (
+            "Observed evidence is too weak to support the "
+            "hypothesis."
+        )
+
+    # ---------------------------------------------------------
+    # Abstract Interface
+    # ---------------------------------------------------------
 
     @abstractmethod
     def validate(

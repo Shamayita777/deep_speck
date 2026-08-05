@@ -66,7 +66,10 @@ def main() -> None:
     # Evaluate
     # ---------------------------------------------------------
 
-    evaluation = evaluator.evaluate(result)
+    evaluation = evaluator.evaluate(
+        test,
+        result,
+    )
 
     # ---------------------------------------------------------
     # Certificate

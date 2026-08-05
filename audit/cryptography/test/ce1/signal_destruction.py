@@ -43,7 +43,7 @@ import time
 
 from audit.cryptography.adapters.base import CryptographicAdapter
 from audit.cryptography.results import CryptographicTestResult
-from audit.cryptography.test.base import CryptographicTest
+from audit.cryptography.test.base import CryptographicTest, EvidenceDirection
 
 
 class SignalDestructionTest(CryptographicTest):
@@ -77,6 +77,7 @@ class SignalDestructionTest(CryptographicTest):
                 "cause measurable degradation in model "
                 "performance."
             ),
+            evidence_direction=EvidenceDirection.HIGHER_IS_BETTER,
         )
 
     # ---------------------------------------------------------
@@ -169,6 +170,7 @@ class SignalDestructionTest(CryptographicTest):
 
         return CryptographicTestResult(
             test_name=self.name,
+            evidence_direction=self.evidence_direction,
             baseline_score=baseline_score,
             test_score=destroyed_score,
             performance_drop=performance_drop,
@@ -178,4 +180,28 @@ class SignalDestructionTest(CryptographicTest):
                 "Baseline and signal-destroyed experiments "
                 "completed successfully."
             ),
+        )
+    # ---------------------------------------------------------
+    # Scientific Interpretation
+    # ---------------------------------------------------------
+
+    @property
+    def supported_rationale(self) -> str:
+        return (
+            "Observed performance degradation exceeds "
+            "the support threshold."
+        )
+
+    @property
+    def inconclusive_rationale(self) -> str:
+        return (
+            "Observed performance degradation is "
+            "insufficient for strong support."
+        )
+
+    @property
+    def unsupported_rationale(self) -> str:
+        return (
+            "Observed performance degradation is too "
+            "small to support the hypothesis."
         )

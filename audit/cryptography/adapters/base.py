@@ -18,13 +18,15 @@ Responsibilities
 ----------------
 A concrete adapter is responsible for
 
-    • generating the baseline experiment
-
-    • generating the signal-destroyed experiment
+    • generating audit-specific datasets
 
     • training a model
 
     • evaluating a trained model
+
+    • computing theory-derived reference values
+
+    • computing theory consistency metrics
 
     • saving and loading trained models
 
@@ -37,7 +39,7 @@ from __future__ import annotations
 from abc import ABC
 from abc import abstractmethod
 from typing import Any
-
+from ..results import CorrelationStatistic
 
 class CryptographicAdapter(ABC):
     """
@@ -144,6 +146,91 @@ class CryptographicAdapter(ABC):
         raise NotImplementedError
 
     # ---------------------------------------------------------
+    # Theory Consistency (CE2)
+    # ---------------------------------------------------------
+
+    @abstractmethod
+    def generate_theory_dataset(self) -> Any:
+        """
+        Generate the evaluation dataset used for theory
+        consistency analysis.
+
+        Returns
+        -------
+        Any
+            Dataset suitable for comparing theoretical
+            expectations with model behaviour.
+        """
+        raise NotImplementedError
+
+
+    @abstractmethod
+    def compute_theoretical_reference(
+        self,
+        dataset: Any,
+    ) -> Any:
+        """
+        Compute the independent theoretical reference for the
+        supplied dataset.
+
+        The theoretical reference must be derived from
+        established cryptographic analysis rather than from
+        the learned model itself.
+
+        Parameters
+        ----------
+        dataset
+            Evaluation dataset.
+
+        Returns
+        -------
+        Any
+            Theory-derived reference values.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def compute_model_predictions(
+        self,
+        model: Any,
+        dataset: Any,
+    ) -> Any:
+        """
+        Compute the model outputs used for theory comparison.
+
+        Parameters
+        ----------
+        model
+            Trained model.
+
+        dataset
+            Evaluation dataset.
+
+        Returns
+        -------
+        Any
+            Model predictions corresponding to the supplied
+            dataset.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def compute_theory_consistency(
+        self,
+        theoretical_reference: Any,
+        model_predictions: Any,
+    ) -> "CorrelationStatistic":
+        """
+        Compute the Theory Consistency Score (TCS).
+
+        Returns
+        -------
+        CorrelationStatistic
+            Correlation coefficient, its p-value, and the
+            sample size it was computed over.
+        """
+        raise NotImplementedError
+    # ---------------------------------------------------------
     # Persistence
     # ---------------------------------------------------------
 
@@ -169,7 +256,7 @@ class CryptographicAdapter(ABC):
     @abstractmethod
     def load(
         self,
-        path: str,
+        path: str | None = None,
     ) -> Any:
         """
         Load a previously saved model.

@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any
-
+from audit.cryptography.test.base import EvidenceDirection
 
 # ============================================================
 # Evaluation Decision
@@ -61,22 +61,33 @@ class CryptographicTestResult:
     Immutable result produced by a cryptographic audit
     experiment.
 
+    The result records a reference measurement, an observed
+    measurement, and their quantitative relationship.
+
+    The semantic interpretation of these measurements is
+    defined by the corresponding audit procedure. For example,
+    Signal Destruction interprets them as baseline and
+    signal-destroyed performance, whereas Theory Consistency
+    interprets them as theoretical and observed behaviour.
+
     This class stores only experimentally observed values.
     No scientific interpretation is performed here.
     """
 
     test_name: str
 
+    evidence_direction: EvidenceDirection
+    # Reference measurement defined by the audit.
     baseline_score: float
-
+    # Observed measurement produced by the audit.
     test_score: float
-
+    # Absolute deviation between the reference and observation.
     performance_drop: float
-
+    # Normalized deviation.
     relative_difference: float
-
     runtime: float
-
+    p_value: float | None = None
+    sample_size: int | None = None
     notes: str = ""
 
     timestamp: datetime = field(
@@ -139,6 +150,12 @@ class CryptographicTestResult:
         return {
 
             "test_name": self.test_name,
+
+            "evidence_direction": self.evidence_direction.value,
+
+            "p_value": self.p_value,
+
+            "sample_size": self.sample_size,
 
             "baseline_score": self.baseline_score,
 
@@ -256,3 +273,15 @@ class EvaluationResult:
             f" ({self.rationale})"
 
         )
+
+@dataclass(frozen=True, slots=True)
+class CorrelationStatistic:
+    """
+    Generic correlation-based statistical result, reusable by
+    any Cryptographic Evidence test that reports a rank or
+    linear agreement measure (CE2 today; potentially others).
+    """
+
+    statistic: float
+    p_value: float
+    n: int

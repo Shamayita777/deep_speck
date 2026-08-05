@@ -20,6 +20,8 @@ test or implementation.
 
 from __future__ import annotations
 
+from audit.cryptography.test.base import EvidenceDirection
+from audit.cryptography.test.base import CryptographicTest
 from .results import (
     CryptographicTestResult,
     EvaluationDecision,
@@ -65,6 +67,7 @@ class CryptographicEvaluator:
 
     def evaluate(
         self,
+        test: CryptographicTest,
         result: CryptographicTestResult,
     ) -> EvaluationResult:
         """
@@ -72,6 +75,8 @@ class CryptographicEvaluator:
 
         Parameters
         ----------
+        test
+            The cryptographic test that was executed.
         result
             Experimental result.
 
@@ -83,14 +88,17 @@ class CryptographicEvaluator:
 
         effect = result.relative_difference
 
+        if (
+            result.evidence_direction
+            is EvidenceDirection.LOWER_IS_BETTER
+        ):
+            effect = -effect
+
         if effect >= self.supported_threshold:
 
             decision = EvaluationDecision.SUPPORTED
 
-            rationale = (
-                "Observed performance degradation exceeds "
-                "the support threshold."
-            )
+            rationale = test.supported_rationale
 
             threshold = self.supported_threshold
 
@@ -98,10 +106,7 @@ class CryptographicEvaluator:
 
             decision = EvaluationDecision.INCONCLUSIVE
 
-            rationale = (
-                "Observed performance degradation is "
-                "insufficient for strong support."
-            )
+            rationale = test.inconclusive_rationale
 
             threshold = self.inconclusive_threshold
 
@@ -109,10 +114,7 @@ class CryptographicEvaluator:
 
             decision = EvaluationDecision.NOT_SUPPORTED
 
-            rationale = (
-                "Observed performance degradation is too "
-                "small to support the hypothesis."
-            )
+            rationale = test.unsupported_rationale
 
             threshold = self.inconclusive_threshold
 

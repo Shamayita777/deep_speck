@@ -43,6 +43,8 @@ class AuditCertificate:
     observed_effect: float
     runtime: float
     timestamp: str
+    p_value: float | None
+    sample_size: int | None
 
 
 class CertificateGenerator:
@@ -74,6 +76,8 @@ class CertificateGenerator:
             observed_effect=evaluation.observed_effect,
             runtime=result.runtime,
             timestamp=result.timestamp.isoformat(),
+            p_value=result.p_value,
+            sample_size=result.sample_size,
         )
 
     @staticmethod

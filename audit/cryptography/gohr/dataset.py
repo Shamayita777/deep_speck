@@ -43,7 +43,24 @@ class DatasetBundle:
     train: tuple[np.ndarray, np.ndarray]
     validation: tuple[np.ndarray, np.ndarray]
 
+@dataclass(frozen=True)
+class TheoryDataset:
+    input_difference: tuple[int, int]
+    rounds: int
+    X: np.ndarray
+    theoretical_probabilities: np.ndarray
 
+    @property
+    def num_samples(self) -> int:
+        return int(self.theoretical_probabilities.shape[0])
+
+@dataclass(frozen=True)
+class TheoryPredictionDataset:
+    """
+    Network-ready dataset used for CE2 prediction.
+    """
+
+    X: np.ndarray
 class GohrDataset:
     """
     Dataset generator for the Gohr neural distinguisher.
@@ -143,6 +160,33 @@ class GohrDataset:
             validation=destroyed_validation,
         )
 
+    def generate_theory_dataset(
+        self, *, num_samples: int, rounds: int,
+    ) -> TheoryDataset:
+        X, theoretical_probabilities = sp.estimate_trail_probabilities(
+            num_samples, rounds, self.differential,
+        )
+        return TheoryDataset(
+            input_difference=self.differential,
+            rounds=rounds,
+            X=X,
+            theoretical_probabilities=theoretical_probabilities,
+        )
+    def generate_prediction_dataset(
+        self,
+        theory_dataset: TheoryDataset,
+    ) -> TheoryPredictionDataset:
+        """
+        Return the network-ready inputs cached on the supplied
+        theory dataset.
+
+        Does not regenerate samples: CE2 requires the theoretical
+        reference and the model's predictions to come from the
+        same samples, which were already generated in
+        `generate_theory_dataset`.
+        """
+
+        return TheoryPredictionDataset(X=theory_dataset.X)
     # ---------------------------------------------------------
     # Metadata
     # ---------------------------------------------------------
