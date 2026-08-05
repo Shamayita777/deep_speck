@@ -14,7 +14,7 @@ def main() -> None:
 
     adapter = GohrAdapter(
         model_path="audit/cryptography/evidence/ce1/best5depth10 (10).h5",
-        theory_num_samples=10000,
+        theory_num_samples=100000,
     )
 
     test = TheoryConsistencyTest()
