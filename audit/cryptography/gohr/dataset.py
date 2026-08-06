@@ -55,6 +55,27 @@ class TheoryDataset:
         return int(self.theoretical_probabilities.shape[0])
 
 @dataclass(frozen=True)
+class CalibrationDataset:
+    """
+    Evaluation dataset used for CE3 calibration probing.
+
+    Unlike TheoryDataset, this dataset contains both real and
+    random differential pairs together with their differential
+    class labels.
+
+    It is used only for calibration targets such as
+    differential-class probing.
+    """
+
+    X: np.ndarray
+
+    differential_labels: np.ndarray
+
+    @property
+    def num_samples(self) -> int:
+        return int(self.differential_labels.shape[0])
+
+@dataclass(frozen=True)
 class TheoryPredictionDataset:
     """
     Network-ready dataset used for CE2 prediction.
@@ -171,6 +192,34 @@ class GohrDataset:
             rounds=rounds,
             X=X,
             theoretical_probabilities=theoretical_probabilities,
+        )
+
+    def generate_calibration_dataset(
+        self,
+        *,
+        num_samples: int,
+    ) -> CalibrationDataset:
+        """
+        Generate the CE3 calibration dataset.
+
+        The calibration dataset is produced using the same data
+        generation procedure as Gohr training, providing both
+        real and random differential pairs together with their
+        binary differential-class labels.
+
+        Unlike TheoryDataset, no analytical probabilities are
+        computed.
+        """
+
+        X, Y = sp.make_train_data(
+            num_samples,
+            self.rounds,
+            diff=self.differential,
+        )
+
+        return CalibrationDataset(
+            X=X,
+            differential_labels=Y,
         )
     def generate_prediction_dataset(
         self,

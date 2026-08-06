@@ -75,6 +75,63 @@ class ReportGenerator:
                     "",
                 ]
             ),
+            *(
+                [
+                    "Theory Consistency",
+                    "------------------",
+                    f"Correlation (ρ)     : {result.test_score:.6f}",
+                    (
+                        f"P-value             : {result.p_value}"
+                        if result.p_value is not None
+                        else "P-value             : N/A"
+                    ),
+                    (
+                        f"Sample Size         : {result.sample_size}"
+                        if result.sample_size is not None
+                        else "Sample Size         : N/A"
+                    ),
+                    "",
+                ]
+                if result.test_name == "Theory Consistency"
+                else
+                [
+                    "Representation Interpretation",
+                    "------------------------------",
+                    f"Target               : {result.metadata.get('target_name', 'N/A')}",
+                    f"Metric               : {result.metadata.get('metric_name', 'N/A')}",
+                    f"Real Probe Score     : {result.metadata.get('real_probe_score', float('nan')):.6f}",
+                    f"Control Probe Score  : {result.metadata.get('control_probe_score', float('nan')):.6f}",
+                    f"Selectivity          : {result.test_score:.6f}",
+                    f"Effect Size (d_z)    : {result.metadata.get('effect_size', float('nan')):.6f}",
+                    (
+                        f"95% CI               : [{result.metadata.get('ci_low', float('nan')):.6f}, "
+                        f"{result.metadata.get('ci_high', float('nan')):.6f}]"
+                    ),
+                    f"Statistical Test     : {result.metadata.get('statistical_test', 'N/A')}",
+                    (
+                        f"P-value              : {result.p_value}"
+                        if result.p_value is not None
+                        else "P-value              : N/A"
+                    ),
+                    (
+                        f"Paired Folds         : {result.sample_size}"
+                        if result.sample_size is not None
+                        else "Paired Folds         : N/A"
+                    ),
+                    "",
+                ]
+                if result.test_name == "Representation Interpretation"
+                else
+                [
+                    "Performance",
+                    "-----------",
+                    f"Baseline Score       : {result.baseline_score:.6f}",
+                    f"Test Score           : {result.test_score:.6f}",
+                    f"Performance Drop     : {result.performance_drop:.6f}",
+                    f"Relative Difference  : {result.relative_difference * 100:.2f}%",
+                    "",
+                ]
+            ),
             "Evaluation",
             "----------",
             f"Threshold            : {evaluation.threshold:.6f}",

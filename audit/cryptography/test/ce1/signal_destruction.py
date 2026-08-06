@@ -133,6 +133,10 @@ class SignalDestructionTest(CryptographicTest):
         baseline_model = adapter.train(
             baseline_dataset,
         )
+        adapter.save(
+            baseline_model,
+            adapter._baseline_model_path,
+        )
 
         baseline_score = adapter.evaluate(
             baseline_model,
@@ -148,6 +152,10 @@ class SignalDestructionTest(CryptographicTest):
 
         destroyed_model = adapter.train(
             destroyed_dataset,
+        )
+        adapter.save(
+            destroyed_model,
+            adapter._signal_destroyed_model_path,
         )
 
         destroyed_score = adapter.evaluate(

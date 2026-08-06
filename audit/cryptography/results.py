@@ -89,45 +89,15 @@ class CryptographicTestResult:
     p_value: float | None = None
     sample_size: int | None = None
     notes: str = ""
+    # Optional test-specific information.
+    # Generic framework code does not interpret these values.
+    metadata: dict[str, Any] = field(
+        default_factory=dict,
+    )
 
     timestamp: datetime = field(
         default_factory=datetime.utcnow,
     )
-
-    # --------------------------------------------------------
-    # Convenience Properties
-    # --------------------------------------------------------
-
-    #@property
-    #def performance_drop(self) -> float:
-        #"""
-        #Positive percentage degradation.
-
-        #Returns
-        #-------
-        #float
-        #"""
-
-        #return max(
-            #0.0,
-            #-self.relative_difference,
-        #)
-
-    #@property
-    #def performance_gain(self) -> float:
-        #"""
-        #Positive percentage improvement.
-
-        #Returns
-        #-------
-        #float
-        #"""
-
-        #return max(
-            #0.0,
-            #self.relative_difference,
-        #)
-
     @property
     def changed(self) -> bool:
         """
@@ -168,6 +138,8 @@ class CryptographicTestResult:
             "runtime": self.runtime,
 
             "notes": self.notes,
+
+            "metadata": self.metadata,
 
             "timestamp": self.timestamp.isoformat(),
         }

@@ -1,0 +1,17 @@
+{
+    "framework": "Cryptographic Evidence Framework",
+    "test": "Theory Consistency",
+    "decision": "NOT_SUPPORTED",
+    "rationale": "Observed rank correlation is negative, indicating disagreement between the frozen model and the theoretical reference.",
+    "baseline_score": 0.0,
+    "test_score": -0.1859802592586383,
+    "performance_drop": -0.1859802592586383,
+    "relative_difference": -0.1859802592586383,
+    "threshold": 0.1,
+    "observed_effect": -0.1859802592586383,
+    "runtime": 4.1554266560000315,
+    "timestamp": "2026-08-06T04:14:50.608165",
+    "p_value": 0.0,
+    "sample_size": 100000,
+    "correlation": -0.1859802592586383
+}

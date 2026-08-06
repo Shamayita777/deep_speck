@@ -22,7 +22,17 @@ from audit.cryptography.gohr import speck
 from scipy.stats import spearmanr
 from audit.cryptography.adapters.base import CryptographicAdapter
 from audit.cryptography.gohr import dataset
-from audit.cryptography.gohr.dataset import DatasetBundle, GohrDataset
+from audit.cryptography.gohr.dataset import (
+    CalibrationDataset,
+    DatasetBundle,
+    GohrDataset,
+    TheoryDataset,
+)
+from audit.cryptography.test.ce3.types import (
+    RepresentationTask,
+    TargetSpecification,
+    TargetType,
+)
 from audit.cryptography.gohr.model import GohrModel
 from audit.cryptography.gohr.trainer import GohrTrainer
 from audit.cryptography.gohr.evaluate import GohrEvaluator
@@ -41,6 +51,13 @@ class GohrAdapter(CryptographicAdapter):
         evaluator: GohrEvaluator | None = None,
         model_path: str | Path | None = None,
         theory_num_samples: int = 10**5,
+        control_model_path: str | Path | None = None,
+        baseline_model_path: str | Path | None = (
+            "audit/cryptography/evidence/ce1/best5depth10 (10).h5"
+        ),
+        signal_destroyed_model_path: str | Path | None = (
+            "audit/cryptography/evidence/ce1/signal_destroyed.h5"
+        ),
     ) -> None:
 
         self._dataset = dataset or GohrDataset()
@@ -48,7 +65,10 @@ class GohrAdapter(CryptographicAdapter):
         self._trainer = trainer or GohrTrainer()
         self._evaluator = evaluator or GohrEvaluator()
         self._model_path = model_path
+        self._control_model_path = control_model_path
         self._theory_num_samples = theory_num_samples
+        self._baseline_model_path = baseline_model_path
+        self._signal_destroyed_model_path = signal_destroyed_model_path
 
         self._last_bundle: DatasetBundle | None = None
 
@@ -84,6 +104,29 @@ class GohrAdapter(CryptographicAdapter):
 
         return bundle
 
+    def extract_representations(
+        self,
+        model: Model,
+        dataset: Any,
+    ) -> np.ndarray:
+        """
+        Extract frozen hidden representations for CE3.
+
+        The representation is taken from the final hidden layer,
+        immediately before the output classifier.
+        """
+
+        representation_model = Model(
+            inputs=model.input,
+            outputs=model.layers[-2].output,
+        )
+
+        representations = representation_model.predict(
+            dataset.X,
+            verbose=0,
+        )
+
+        return np.asarray(representations)
     # ---------------------------------------------------------
     # Training
     # ---------------------------------------------------------
@@ -127,6 +170,84 @@ class GohrAdapter(CryptographicAdapter):
             model,
             self._last_bundle.validation,
         )
+
+    def generate_representation_tasks(
+        self,
+    ) -> list[RepresentationTask]:
+        """
+        Generate the representation probing tasks required
+        for CE3.
+
+        Returns
+        -------
+        list[RepresentationTask]
+            Calibration and primary probing tasks.
+        """
+
+        # ---------------------------------------------
+        # Calibration task
+        # ---------------------------------------------
+
+        calibration_dataset = (
+            self._dataset.generate_calibration_dataset(
+                num_samples=self._theory_num_samples,
+            )
+        )
+
+        calibration_target = TargetSpecification(
+            name="Differential Class",
+            description=(
+                "Binary differential-class labels used to "
+                "verify the probing pipeline."
+            ),
+            target_type=TargetType.BINARY,
+            labels=calibration_dataset.differential_labels,
+        )
+
+        # ---------------------------------------------
+        # Primary task
+        # ---------------------------------------------
+
+        theory_dataset = self.generate_theory_dataset()
+
+        probabilities = (
+            theory_dataset.theoretical_probabilities
+        )
+
+        quantiles = np.quantile(
+            probabilities,
+            [0.2, 0.4, 0.6, 0.8],
+        )
+
+        probability_labels = np.digitize(
+            probabilities,
+            bins=quantiles,
+            right=False,
+        )
+
+        primary_target = TargetSpecification(
+            name="Analytical Trail Probability",
+            description=(
+                "Discretized analytical trail probability."
+            ),
+            target_type=TargetType.MULTICLASS,
+            labels=probability_labels.astype(np.int64),
+        )
+
+        return [
+
+            RepresentationTask(
+                dataset=calibration_dataset,
+                target=calibration_target,
+                is_primary=False,
+            ),
+
+            RepresentationTask(
+                dataset=theory_dataset,
+                target=primary_target,
+                is_primary=True,
+            ),
+        ]    
 
     def generate_theory_dataset(self):
         """
@@ -232,6 +353,25 @@ class GohrAdapter(CryptographicAdapter):
             compile=False,
         )
 
+    def provide_control_model(self) -> Model:
+        """
+        Load the CE1 signal-destroyed control model.
+
+        Returns
+        -------
+        Model
+            Frozen signal-destroyed model used as the CE3 baseline.
+        """
+
+        if self._signal_destroyed_model_path is None:
+            raise RuntimeError(
+                "No signal-destroyed model path provided."
+            )
+
+        return load_model(
+            self._signal_destroyed_model_path,
+            compile=False,
+        )
     # ---------------------------------------------------------
     # Metadata
     # ---------------------------------------------------------

@@ -18,6 +18,7 @@ Responsibilities
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from typing import Any
 
 from .results import (
     CryptographicTestResult,
@@ -43,6 +44,7 @@ class AuditCertificate:
     observed_effect: float
     runtime: float
     timestamp: str
+    metadata: dict[str, Any]
     p_value: float | None
     sample_size: int | None
 
@@ -76,21 +78,36 @@ class CertificateGenerator:
             observed_effect=evaluation.observed_effect,
             runtime=result.runtime,
             timestamp=result.timestamp.isoformat(),
+            metadata=result.metadata,
             p_value=result.p_value,
             sample_size=result.sample_size,
         )
 
     @staticmethod
-    def to_dict(
-        certificate: AuditCertificate,
-    ) -> dict:
-        """
-        Convert a certificate into a dictionary.
-        """
+    def to_dict(certificate: AuditCertificate) -> dict:
         data = asdict(certificate)
+
         # Add CE2-specific alias for clarity.
         if certificate.test == "Theory Consistency":
             data["correlation"] = certificate.test_score
+
+        # Add CE3-specific fields, sourced from metadata rather
+        # than reusing baseline_score/test_score/relative_difference
+        # for quantities those fields were never meant to carry.
+        elif certificate.test == "Representation Interpretation":
+            m = certificate.metadata
+            data["real_probe_score"] = m.get("real_probe_score")
+            data["control_probe_score"] = m.get("control_probe_score")
+            data["selectivity"] = certificate.test_score
+            data["effect_size"] = m.get("effect_size")
+            data["confidence_interval"] = [
+                m.get("ci_low"), m.get("ci_high"),
+            ]
+            data["statistical_test"] = m.get("statistical_test")
+            data["metric"] = m.get("metric_name")
+            data["n_folds"] = m.get("n_folds")
+            data["target"] = m.get("target_name")
+
         return data
 
     @property

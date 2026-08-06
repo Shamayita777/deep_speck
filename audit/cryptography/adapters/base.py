@@ -35,11 +35,14 @@ performed.
 """
 
 from __future__ import annotations
-
+import numpy as np
 from abc import ABC
 from abc import abstractmethod
 from typing import Any
 from ..results import CorrelationStatistic
+from audit.cryptography.test.ce3.types import (
+    RepresentationTask,
+)
 
 class CryptographicAdapter(ABC):
     """
@@ -230,6 +233,28 @@ class CryptographicAdapter(ABC):
             sample size it was computed over.
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def generate_representation_tasks(
+        self,
+    ) -> list[RepresentationTask]:
+        """
+        Generate the representation probing tasks required
+        for CE3.
+
+        Each task couples an evaluation dataset with the
+        cryptographic target defined for that dataset.
+
+        This allows different probing targets to be evaluated
+        on different datasets when required by the underlying
+        cryptographic experiment.
+
+        Returns
+        -------
+        list[RepresentationTask]
+            Representation probing tasks.
+        """
+        raise NotImplementedError
     # ---------------------------------------------------------
     # Persistence
     # ---------------------------------------------------------
@@ -273,6 +298,76 @@ class CryptographicAdapter(ABC):
         """
         raise NotImplementedError
 
+    # ---------------------------------------------------------
+    # CE3 — Representation Interpretation
+    # ---------------------------------------------------------
+
+    @abstractmethod
+    def extract_representations(
+        self,
+        model: Any,
+        dataset: Any,
+    ) -> np.ndarray:
+        """
+        Extract frozen internal representations from a trained model.
+
+        Parameters
+        ----------
+        model
+            Trained model under evaluation.
+
+        dataset
+            Evaluation dataset.
+
+        Returns
+        -------
+        np.ndarray
+            Representation matrix of shape
+
+                (num_samples, representation_dimension)
+
+        Notes
+        -----
+        The framework intentionally does not prescribe
+
+        • which hidden layer is used
+
+        • how representations are extracted
+
+        • the representation dimensionality
+
+        These choices remain adapter-specific.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def provide_control_model(
+        self,
+    ) -> Any:
+        """
+        Return the control model used for CE3.
+
+        Returns
+        -------
+        Any
+            Adapter-specific control model.
+
+        Notes
+        -----
+        The framework intentionally does not prescribe the
+        construction of the control model.
+
+        Examples include
+
+        • a signal-destroyed model,
+
+        • a randomly initialised model,
+
+        • another scientifically justified control model.
+        """
+        raise NotImplementedError
+
+    
     # ---------------------------------------------------------
     # Metadata
     # ---------------------------------------------------------
