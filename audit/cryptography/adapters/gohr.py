@@ -39,12 +39,20 @@ class GohrAdapter(CryptographicAdapter):
         model: GohrModel | None = None,
         trainer: GohrTrainer | None = None,
         evaluator: GohrEvaluator | None = None,
+        baseline_model_path: str | Path | None = (
+            "audit/cryptography/evidence/ce1/best5depth10 (10).h5"
+        ),
+        signal_destroyed_model_path: str | Path | None = (
+            "audit/cryptography/evidence/ce1/signal_destroyed.h5"
+        ),
     ) -> None:
 
         self._dataset = dataset or GohrDataset()
         self._model_factory = model or GohrModel()
         self._trainer = trainer or GohrTrainer()
         self._evaluator = evaluator or GohrEvaluator()
+        self._baseline_model_path = baseline_model_path
+        self._signal_destroyed_model_path = signal_destroyed_model_path
 
         self._last_bundle: DatasetBundle | None = None
 
