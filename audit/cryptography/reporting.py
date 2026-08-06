@@ -45,13 +45,36 @@ class ReportGenerator:
             f"Test                 : {result.test_name}",
             f"Decision             : {evaluation.decision.value}",
             "",
-            "Performance",
-            "-----------",
-            f"Baseline Score       : {result.baseline_score:.6f}",
-            f"Test Score           : {result.test_score:.6f}",
-            f"Performance Drop     : {result.performance_drop:.6f}",
-            f"Relative Difference  : {result.relative_difference * 100:.2f}%",
             "",
+            *(
+                [
+                    "Theory Consistency",
+                    "------------------",
+                    f"Correlation (ρ)     : {result.test_score:.6f}",
+                    (
+                        f"P-value             : {result.p_value}"
+                        if result.p_value is not None
+                        else "P-value             : N/A"
+                    ),
+                    (
+                        f"Sample Size         : {result.sample_size}"
+                        if result.sample_size is not None
+                        else "Sample Size         : N/A"
+                    ),
+                    "",
+                ]
+                if result.test_name == "Theory Consistency"
+                else
+                [
+                    "Performance",
+                    "-----------",
+                    f"Baseline Score       : {result.baseline_score:.6f}",
+                    f"Test Score           : {result.test_score:.6f}",
+                    f"Performance Drop     : {result.performance_drop:.6f}",
+                    f"Relative Difference  : {result.relative_difference * 100:.2f}%",
+                    "",
+                ]
+            ),
             "Evaluation",
             "----------",
             f"Threshold            : {evaluation.threshold:.6f}",

@@ -87,8 +87,11 @@ class CertificateGenerator:
         """
         Convert a certificate into a dictionary.
         """
-
-        return asdict(certificate)
+        data = asdict(certificate)
+        # Add CE2-specific alias for clarity.
+        if certificate.test == "Theory Consistency":
+            data["correlation"] = certificate.test_score
+        return data
 
     @property
     def name(self) -> str:
