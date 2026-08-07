@@ -372,7 +372,13 @@ def compute_significance(
     resamples = rng.choice(diffs, size=(n_bootstrap, n), replace=True)
     bootstrap_means = resamples.mean(axis=1)
     ci_low, ci_high = np.percentile(bootstrap_means, [2.5, 97.5])
-
+    print("\n----- CE3 statistics -----")
+    print("Mean:", np.mean(diffs))
+    print("Std :", np.std)
+    print("Min :", np.min(diffs))
+    print("Max :", np.max(diffs))
+    print("First 10:", diffs[:10])
+    print("--------------------------\n")
     return PairedComparisonStatistic(
         test_name="wilcoxon_signed_rank",
         alternative=alternative,
