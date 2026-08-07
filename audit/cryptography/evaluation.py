@@ -88,35 +88,81 @@ class CryptographicEvaluator:
 
         effect = result.relative_difference
 
-        if (
-            result.evidence_direction
-            is EvidenceDirection.LOWER_IS_BETTER
-        ):
-            effect = -effect
+        if test.name == "Representation Interpretation":
 
-        if effect >= self.supported_threshold:
+            calibration_validated = result.metadata.get(
+                "calibration_validated",
+                False,
+            )
 
-            decision = EvaluationDecision.SUPPORTED
+            primary_supported = result.metadata.get(
+                "primary_supported",
+                False,
+            )
 
-            rationale = test.supported_rationale
+            if calibration_validated and primary_supported:
 
-            threshold = self.supported_threshold
+                decision = EvaluationDecision.SUPPORTED
 
-        elif effect >= self.inconclusive_threshold:
+                rationale = (
+                    "Calibration probe validated and the primary "
+                    "cryptographic target exhibited positive, "
+                    "statistically significant selectivity."
+                )
 
-            decision = EvaluationDecision.INCONCLUSIVE
+            elif calibration_validated:
 
-            rationale = test.inconclusive_rationale
+                decision = EvaluationDecision.INCONCLUSIVE
 
-            threshold = self.inconclusive_threshold
+                rationale = (
+                    "Calibration probe validated, but the primary "
+                    "cryptographic target did not demonstrate "
+                    "statistically significant selectivity."
+                )
+
+            else:
+
+                decision = EvaluationDecision.NOT_SUPPORTED
+
+                rationale = (
+                    "Calibration probe failed validation; "
+                    "representation evidence is therefore "
+                    "not scientifically interpretable."
+                )
+
+            threshold = 0.0
 
         else:
 
-            decision = EvaluationDecision.NOT_SUPPORTED
+            if (
+                result.evidence_direction
+                is EvidenceDirection.LOWER_IS_BETTER
+            ):
+                effect = -effect
 
-            rationale = test.unsupported_rationale
+            if effect >= self.supported_threshold:
 
-            threshold = self.inconclusive_threshold
+                decision = EvaluationDecision.SUPPORTED
+
+                rationale = test.supported_rationale
+
+                threshold = self.supported_threshold
+
+            elif effect >= self.inconclusive_threshold:
+
+                decision = EvaluationDecision.INCONCLUSIVE
+
+                rationale = test.inconclusive_rationale
+
+                threshold = self.inconclusive_threshold
+
+            else:
+
+                decision = EvaluationDecision.NOT_SUPPORTED
+
+                rationale = test.unsupported_rationale
+
+                threshold = self.inconclusive_threshold
 
         return EvaluationResult(
             decision=decision,

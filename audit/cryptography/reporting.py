@@ -66,6 +66,16 @@ class ReportGenerator:
                 if result.test_name == "Theory Consistency"
                 else
                 [
+                    "Representation Evidence",
+                    "-----------------------",
+                    f"Primary Selectivity    : {result.test_score:.6f}",
+                    f"Calibration Selectivity: "
+                    f"{result.metadata.get('calibration_selectivity', float('nan')):.6f}",
+                    "",
+                ]
+                if result.test_name == "Representation Interpretation"
+                else
+                [
                     "Performance",
                     "-----------",
                     f"Baseline Score       : {result.baseline_score:.6f}",
@@ -101,7 +111,6 @@ class ReportGenerator:
                     f"Metric               : {result.metadata.get('metric_name', 'N/A')}",
                     f"Real Probe Score     : {result.metadata.get('real_probe_score', float('nan')):.6f}",
                     f"Control Probe Score  : {result.metadata.get('control_probe_score', float('nan')):.6f}",
-                    f"Selectivity          : {result.test_score:.6f}",
                     f"Effect Size (d_z)    : {result.metadata.get('effect_size', float('nan')):.6f}",
                     (
                         f"95% CI               : [{result.metadata.get('ci_low', float('nan')):.6f}, "
@@ -134,8 +143,18 @@ class ReportGenerator:
             ),
             "Evaluation",
             "----------",
-            f"Threshold            : {evaluation.threshold:.6f}",
-            f"Observed Effect      : {evaluation.observed_effect:.6f}",
+            *(
+                [
+                    f"Calibration Validated : {result.metadata.get('calibration_validated', False)}",
+                    f"Primary Supported     : {result.metadata.get('primary_supported', False)}",
+                ]
+                if result.test_name == "Representation Interpretation"
+                else
+                [
+                    f"Threshold            : {evaluation.threshold:.6f}",
+                ]
+            ),
+            f"Observed Selectivity : {evaluation.observed_effect:.6f}",
             f"Rationale            : {evaluation.rationale}",
             "",
             "Execution",

@@ -50,7 +50,7 @@ class GohrAdapter(CryptographicAdapter):
         trainer: GohrTrainer | None = None,
         evaluator: GohrEvaluator | None = None,
         model_path: str | Path | None = None,
-        theory_num_samples: int = 10**5,
+        theory_num_samples: int = 1000,
         control_model_path: str | Path | None = None,
         baseline_model_path: str | Path | None = (
             "audit/cryptography/evidence/ce1/best5depth10 (10).h5"
@@ -202,6 +202,13 @@ class GohrAdapter(CryptographicAdapter):
             ),
             target_type=TargetType.BINARY,
             labels=calibration_dataset.differential_labels,
+            theoretical_interpretation=(
+                "Indicates whether each sample belongs to the "
+                "true differential distribution or the random "
+                "distribution. This target serves as a calibration "
+                "task to verify that the learned representation "
+                "encodes the differential distinguisher objective."
+            ),
         )
 
         # ---------------------------------------------
@@ -232,6 +239,13 @@ class GohrAdapter(CryptographicAdapter):
             ),
             target_type=TargetType.MULTICLASS,
             labels=probability_labels.astype(np.int64),
+            theoretical_interpretation=(
+                "Represents the analytical trail probability "
+                "predicted by differential cryptanalysis. "
+                "Successful decoding indicates that the learned "
+                "representation encodes information correlated "
+                "with the theoretical attack model."
+            ),
         )
 
         return [

@@ -40,7 +40,7 @@ class AuditCertificate:
     test_score: float
     performance_drop: float
     relative_difference: float
-    threshold: float
+    threshold: float | None
     observed_effect: float
     runtime: float
     timestamp: str
@@ -74,7 +74,11 @@ class CertificateGenerator:
             test_score=result.test_score,
             performance_drop=result.performance_drop,
             relative_difference=result.relative_difference,
-            threshold=evaluation.threshold,
+            threshold=(
+                None
+                if result.test_name == "Representation Interpretation"
+                else evaluation.threshold
+            ),
             observed_effect=evaluation.observed_effect,
             runtime=result.runtime,
             timestamp=result.timestamp.isoformat(),
@@ -107,6 +111,21 @@ class CertificateGenerator:
             data["metric"] = m.get("metric_name")
             data["n_folds"] = m.get("n_folds")
             data["target"] = m.get("target_name")
+            data["calibration_selectivity"] = m.get(
+                "calibration_selectivity"
+            )
+
+            data["calibration_p_value"] = m.get(
+                "calibration_p_value"
+            )
+
+            data["calibration_validated"] = m.get(
+                "calibration_validated"
+            )
+
+            data["primary_supported"] = m.get(
+                "primary_supported"
+            )
 
         return data
 

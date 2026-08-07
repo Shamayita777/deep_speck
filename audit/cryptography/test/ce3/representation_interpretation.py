@@ -32,15 +32,14 @@ layer).
 
 Scope
 -----
-The current adapter interface declares exactly one target per
-`declare_target` call and returns exactly one representation
-matrix per `extract_representations` call. This test therefore
-evaluates one target against one representation layer per run.
-Running CE3 against multiple declared targets or multiple hidden
-layers means instantiating and running this test once per
-target/layer from the experiment script -- it is not handled
-inside this module, since the adapter interface does not
-currently expose either as a list.
+The adapter supplies one or more RepresentationTask objects,
+each coupling an evaluation dataset with its corresponding
+cryptographic target.
+
+Each task is evaluated independently. Tasks marked as
+`is_primary=True` provide the primary scientific evidence
+reported by CE3, while auxiliary tasks (e.g. calibration
+targets) validate the probing methodology.
 """
 
 from __future__ import annotations
@@ -112,89 +111,153 @@ class RepresentationInterpretationTest(CryptographicTest):
 
         model = adapter.load()
         control_model = adapter.provide_control_model()
+        test_score = 0.0
+        p_value = None
+        sample_size = None
+        notes = ""
+        metadata = {}
+        tasks = adapter.generate_representation_tasks()
+        calibration_evaluation = None
+        calibration_significance = None
 
-        # ---------------------------------------------
-        # Evaluation dataset and declared target.
-        #
-        # declare_target receives only the dataset, never the
-        # model, enforcing model-independence of the target at
-        # the interface level rather than by adapter convention.
-        # ---------------------------------------------
+        primary_evaluation = None
+        primary_significance = None
 
-        dataset = adapter.generate_representation_dataset()
-        target = adapter.declare_targets(dataset)
+        for task in tasks:
 
-        # ---------------------------------------------
-        # Representation extraction -- real and control arms,
-        # over the identical evaluation dataset.
-        # ---------------------------------------------
+            dataset = task.dataset
+            target = task.target
 
-        real_representations = adapter.extract_representations(
-            model, dataset,
+            real_representations = adapter.extract_representations(
+                model,
+                dataset,
+            )
+
+            control_representations = adapter.extract_representations(
+                control_model,
+                dataset,
+            )
+
+            try:
+                evaluation = evaluate_selectivity(
+                    real_representations,
+                    control_representations,
+                    target,
+                    n_splits=self._n_splits,
+                    n_repeats=self._n_repeats,
+                    seed=self._seed,
+                )
+
+                significance = compute_significance(
+                    evaluation,
+                    seed=self._seed,
+                )
+
+                if task.is_primary:
+
+                    primary_evaluation = evaluation
+                    primary_significance = significance
+
+                else:
+
+                    calibration_evaluation = evaluation
+                    calibration_significance = significance
+
+            except ValueError as exc:
+
+                if not task.is_primary:
+                    raise RuntimeError(
+                        "Calibration probing failed."
+                    ) from exc
+
+                test_score = 0.0
+                p_value = None
+                sample_size = int(real_representations.shape[0])
+
+                notes = (
+                    "Selectivity is undefined "
+                    f"({exc}); recorded as no evidence of "
+                    "control-normalized decodability."
+                )
+
+                metadata = {}
+        if calibration_evaluation is None:
+            raise RuntimeError(
+                "Calibration representation task was not executed."
+            )
+
+        if primary_evaluation is None:
+            raise RuntimeError(
+                "Primary representation task was not executed."
+            )
+
+        calibration_supported = (
+            calibration_evaluation.selectivity_mean > 0.0
+            and calibration_significance.p_value < 0.05
         )
-        control_representations = adapter.extract_representations(
-            control_model, dataset,
+
+        primary_supported = (
+            primary_evaluation.selectivity_mean > 0.0
+            and primary_significance.p_value < 0.05
         )
 
-        # ---------------------------------------------
-        # Selectivity and its statistical significance.
-        #
-        # Only these two calls are guarded: extraction above
-        # either succeeds or is an adapter-level failure that
-        # should propagate, not be silently absorbed here. What
-        # can legitimately be undefined is the *evidence itself*
-        # -- e.g. a degenerate target, or all-identical per-fold
-        # selectivity values -- which is exactly what
-        # evaluate_selectivity / compute_significance raise
-        # ValueError for.
-        # ---------------------------------------------
+        test_score = primary_evaluation.selectivity_mean
 
-        try:
-            evaluation = evaluate_selectivity(
-                real_representations,
-                control_representations,
-                target,
-                n_splits=self._n_splits,
-                n_repeats=self._n_repeats,
-                seed=self._seed,
-            )
+        p_value = primary_significance.p_value
 
-            significance = compute_significance(
-                evaluation, seed=self._seed,
-            )
+        sample_size = primary_significance.n_pairs
 
-            test_score = evaluation.selectivity_mean
-            p_value = significance.p_value
-            sample_size = significance.n_pairs
-            notes = "Selectivity computed successfully."
-            metadata = {
-                "target_name": target.name,
-                "target_type": target.target_type.value,
-                "metric_name": evaluation.metric_name,
-                "real_probe_score": evaluation.real_score_mean,
-                "control_probe_score": evaluation.control_score_mean,
-                "effect_size": significance.effect_size,
-                "ci_low": significance.ci_low,
-                "ci_high": significance.ci_high,
-                "statistical_test": significance.test_name,
-                "statistical_alternative": significance.alternative,
-                "n_folds": evaluation.n_splits,
-            }
+        notes = "Representation probing completed successfully."
 
-        except ValueError as exc:
+        metadata = {
 
-            test_score = 0.0
-            p_value = None
-            sample_size = int(real_representations.shape[0])
-            notes = (
-                "Selectivity is undefined "
-                f"({exc}); recorded as no evidence of "
-                "control-normalized decodability."
-            )
-            metadata = {}
+            "calibration_selectivity":
+                calibration_evaluation.selectivity_mean,
+
+            "calibration_p_value":
+                calibration_significance.p_value,
+
+            "calibration_validated":
+                calibration_supported,
+
+            "target_name":
+                primary_evaluation.target.name,
+
+            "target_type":
+                primary_evaluation.target.target_type.value,
+
+            "metric_name":
+                primary_evaluation.metric_name,
+
+            "real_probe_score":
+                primary_evaluation.real_score_mean,
+
+            "control_probe_score":
+                primary_evaluation.control_score_mean,
+
+            "effect_size":
+                primary_significance.effect_size,
+
+            "ci_low":
+                primary_significance.ci_low,
+
+            "ci_high":
+                primary_significance.ci_high,
+
+            "statistical_test":
+                primary_significance.test_name,
+
+            "statistical_alternative":
+                primary_significance.alternative,
+
+            "n_folds":
+                primary_evaluation.n_splits,
+
+            "primary_supported":
+                primary_supported,
+        }
 
         runtime = time.perf_counter() - start
-
         baseline_score = 0.0
         performance_drop = test_score - baseline_score
         relative_difference = test_score
