@@ -50,7 +50,7 @@ class GohrAdapter(CryptographicAdapter):
         trainer: GohrTrainer | None = None,
         evaluator: GohrEvaluator | None = None,
         model_path: str | Path | None = None,
-        theory_num_samples: int = 1000,
+        theory_num_samples: int = 10**5,
         control_model_path: str | Path | None = None,
         baseline_model_path: str | Path | None = (
             "audit/cryptography/evidence/ce1/best5depth10 (10).h5"
