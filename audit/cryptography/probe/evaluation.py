@@ -334,11 +334,17 @@ def compute_significance(
     "different from zero" hypothesis, which would needlessly
     halve the test's power for the question actually being asked.
 
-    Effect size is Cohen's d_z (matched-pairs standardized mean
-    difference: mean(diff) / std(diff)), reported independently
-    of the significance test chosen, since Wilcoxon's own
-    rank-biserial effect size requires internals scipy does not
-    expose directly.
+    Effect size is reported as Cohen's d_z for paired observations,
+    computed as the mean per-fold selectivity divided by the sample
+    standard deviation of the paired per-fold selectivities across
+    the repeated cross-validation folds:
+
+        d_z = mean(selectivity_values) /
+            std(selectivity_values, ddof=1)
+
+    This effect size is reported independently of the significance
+    test and quantifies the magnitude of the representation
+    selectivity beyond statistical significance alone.
 
     The confidence interval is a percentile bootstrap over the
     per-fold selectivity values rather than a normal-
@@ -372,13 +378,6 @@ def compute_significance(
     resamples = rng.choice(diffs, size=(n_bootstrap, n), replace=True)
     bootstrap_means = resamples.mean(axis=1)
     ci_low, ci_high = np.percentile(bootstrap_means, [2.5, 97.5])
-    print("\n----- CE3 statistics -----")
-    print("Mean:", np.mean(diffs))
-    print("Std :", np.std)
-    print("Min :", np.min(diffs))
-    print("Max :", np.max(diffs))
-    print("First 10:", diffs[:10])
-    print("--------------------------\n")
     return PairedComparisonStatistic(
         test_name="wilcoxon_signed_rank",
         alternative=alternative,
