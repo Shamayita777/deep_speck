@@ -40,9 +40,15 @@ from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.metrics import balanced_accuracy_score, r2_score
 from sklearn.model_selection import RepeatedKFold, RepeatedStratifiedKFold
 
-from ..test.ce3.types import PairedComparisonStatistic, ProbeEvaluation, TargetSpecification, TargetType
+from ..test.ce3.types import (
+    PairedComparisonStatistic,
+    ProbeEvaluation,
+    ReplicatedProbeEvaluation,
+    TargetSpecification,
+    TargetType,
+)
 from .base import CryptographicProbe
-
+from .significance import paired_significance
 
 # ============================================================
 # Default Probes (Q1)
@@ -315,7 +321,6 @@ def evaluate_selectivity(
 # ============================================================
 # Statistical Significance 
 # ============================================================
-
 def compute_significance(
     evaluation: ProbeEvaluation,
     *,
@@ -325,66 +330,111 @@ def compute_significance(
 ) -> PairedComparisonStatistic:
     """
     Test whether mean selectivity is significantly greater than
-    zero, using the Wilcoxon signed-rank test on the paired
-    per-fold selectivity values in `evaluation.selectivity_values`.
+    zero.
 
-    `alternative="greater"` (default) matches CE3's directional
-    hypothesis -- real representations decode the target better
-    than the control -- rather than testing a non-directional
-    "different from zero" hypothesis, which would needlessly
-    halve the test's power for the question actually being asked.
-
-    Effect size is reported as Cohen's d_z for paired observations,
-    computed as the mean per-fold selectivity divided by the sample
-    standard deviation of the paired per-fold selectivities across
-    the repeated cross-validation folds:
-
-        d_z = mean(selectivity_values) /
-            std(selectivity_values, ddof=1)
-
-    This effect size is reported independently of the significance
-    test and quantifies the magnitude of the representation
-    selectivity beyond statistical significance alone.
-
-    The confidence interval is a percentile bootstrap over the
-    per-fold selectivity values rather than a normal-
-    approximation interval, since using Wilcoxon here already
-    signals that normality of the per-fold differences should
-    not be assumed.
+    CE3-specific wrapper around the shared paired-significance
+    procedure. The pairing unit for CE3 is the per-fold
+    selectivity value.
     """
 
-    diffs = np.asarray(evaluation.selectivity_values, dtype=np.float64)
-    n = diffs.shape[0]
+    diffs = np.asarray(
+        evaluation.selectivity_values,
+        dtype=np.float64,
+    )
 
-    if n < 2:
-        raise ValueError(
-            "At least 2 paired folds are required to compute "
-            "statistical significance."
-        )
-
-    if np.all(diffs == diffs[0]):
-        raise ValueError(
-            "Wilcoxon signed-rank test is undefined: all per-fold "
-            "selectivity values are identical (zero variance "
-            "across folds)."
-        )
-
-    statistic, p_value = wilcoxon(diffs, alternative=alternative)
-
-    std = np.std(diffs, ddof=1)
-    effect_size = float(np.mean(diffs) / std) if std > 0 else float("nan")
-
-    rng = np.random.default_rng(seed)
-    resamples = rng.choice(diffs, size=(n_bootstrap, n), replace=True)
-    bootstrap_means = resamples.mean(axis=1)
-    ci_low, ci_high = np.percentile(bootstrap_means, [2.5, 97.5])
-    return PairedComparisonStatistic(
-        test_name="wilcoxon_signed_rank",
+    return paired_significance(
+        diffs,
         alternative=alternative,
-        statistic=float(statistic),
-        p_value=float(p_value),
-        effect_size=effect_size,
-        ci_low=float(ci_low),
-        ci_high=float(ci_high),
-        n_pairs=int(n),
+        n_bootstrap=n_bootstrap,
+        seed=seed,
+    )
+
+
+def evaluate_selectivity_replicates(
+    task_factory: Callable[[int], "RepresentationTask"],
+    adapter,
+    model,
+    control_model,
+    *,
+    n_replicates: int = 20,
+    n_splits: int = 5,
+    seed: int = 0,
+) -> "ReplicatedProbeEvaluation":
+    """
+    Estimate selectivity across `n_replicates` independently
+    generated evaluation datasets, each internally stabilized
+    by `n_splits`-fold CV.
+
+    The replicate is the statistical unit here, not the fold:
+    each call to `task_factory` must produce a freshly generated
+    dataset and a target derived from that same dataset, so that
+    target consistency holds per replicate (Framework Principle
+    2 extended across replicates, not just across folds).
+
+    `evaluate_selectivity` is called once per replicate with
+    n_repeats=1: the folds inside a replicate exist only to
+    stabilize that replicate's single point estimate, and are
+    never themselves treated as independent observations.
+    """
+
+    replicate_evaluations: list[ProbeEvaluation] = []
+    selectivity_replicates: list[float] = []
+
+    for replicate_index in range(n_replicates):
+        replicate_seed = seed + replicate_index
+
+        task = task_factory(replicate_seed)
+
+        real_representations = adapter.extract_representations(
+            model, task.dataset,
+        )
+        control_representations = adapter.extract_representations(
+            control_model, task.dataset,
+        )
+
+        evaluation = evaluate_selectivity(
+            real_representations,
+            control_representations,
+            task.target,
+            n_splits=n_splits,
+            n_repeats=1,
+            seed=replicate_seed,
+        )
+
+        replicate_evaluations.append(evaluation)
+        selectivity_replicates.append(evaluation.selectivity_mean)
+
+    return ReplicatedProbeEvaluation(
+        replicate_evaluations=replicate_evaluations,
+        selectivity_replicates=selectivity_replicates,
+        n_replicates=n_replicates,
+        n_splits_per_replicate=n_splits,
+        metric_name=replicate_evaluations[0].metric_name,
+        target_name=replicate_evaluations[0].target.name,
+    )
+
+
+def compute_significance_over_replicates(
+    replicated_evaluation: "ReplicatedProbeEvaluation",
+    *,
+    alternative: str = "greater",
+    n_bootstrap: int = 10_000,
+    seed: int = 0,
+) -> PairedComparisonStatistic:
+    """
+    CE3 significance test over independent replicate-level
+    selectivity values. Mirrors compute_significance exactly;
+    the only difference is which array is the statistical unit.
+    """
+
+    diffs = np.asarray(
+        replicated_evaluation.selectivity_replicates,
+        dtype=np.float64,
+    )
+
+    return paired_significance(
+        diffs,
+        alternative=alternative,
+        n_bootstrap=n_bootstrap,
+        seed=seed,
     )

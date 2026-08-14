@@ -4,11 +4,11 @@ from audit.cryptography.adapters.gohr import GohrAdapter
 from audit.cryptography.certificate import CertificateGenerator
 from audit.cryptography.engine import CryptographicEngine
 from audit.cryptography.evaluation import CryptographicEvaluator
-from audit.cryptography.gohr.dataset import GohrDataset
 from audit.cryptography.reporting import ReportGenerator
-from audit.cryptography.test.ce3.representation_interpretation import (
-    RepresentationInterpretationTest,
+from audit.cryptography.test.ce4.causal_intervention import (
+    CausalInterventionTest,
 )
+from audit.cryptography.gohr.dataset import GohrDataset
 
 
 def main() -> None:
@@ -21,29 +21,25 @@ def main() -> None:
         model_path="audit/cryptography/evidence/ce1/best5depth10 (10).h5",
     )
 
-    test = RepresentationInterpretationTest(
-        n_replicates=20,
-        n_splits_per_replicate=5,
-        seed=0,
-    )
+    test = CausalInterventionTest()
 
     engine = CryptographicEngine()
 
-    # NOTE: unlike CE2's supported/inconclusive thresholds, these
-    # are NOT derived from an established convention -- there is
-    # no Cohen's-style citable standard for a selectivity gap in
-    # accuracy/R^2 units the way there is for correlation
-    # strength. Treat these as placeholders. The principled way
-    # to calibrate them is empirically: run CE3 once against the
-    # differential-class calibration target discussed earlier
-    # (a quantity already known to be encoded, since the output
-    # layer must decode it to achieve training accuracy at all)
-    # and use its observed selectivity as a reference scale for
-    # what "supported" should mean for the primary target, rather
-    # than picking round numbers.
+    # NOTE: same caveat as CE3's thresholds -- there is no
+    # citable convention for what a "large" necessity gap is in
+    # raw output-probability-difference units, unlike CE2's
+    # correlation-strength thresholds (Cohen, 1988). Treat these
+    # as placeholders. Since CE4 is cheap to run at large N (no
+    # training involved, just inference), the principled way to
+    # calibrate them is empirically: run CE4 once against a
+    # target you expect to be trivially necessary (e.g. flipping
+    # every input bit vs. flipping none) to see what the ceiling
+    # necessity gap looks like for this model, and scale these
+    # thresholds relative to that ceiling rather than picking
+    # round numbers.
     evaluator = CryptographicEvaluator(
-        supported_threshold=0.20,
-        inconclusive_threshold=0.05,
+        supported_threshold=0.10,
+        inconclusive_threshold=0.02,
     )
 
     certificate_generator = CertificateGenerator()
@@ -61,7 +57,7 @@ def main() -> None:
         result=result, evaluation=evaluation,
     )
 
-    with open("ce3_certificate.json", "w", encoding="utf-8") as f:
+    with open("ce4_certificate.json", "w", encoding="utf-8") as f:
         json.dump(
             certificate_generator.to_dict(certificate), f, indent=4,
         )
@@ -72,7 +68,7 @@ def main() -> None:
     print("Audit Certificate")
     print("-----------------")
     print(certificate_generator.to_dict(certificate))
-    print("Certificate saved to: ce3_certificate.json")
+    print("Certificate saved to: ce4_certificate.json")
 
 
 if __name__ == "__main__":

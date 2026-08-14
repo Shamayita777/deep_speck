@@ -42,6 +42,10 @@ from typing import Any
 from ..results import CorrelationStatistic
 from audit.cryptography.test.ce3.types import (
     RepresentationTask,
+    TargetSpecification,
+)
+from audit.cryptography.test.ce4.types import (
+    InterventionTask,
 )
 
 class CryptographicAdapter(ABC):
@@ -255,6 +259,50 @@ class CryptographicAdapter(ABC):
             Representation probing tasks.
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def generate_primary_representation_task(
+        self,
+    ) -> RepresentationTask:
+        """
+        Generate ONE freshly, independently generated primary
+        representation-probing task.
+
+        Must be safe to call repeatedly: each call generates a new
+        evaluation dataset and derives its target from that same
+        dataset, so calling this N times produces N independent
+        replicates, never N views of one fixed dataset.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def generate_calibration_representation_task(
+        self,
+    ) -> RepresentationTask:
+        """
+        Generate ONE freshly, independently generated calibration
+        representation-probing task. Same independence contract as
+        generate_primary_representation_task.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def generate_intervention_tasks(
+        self,
+    ) -> list[InterventionTask]:
+        """
+        Generate the causal intervention tasks required
+        by CE4.
+
+        Returns
+        -------
+        list[InterventionTask]
+            Evaluation tasks describing the cryptographic
+            targets whose causal necessity will be
+            evaluated.
+        """
+        raise NotImplementedError
+
     # ---------------------------------------------------------
     # Persistence
     # ---------------------------------------------------------
@@ -340,6 +388,80 @@ class CryptographicAdapter(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def apply_structural_intervention(
+        self,
+        dataset: Any,
+        target: TargetSpecification,
+    ) -> Any:
+        """
+        Apply a targeted intervention to the
+        theoretically relevant cryptographic
+        structure declared by ``target``.
+
+        Parameters
+        ----------
+        dataset
+            Original evaluation dataset.
+
+        target
+            Cryptographic quantity being tested.
+
+        Returns
+        -------
+        Any
+            Perturbed evaluation sample.
+        """
+
+    @abstractmethod
+    def apply_control_intervention(
+        self,
+        dataset: Any,
+        target: TargetSpecification,
+    ) -> Any:
+        """
+        Apply a magnitude-matched control intervention
+        that does not target the cryptographic structure
+        declared by ``target``.
+
+        Parameters
+        ----------
+        dataset
+            Original evaluation dataset.
+
+        target
+            Cryptographic quantity being tested.
+
+        Returns
+        -------
+        Any
+            Control-perturbed evaluation sample.
+        """
+
+    @abstractmethod
+    def compute_intervention_magnitude(
+        self,
+        original_dataset: Any,
+        perturbed_dataset: Any,
+    ) -> np.ndarray:
+        """
+        Per-sample magnitude of change introduced by an
+        intervention, relative to the original dataset.
+
+        Used by the framework to verify that structural and
+        control interventions perturb each sample by the same
+        magnitude (Framework Principle 2: only which positions
+        are perturbed should differ between arms, not how much
+        is perturbed) -- without the framework needing to know
+        the dataset's internal representation.
+
+        Returns
+        -------
+        np.ndarray
+            Shape (num_samples,).
+        """
+        raise NotImplementedError
+    
     @abstractmethod
     def provide_control_model(
         self,

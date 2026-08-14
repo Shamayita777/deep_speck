@@ -282,7 +282,51 @@ class ProbeEvaluation:
     """
     Cryptographic target evaluated by the probe.
     """
+@dataclass(frozen=True, slots=True)
+class ReplicatedProbeEvaluation:
+    """
+    CE3 evidence across independent replicate-level observations.
 
+    This is the object that should feed statistical significance
+    testing. `ProbeEvaluation.selectivity_values` (per-fold) is
+    never itself a set of independent observations -- it exists
+    only to produce one stabilized point estimate per replicate,
+    retained here in `replicate_evaluations` purely for audit
+    trail / debugging, not for significance testing.
+    """
+
+    replicate_evaluations: list[ProbeEvaluation]
+    """
+    Full per-replicate CV detail, retained for audit trail.
+    NOT the statistical unit -- do not feed to paired_significance.
+    """
+
+    selectivity_replicates: list[float]
+    """
+    One selectivity value per independent replicate. THIS is the
+    array that should be passed to paired_significance -- these
+    are the actual statistical observations.
+    """
+
+    n_replicates: int
+    """
+    Number of independently generated evaluation datasets.
+    """
+
+    n_splits_per_replicate: int
+    """
+    Number of CV folds used internally within each replicate to
+    stabilize its point estimate. NOT a count of independent
+    observations.
+    """
+
+    metric_name: str
+
+    target_name: str
+
+    @property
+    def selectivity_mean(self) -> float:
+        return float(np.mean(self.selectivity_replicates))
 # ============================================================
 # Statistical Significance
 # ============================================================

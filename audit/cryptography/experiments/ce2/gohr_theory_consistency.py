@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json
 from audit.cryptography.adapters.gohr import GohrAdapter
+from audit.cryptography.gohr.dataset import GohrDataset
 from audit.cryptography.certificate import CertificateGenerator
 from audit.cryptography.engine import CryptographicEngine
 from audit.cryptography.evaluation import CryptographicEvaluator
@@ -13,6 +14,10 @@ from audit.cryptography.test.ce2.theory_consistency import (
 def main() -> None:
 
     adapter = GohrAdapter(
+        dataset=GohrDataset(
+            rounds=5,
+            differential=(0x0040, 0x0000),
+        ),
         model_path="audit/cryptography/evidence/ce1/best5depth10 (10).h5",
         theory_num_samples=100000,
     )

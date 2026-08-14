@@ -22,7 +22,6 @@ Generate Report
 
 from __future__ import annotations
 import json
-from audit.cryptography.adapters.gohr import GohrAdapter
 from audit.cryptography.certificate import CertificateGenerator
 from audit.cryptography.engine import CryptographicEngine
 from audit.cryptography.evaluation import CryptographicEvaluator
@@ -30,7 +29,8 @@ from audit.cryptography.reporting import ReportGenerator
 from audit.cryptography.test.ce1.signal_destruction import (
     SignalDestructionTest,
 )
-
+from audit.cryptography.adapters.gohr import GohrAdapter
+from audit.cryptography.gohr.dataset import GohrDataset
 
 def main() -> None:
     """
@@ -41,7 +41,12 @@ def main() -> None:
     # Framework Components
     # ---------------------------------------------------------
 
-    adapter = GohrAdapter()
+    adapter = GohrAdapter(
+        dataset=GohrDataset(
+            rounds=5,
+            differential=(0x0040, 0x0000),
+        ),
+    )
 
     test = SignalDestructionTest()
 
