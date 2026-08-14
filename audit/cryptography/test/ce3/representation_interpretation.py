@@ -52,7 +52,7 @@ from audit.cryptography.probe.evaluation import (
 from audit.cryptography.results import CryptographicTestResult
 from audit.cryptography.test.base import CryptographicTest, EvidenceDirection
 
-
+import numpy as np
 class RepresentationInterpretationTest(CryptographicTest):
     """
     Cryptographic Evidence Test CE3.
