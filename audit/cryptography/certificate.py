@@ -109,7 +109,9 @@ class CertificateGenerator:
             ]
             data["statistical_test"] = m.get("statistical_test")
             data["metric"] = m.get("metric_name")
-            data["n_folds"] = m.get("n_folds")
+            data["n_folds"] = m.get("n_splits_per_replicate")
+            data["n_replicates"] = m.get("n_replicates")
+            data["selectivity_replicates"] = m.get("selectivity_replicates")
             data["target"] = m.get("target_name")
             data["calibration_selectivity"] = m.get(
                 "calibration_selectivity"

@@ -147,6 +147,13 @@ class RepresentationInterpretationTest(CryptographicTest):
         test_score = primary_replicated.selectivity_mean
         p_value = primary_significance.p_value
         sample_size = primary_significance.n_pairs  # == n_replicates, automatically
+        primary_real_score_mean = float(np.mean(
+            [e.real_score_mean for e in primary_replicated.replicate_evaluations]
+        ))
+
+        primary_control_score_mean = float(np.mean(
+            [e.control_score_mean for e in primary_replicated.replicate_evaluations]
+        ))
 
         metadata = {
             "calibration_selectivity": calibration_replicated.selectivity_mean,
@@ -163,6 +170,10 @@ class RepresentationInterpretationTest(CryptographicTest):
             "n_splits_per_replicate": primary_replicated.n_splits_per_replicate,
             "statistical_unit": "independent_evaluation_replicate",
             "primary_supported": primary_supported,
+            "real_probe_score": primary_real_score_mean,
+            "control_probe_score": primary_control_score_mean,
+            "n_splits_per_replicate": primary_replicated.n_splits_per_replicate,
+            "selectivity_replicates": primary_replicated.selectivity_replicates,
         }
 
         runtime = time.perf_counter() - start
