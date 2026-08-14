@@ -381,15 +381,18 @@ def evaluate_selectivity_replicates(
     selectivity_replicates: list[float] = []
 
     for replicate_index in range(n_replicates):
-        replicate_seed = seed + replicate_index
 
-        task = task_factory(replicate_seed)
+        replicate_seed = seed + replicate_index
+        task = task_factory()
 
         real_representations = adapter.extract_representations(
-            model, task.dataset,
+            model,
+            task.dataset,
         )
+
         control_representations = adapter.extract_representations(
-            control_model, task.dataset,
+            control_model,
+            task.dataset,
         )
 
         evaluation = evaluate_selectivity(
@@ -402,7 +405,9 @@ def evaluate_selectivity_replicates(
         )
 
         replicate_evaluations.append(evaluation)
-        selectivity_replicates.append(evaluation.selectivity_mean)
+        selectivity_replicates.append(
+            evaluation.selectivity_mean
+        )
 
     return ReplicatedProbeEvaluation(
         replicate_evaluations=replicate_evaluations,
