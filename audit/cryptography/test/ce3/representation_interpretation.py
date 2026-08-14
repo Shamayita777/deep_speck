@@ -109,7 +109,7 @@ class RepresentationInterpretationTest(CryptographicTest):
         control_model = adapter.provide_control_model()
 
         primary_replicated = evaluate_selectivity_replicates(
-            task_factory=lambda s: adapter.generate_primary_representation_task(seed=s),
+            task_factory=lambda s: adapter.generate_primary_representation_task,
             adapter=adapter,
             model=model,
             control_model=control_model,
@@ -119,7 +119,7 @@ class RepresentationInterpretationTest(CryptographicTest):
         )
 
         calibration_replicated = evaluate_selectivity_replicates(
-            task_factory=lambda s: adapter.generate_calibration_representation_task(seed=s),
+            task_factory=lambda s: adapter.generate_calibration_representation_task,
             adapter=adapter,
             model=model,
             control_model=control_model,
