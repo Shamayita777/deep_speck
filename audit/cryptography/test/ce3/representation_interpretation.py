@@ -109,7 +109,7 @@ class RepresentationInterpretationTest(CryptographicTest):
         control_model = adapter.provide_control_model()
 
         primary_replicated = evaluate_selectivity_replicates(
-            task_factory=lambda s: adapter.generate_primary_representation_task,
+            task_factory=adapter.generate_primary_representation_task,
             adapter=adapter,
             model=model,
             control_model=control_model,
@@ -119,13 +119,13 @@ class RepresentationInterpretationTest(CryptographicTest):
         )
 
         calibration_replicated = evaluate_selectivity_replicates(
-            task_factory=lambda s: adapter.generate_calibration_representation_task,
+            task_factory=adapter.generate_calibration_representation_task,
             adapter=adapter,
             model=model,
             control_model=control_model,
             n_replicates=self._n_replicates,
             n_splits=self._n_splits_per_replicate,
-            seed=self._seed + 10_000,   # disjoint seed space from primary
+            seed=self._seed + 10_000,
         )
 
         primary_significance = compute_significance_over_replicates(
