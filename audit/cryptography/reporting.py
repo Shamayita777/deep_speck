@@ -123,9 +123,10 @@ class ReportGenerator:
                         else "P-value              : N/A"
                     ),
                     (
-                        f"Paired Folds         : {result.sample_size}"
-                        if result.sample_size is not None
-                        else "Paired Folds         : N/A"
+                        f"Independent Replicates: {result.metadata.get('n_replicates', 'N/A')}"
+                    ),
+                    (
+                        f"Folds per Replicate   : {result.metadata.get('n_splits_per_replicate', 'N/A')}"
                     ),
                     "",
                 ]
