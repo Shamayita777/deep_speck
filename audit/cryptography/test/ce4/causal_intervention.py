@@ -39,6 +39,7 @@ auxiliary evidence in metadata.
 
 from __future__ import annotations
 
+import dataclasses
 import time
 
 from audit.cryptography.adapters.base import CryptographicAdapter
@@ -112,6 +113,29 @@ class CausalInterventionTest(CryptographicTest):
 
         for task in tasks:
 
+            filtered_dataset, n_excluded, n_total = (
+                adapter.select_intervenable_samples(task.dataset, task.target)
+            )
+
+            if n_excluded > 0:
+                exclusion_rate = n_excluded / n_total
+                # 1% is a placeholder sanity bound, same spirit as CE4's
+                # effect-size thresholds -- should be justified/reported,
+                # not treated as self-evidently correct.
+                if exclusion_rate > 0.01:
+                    raise ValueError(
+                        f"select_intervenable_samples excluded "
+                        f"{n_excluded}/{n_total} samples "
+                        f"({exclusion_rate:.2%}) for target "
+                        f"'{task.target.name}'. This exceeds the 1% "
+                        "sanity bound and likely indicates a "
+                        "misconfigured intervention magnitude rather "
+                        "than an expected rare boundary condition -- "
+                        "investigate before proceeding."
+                    )
+
+            task = dataclasses.replace(task, dataset=filtered_dataset)
+
             structural_dataset = adapter.apply_structural_intervention(
                 task.dataset, task.target,
             )
@@ -162,6 +186,11 @@ class CausalInterventionTest(CryptographicTest):
                     "p_value": significance.p_value,
                     "statistical_test": significance.test_name,
                     "n_samples": evaluation.n_samples,
+                    "n_excluded": n_excluded,
+                    "n_total_before_filtering": n_total,
+                    "exclusion_rate": (
+                        n_excluded / n_total if n_total else 0.0
+                    ),
                 }
 
             except ValueError as exc:

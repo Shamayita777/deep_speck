@@ -1,5 +1,7 @@
 from __future__ import annotations
 import json
+import dataclasses
+import numpy as np
 from audit.cryptography.adapters.gohr import GohrAdapter
 from audit.cryptography.certificate import CertificateGenerator
 from audit.cryptography.engine import CryptographicEngine
@@ -9,6 +11,26 @@ from audit.cryptography.test.ce4.causal_intervention import (
     CausalInterventionTest,
 )
 from audit.cryptography.gohr.dataset import GohrDataset
+
+def calibrate_necessity_ceiling(
+    adapter, model, task, *, n_calibration_samples: int = 5000,
+) -> float:
+    """
+    Empirical ceiling for the necessity gap on THIS model and
+    dataset: the mean |output change| from flipping every input
+    bit, versus flipping none. Used to scale supported/
+    inconclusive thresholds relative to what this model's output
+    can move by at all, rather than an arbitrary fixed number.
+    """
+    subset = dataclasses.replace(
+        task.dataset, X=task.dataset.X[:n_calibration_samples],
+    )
+    original_predictions = adapter.compute_model_predictions(model, subset)
+
+    all_flipped = dataclasses.replace(subset, X=subset.X ^ 1)
+    flipped_predictions = adapter.compute_model_predictions(model, all_flipped)
+
+    return float(np.mean(np.abs(original_predictions - flipped_predictions)))
 
 
 def main() -> None:
@@ -25,22 +47,36 @@ def main() -> None:
 
     engine = CryptographicEngine()
 
-    # NOTE: same caveat as CE3's thresholds -- there is no
-    # citable convention for what a "large" necessity gap is in
-    # raw output-probability-difference units, unlike CE2's
-    # correlation-strength thresholds (Cohen, 1988). Treat these
-    # as placeholders. Since CE4 is cheap to run at large N (no
-    # training involved, just inference), the principled way to
-    # calibrate them is empirically: run CE4 once against a
-    # target you expect to be trivially necessary (e.g. flipping
-    # every input bit vs. flipping none) to see what the ceiling
-    # necessity gap looks like for this model, and scale these
-    # thresholds relative to that ceiling rather than picking
-    # round numbers.
-    evaluator = CryptographicEvaluator(
-        supported_threshold=0.10,
-        inconclusive_threshold=0.02,
+    # Load the frozen model used by CE4.
+    model = adapter.load()
+
+    # Obtain the adapter-declared primary intervention task.
+    tasks = adapter.generate_intervention_tasks()
+    primary_tasks = [t for t in tasks if t.is_primary]
+
+    if len(primary_tasks) != 1:
+        raise ValueError(
+            "Exactly one InterventionTask must be marked "
+            f"is_primary=True; found {len(primary_tasks)}."
+        )
+
+    primary_task = primary_tasks[0]
+
+    # Calibrate the empirical output-change ceiling for this
+    # model and dataset before defining CE4 decision thresholds.
+    ceiling = calibrate_necessity_ceiling(
+        adapter,
+        model,
+        primary_task,
     )
+
+    evaluator = CryptographicEvaluator(
+        supported_threshold=0.10 * ceiling,
+        inconclusive_threshold=0.02 * ceiling,
+    )
+    # Decision thresholds are scaled to the empirical output-change
+    # ceiling of this model and dataset, avoiding fixed raw-unit
+    # thresholds.
 
     certificate_generator = CertificateGenerator()
 

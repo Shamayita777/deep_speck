@@ -436,6 +436,47 @@ class GohrAdapter(CryptographicAdapter):
             ),
         ]
 
+    def select_intervenable_samples(self, dataset, target):
+        """
+        Exclude samples whose realized ciphertext-pair XOR
+        difference has fewer than n_intervention_bits differing
+        mirrored-pair positions among the 32 available. This is a
+        genuine boundary condition of low-probability differential
+        trail realizations -- not an implementation error -- and
+        excluding such samples narrows CE4's causal claim to the
+        population of samples whose realized trail supports the
+        requested intervention magnitude. That narrowing must be
+        disclosed, not silently absorbed.
+        """
+
+        X = dataset.X
+        n_total = X.shape[0]
+
+        pairs = self._mirrored_pairs()
+        c0_cols, c1_cols = pairs[:, 0], pairs[:, 1]
+
+        eligible_positions = X[:, c0_cols] != X[:, c1_cols]
+        n_eligible = eligible_positions.sum(axis=1)
+
+        # structural needs n_intervention_bits eligible positions;
+        # control needs n_intervention_bits // 2 eligible PAIRS from
+        # the same pool -- structural's requirement is always >=
+        # control's, so it's the binding constraint for both arms.
+        mask = n_eligible >= self._n_intervention_bits
+        n_excluded = int(n_total - mask.sum())
+
+        if n_excluded == 0:
+            return dataset, 0, n_total
+
+        filtered_fields = {
+            f.name: getattr(dataset, f.name)[mask]
+            for f in dataclasses.fields(dataset)
+            if isinstance(getattr(dataset, f.name), np.ndarray)
+            and getattr(dataset, f.name).shape[0] == n_total
+        }
+
+        return dataclasses.replace(dataset, **filtered_fields), n_excluded, n_total
+
     def apply_structural_intervention(self, dataset, target):
         """
         Flip `n_intervention_bits` single, independently random

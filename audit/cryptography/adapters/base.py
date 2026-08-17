@@ -388,6 +388,30 @@ class CryptographicAdapter(ABC):
         """
         raise NotImplementedError
 
+    def select_intervenable_samples(
+        self, dataset, target,
+    ) -> tuple[Any, int, int]:
+        """
+        Select the subset of `dataset` for which this adapter's
+        intervention design is well-defined. Applied once, before
+        apply_structural_intervention, apply_control_intervention,
+        and the original-condition prediction, so all three
+        conditions remain sample-aligned.
+
+        Default: no filtering -- adapters whose intervention design
+        has no per-sample eligibility constraint don't need to
+        override this. Adapters that do have such a constraint
+        should implement it here rather than raising inside
+        apply_structural_intervention, so exclusion is applied once,
+        consistently, and is reportable -- not discovered as a
+        runtime failure partway through the pipeline.
+
+        Returns
+        -------
+        (filtered_dataset, n_excluded, n_total)
+        """
+        return dataset, 0, len(dataset)
+
     @abstractmethod
     def apply_structural_intervention(
         self,
