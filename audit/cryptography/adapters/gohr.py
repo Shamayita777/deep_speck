@@ -438,12 +438,16 @@ class GohrAdapter(CryptographicAdapter):
 
     def apply_structural_intervention(self, dataset, target):
         """
-        Flip `n_intervention_bits` independently random single
-        columns per sample. Each single-sided flip alters the
-        realized ciphertext-pair difference at that bit
-        position -- this directly targets the theoretically
-        relevant structure the analytical trail probability
-        (declared by `target`) is defined over.
+        Flip `n_intervention_bits` single, independently random
+        columns per sample, restricted to columns where an actual
+        ciphertext-pair difference exists for that sample
+        (c0[j] != c1[j]). Flipping one side at such a position
+        directly alters an existing element of the realized
+        differential trail -- the quantity `target` (Analytical
+        Trail Probability) is defined over -- rather than
+        introducing a difference that was never part of the
+        original trail. This is a strictly more targeted
+        intervention than an unrestricted uniform-random flip.
         """
 
         rng = np.random.default_rng(self._intervention_seed)
@@ -452,12 +456,38 @@ class GohrAdapter(CryptographicAdapter):
         n_samples, n_bits = X.shape
         k = self._n_intervention_bits
 
-        random_vals = rng.random((n_samples, n_bits))
-        columns = np.argpartition(random_vals, k, axis=1)[:, :k]
+        pairs = self._mirrored_pairs()  # (32, 2): (c0_col, c1_col)
+        c0_cols = pairs[:, 0]
+        c1_cols = pairs[:, 1]
+
+        # eligible[i, p] = True iff sample i has a real difference
+        # at mirrored-pair position p
+        eligible = X[:, c0_cols] != X[:, c1_cols]  # (n_samples, 32)
+
+        n_eligible_per_sample = eligible.sum(axis=1)
+        if np.any(n_eligible_per_sample < k):
+            raise ValueError(
+                "At least one sample has fewer than "
+                f"n_intervention_bits={k} differing bit positions "
+                "to structurally intervene on. Reduce "
+                "n_intervention_bits or filter such samples before "
+                "calling apply_structural_intervention."
+            )
+
+        # Rank-select k eligible positions per sample uniformly at
+        # random: assign random keys, push ineligible positions to
+        # +inf so they never win the argpartition, then take the k
+        # smallest keys per row.
+        random_keys = rng.random((n_samples, pairs.shape[0]))
+        random_keys = np.where(eligible, random_keys, np.inf)
+        pair_idx = np.argpartition(random_keys, k, axis=1)[:, :k]
+
+        rows = np.arange(n_samples)[:, None]
+        # single-sided: always flip the c0 side of the chosen pairs
+        chosen_cols = c0_cols[pair_idx]
 
         mask = np.zeros_like(X, dtype=bool)
-        rows = np.arange(n_samples)[:, None]
-        mask[rows, columns] = True
+        mask[rows, chosen_cols] = True
 
         X_perturbed = X ^ mask.astype(X.dtype)
 
@@ -465,14 +495,16 @@ class GohrAdapter(CryptographicAdapter):
 
     def apply_control_intervention(self, dataset, target):
         """
-        Flip `n_intervention_bits // 2` independently random
-        mirrored bit-position PAIRS per sample (both ciphertexts'
-        bit at the same position, flipped together). This changes
-        the same total number of raw input bits as
-        `apply_structural_intervention`, but leaves the realized
-        ciphertext-pair difference completely unchanged at every
-        flipped position -- a magnitude-matched perturbation that
-        is, by construction, invisible to the declared target.
+        Flip `n_intervention_bits // 2` mirrored bit-position pairs
+        per sample, drawn from the SAME eligible pool as
+        `apply_structural_intervention` (positions with a real
+        ciphertext-pair difference), but flipping both sides
+        together so the XOR-difference at each chosen position is
+        provably preserved: (a^1)^(b^1) == a^b. Restricting to the
+        same eligible pool as the structural arm ensures the two
+        arms differ only in HOW a position is perturbed
+        (single-sided vs. mirrored), not in WHICH positions are
+        even eligible.
         """
 
         rng = np.random.default_rng(self._intervention_seed + 1)
@@ -482,14 +514,24 @@ class GohrAdapter(CryptographicAdapter):
         k_pairs = self._n_intervention_bits // 2
 
         pairs = self._mirrored_pairs()
-        n_pairs = pairs.shape[0]
+        c0_cols = pairs[:, 0]
+        c1_cols = pairs[:, 1]
 
-        random_vals = rng.random((n_samples, n_pairs))
-        pair_idx = np.argpartition(
-            random_vals, k_pairs, axis=1,
-        )[:, :k_pairs]
+        eligible = X[:, c0_cols] != X[:, c1_cols]
 
-        selected_pairs = pairs[pair_idx]
+        n_eligible_per_sample = eligible.sum(axis=1)
+        if np.any(n_eligible_per_sample < k_pairs):
+            raise ValueError(
+                "At least one sample has fewer than "
+                f"n_intervention_bits // 2={k_pairs} differing bit "
+                "position pairs to control-intervene on."
+            )
+
+        random_keys = rng.random((n_samples, pairs.shape[0]))
+        random_keys = np.where(eligible, random_keys, np.inf)
+        pair_idx = np.argpartition(random_keys, k_pairs, axis=1)[:, :k_pairs]
+
+        selected_pairs = pairs[pair_idx]  # (n_samples, k_pairs, 2)
 
         mask = np.zeros_like(X, dtype=bool)
         rows = np.arange(n_samples)[:, None, None]
