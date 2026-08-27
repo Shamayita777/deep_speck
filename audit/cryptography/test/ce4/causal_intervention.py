@@ -112,6 +112,9 @@ class CausalInterventionTest(CryptographicTest):
         task_results: dict[str, dict] = {}
 
         for task in tasks:
+            print(f"[CE4] Starting task: {task.target.name}", flush=True)
+
+            print("[CE4] Selecting intervenable samples...", flush=True)
 
             filtered_dataset, n_excluded, n_total = (
                 adapter.select_intervenable_samples(task.dataset, task.target)
@@ -135,20 +138,23 @@ class CausalInterventionTest(CryptographicTest):
                     )
 
             task = dataclasses.replace(task, dataset=filtered_dataset)
-
+            print("[CE4] Applying structural intervention...", flush=True)
             structural_dataset = adapter.apply_structural_intervention(
                 task.dataset, task.target,
             )
+            print("[CE4] Applying control intervention...", flush=True)
             control_dataset = adapter.apply_control_intervention(
                 task.dataset, task.target,
             )
-
+            print("[CE4] Computing intervention magnitudes...", flush=True)
             structural_magnitude = adapter.compute_intervention_magnitude(
                 task.dataset, structural_dataset,
             )
+            print("[CE4] Structural intervention magnitude computed.", flush=True)
             control_magnitude = adapter.compute_intervention_magnitude(
                 task.dataset, control_dataset,
             )
+            print("[CE4] Control intervention magnitude computed.", flush=True)
 
             original_predictions = adapter.compute_model_predictions(
                 model, task.dataset,
