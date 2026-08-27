@@ -1,0 +1,117 @@
+{
+  "audit": {
+    "claim": "The audited dataset instance contains no exact duplicate feature samples within partitions and no exact feature overlap across audited partitions.",
+    "id": "D1",
+    "name": "Exact Duplicate and Partition Overlap Census"
+  },
+  "certificate_schema_version": "1.0",
+  "decision": {
+    "evidence_level": "DATASET_INTEGRITY_EXACT_CENSUS",
+    "outcome": "PASS"
+  },
+  "findings": {
+    "duplicate_samples": 0,
+    "exact_partition_overlap": 0,
+    "label_conflict_groups": 0,
+    "partition_overlap": {
+      "train_test": 0,
+      "train_validation": 0,
+      "validation_test": 0
+    },
+    "partition_results": {
+      "test": {
+        "duplicate_groups": 0,
+        "duplicate_samples": 0,
+        "label_consistency": {
+          "consistent": true,
+          "label_conflict_groups": 0
+        },
+        "maximum_multiplicity": 1,
+        "total_samples": 1000000,
+        "unique_samples": 1000000
+      },
+      "train": {
+        "duplicate_groups": 0,
+        "duplicate_samples": 0,
+        "label_consistency": {
+          "consistent": true,
+          "label_conflict_groups": 0
+        },
+        "maximum_multiplicity": 1,
+        "total_samples": 10000000,
+        "unique_samples": 10000000
+      },
+      "validation": {
+        "duplicate_groups": 0,
+        "duplicate_samples": 0,
+        "label_consistency": {
+          "consistent": true,
+          "label_conflict_groups": 0
+        },
+        "maximum_multiplicity": 1,
+        "total_samples": 1000000,
+        "unique_samples": 1000000
+      }
+    }
+  },
+  "generated_at_utc": "2026-08-27T06:58:06.951502+00:00",
+  "limitations": [
+    "D1 addresses exact equality only. It does not establish the absence of near duplicates or statistical dependence.",
+    "If the audited data were regenerated from a generation procedure, the certificate describes the generated dataset instance actually supplied to D1; it does not retroactively certify an unavailable historical dataset instance.",
+    "A zero-overlap result is evidence that no exact overlap was observed in the audited data under the stated representation. It is not evidence that all forms of dataset correlation are absent."
+  ],
+  "methodology": {
+    "decision_rule": "PASS iff every audited partition contains zero exact duplicate samples and every audited partition pair contains zero exact feature overlap.",
+    "inferential_scope": "exact duplicates and exact feature overlap only",
+    "method": "exhaustive SHA-256 exact-equality census",
+    "statistical_unit": "individual dataset sample"
+  },
+  "provenance": {
+    "audit_configuration": {
+      "audit_id": "D1",
+      "exact_duplicate_detection": true,
+      "exact_partition_overlap_detection": true,
+      "hash_algorithm": "SHA-256",
+      "hash_scope": "sample dtype + sample shape + contiguous raw sample bytes",
+      "label_conflict_diagnostic": true
+    },
+    "dataset": {
+      "dataset_id": "gohr-speck",
+      "dataset_version": "original-make-train-data",
+      "generation_parameters": {
+        "deterministic_seed": null,
+        "generator": "speck.make_train_data",
+        "input_difference": {
+          "left_word": "0x0040",
+          "right_word": "0x0000"
+        },
+        "num_rounds": 5,
+        "randomness_source": "os.urandom",
+        "test_samples": 1000000,
+        "train_samples": 10000000,
+        "validation_samples": 1000000
+      },
+      "generation_procedure": "speck.make_train_data(n, nr)",
+      "random_seed": null
+    },
+    "environment": {
+      "numpy_version": "2.4.6",
+      "platform": "macOS-13.5-arm64-arm-64bit",
+      "python_version": "3.11.14 (main, Jan 10 2026, 14:09:46) [Clang 14.0.3 (clang-1403.0.22.14.1)]"
+    },
+    "partitions": {
+      "test": {
+        "sample_count": 1000000,
+        "unique_sample_count": 1000000
+      },
+      "train": {
+        "sample_count": 10000000,
+        "unique_sample_count": 10000000
+      },
+      "validation": {
+        "sample_count": 1000000,
+        "unique_sample_count": 1000000
+      }
+    }
+  }
+}
