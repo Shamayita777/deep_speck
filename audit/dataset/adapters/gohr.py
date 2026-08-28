@@ -1,14 +1,14 @@
 """
 Gohr dataset/model adapter.
 
-This module is the dataset-specific boundary for Gohr/Speck.
+Dataset generation is delegated directly to speck.make_train_data().
+The adapter also provides resumable Keras training for controlled
+audit experiments.
 
-Generic dataset-audit modules must not import the Gohr generator
-directly. They receive arrays through this adapter.
-
-The adapter retains the existing Gohr model/training/evaluation
-interface and adds the canonical dataset-generation method used by
-Dataset Integrity experiments.
+Important:
+    Dataset generation uses os.urandom() internally. Therefore a
+    generated dataset must be persisted by the experiment driver if
+    an experiment is intended to resume across processes/sessions.
 """
 
 from __future__ import annotations
@@ -16,15 +16,83 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Tuple
 
-from keras.callbacks import LearningRateScheduler
+from keras.callbacks import (
+    Callback,
+    LearningRateScheduler,
+    ModelCheckpoint,
+)
 from keras.models import load_model
-
+import json
+import os
 import speck as sp
 import train_nets as tn
+class EpochStateCallback(Callback):
+    """
+    Persist the completed epoch after each successful epoch.
 
+    The checkpoint itself is written by ModelCheckpoint before
+    this callback records the epoch state.
+    """
 
+    def __init__(
+        self,
+        *,
+        state_path: Path,
+        seed: int,
+        condition: str,
+        replicate: int,
+        total_epochs: int,
+    ) -> None:
+        super().__init__()
+
+        self.state_path = state_path
+        self.seed = int(seed)
+        self.condition = condition
+        self.replicate = int(replicate)
+        self.total_epochs = int(total_epochs)
+
+    def on_epoch_end(self, epoch, logs=None):
+
+        state = {
+            "schema_version": "1.0",
+            "seed": self.seed,
+            "condition": self.condition,
+            "replicate": self.replicate,
+            "total_epochs": self.total_epochs,
+            "completed_epochs": int(epoch + 1),
+            "status": (
+                "complete"
+                if epoch + 1 >= self.total_epochs
+                else "in_progress"
+            ),
+        }
+
+        self.state_path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        temporary = self.state_path.with_suffix(
+            ".tmp"
+        )
+
+        with temporary.open(
+            "w",
+            encoding="utf-8",
+        ) as handle:
+            json.dump(
+                state,
+                handle,
+                indent=2,
+                sort_keys=True,
+            )
+
+        os.replace(
+            temporary,
+            self.state_path
+        )
 class GohrAdapter:
-    """Adapter for the Gohr neural distinguisher and dataset generator."""
+    """Adapter for Gohr's neural distinguisher and dataset generator."""
 
     DATASET_ID = "gohr-speck"
     DATASET_VERSION = "original-make-train-data"
@@ -78,13 +146,12 @@ class GohrAdapter:
         self.model = None
         self.history = None
 
-    # ----------------------------------------------------------
+    # ==========================================================
     # Dataset generation
-    # ----------------------------------------------------------
+    # ==========================================================
 
     @property
     def feature_bits(self) -> int:
-        """Number of binary features emitted by Gohr's generator."""
         return 64
 
     def generate_partition(
@@ -93,16 +160,6 @@ class GohrAdapter:
         *,
         num_rounds: int | None = None,
     ) -> Tuple[Any, Any]:
-        """
-        Generate one Gohr/Speck dataset partition.
-
-        This is the single canonical adapter boundary for dataset
-        generation used by Dataset Integrity experiments.
-
-        Gohr's make_train_data() uses os.urandom() internally.
-        Therefore self.seed does not deterministically reproduce
-        the generated partition.
-        """
 
         if samples < 1:
             raise ValueError("samples must be >= 1.")
@@ -116,12 +173,10 @@ class GohrAdapter:
         if rounds < 1:
             raise ValueError("num_rounds must be >= 1.")
 
-        features, labels = sp.make_train_data(
+        return sp.make_train_data(
             int(samples),
             rounds,
         )
-
-        return features, labels
 
     def dataset_provenance(
         self,
@@ -130,7 +185,6 @@ class GohrAdapter:
         validation_samples: int,
         test_samples: int,
     ) -> dict[str, Any]:
-        """Return Gohr-specific generation metadata for certificates."""
 
         return {
             "dataset_id": self.DATASET_ID,
@@ -156,9 +210,9 @@ class GohrAdapter:
             "generation_random_seed": None,
         }
 
-    # ----------------------------------------------------------
+    # ==========================================================
     # Model
-    # ----------------------------------------------------------
+    # ==========================================================
 
     def build_model(self):
 
@@ -175,26 +229,91 @@ class GohrAdapter:
 
         return model
 
-    # ----------------------------------------------------------
+    # ==========================================================
     # Training
-    # ----------------------------------------------------------
+    # ==========================================================
 
     def train(
         self,
         train_x,
         train_y,
+        *,
+        checkpoint_path: Path | None = None,
+        state_path: Path | None = None,
+        replicate: int = 0,
+        condition: str = "unknown",
     ):
 
         tn.set_seed(self.seed)
 
-        self.model = self.build_model()
+        self.model_directory.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
-        checkpoint = tn.make_checkpoint(
+        completed_epochs = 0
+
+        # ----------------------------------------------------------
+        # Resume from checkpoint if one exists
+        # ----------------------------------------------------------
+
+        if (
+            checkpoint_path is not None
+            and state_path is not None
+            and checkpoint_path.exists()
+            and state_path.exists()
+        ):
+            with state_path.open(
+                "r",
+                encoding="utf-8",
+            ) as handle:
+                state = json.load(handle)
+
+            completed_epochs = int(
+                state.get(
+                    "completed_epochs",
+                    0,
+                )
+            )
+
+            print(
+                f"Resuming {condition} replicate "
+                f"{replicate} from epoch "
+                f"{completed_epochs}/{self.epochs}..."
+            )
+
+            self.model = load_model(
+                checkpoint_path,
+                compile=True,
+            )
+
+            # Already finished.
+            if completed_epochs >= self.epochs:
+                print(
+                    f"{condition} replicate {replicate} "
+                    f"already completed."
+                )
+                return self.model
+
+        else:
+            self.model = self.build_model()
+
+        # ----------------------------------------------------------
+        # Best-model checkpoint used by the original training code
+        # ----------------------------------------------------------
+
+        best_checkpoint = tn.make_checkpoint(
             str(
                 self.model_directory
                 / f"best_{self.num_rounds}r_depth{self.depth}.keras"
             )
         )
+
+        # ----------------------------------------------------------
+        # Rolling recovery checkpoint
+        #
+        # This overwrites latest.keras every epoch.
+        # ----------------------------------------------------------
 
         scheduler = LearningRateScheduler(
             tn.cyclic_lr(
@@ -202,7 +321,45 @@ class GohrAdapter:
                 0.002,
                 0.0001,
             )
-        )
+            )
+
+        callbacks = [
+            best_checkpoint,
+            scheduler,
+        ]
+
+        if checkpoint_path is not None:
+            checkpoint_path.parent.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            rolling_checkpoint = ModelCheckpoint(
+                filepath=str(checkpoint_path),
+                save_weights_only=False,
+                save_best_only=False,
+                save_freq="epoch",
+                verbose=0,
+            )
+
+            callbacks.append(
+                rolling_checkpoint
+            )
+
+        if state_path is not None:
+            callbacks.append(
+                EpochStateCallback(
+                    state_path=state_path,
+                    seed=self.seed,
+                    condition=condition,
+                    replicate=replicate,
+                    total_epochs=self.epochs,
+                )
+            )
+
+        # ----------------------------------------------------------
+        # Continue training
+        # ----------------------------------------------------------
 
         self.history = self.model.fit(
             train_x,
@@ -212,24 +369,26 @@ class GohrAdapter:
                 self.validation_y,
             ),
             epochs=self.epochs,
+            initial_epoch=completed_epochs,
             batch_size=self.batch_size,
-            callbacks=[
-                checkpoint,
-                scheduler,
-            ],
+            callbacks=callbacks,
             verbose=1,
         )
 
         return self.model
-
-    # ----------------------------------------------------------
+    # ==========================================================
     # Evaluation
-    # ----------------------------------------------------------
+    # ==========================================================
 
     def evaluate(
         self,
         model,
     ):
+
+        if self.test_x is None or self.test_y is None:
+            raise ValueError(
+                "test_x and test_y are required for evaluation."
+            )
 
         _, score = model.evaluate(
             self.test_x,
@@ -239,9 +398,9 @@ class GohrAdapter:
 
         return float(score)
 
-    # ----------------------------------------------------------
+    # ==========================================================
     # Prediction
-    # ----------------------------------------------------------
+    # ==========================================================
 
     def predict(
         self,
@@ -258,9 +417,9 @@ class GohrAdapter:
             verbose=0,
         )
 
-    # ----------------------------------------------------------
+    # ==========================================================
     # Save / Load
-    # ----------------------------------------------------------
+    # ==========================================================
 
     def save(
         self,
@@ -282,23 +441,3 @@ class GohrAdapter:
         self.model = load_model(path)
 
         return self.model
-
-    # ----------------------------------------------------------
-    # Properties
-    # ----------------------------------------------------------
-
-    @property
-    def best_validation_score(self):
-
-        if self.history is None:
-            return None
-
-        history = self.history.history
-
-        if "val_accuracy" in history:
-            return max(history["val_accuracy"])
-
-        if "val_acc" in history:
-            return max(history["val_acc"])
-
-        return None

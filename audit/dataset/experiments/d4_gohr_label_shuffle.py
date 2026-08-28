@@ -40,6 +40,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shutil
+import time
 from pathlib import Path
 
 import numpy as np
@@ -53,6 +56,342 @@ from audit.dataset.d4_controlled_perturbation import (
 from audit.dataset.perturbations.label_shuffle import (
     LabelShufflePerturbation,
 )
+
+# ============================================================
+# Persistent dataset storage
+# ============================================================
+
+def dataset_paths(
+    root: Path,
+) -> dict[str, Path]:
+
+    dataset_dir = root / "dataset"
+
+    return {
+        "train_x": dataset_dir / "train_x.npy",
+        "train_y": dataset_dir / "train_y.npy",
+        "validation_x": dataset_dir / "validation_x.npy",
+        "validation_y": dataset_dir / "validation_y.npy",
+        "test_x": dataset_dir / "test_x.npy",
+        "test_y": dataset_dir / "test_y.npy",
+        "metadata": dataset_dir / "metadata.json",
+    }
+
+def dataset_exists(
+    root: Path,
+) -> bool:
+
+    paths = dataset_paths(root)
+
+    return all(
+        path.exists()
+        for path in paths.values()
+    )
+def save_dataset(
+    *,
+    root: Path,
+    train_x: np.ndarray,
+    train_y: np.ndarray,
+    validation_x: np.ndarray,
+    validation_y: np.ndarray,
+    test_x: np.ndarray,
+    test_y: np.ndarray,
+    metadata: dict,
+) -> None:
+
+    paths = dataset_paths(root)
+
+    paths["train_x"].parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    np.save(
+        paths["train_x"],
+        train_x,
+    )
+
+    np.save(
+        paths["train_y"],
+        train_y,
+    )
+
+    np.save(
+        paths["validation_x"],
+        validation_x,
+    )
+
+    np.save(
+        paths["validation_y"],
+        validation_y,
+    )
+
+    np.save(
+        paths["test_x"],
+        test_x,
+    )
+
+    np.save(
+        paths["test_y"],
+        test_y,
+    )
+
+    save_state(
+        paths["metadata"],
+        metadata,
+    )
+def load_dataset(
+    root: Path,
+):
+    paths = dataset_paths(root)
+
+    return (
+        np.load(
+            paths["train_x"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["train_y"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["validation_x"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["validation_y"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["test_x"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["test_y"],
+            mmap_mode="r",
+        ),
+    )
+
+def permutation_path(
+    root: Path,
+    replicate: int,
+) -> Path:
+
+    return (
+        root
+        / "perturbations"
+        / f"replicate_{replicate:02d}_labels.npy"
+    )
+
+
+def load_or_create_label_permutation(
+    *,
+    root: Path,
+    replicate: int,
+    labels: np.ndarray,
+    rng: np.random.Generator,
+) -> np.ndarray:
+
+    path = permutation_path(
+        root,
+        replicate,
+    )
+
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    if path.exists():
+
+        permutation = np.load(
+            path,
+            mmap_mode="r",
+        )
+
+        if permutation.shape != labels.shape:
+            raise ValueError(
+                "Persisted label permutation has "
+                "an incompatible shape."
+            )
+
+        return permutation
+
+    permutation = rng.permutation(
+        len(labels)
+    ).astype(
+        np.int64,
+        copy=False,
+    )
+
+    temporary = path.with_suffix(
+        ".tmp.npy"
+    )
+
+    np.save(
+        temporary,
+        permutation,
+    )
+
+    temporary.replace(
+        path
+    )
+
+    return np.load(
+        path,
+        mmap_mode="r",
+    )
+
+def experiment_metadata(
+    *,
+    train_samples: int,
+    validation_samples: int,
+    test_samples: int,
+) -> dict:
+
+    return {
+        "schema_version": "1.0",
+        "dataset_id": DATASET_ID,
+        "dataset_version": DATASET_VERSION,
+        "generator": "speck.make_train_data",
+        "randomness_source": "os.urandom",
+        "num_rounds": NUM_ROUNDS,
+        "depth": DEPTH,
+        "epochs": EPOCHS,
+        "batch_size": 5000,
+        "train_samples": train_samples,
+        "validation_samples": validation_samples,
+        "test_samples": test_samples,
+        "input_difference": {
+            "left_word": "0x0040",
+            "right_word": "0x0000",
+        },
+    }
+
+def state_path(
+    root: Path,
+    replicate: int,
+    condition: str,
+) -> Path:
+
+    return (
+        root
+        / "state"
+        / f"replicate_{replicate:02d}_{condition}.json"
+    )
+
+
+def checkpoint_path(
+    root: Path,
+    replicate: int,
+    condition: str,
+) -> Path:
+
+    return (
+        root
+        / "checkpoints"
+        / f"replicate_{replicate:02d}"
+        / condition
+        / "latest.keras"
+    )
+
+
+def save_state(
+    path: Path,
+    state: dict,
+) -> None:
+
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    temporary = path.with_suffix(".tmp")
+
+    with temporary.open(
+        "w",
+        encoding="utf-8",
+    ) as handle:
+
+        json.dump(
+            state,
+            handle,
+            indent=2,
+            sort_keys=True,
+        )
+
+    os.replace(
+        temporary,
+        path,
+    )
+
+
+def load_state(
+    path: Path,
+) -> dict:
+
+    with path.open(
+        "r",
+        encoding="utf-8",
+    ) as handle:
+
+        return json.load(handle)
+
+class EpochStateCallback(Callback):
+    """
+    Persist the completed epoch in a sidecar state file.
+
+    Epoch numbering stored here is one-based:
+        epoch 1 means the first epoch has completed.
+    """
+
+    def __init__(
+        self,
+        *,
+        state_path: Path,
+        replicate: int,
+        condition: str,
+        seed: int,
+        total_epochs: int,
+    ) -> None:
+
+        super().__init__()
+
+        self.state_path = state_path
+        self.replicate = replicate
+        self.condition = condition
+        self.seed = seed
+        self.total_epochs = total_epochs
+
+    def on_epoch_end(
+        self,
+        epoch,
+        logs=None,
+    ):
+
+        state = {
+            "schema_version": "1.0",
+            "replicate": self.replicate,
+            "condition": self.condition,
+            "seed": self.seed,
+            "total_epochs": self.total_epochs,
+            "completed_epochs": int(epoch + 1),
+            "status": (
+                "complete"
+                if epoch + 1 >= self.total_epochs
+                else "in_progress"
+            ),
+            "last_epoch_logs": {
+                key: float(value)
+                for key, value in (logs or {}).items()
+                if np.isscalar(value)
+            },
+        }
+
+        save_state(
+            self.state_path,
+            state,
+        )
 
 
 # ============================================================
@@ -203,7 +542,108 @@ def validate_args(
             "--alpha must lie in (0, 1)."
         )
 
+def dataset_cache_paths(
+    root: Path,
+) -> dict[str, Path]:
 
+    directory = root / "dataset"
+
+    return {
+        "train_x": directory / "train_x.npy",
+        "train_y": directory / "train_y.npy",
+        "validation_x": directory / "validation_x.npy",
+        "validation_y": directory / "validation_y.npy",
+        "test_x": directory / "test_x.npy",
+        "test_y": directory / "test_y.npy",
+        "metadata": directory / "metadata.json",
+    }
+
+def cached_dataset_exists(
+    root: Path,
+) -> bool:
+
+    paths = dataset_cache_paths(root)
+
+    return all(
+        path.exists()
+        for path in paths.values()
+    )
+
+def save_dataset_cache(
+    *,
+    root: Path,
+    train_x: np.ndarray,
+    train_y: np.ndarray,
+    validation_x: np.ndarray,
+    validation_y: np.ndarray,
+    test_x: np.ndarray,
+    test_y: np.ndarray,
+) -> None:
+
+    paths = dataset_cache_paths(root)
+
+    paths["train_x"].parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    arrays = {
+        "train_x": train_x,
+        "train_y": train_y,
+        "validation_x": validation_x,
+        "validation_y": validation_y,
+        "test_x": test_x,
+        "test_y": test_y,
+    }
+
+    for name, array in arrays.items():
+
+        final_path = paths[name]
+
+        temporary_path = final_path.with_suffix(
+            ".tmp.npy"
+        )
+
+        np.save(
+            temporary_path,
+            array,
+        )
+
+        temporary_path.replace(
+            final_path,
+        )
+
+def load_dataset_cache(
+    root: Path,
+):
+    paths = dataset_cache_paths(root)
+
+    return (
+        np.load(
+            paths["train_x"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["train_y"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["validation_x"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["validation_y"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["test_x"],
+            mmap_mode="r",
+        ),
+        np.load(
+            paths["test_y"],
+            mmap_mode="r",
+        ),
+    )
 # ============================================================
 # Gohr data generation
 # ============================================================
@@ -394,18 +834,58 @@ def main() -> None:
     args = parse_args()
     validate_args(args)
 
-    (
-        train_x,
-        train_y,
-        validation_x,
-        validation_y,
-        test_x,
-        test_y,
-    ) = generate_gohr_partitions(
-        train_samples=args.train_samples,
-        validation_samples=args.validation_samples,
-        test_samples=args.test_samples,
+    dataset_root = (
+        OUTPUT_DIRECTORY
+        / "persistent_data"
     )
+
+    if cached_dataset_exists(
+        dataset_root
+    ):
+
+        print("=" * 72)
+        print("Loading cached D4 dataset")
+        print("=" * 72)
+
+        (
+            train_x,
+            train_y,
+            validation_x,
+            validation_y,
+            test_x,
+            test_y,
+        ) = load_dataset_cache(
+            dataset_root
+        )
+
+    else:
+
+        (
+            train_x,
+            train_y,
+            validation_x,
+            validation_y,
+            test_x,
+            test_y,
+        ) = generate_gohr_partitions(
+            train_samples=args.train_samples,
+            validation_samples=args.validation_samples,
+            test_samples=args.test_samples,
+        )
+
+        save_dataset_cache(
+            root=dataset_root,
+            train_x=train_x,
+            train_y=train_y,
+            validation_x=validation_x,
+            validation_y=validation_y,
+            test_x=test_x,
+            test_y=test_y,
+        )
+
+        print(
+            "D4 dataset cached for future resumes."
+        )
 
     perturbation = (
         LabelShufflePerturbation()
@@ -438,6 +918,10 @@ def main() -> None:
         test_features=test_x,
         test_labels=test_y,
         adapter_factory=adapter_factory,
+        checkpoint_root=(
+            OUTPUT_DIRECTORY
+            / "checkpoints"
+        ),
         replicates=args.replicates,
         audit_seed=args.audit_seed,
         effect_threshold=args.effect_threshold,

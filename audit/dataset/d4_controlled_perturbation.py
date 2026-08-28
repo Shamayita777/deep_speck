@@ -43,6 +43,8 @@ from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Optional, Sequence
 
 import numpy as np
+import json
+from pathlib import Path
 from scipy.stats import binomtest
 
 # ============================================================
@@ -353,7 +355,36 @@ def binary_predictions_to_correctness(
 
     return predicted_labels == labels.astype(np.int64)
 
+def checkpoint_paths(
+    checkpoint_root: Path,
+    replicate: int,
+    condition: str,
+) -> tuple[Path, Path]:
 
+    directory = (
+        checkpoint_root
+        / f"replicate_{replicate:02d}"
+        / condition
+    )
+
+    return (
+        directory / "latest.keras",
+        directory / "state.json",
+    )
+
+
+def load_completed_state(
+    state_path: Path,
+) -> dict[str, Any] | None:
+
+    if not state_path.exists():
+        return None
+
+    with state_path.open(
+        "r",
+        encoding="utf-8",
+    ) as handle:
+        return json.load(handle)
 # ============================================================
 # One repeated experiment
 # ============================================================
@@ -366,6 +397,7 @@ def run_d4(
     test_features: Any,
     test_labels: Any,
     adapter_factory: Callable[[int], Any],
+    checkpoint_root: Path,
     replicates: int,
     audit_seed: int,
     effect_threshold: float,
@@ -473,9 +505,21 @@ def run_d4(
             seed_value
         )
 
+        baseline_checkpoint, baseline_state = (
+            checkpoint_paths(
+                checkpoint_root,
+                replicate_index,
+                "baseline",
+            )
+        )
+
         baseline_model = baseline_adapter.train(
             train_features,
             train_labels,
+            checkpoint_path=baseline_checkpoint,
+            state_path=baseline_state,
+            replicate=replicate_index,
+            condition="baseline",
         )
 
         baseline_predictions = baseline_adapter.predict(
@@ -497,21 +541,74 @@ def run_d4(
         # Perturbation
         # ----------------------------------------------------
 
-        perturbed_features, perturbed_labels = (
-            perturbation.apply(
-                train_features,
-                train_labels,
-                rng=rng,
-            )
+        perturbation_directory = (
+            checkpoint_root
+            / "perturbations"
         )
+
+        perturbation_directory.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        perturbation_path = (
+            perturbation_directory
+            / f"replicate_{replicate_index:02d}_labels.npy"
+        )
+
+        if perturbation_path.exists():
+
+            print(
+                f"Loading persisted perturbation for "
+                f"replicate {replicate_index}..."
+            )
+
+            perturbed_features = train_features
+
+            perturbed_labels = np.load(
+                perturbation_path,
+                mmap_mode="r",
+            )
+
+        else:
+
+            print(
+                f"Generating perturbation for "
+                f"replicate {replicate_index}..."
+            )
+
+            perturbed_features, perturbed_labels = (
+                perturbation.apply(
+                    train_features,
+                    train_labels,
+                    rng=rng,
+                )
+            )
+
+            np.save(
+                perturbation_path,
+                perturbed_labels,
+            )
 
         perturbed_adapter = adapter_factory(
             seed_value
         )
 
+        perturbed_checkpoint, perturbed_state = (
+            checkpoint_paths(
+                checkpoint_root,
+                replicate_index,
+                "perturbed",
+            )
+        )
+
         perturbed_model = perturbed_adapter.train(
             perturbed_features,
             perturbed_labels,
+            checkpoint_path=perturbed_checkpoint,
+            state_path=perturbed_state,
+            replicate=replicate_index,
+            condition="perturbed",
         )
 
         perturbed_predictions = (
