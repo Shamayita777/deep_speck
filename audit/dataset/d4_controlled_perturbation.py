@@ -1,443 +1,1014 @@
 """
-D4 - Controlled Perturbation Audit
+D4 - Controlled Perturbation Audit.
 
-Architecture
+Generic framework for repeated controlled perturbation experiments.
 
-Perturbation
-        ↓
-PerturbationResult
-        ↓
-Dataset Adapter
-        ↓
-Generic Perturbation Engine
-        ↓
-Evaluation
-        ↓
-Certificate
-        ↓
-Reporting
-        ↓
-JSON
-        ↓
-main()
+Scientific design
+-----------------
+D4 estimates whether a controlled perturbation changes predictive
+performance relative to an unperturbed baseline.
+
+For binary classification, inference is performed on predictions
+from the same held-out test examples, giving a paired comparison.
+McNemar's exact test is used for the paired binary correctness
+outcomes, while replicate-level performance differences quantify
+training-run variability.
+
+D4 deliberately does NOT interpret a label-shuffle effect as proof
+of cryptographic dependence. A label shuffle tests whether the
+original feature/label correspondence is necessary for predictive
+performance; the observed effect may arise from cryptographic
+structure, implementation artifacts, dataset-construction artifacts,
+or other label-correlated structure.
+
+The framework therefore reports:
+
+- replicate-level baseline accuracy;
+- replicate-level perturbed accuracy;
+- paired accuracy difference;
+- replicate mean and standard deviation;
+- bootstrap confidence interval for the replicate-level effect;
+- exact McNemar p-value for each paired test-set comparison;
+- multiplicity-adjusted McNemar inference across replicates;
+- effect-detection decision based on a pre-specified effect size
+  and inferential criterion.
+
+No result is labelled "statistically significant" merely because
+an effect exceeds a percentage threshold.
 """
 
-# ============================================================
-# Imports
-# ============================================================
-
-from abc import ABC, abstractmethod
-
-from typing import Any
+from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any, Callable, Mapping, Optional, Sequence
+
+import numpy as np
+from scipy.stats import binomtest
+
 # ============================================================
-# Phase 1
-# Perturbation Interface
+# Perturbation interface
 # ============================================================
 
-@dataclass
-class Perturbation(ABC):
+class Perturbation:
     """
-    Abstract base class for controlled dataset perturbations.
+    Abstract interface for a controlled dataset perturbation.
 
-    Every perturbation must define:
-        • a name
-        • a description
-        • an apply() method that returns the perturbed
-          features and labels.
+    A perturbation receives a feature matrix and label array and
+    returns the perturbed feature/label pair.
+
+    Perturbation randomness must be supplied explicitly through
+    the NumPy Generator argument. This prevents accidental use
+    of global RNG state.
     """
 
-    name: str
-    description: str
+    def __init__(
+        self,
+        *,
+        name: str,
+        description: str,
+    ) -> None:
+        if not name:
+            raise ValueError(
+                "Perturbation name must be non-empty."
+            )
 
-    @abstractmethod
+        if not description:
+            raise ValueError(
+                "Perturbation description must be non-empty."
+            )
+
+        self.name = name
+        self.description = description
+
     def apply(
         self,
         features: Any,
         labels: Any,
-    ) -> tuple[Any, Any]:
+        *,
+        rng: np.random.Generator,
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Apply the perturbation.
 
-        Parameters
-        ----------
-        features
-            Original feature matrix.
-
-        labels
-            Original target labels.
-
-        Returns
-        -------
-        tuple
-            Perturbed (features, labels).
+        Subclasses must implement this method.
         """
-        raise NotImplementedError
 
+        raise NotImplementedError(
+            "Perturbation subclasses must implement apply()."
+        )
+
+# ============================================================
+# Result structures
+# ============================================================
 
 @dataclass
-class PerturbationResult:
-    """
-    Result produced by a controlled perturbation audit.
-    """
+class ReplicateResult:
+    """One independent baseline/perturbation training replicate."""
 
-    perturbation: str
+    replicate: int
+    seed: int
 
     baseline_score: float
-
     perturbed_score: float
 
     absolute_difference: float
+    relative_difference_percent: float
 
-    relative_difference: float
+    mcnemar_b: int
+    mcnemar_c: int
+    mcnemar_pvalue: float
 
-    runtime: float
-
-    notes: str
-
-# ============================================================
-# Phase 2
-# Generic Perturbation Engine
-# ============================================================
-
-import time
-
-def run_perturbation(
-    *,
-    perturbation: Perturbation,
-    features: Any,
-    labels: Any,
-    adapter: Any,
-    notes: str = "",
-) -> PerturbationResult:
-    """
-    Execute a controlled perturbation experiment.
-
-    The framework is intentionally independent of the
-    underlying dataset, machine-learning framework,
-    evaluation metric, and cryptographic primitive.
-
-    Parameters
-    ----------
-    perturbation
-        Perturbation to apply.
-
-    features
-        Original feature matrix.
-
-    labels
-        Original labels.
-
-    adapter
-        Dataset adapter for training and evaluating models.
-
-    notes
-        Optional experiment notes.
-
-    Returns
-    -------
-    PerturbationResult
-        Result of the perturbation experiment.
-    """
-
-    start = time.perf_counter()
-
-    # --------------------------------------------------------
-    # Baseline
-    # --------------------------------------------------------
-
-    import json
-
-    from pathlib import Path
-
-    evidence_dir = Path("audit/dataset/evidence/d4")
-    evidence_dir.mkdir(parents=True, exist_ok=True)
-
-    status_file = evidence_dir / "baseline_status.json"
-    model_file = evidence_dir / "baseline_model.keras"
-
-    if status_file.exists() and model_file.exists():
-
-        print("Loading existing baseline...")
-
-        baseline_model = adapter.load(model_file)
-
-        with open(status_file) as fp:
-            status = json.load(fp)
-
-        baseline_score = status["baseline_score"]
-
-    else:
-
-        print("Training baseline...")
-
-        baseline_model = adapter.train(
-            features,
-            labels,
-        )
-
-        baseline_score = adapter.evaluate(
-            baseline_model,
-        )
-
-        adapter.save(model_file)
-
-        with open(status_file, "w") as fp:
-            json.dump(
-                {
-                    "completed": True,
-                    "baseline_score": baseline_score,
-                    "num_rounds": adapter.num_rounds,
-                    "depth": adapter.depth,
-                    "epochs": adapter.epochs,
-                    "batch_size": adapter.batch_size,
-                    "seed": adapter.seed,
-                },
-                fp,
-                indent=4,
-            )
-    # --------------------------------------------------------
-    # Controlled perturbation
-    # --------------------------------------------------------
-
-    perturbed_features, perturbed_labels = (
-        perturbation.apply(
-            features,
-            labels,
-        )
-    )
-
-    perturbed_model = adapter.train(
-        perturbed_features,
-        perturbed_labels,
-    )
-
-    perturbed_score = adapter.evaluate(
-        perturbed_model,
-    )
-
-    # --------------------------------------------------------
-    # Performance difference
-    # --------------------------------------------------------
-
-    absolute_difference = (
-        perturbed_score
-        - baseline_score
-    )
-
-    if baseline_score == 0:
-
-        relative_difference = 0.0
-
-    else:
-
-        relative_difference = (
-            absolute_difference
-            / baseline_score
-        ) * 100.0
-
-    runtime = (
-        time.perf_counter()
-        - start
-    )
-
-    return PerturbationResult(
-
-        perturbation=perturbation.name,
-
-        baseline_score=baseline_score,
-
-        perturbed_score=perturbed_score,
-
-        absolute_difference=absolute_difference,
-
-        relative_difference=relative_difference,
-
-        runtime=runtime,
-
-        notes=notes,
-    )
-
-# ============================================================
-# Evaluation
-# ============================================================
 
 @dataclass
-class EvaluationResult:
+class D4Result:
+    """Aggregated repeated D4 experiment."""
+
+    perturbation: str
+
+    replicates: list[ReplicateResult]
+
+    mean_baseline_score: float
+    mean_perturbed_score: float
+
+    mean_absolute_difference: float
+    sd_absolute_difference: float
+
+    mean_relative_difference_percent: float
+
+    bootstrap_ci_low: float
+    bootstrap_ci_high: float
+
+    min_mcnemar_pvalue: float
+    max_mcnemar_pvalue: float
+
+    adjusted_alpha: float
+
+    effect_threshold: float
+
+    effect_detected: bool
+
+    inference_supported: bool
+
+    interpretation: str
+
+
+# ============================================================
+# Paired binary inference
+# ============================================================
+
+def mcnemar_exact_pvalue(
+    baseline_correct: np.ndarray,
+    perturbed_correct: np.ndarray,
+) -> tuple[int, int, float]:
     """
-    Decision produced from a perturbation result.
-
-    The framework does not assume any particular
-    machine-learning metric or expected direction of
-    change. The interpretation of the observed effect
-    is left to the dataset adapter.
-    """
-
-    observed_effect: bool
-
-    threshold: float
-
-    decision: str
-
-    rationale: str
-
-
-def evaluate_result(
-    result: PerturbationResult,
-    *,
-    effect_threshold: float,
-) -> EvaluationResult:
-    """
-    Evaluate whether a perturbation produced a
-    meaningful performance change.
+    Perform exact McNemar inference on paired binary outcomes.
 
     Parameters
     ----------
-    result
-        Result returned by the perturbation engine.
+    baseline_correct:
+        Boolean correctness indicators for the baseline model.
 
-    effect_threshold
-        Minimum absolute relative change (%) required
-        to consider the perturbation effective.
+    perturbed_correct:
+        Boolean correctness indicators for the perturbed model.
 
     Returns
     -------
-    EvaluationResult
+    (b, c, p_value)
+
+    b:
+        Baseline incorrect / perturbed correct.
+
+    c:
+        Baseline correct / perturbed incorrect.
+
+    Notes
+    -----
+    Only discordant pairs contribute to the McNemar test.
     """
 
-    observed_effect = (
-        abs(result.relative_difference)
+    baseline_correct = np.asarray(
+        baseline_correct,
+        dtype=bool,
+    )
+
+    perturbed_correct = np.asarray(
+        perturbed_correct,
+        dtype=bool,
+    )
+
+    if baseline_correct.shape != perturbed_correct.shape:
+        raise ValueError(
+            "Paired correctness arrays must have identical shapes."
+        )
+
+    b = int(
+        np.sum(
+            (~baseline_correct)
+            & perturbed_correct
+        )
+    )
+
+    c = int(
+        np.sum(
+            baseline_correct
+            & (~perturbed_correct)
+        )
+    )
+
+    discordant = b + c
+
+    if discordant == 0:
+        p_value = 1.0
+    else:
+        # Exact two-sided McNemar test.
+        #
+        # Under H0, conditional on the discordant total,
+        # b ~ Binomial(discordant, 0.5).
+        p_value = float(
+            binomtest(
+                b,
+                n=discordant,
+                p=0.5,
+                alternative="two-sided",
+            ).pvalue
+        )
+
+    return b, c, p_value
+
+
+# ============================================================
+# Bootstrap
+# ============================================================
+
+def bootstrap_mean_ci(
+    values: Sequence[float],
+    *,
+    rng: np.random.Generator,
+    bootstrap_replicates: int = 5000,
+    confidence_level: float = 0.95,
+) -> tuple[float, float]:
+    """
+    Bootstrap percentile confidence interval for the mean.
+
+    The bootstrap resamples independent training replicates,
+    not individual test examples.
+
+    This distinction is important: test examples are paired
+    observations within a replicate, whereas independent model
+    fits are the experimental replicates.
+    """
+
+    values = np.asarray(
+        values,
+        dtype=np.float64,
+    )
+
+    if values.ndim != 1 or len(values) < 2:
+        raise ValueError(
+            "At least two replicate-level observations are required."
+        )
+
+    if bootstrap_replicates < 1000:
+        raise ValueError(
+            "bootstrap_replicates must be >= 1000."
+        )
+
+    if not 0.0 < confidence_level < 1.0:
+        raise ValueError(
+            "confidence_level must lie in (0, 1)."
+        )
+
+    indices = rng.integers(
+        0,
+        len(values),
+        size=(bootstrap_replicates, len(values)),
+    )
+
+    bootstrap_means = np.mean(
+        values[indices],
+        axis=1,
+    )
+
+    alpha = 1.0 - confidence_level
+
+    low = float(
+        np.quantile(
+            bootstrap_means,
+            alpha / 2.0,
+        )
+    )
+
+    high = float(
+        np.quantile(
+            bootstrap_means,
+            1.0 - alpha / 2.0,
+        )
+    )
+
+    return low, high
+
+
+# ============================================================
+# Prediction handling
+# ============================================================
+
+def binary_predictions_to_correctness(
+    predictions: Any,
+    labels: np.ndarray,
+) -> np.ndarray:
+    """
+    Convert binary model predictions into correctness indicators.
+
+    Predictions may be shaped:
+
+        (n,)
+        (n, 1)
+
+    and are interpreted as probabilities/logits thresholded at 0.5.
+
+    This function is intentionally explicit because D4's paired
+    inference is defined for binary classification.
+    """
+
+    labels = np.asarray(labels).reshape(-1)
+
+    predictions = np.asarray(predictions)
+
+    if predictions.ndim == 2 and predictions.shape[1] == 1:
+        predictions = predictions[:, 0]
+
+    if predictions.ndim != 1:
+        raise ValueError(
+            "Binary predictions must have shape (n,) or (n, 1)."
+        )
+
+    if len(predictions) != len(labels):
+        raise ValueError(
+            "Prediction and label counts must match."
+        )
+
+    predicted_labels = (
+        predictions >= 0.5
+    ).astype(np.int64)
+
+    return predicted_labels == labels.astype(np.int64)
+
+
+# ============================================================
+# One repeated experiment
+# ============================================================
+
+def run_d4(
+    *,
+    perturbation: Any,
+    train_features: Any,
+    train_labels: Any,
+    test_features: Any,
+    test_labels: Any,
+    adapter_factory: Callable[[int], Any],
+    replicates: int,
+    audit_seed: int,
+    effect_threshold: float,
+    bootstrap_replicates: int = 5000,
+    confidence_level: float = 0.95,
+    alpha: float = 0.05,
+) -> D4Result:
+    """
+    Execute repeated controlled perturbation inference.
+
+    Parameters
+    ----------
+    perturbation:
+        Perturbation object with an apply(features, labels, rng)
+        method.
+
+    train_features, train_labels:
+        Original training data.
+
+    test_features, test_labels:
+        Fixed held-out test data. Every model is evaluated on
+        exactly this same test partition.
+
+    adapter_factory:
+        Callable receiving an independent integer seed and
+        returning a fresh dataset/model adapter.
+
+    replicates:
+        Number of independent model-training replicates.
+
+    audit_seed:
+        Seed controlling the audit-side RNG streams.
+
+    effect_threshold:
+        Minimum absolute accuracy difference, expressed in
+        percentage points, regarded as practically meaningful.
+
+    bootstrap_replicates:
+        Number of bootstrap resamples over independent
+        training replicates.
+
+    confidence_level:
+        Confidence level for the replicate-level bootstrap CI.
+
+    alpha:
+        Family-wise significance level.
+
+    Returns
+    -------
+    D4Result
+    """
+
+    if replicates < 2:
+        raise ValueError(
+            "At least two independent training replicates are required."
+        )
+
+    if effect_threshold < 0:
+        raise ValueError(
+            "effect_threshold must be non-negative."
+        )
+
+    if not 0.0 < alpha < 1.0:
+        raise ValueError(
+            "alpha must lie in (0, 1)."
+        )
+
+    seed_sequence = np.random.SeedSequence(
+        audit_seed
+    )
+
+    child_sequences = seed_sequence.spawn(
+        replicates
+    )
+
+    replicate_results: list[ReplicateResult] = []
+
+    for replicate_index, child_sequence in enumerate(
+        child_sequences,
+        start=1,
+    ):
+        rng = np.random.default_rng(
+            child_sequence
+        )
+
+        seed_value = int(
+            child_sequence.generate_state(
+                1,
+                dtype=np.uint32,
+            )[0]
+        )
+
+        print()
+        print(
+            f"Running D4 replicate "
+            f"{replicate_index}/{replicates} "
+            f"(seed={seed_value})..."
+        )
+
+        # ----------------------------------------------------
+        # Baseline
+        # ----------------------------------------------------
+
+        baseline_adapter = adapter_factory(
+            seed_value
+        )
+
+        baseline_model = baseline_adapter.train(
+            train_features,
+            train_labels,
+        )
+
+        baseline_predictions = baseline_adapter.predict(
+            test_features
+        )
+
+        baseline_correct = (
+            binary_predictions_to_correctness(
+                baseline_predictions,
+                test_labels,
+            )
+        )
+
+        baseline_score = float(
+            np.mean(baseline_correct)
+        )
+
+        # ----------------------------------------------------
+        # Perturbation
+        # ----------------------------------------------------
+
+        perturbed_features, perturbed_labels = (
+            perturbation.apply(
+                train_features,
+                train_labels,
+                rng=rng,
+            )
+        )
+
+        perturbed_adapter = adapter_factory(
+            seed_value
+        )
+
+        perturbed_model = perturbed_adapter.train(
+            perturbed_features,
+            perturbed_labels,
+        )
+
+        perturbed_predictions = (
+            perturbed_adapter.predict(
+                test_features
+            )
+        )
+
+        perturbed_correct = (
+            binary_predictions_to_correctness(
+                perturbed_predictions,
+                test_labels,
+            )
+        )
+
+        perturbed_score = float(
+            np.mean(perturbed_correct)
+        )
+
+        # ----------------------------------------------------
+        # Paired inference
+        # ----------------------------------------------------
+
+        b, c, p_value = mcnemar_exact_pvalue(
+            baseline_correct,
+            perturbed_correct,
+        )
+
+        absolute_difference = (
+            perturbed_score
+            - baseline_score
+        )
+
+        if baseline_score == 0.0:
+            relative_difference_percent = float("nan")
+        else:
+            relative_difference_percent = (
+                absolute_difference
+                / baseline_score
+                * 100.0
+            )
+
+        replicate_results.append(
+            ReplicateResult(
+                replicate=replicate_index,
+                seed=seed_value,
+                baseline_score=baseline_score,
+                perturbed_score=perturbed_score,
+                absolute_difference=absolute_difference,
+                relative_difference_percent=(
+                    relative_difference_percent
+                ),
+                mcnemar_b=b,
+                mcnemar_c=c,
+                mcnemar_pvalue=p_value,
+            )
+        )
+
+        # Explicitly delete models before next replicate.
+        del baseline_model
+        del perturbed_model
+
+    # ========================================================
+    # Aggregate independent training replicates
+    # ========================================================
+
+    baseline_scores = np.asarray(
+        [
+            r.baseline_score
+            for r in replicate_results
+        ],
+        dtype=np.float64,
+    )
+
+    perturbed_scores = np.asarray(
+        [
+            r.perturbed_score
+            for r in replicate_results
+        ],
+        dtype=np.float64,
+    )
+
+    absolute_differences = np.asarray(
+        [
+            r.absolute_difference
+            for r in replicate_results
+        ],
+        dtype=np.float64,
+    )
+
+    relative_differences = np.asarray(
+        [
+            r.relative_difference_percent
+            for r in replicate_results
+        ],
+        dtype=np.float64,
+    )
+
+    bootstrap_rng = np.random.default_rng(
+        np.random.SeedSequence(
+            [audit_seed, 0xD4]
+        )
+    )
+
+    ci_low, ci_high = bootstrap_mean_ci(
+        absolute_differences,
+        rng=bootstrap_rng,
+        bootstrap_replicates=bootstrap_replicates,
+        confidence_level=confidence_level,
+    )
+
+    # --------------------------------------------------------
+    # Multiplicity control
+    # --------------------------------------------------------
+
+    # Each replicate produces one paired McNemar test.
+    # Bonferroni controls family-wise error conservatively.
+    adjusted_alpha = (
+        alpha / replicates
+    )
+
+    mcnemar_passes = sum(
+        r.mcnemar_pvalue < adjusted_alpha
+        for r in replicate_results
+    )
+
+    # A robust decision requires:
+    #
+    # 1. practical effect threshold met;
+    # 2. replicate-level bootstrap CI excludes zero;
+    # 3. all independent paired comparisons meet the
+    #    conservative multiplicity-adjusted criterion.
+    #
+    # This is intentionally conservative.
+    ci_excludes_zero = (
+        ci_low > 0.0
+        or ci_high < 0.0
+    )
+
+    practical_effect = (
+        abs(
+            float(
+                np.mean(
+                    absolute_differences
+                )
+            )
+        )
         >= effect_threshold
     )
 
-    decision = (
-        "SIGNIFICANT_CHANGE"
-        if observed_effect
-        else "NO_SIGNIFICANT_CHANGE"
+    inference_supported = (
+        mcnemar_passes == replicates
+        and ci_excludes_zero
     )
 
-    rationale = (
-        "Perturbation produced a measurable "
-        "performance change."
-        if observed_effect
+    effect_detected = (
+        practical_effect
+        and inference_supported
+    )
+
+    interpretation = (
+        "A reproducible performance effect was detected under "
+        "the specified perturbation, with the pre-specified "
+        "practical-effect criterion and conservative paired "
+        "inference criterion both satisfied."
+        if effect_detected
         else
-        "Perturbation produced no substantial "
-        "performance change."
+        "The experiment did not satisfy all pre-specified "
+        "criteria for a reproducible performance effect."
     )
 
-    return EvaluationResult(
-
-        observed_effect=observed_effect,
-
-        threshold=effect_threshold,
-
-        decision=decision,
-
-        rationale=rationale,
+    return D4Result(
+        perturbation=perturbation.name,
+        replicates=replicate_results,
+        mean_baseline_score=float(
+            np.mean(baseline_scores)
+        ),
+        mean_perturbed_score=float(
+            np.mean(perturbed_scores)
+        ),
+        mean_absolute_difference=float(
+            np.mean(absolute_differences)
+        ),
+        sd_absolute_difference=float(
+            np.std(
+                absolute_differences,
+                ddof=1,
+            )
+        ),
+        mean_relative_difference_percent=float(
+            np.nanmean(relative_differences)
+        ),
+        bootstrap_ci_low=ci_low,
+        bootstrap_ci_high=ci_high,
+        min_mcnemar_pvalue=float(
+            np.min(
+                [
+                    r.mcnemar_pvalue
+                    for r in replicate_results
+                ]
+            )
+        ),
+        max_mcnemar_pvalue=float(
+            np.max(
+                [
+                    r.mcnemar_pvalue
+                    for r in replicate_results
+                ]
+            )
+        ),
+        adjusted_alpha=adjusted_alpha,
+        effect_threshold=effect_threshold,
+        effect_detected=effect_detected,
+        inference_supported=inference_supported,
+        interpretation=interpretation,
     )
+
 
 # ============================================================
 # Certificate
 # ============================================================
 
 def generate_certificate(
-    result: PerturbationResult,
-    evaluation: EvaluationResult,
-) -> dict:
+    result: D4Result,
+    *,
+    dataset_id: str,
+    dataset_version: str,
+    generation_procedure: str,
+    generation_parameters: Mapping[str, Any],
+    audit_seed: int,
+    confidence_level: float,
+    alpha: float,
+) -> dict[str, Any]:
     """
-    Generate a machine-readable audit certificate.
-
-    Returns
-    -------
-    dict
-        Certificate summarizing the perturbation audit.
+    Construct a machine-readable D4 certificate.
     """
 
     return {
-
-        "audit_dimension": "Controlled Perturbation",
-
-        "perturbation": result.perturbation,
-
-        "baseline_score": result.baseline_score,
-
-        "perturbed_score": result.perturbed_score,
-
-        "absolute_difference": result.absolute_difference,
-
-        "relative_difference": result.relative_difference,
-
-        "runtime": result.runtime,
-
-        "decision": evaluation.decision,
-
-        "observed_effect": evaluation.observed_effect,
-
-        "threshold": evaluation.threshold,
-
-        "rationale": evaluation.rationale,
-
-        "notes": result.notes,
+        "audit": {
+            "id": "D4",
+            "name": "Controlled Perturbation Audit",
+            "claim": (
+                "Whether the specified controlled perturbation "
+                "produces a reproducible change in predictive "
+                "performance under the stated experimental "
+                "and inferential design."
+            ),
+        },
+        "decision": {
+            "outcome": (
+                "EFFECT_DETECTED"
+                if result.effect_detected
+                else "NO_REPRODUCIBLE_EFFECT_DETECTED"
+            ),
+            "effect_detected": result.effect_detected,
+            "inference_supported": result.inference_supported,
+        },
+        "findings": {
+            "perturbation": result.perturbation,
+            "replicates": [
+                {
+                    "replicate": r.replicate,
+                    "seed": r.seed,
+                    "baseline_accuracy": r.baseline_score,
+                    "perturbed_accuracy": r.perturbed_score,
+                    "accuracy_difference": (
+                        r.absolute_difference
+                    ),
+                    "relative_difference_percent": (
+                        r.relative_difference_percent
+                    ),
+                    "mcnemar_b": r.mcnemar_b,
+                    "mcnemar_c": r.mcnemar_c,
+                    "mcnemar_pvalue": r.mcnemar_pvalue,
+                }
+                for r in result.replicates
+            ],
+            "mean_baseline_accuracy": (
+                result.mean_baseline_score
+            ),
+            "mean_perturbed_accuracy": (
+                result.mean_perturbed_score
+            ),
+            "mean_accuracy_difference": (
+                result.mean_absolute_difference
+            ),
+            "sd_accuracy_difference": (
+                result.sd_absolute_difference
+            ),
+            "mean_relative_difference_percent": (
+                result.mean_relative_difference_percent
+            ),
+            "bootstrap_ci": {
+                "confidence_level": confidence_level,
+                "low": result.bootstrap_ci_low,
+                "high": result.bootstrap_ci_high,
+            },
+            "mcnemar": {
+                "minimum_pvalue": (
+                    result.min_mcnemar_pvalue
+                ),
+                "maximum_pvalue": (
+                    result.max_mcnemar_pvalue
+                ),
+                "familywise_alpha": alpha,
+                "bonferroni_adjusted_alpha": (
+                    result.adjusted_alpha
+                ),
+            },
+        },
+        "methodology": {
+            "unit_of_independent_replication": (
+                "independent model training replicate"
+            ),
+            "evaluation_design": (
+                "same fixed held-out test partition for "
+                "baseline and perturbed models"
+            ),
+            "paired_test": (
+                "exact two-sided McNemar test on paired "
+                "test-example correctness"
+            ),
+            "multiple_comparison_control": (
+                "Bonferroni correction across independent "
+                "replicate-level McNemar tests"
+            ),
+            "effect_size": (
+                "absolute accuracy difference in percentage "
+                "points"
+            ),
+            "practical_effect_threshold": (
+                result.effect_threshold
+            ),
+            "confidence_interval": (
+                "percentile bootstrap over independent "
+                "training replicates"
+            ),
+            "bootstrap_replicates": 5000,
+            "decision_rule": (
+                "EFFECT_DETECTED iff the mean absolute accuracy "
+                "difference meets the practical-effect threshold, "
+                "the replicate-level bootstrap confidence interval "
+                "excludes zero, and every replicate satisfies the "
+                "Bonferroni-adjusted paired McNemar criterion."
+            ),
+        },
+        "provenance": {
+            "dataset_id": dataset_id,
+            "dataset_version": dataset_version,
+            "generation_procedure": generation_procedure,
+            "generation_parameters": dict(
+                generation_parameters
+            ),
+            "audit_seed": audit_seed,
+        },
+        "limitations": [
+            (
+                "The perturbation result establishes dependence "
+                "on the original feature/label correspondence, "
+                "not cryptographic dependence specifically."
+            ),
+            (
+                "A label shuffle can disrupt any predictive "
+                "relationship between features and labels, "
+                "including relationships arising from dataset "
+                "construction or implementation artifacts."
+            ),
+            (
+                "Inference is conditional on the specified "
+                "model architecture, optimization procedure, "
+                "dataset generation procedure, perturbation, "
+                "and held-out test partition."
+            ),
+            (
+                "The bootstrap confidence interval quantifies "
+                "uncertainty across independent training "
+                "replicates; it is not a confidence interval for "
+                "the population of all possible datasets."
+            ),
+            (
+                "The experiment does not by itself establish "
+                "security, cryptographic hardness, or absence "
+                "of alternative predictive shortcuts."
+            ),
+        ],
+        "interpretation": result.interpretation,
     }
+
 
 # ============================================================
 # Reporting
 # ============================================================
 
-import json
-from pathlib import Path
-
-
 def print_report(
-    result: PerturbationResult,
-    evaluation: EvaluationResult,
+    result: D4Result,
 ) -> None:
-    """
-    Print a human-readable perturbation audit report.
-    """
+    """Print the D4 statistical report."""
 
-    print("=" * 60)
-    print("Controlled Perturbation Audit")
-    print("=" * 60)
-
-    print(f"Perturbation        : {result.perturbation}")
-    print(f"Baseline Score      : {result.baseline_score:.6f}")
-    print(f"Perturbed Score     : {result.perturbed_score:.6f}")
-    print(f"Absolute Difference : {result.absolute_difference:.6f}")
-    print(f"Relative Difference : {result.relative_difference:.2f}%")
-    print(f"Runtime             : {result.runtime:.2f} seconds")
+    print("=" * 72)
+    print("Dataset Integrity Audit")
+    print("D4 - Controlled Perturbation Audit")
+    print("=" * 72)
     print()
 
-    print(f"Decision            : {evaluation.decision}")
-    print(f"Observed Effect     : {evaluation.observed_effect}")
-    print(f"Threshold           : {evaluation.threshold:.2f}%")
-    print(f"Rationale           : {evaluation.rationale}")
+    print(
+        f"Perturbation                 : "
+        f"{result.perturbation}"
+    )
 
-    if result.notes:
-        print(f"Notes               : {result.notes}")
+    print(
+        f"Independent replicates      : "
+        f"{len(result.replicates)}"
+    )
 
-    print("=" * 60)
+    print()
 
+    print("Aggregate performance")
+    print("-" * 72)
 
-def save_json(
-    certificate: dict,
-    output_path: str | Path,
-) -> None:
-    """
-    Save the audit certificate as a JSON file.
-    """
+    print(
+        f"Mean baseline accuracy      : "
+        f"{result.mean_baseline_score:.8f}"
+    )
 
-    output_path = Path(output_path)
+    print(
+        f"Mean perturbed accuracy     : "
+        f"{result.mean_perturbed_score:.8f}"
+    )
 
-    with output_path.open(
-        "w",
-        encoding="utf-8",
-    ) as fp:
+    print(
+        f"Mean accuracy difference    : "
+        f"{result.mean_absolute_difference:.8f}"
+    )
 
-        json.dump(
-            certificate,
-            fp,
-            indent=4,
+    print(
+        f"SD accuracy difference      : "
+        f"{result.sd_absolute_difference:.8f}"
+    )
+
+    print(
+        f"Mean relative difference    : "
+        f"{result.mean_relative_difference_percent:.4f}%"
+    )
+
+    print()
+
+    print("Replicate-level paired inference")
+    print("-" * 72)
+
+    for replicate in result.replicates:
+        print(
+            f"Replicate {replicate.replicate:2d} | "
+            f"baseline={replicate.baseline_score:.6f} | "
+            f"perturbed={replicate.perturbed_score:.6f} | "
+            f"diff={replicate.absolute_difference:+.6f} | "
+            f"McNemar p={replicate.mcnemar_pvalue:.6g}"
         )
 
+    print()
+
+    print("Replicate-level bootstrap")
+    print("-" * 72)
+
+    print(
+        f"95% CI for mean accuracy difference: "
+        f"[{result.bootstrap_ci_low:.8f}, "
+        f"{result.bootstrap_ci_high:.8f}]"
+    )
+
+    print()
+
+    print("Decision")
+    print("-" * 72)
+
+    print(
+        f"Practical-effect threshold    : "
+        f"{result.effect_threshold:.8f}"
+    )
+
+    print(
+        f"Bonferroni-adjusted alpha     : "
+        f"{result.adjusted_alpha:.8g}"
+    )
+
+    print(
+        f"Paired inference supported    : "
+        f"{result.inference_supported}"
+    )
+
+    print(
+        f"Effect detected               : "
+        f"{result.effect_detected}"
+    )
+
+    print(
+        f"Interpretation                : "
+        f"{result.interpretation}"
+    )
+
+    print("=" * 72)
