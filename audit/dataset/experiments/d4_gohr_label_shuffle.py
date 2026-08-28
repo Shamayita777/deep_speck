@@ -41,12 +41,10 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import shutil
-import time
 from pathlib import Path
 
 import numpy as np
-
+from keras.callbacks import Callback
 from audit.dataset.adapters.gohr import GohrAdapter
 from audit.dataset.d4_controlled_perturbation import (
     generate_certificate,
