@@ -728,6 +728,7 @@ def run_d5(
         [int],
         Any,
     ],
+    training_callbacks_factory: Callable | None = None,
     evaluate_model: Callable[
         [Any, np.ndarray, np.ndarray],
         tuple[float, float],
@@ -848,6 +849,7 @@ def run_d5(
             batch_size=batch_size,
             train_dataset_factory=train_dataset_factory,
             model_factory=model_factory,
+            training_callbacks_factory=training_callbacks_factory,
             evaluate_model=evaluate_model,
         )
 
