@@ -229,6 +229,27 @@ class GohrAdapter:
 
         return model
 
+    def training_callbacks(self):
+        """
+        Return Gohr's original training callbacks.
+
+        Checkpointing is deliberately NOT included here.
+        The generic D5 audit owns checkpointing so that the
+        checkpoint/resume mechanism remains dataset-agnostic.
+        """
+
+        scheduler = LearningRateScheduler(
+            tn.cyclic_lr(
+                10,
+                0.002,
+                0.0001,
+            )
+        )
+
+        return [
+            scheduler,
+        ]
+    
     # ==========================================================
     # Training
     # ==========================================================

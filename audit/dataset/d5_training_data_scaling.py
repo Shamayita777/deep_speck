@@ -439,6 +439,10 @@ def run_condition(
         [Any, np.ndarray, np.ndarray],
         tuple[float, float],
     ],
+    training_callbacks_factory: Callable[
+        [int],
+        list[Any],
+    ],
 ) -> D5ConditionResult:
     """
     Execute or resume one D5 training-data condition.
@@ -640,6 +644,12 @@ def run_condition(
             total_epochs=total_epochs,
         )
 
+        gohr_callbacks = (
+            training_callbacks_factory(seed)
+            if training_callbacks_factory is not None
+            else []
+        )
+
         model.fit(
             train_x,
             train_y,
@@ -648,6 +658,7 @@ def run_condition(
             batch_size=batch_size,
             callbacks=[
                 callback,
+                *gohr_callbacks,
             ],
             verbose=1,
         )

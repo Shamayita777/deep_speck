@@ -1,22 +1,13 @@
 """
 Gohr D5 - Training Data Scaling Experiment.
 
-This module is the Gohr-specific experiment driver for the generic
-D5 Training Data Scaling Audit.
+Gohr-specific driver for the generic D5 Training Data Scaling Audit.
 
-Dataset provenance
-------------------
-All datasets are generated exclusively through GohrAdapter.
+All Gohr dataset generation and model construction pass through
+GohrAdapter. The generic D5 module contains the experiment
+machinery, persistence, checkpointing, resumption, and reporting.
 
-GohrAdapter.generate_partition() delegates to:
-
-    speck.make_train_data()
-
-No alternate dataset generator is used.
-
-Experimental design
--------------------
-Training-set sizes:
+The experiment varies only training-set size:
 
     2,500,000
     5,000,000
@@ -25,15 +16,13 @@ Training-set sizes:
 
 For every condition:
 
-    - Gohr's dataset generator is used;
-    - the Gohr model architecture is used;
-    - the same training procedure is used;
-    - the same number of epochs is used;
-    - a fixed held-out Gohr test partition is used;
-    - the condition has its own resumable checkpoint.
+    - Gohr's speck.make_train_data() is used;
+    - GohrAdapter supplies the Gohr model;
+    - Gohr's original training configuration is used;
+    - the same fixed held-out test partition is used;
+    - the generic D5 runner provides resumable checkpoints.
 
-The experiment is therefore a training-data-size scaling experiment,
-not a label perturbation or synthetic-data experiment.
+This is a training-data-size scaling experiment.
 """
 
 from __future__ import annotations
@@ -43,8 +32,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-
-import train_nets as tn
 
 from audit.dataset.adapters.gohr import GohrAdapter
 from audit.dataset.d5_training_data_scaling import (
@@ -60,8 +47,8 @@ from audit.dataset.d5_training_data_scaling import (
 
 NUM_ROUNDS = 5
 DEPTH = 10
-EPOCHS = 200
 
+EPOCHS = 200
 BATCH_SIZE = 5000
 
 TEST_SAMPLES = 1_000_000
@@ -75,14 +62,14 @@ TRAINING_SIZES = (
 
 DEFAULT_AUDIT_SEED = 0
 
-OUTPUT_DIRECTORY = Path(
-    "audit/dataset/evidence/d5"
-)
-
 DATASET_ID = "gohr-speck"
 
 DATASET_VERSION = (
     "original-make-train-data"
+)
+
+OUTPUT_DIRECTORY = Path(
+    "audit/dataset/evidence/d5"
 )
 
 
@@ -157,19 +144,20 @@ def validate_args(
 
 
 # ============================================================
-# Gohr adapter helpers
+# Gohr adapter
 # ============================================================
 
-def generate_gohr_partition(
-    samples: int,
-) -> tuple[np.ndarray, np.ndarray]:
+def make_adapter(
+    *,
+    seed: int,
+) -> GohrAdapter:
     """
-    Generate data exclusively through GohrAdapter.
+    Construct the dataset-specific Gohr adapter.
 
-    GohrAdapter delegates directly to speck.make_train_data().
+    No Gohr model or training logic is duplicated here.
     """
 
-    adapter = GohrAdapter(
+    return GohrAdapter(
         validation_x=None,
         validation_y=None,
         test_x=None,
@@ -178,10 +166,31 @@ def generate_gohr_partition(
         depth=DEPTH,
         epochs=EPOCHS,
         batch_size=BATCH_SIZE,
+        seed=seed,
+    )
+
+
+# ============================================================
+# Gohr dataset generation
+# ============================================================
+
+def generate_gohr_partition(
+    samples: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Generate data exclusively through GohrAdapter.
+
+    GohrAdapter delegates directly to:
+
+        speck.make_train_data()
+    """
+
+    adapter = make_adapter(
+        seed=0,
     )
 
     return adapter.generate_partition(
-        samples
+        samples,
     )
 
 
@@ -192,16 +201,14 @@ def generate_gohr_test_partition(
     """
     Generate the fixed held-out Gohr test partition.
 
-    The seed argument is retained by the generic interface for
-    provenance/stream separation. Gohr's original generator uses
-    os.urandom internally, so this seed does not control the
-    generator itself.
+    Gohr's original generator uses os.urandom(), so the audit
+    seed does not deterministically control generation.
     """
 
     del seed
 
     return generate_gohr_partition(
-        samples
+        samples,
     )
 
 
@@ -212,14 +219,15 @@ def generate_gohr_training_partition(
     """
     Generate one Gohr training partition.
 
-    The seed is not passed to the Gohr generator because the
-    original Gohr generator uses os.urandom internally.
+    The seed is retained by the generic D5 interface for
+    provenance, but is not passed to make_train_data(), because
+    Gohr's generator uses os.urandom().
     """
 
     del seed
 
     return generate_gohr_partition(
-        samples
+        samples,
     )
 
 
@@ -231,34 +239,35 @@ def make_gohr_model(
     seed: int,
 ):
     """
-    Construct the Gohr neural distinguisher.
+    Construct the Gohr model through GohrAdapter.
 
-    This follows Gohr's existing model construction:
-
-        tn.make_resnet(
-            depth=10,
-            reg_param=1e-5,
-        )
-
-    and the original Adam/MSE/accuracy compilation.
+    This deliberately does not duplicate tn.make_resnet(),
+    compilation, or other Gohr training logic here.
     """
 
-    tn.set_seed(
-        seed
+    adapter = make_adapter(
+        seed=seed,
     )
 
-    model = tn.make_resnet(
-        depth=DEPTH,
-        reg_param=1e-5,
+    return adapter.build_model()
+
+
+def make_gohr_training_callbacks(
+    seed: int,
+):
+    """
+    Return Gohr's original training callbacks.
+
+    The generic D5 runner supplies the checkpoint callback.
+    The Gohr adapter supplies the Gohr-specific learning-rate
+    schedule.
+    """
+
+    adapter = make_adapter(
+        seed=seed,
     )
 
-    model.compile(
-        optimizer="adam",
-        loss="mse",
-        metrics=["accuracy"],
-    )
-
-    return model
+    return adapter.training_callbacks()
 
 
 # ============================================================
@@ -271,11 +280,7 @@ def evaluate_gohr_model(
     test_y: np.ndarray,
 ) -> tuple[float, float]:
     """
-    Evaluate a trained Gohr model on the fixed held-out test set.
-
-    Returns
-    -------
-    test_loss, test_accuracy
+    Evaluate a trained Gohr model on the fixed test partition.
     """
 
     loss, accuracy = model.evaluate(
@@ -310,7 +315,8 @@ def main() -> None:
     print()
 
     print(
-        f"Dataset                    : {DATASET_ID}"
+        f"Dataset                    : "
+        f"{DATASET_ID}"
     )
 
     print(
@@ -364,7 +370,7 @@ def main() -> None:
     print()
 
     # --------------------------------------------------------
-    # Run D5
+    # Run generic D5 machinery
     # --------------------------------------------------------
 
     result = run_d5(
@@ -380,8 +386,15 @@ def main() -> None:
         test_dataset_factory=(
             generate_gohr_test_partition
         ),
-        model_factory=make_gohr_model,
-        evaluate_model=evaluate_gohr_model,
+        model_factory=(
+            make_gohr_model
+        ),
+        training_callbacks_factory=(
+            make_gohr_training_callbacks
+        ),
+        evaluate_model=(
+            evaluate_gohr_model
+        ),
         experiment_name=(
             "Gohr Speck training-data scaling"
         ),
@@ -433,9 +446,7 @@ def main() -> None:
         audit_seed=args.audit_seed,
     )
 
-    # --------------------------------------------------------
-    # Report
-    # --------------------------------------------------------
+    print()
 
     print_report(
         result
@@ -479,6 +490,7 @@ def main() -> None:
         )
 
     print()
+
     print("=" * 72)
     print("D5 COMPLETE")
     print("=" * 72)
