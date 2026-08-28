@@ -2,88 +2,59 @@
 Gohr Dataset Integrity Audit D1
 Exact Duplicate and Partition Overlap Census.
 
-This module applies the generic D1 audit to datasets generated
-through Gohr's original Speck training-data generator.
+This is the Gohr-specific experiment driver for the generic
+D1 Dataset Integrity audit.
 
-The runner is intentionally separate from:
+Architecture
+------------
+Generic D1 methodology:
+    audit.dataset.d1_duplicate_detection
 
-    audit/dataset/d1_duplicate_detection.py
-
-which contains the generic D1 methodology.
+Gohr-specific dataset generation:
+    audit.dataset.adapters.gohr.GohrAdapter
 
 This module is responsible only for:
 
-    1. generating the Gohr dataset partitions;
-    2. invoking the generic D1 audit;
-    3. recording Gohr-specific provenance;
-    4. writing the resulting D1 certificate.
+    1. configuring the Gohr case study;
+    2. generating Gohr partitions through GohrAdapter;
+    3. invoking the generic D1 audit;
+    4. recording Gohr-specific provenance;
+    5. writing the resulting D1 certificate.
 
 Scientific scope
 ----------------
-The audit evaluates the concrete generated dataset instance
-for exact feature duplication and exact cross-partition feature
-overlap.
+D1 evaluates the concrete generated dataset instance for:
 
-It does NOT claim:
+    - exact feature duplicates within partitions;
+    - exact feature overlap across partitions;
+    - optional exact-feature label conflicts.
+
+D1 does NOT establish:
 
     - absence of near duplicates;
     - statistical independence;
     - absence of generation-order effects;
     - absence of metadata leakage;
-    - distributional integrity;
-    - validity of the neural distinguisher itself.
-
-Those properties require separate audits.
+    - distributional equivalence;
+    - validity of the neural distinguisher.
 
 Randomness
 ----------
 Gohr's make_train_data() uses os.urandom() internally.
 
-Therefore this runner does NOT claim that a numerical random seed
-reproduces the generated dataset. The certificate explicitly
-records the randomness source as OS-level randomness.
+Therefore this experiment does not claim deterministic
+reproduction from a numerical seed.
 
-Dataset protocol
-----------------
-The historical Gohr training pipeline generates:
-
-    training   : 10^7 samples
-    evaluation : 10^6 samples
-
-The audit framework additionally supports an independent test
-partition of 10^6 samples, matching the three-partition protocol
-already used by the controlled perturbation experiments.
-
-For smoke testing, much smaller partitions can be requested.
-
-Examples
---------
-Smoke test:
-
-    python -m audit.dataset.experiments.d1_gohr_exact_census \
-        --train-samples 1000 \
-        --validation-samples 1000 \
-        --test-samples 1000
-
-Full audit:
-
-    python -m audit.dataset.experiments.d1_gohr_exact_census
-
-The default full audit uses:
-
-    train      = 10^7
-    validation = 10^6
-    test       = 10^6
+The certificate explicitly records the randomness source.
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 from typing import Any, Dict
 
-import speck as sp
+from audit.dataset.adapters.gohr import GohrAdapter
 
 from audit.dataset.d1_duplicate_detection import (
     audit_duplicates,
@@ -93,14 +64,14 @@ from audit.dataset.d1_duplicate_detection import (
 
 
 # ============================================================
-# Gohr dataset configuration
+# Gohr configuration
 # ============================================================
 
 NUM_ROUNDS = 5
 
-DEFAULT_TRAIN_SAMPLES = 10 ** 7
-DEFAULT_VALIDATION_SAMPLES = 10 ** 6
-DEFAULT_TEST_SAMPLES = 10 ** 6
+DEFAULT_TRAIN_SAMPLES = 10**7
+DEFAULT_VALIDATION_SAMPLES = 10**6
+DEFAULT_TEST_SAMPLES = 10**6
 
 DATASET_ID = "gohr-speck"
 DATASET_VERSION = "original-make-train-data"
@@ -116,28 +87,6 @@ OUTPUT_DIRECTORY = Path(
 # Dataset generation
 # ============================================================
 
-def generate_partition(
-    *,
-    samples: int,
-    num_rounds: int,
-):
-    """
-    Generate one partition using the existing Gohr generator.
-
-    No alternate implementation of make_train_data() is used.
-
-    Returns
-    -------
-    tuple
-        (features, labels)
-    """
-
-    return sp.make_train_data(
-        samples,
-        num_rounds,
-    )
-
-
 def generate_gohr_dataset(
     *,
     train_samples: int,
@@ -146,12 +95,19 @@ def generate_gohr_dataset(
     num_rounds: int,
 ) -> Dict[str, Any]:
     """
-    Generate the train, validation, and test partitions using
-    Gohr's existing make_train_data() implementation.
+    Generate the Gohr dataset partitions through GohrAdapter.
 
-    Each invocation of make_train_data() independently generates
-    a partition using os.urandom().
+    No Gohr/Speck generation logic is implemented in this module.
+    The adapter is the single dataset-specific generation boundary.
     """
+
+    adapter = GohrAdapter(
+        validation_x=None,
+        validation_y=None,
+        test_x=None,
+        test_y=None,
+        num_rounds=num_rounds,
+    )
 
     print("=" * 64)
     print("Gohr D1 Dataset Generation")
@@ -186,8 +142,8 @@ def generate_gohr_dataset(
 
     print("Generating training partition...")
 
-    train_x, train_y = generate_partition(
-        samples=train_samples,
+    train_x, train_y = adapter.generate_partition(
+        train_samples,
         num_rounds=num_rounds,
     )
 
@@ -202,9 +158,11 @@ def generate_gohr_dataset(
 
     print("Generating validation partition...")
 
-    validation_x, validation_y = generate_partition(
-        samples=validation_samples,
-        num_rounds=num_rounds,
+    validation_x, validation_y = (
+        adapter.generate_partition(
+            validation_samples,
+            num_rounds=num_rounds,
+        )
     )
 
     print(
@@ -218,8 +176,8 @@ def generate_gohr_dataset(
 
     print("Generating test partition...")
 
-    test_x, test_y = generate_partition(
-        samples=test_samples,
+    test_x, test_y = adapter.generate_partition(
+        test_samples,
         num_rounds=num_rounds,
     )
 
@@ -252,21 +210,27 @@ def build_generation_parameters(
     num_rounds: int,
 ) -> Dict[str, Any]:
     """
-    Build the generation configuration recorded in the D1
-    certificate.
+    Build the Gohr generation configuration recorded in
+    the D1 certificate.
 
-    This describes the procedure used to construct the audited
-    dataset instance; it does not claim deterministic replay.
+    This describes the generation procedure used to construct
+    the audited dataset instance. It does not claim deterministic
+    replay because Gohr uses os.urandom().
     """
 
     return {
         "generator": (
             "speck.make_train_data"
         ),
-        "num_rounds": num_rounds,
-        "train_samples": train_samples,
-        "validation_samples": validation_samples,
-        "test_samples": test_samples,
+        "adapter": (
+            "audit.dataset.adapters.gohr.GohrAdapter"
+        ),
+        "num_rounds": int(num_rounds),
+        "train_samples": int(train_samples),
+        "validation_samples": int(
+            validation_samples
+        ),
+        "test_samples": int(test_samples),
         "input_difference": {
             "left_word": "0x0040",
             "right_word": "0x0000",
@@ -289,7 +253,8 @@ def run_d1(
     output_path: Path,
 ) -> Dict[str, Any]:
     """
-    Generate the Gohr dataset instance and execute D1.
+    Generate one concrete Gohr dataset instance and execute
+    the generic D1 exact census.
     """
 
     dataset = generate_gohr_dataset(
@@ -309,7 +274,9 @@ def run_d1(
         validation=dataset["validation_x"],
         test=dataset["test_x"],
         train_labels=dataset["train_y"],
-        validation_labels=dataset["validation_y"],
+        validation_labels=dataset[
+            "validation_y"
+        ],
         test_labels=dataset["test_y"],
     )
 
@@ -329,7 +296,9 @@ def run_d1(
         generation_procedure=(
             "speck.make_train_data(n, nr)"
         ),
-        generation_parameters=generation_parameters,
+        generation_parameters=(
+            generation_parameters
+        ),
         random_seed=None,
         output_path=str(output_path),
     )
@@ -354,7 +323,8 @@ def build_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Run Dataset Integrity Audit D1 on a "
-            "Gohr-generated Speck dataset."
+            "Gohr-generated Speck dataset through "
+            "GohrAdapter."
         )
     )
 
@@ -404,8 +374,8 @@ def build_argument_parser() -> argparse.ArgumentParser:
         default=None,
         help=(
             "Optional output path for the D1 certificate. "
-            "If omitted, a filename is generated from the "
-            "dataset configuration."
+            "If omitted, a filename is generated from "
+            "the dataset configuration."
         ),
     )
 
@@ -495,18 +465,22 @@ def main() -> None:
     print("=" * 64)
     print("D1 COMPLETE")
     print("=" * 64)
+
     print(
         f"Outcome              : "
         f"{certificate['decision']['outcome']}"
     )
+
     print(
         f"Certificate          : "
         f"{output_path}"
     )
+
     print(
         f"Randomness           : "
         f"{RANDOMNESS_SOURCE}"
     )
+
     print()
 
 

@@ -85,7 +85,6 @@ class GohrAdapter:
     @property
     def feature_bits(self) -> int:
         """Number of binary features emitted by Gohr's generator."""
-
         return 64
 
     def generate_partition(
@@ -100,15 +99,19 @@ class GohrAdapter:
         This is the single canonical adapter boundary for dataset
         generation used by Dataset Integrity experiments.
 
-        Gohr's make_train_data() uses its own randomness source;
-        this method does not claim deterministic generation from
-        self.seed.
+        Gohr's make_train_data() uses os.urandom() internally.
+        Therefore self.seed does not deterministically reproduce
+        the generated partition.
         """
 
         if samples < 1:
             raise ValueError("samples must be >= 1.")
 
-        rounds = self.num_rounds if num_rounds is None else int(num_rounds)
+        rounds = (
+            self.num_rounds
+            if num_rounds is None
+            else int(num_rounds)
+        )
 
         if rounds < 1:
             raise ValueError("num_rounds must be >= 1.")
@@ -138,15 +141,17 @@ class GohrAdapter:
             "generation_parameters": {
                 "generator": self.GENERATOR_NAME,
                 "num_rounds": self.num_rounds,
+                "train_samples": int(train_samples),
+                "validation_samples": int(
+                    validation_samples
+                ),
+                "test_samples": int(test_samples),
                 "input_difference": {
                     "left_word": "0x0040",
                     "right_word": "0x0000",
                 },
                 "randomness_source": "os.urandom",
                 "deterministic_seed": None,
-                "train_samples": int(train_samples),
-                "validation_samples": int(validation_samples),
-                "test_samples": int(test_samples),
             },
             "generation_random_seed": None,
         }

@@ -54,7 +54,7 @@
       }
     }
   },
-  "generated_at_utc": "2026-08-27T06:58:06.951502+00:00",
+  "generated_at_utc": "2026-08-28T05:48:27.781311+00:00",
   "limitations": [
     "D1 addresses exact equality only. It does not establish the absence of near duplicates or statistical dependence.",
     "If the audited data were regenerated from a generation procedure, the certificate describes the generated dataset instance actually supplied to D1; it does not retroactively certify an unavailable historical dataset instance.",
@@ -79,6 +79,7 @@
       "dataset_id": "gohr-speck",
       "dataset_version": "original-make-train-data",
       "generation_parameters": {
+        "adapter": "audit.dataset.adapters.gohr.GohrAdapter",
         "deterministic_seed": null,
         "generator": "speck.make_train_data",
         "input_difference": {
