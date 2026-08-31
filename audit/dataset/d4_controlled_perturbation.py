@@ -360,17 +360,24 @@ def checkpoint_paths(
     replicate: int,
     condition: str,
 ) -> tuple[Path, Path]:
+    """Return the persistent condition directory and state path.
 
+    The first return value is intentionally a directory rather than a
+    single rolling checkpoint.  The Gohr adapter stores immutable
+    epoch checkpoints inside this directory as:
+
+        checkpoint_epoch_001.keras
+        checkpoint_epoch_002.keras
+        ...
+
+    The state sidecar records the latest completed epoch.
+    """
     directory = (
         checkpoint_root
         / f"replicate_{replicate:02d}"
         / condition
     )
-
-    return (
-        directory / "latest.keras",
-        directory / "state.json",
-    )
+    return directory, directory / "state.json"
 
 
 def load_completed_state(
@@ -404,6 +411,7 @@ def run_d4(
     bootstrap_replicates: int = 5000,
     confidence_level: float = 0.95,
     alpha: float = 0.05,
+    run_config_hash: str | None = None,
 ) -> D4Result:
     """
     Execute repeated controlled perturbation inference.
@@ -520,6 +528,7 @@ def run_d4(
             state_path=baseline_state,
             replicate=replicate_index,
             condition="baseline",
+            run_config_hash=run_config_hash,
         )
 
         baseline_predictions = baseline_adapter.predict(
@@ -609,6 +618,7 @@ def run_d4(
             state_path=perturbed_state,
             replicate=replicate_index,
             condition="perturbed",
+            run_config_hash=run_config_hash,
         )
 
         perturbed_predictions = (

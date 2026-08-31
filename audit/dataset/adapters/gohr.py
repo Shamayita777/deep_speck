@@ -24,14 +24,17 @@ from keras.callbacks import (
 from keras.models import load_model
 import json
 import os
+import numpy as np
 import speck as sp
 import train_nets as tn
 class EpochStateCallback(Callback):
-    """
-    Persist the completed epoch after each successful epoch.
+    """Atomically persist the completed epoch after its checkpoint exists.
 
-    The checkpoint itself is written by ModelCheckpoint before
-    this callback records the epoch state.
+    The callback is deliberately registered after ModelCheckpoint.  Thus a
+    state file can only advance after the corresponding immutable epoch
+    checkpoint has been written successfully.  If a process dies between
+    those two operations, the state safely points to the previous epoch and
+    that epoch is rerun rather than silently skipped.
     """
 
     def __init__(
@@ -42,55 +45,49 @@ class EpochStateCallback(Callback):
         condition: str,
         replicate: int,
         total_epochs: int,
+        config_hash: str,
+        checkpoint_directory: Path,
     ) -> None:
         super().__init__()
-
-        self.state_path = state_path
+        self.state_path = Path(state_path)
         self.seed = int(seed)
-        self.condition = condition
+        self.condition = str(condition)
         self.replicate = int(replicate)
         self.total_epochs = int(total_epochs)
+        self.config_hash = str(config_hash)
+        self.checkpoint_directory = Path(checkpoint_directory)
 
     def on_epoch_end(self, epoch, logs=None):
-
+        completed = int(epoch + 1)
+        checkpoint = self.checkpoint_directory / f"checkpoint_epoch_{completed:03d}.keras"
+        if not checkpoint.exists():
+            raise RuntimeError(
+                "Epoch state cannot advance because the expected epoch "
+                f"checkpoint does not exist: {checkpoint}"
+            )
         state = {
-            "schema_version": "1.0",
+            "schema_version": "2.0",
             "seed": self.seed,
             "condition": self.condition,
             "replicate": self.replicate,
             "total_epochs": self.total_epochs,
-            "completed_epochs": int(epoch + 1),
-            "status": (
-                "complete"
-                if epoch + 1 >= self.total_epochs
-                else "in_progress"
-            ),
+            "completed_epochs": completed,
+            "latest_checkpoint": checkpoint.name,
+            "config_hash": self.config_hash,
+            "status": "complete" if completed >= self.total_epochs else "in_progress",
+            "last_epoch_logs": {
+                key: float(value)
+                for key, value in (logs or {}).items()
+                if np.isscalar(value)
+            },
         }
+        self.state_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = self.state_path.with_suffix(".tmp")
+        with temporary.open("w", encoding="utf-8") as handle:
+            json.dump(state, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+        os.replace(self.state_path if False else temporary, self.state_path)
 
-        self.state_path.parent.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
-
-        temporary = self.state_path.with_suffix(
-            ".tmp"
-        )
-
-        with temporary.open(
-            "w",
-            encoding="utf-8",
-        ) as handle:
-            json.dump(
-                state,
-                handle,
-                indent=2,
-                sort_keys=True,
-            )
-
-        os.replace(
-            temporary,
-            self.state_path
-        )
 class GohrAdapter:
     """Adapter for Gohr's neural distinguisher and dataset generator."""
 
@@ -263,140 +260,151 @@ class GohrAdapter:
         state_path: Path | None = None,
         replicate: int = 0,
         condition: str = "unknown",
+        run_config_hash: str | None = None,
     ):
+        """Train with crash-safe epoch checkpoints and strict resume validation.
 
+        ``checkpoint_path`` is interpreted as the persistent condition
+        directory supplied by the D4 driver.  One immutable Keras model file
+        is written after every completed epoch.  ``state.json`` is advanced
+        only after that epoch checkpoint exists.
+
+        On restart, the state file and referenced checkpoint must agree with
+        the current immutable configuration.  A mismatch is a hard error;
+        the code never silently mixes runs.
+        """
         tn.set_seed(self.seed)
+        self.model_directory.mkdir(parents=True, exist_ok=True)
 
-        self.model_directory.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
+        if checkpoint_path is None:
+            checkpoint_directory = self.model_directory / "checkpoints"
+        else:
+            checkpoint_directory = Path(checkpoint_path)
+        checkpoint_directory.mkdir(parents=True, exist_ok=True)
+
+        if state_path is None:
+            state_path = checkpoint_directory / "state.json"
+        else:
+            state_path = Path(state_path)
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if run_config_hash is None:
+            raise ValueError("run_config_hash is required for resumable D4 training.")
 
         completed_epochs = 0
+        resume_checkpoint = None
 
-        # ----------------------------------------------------------
-        # Resume from checkpoint if one exists
-        # ----------------------------------------------------------
-
-        if (
-            checkpoint_path is not None
-            and state_path is not None
-            and checkpoint_path.exists()
-            and state_path.exists()
-        ):
-            with state_path.open(
-                "r",
-                encoding="utf-8",
-            ) as handle:
+        if state_path.exists():
+            with state_path.open("r", encoding="utf-8") as handle:
                 state = json.load(handle)
 
-            completed_epochs = int(
-                state.get(
-                    "completed_epochs",
-                    0,
-                )
-            )
+            expected = {
+                "seed": int(self.seed),
+                "condition": str(condition),
+                "replicate": int(replicate),
+                "total_epochs": int(self.epochs),
+                "config_hash": str(run_config_hash),
+            }
+            for key, expected_value in expected.items():
+                actual = state.get(key)
+                if actual != expected_value:
+                    raise RuntimeError(
+                        f"Refusing to resume {condition} replicate {replicate}: "
+                        f"state field {key!r} is {actual!r}, expected {expected_value!r}. "
+                        "The experiment configuration must remain immutable across sessions."
+                    )
+
+            completed_epochs = int(state.get("completed_epochs", 0))
+            if completed_epochs < 0 or completed_epochs > self.epochs:
+                raise RuntimeError("Invalid completed_epochs in D4 state.json.")
+
+            checkpoint_name = state.get("latest_checkpoint")
+            if completed_epochs > 0:
+                expected_name = f"checkpoint_epoch_{completed_epochs:03d}.keras"
+                if checkpoint_name != expected_name:
+                    raise RuntimeError(
+                        "D4 state/checkpoint mismatch: latest_checkpoint does not "
+                        "match completed_epochs."
+                    )
+                resume_checkpoint = checkpoint_directory / expected_name
+                if not resume_checkpoint.exists():
+                    raise RuntimeError(
+                        f"D4 state says epoch {completed_epochs} is complete, but "
+                        f"{resume_checkpoint} is missing. Refusing to guess."
+                    )
 
             print(
-                f"Resuming {condition} replicate "
-                f"{replicate} from epoch "
-                f"{completed_epochs}/{self.epochs}..."
+                f"Resuming {condition} replicate {replicate} from "
+                f"epoch {completed_epochs}/{self.epochs}..."
             )
-
-            self.model = load_model(
-                checkpoint_path,
-                compile=True,
-            )
-
-            # Already finished.
             if completed_epochs >= self.epochs:
-                print(
-                    f"{condition} replicate {replicate} "
-                    f"already completed."
-                )
+                self.model = load_model(resume_checkpoint, compile=True)
                 return self.model
 
+            self.model = load_model(resume_checkpoint, compile=True)
         else:
             self.model = self.build_model()
 
-        # ----------------------------------------------------------
-        # Best-model checkpoint used by the original training code
-        # ----------------------------------------------------------
+        # Keep the original Gohr learning-rate schedule.  The only training
+        # change here is crash-safe checkpointing/resumption.
+        scheduler = LearningRateScheduler(
+            tn.cyclic_lr(10, 0.002, 0.0001)
+        )
 
+        callbacks = [scheduler]
+
+        # Preserve the original best-model artifact separately.
         best_checkpoint = tn.make_checkpoint(
             str(
                 self.model_directory
                 / f"best_{self.num_rounds}r_depth{self.depth}.keras"
             )
         )
+        callbacks.insert(0, best_checkpoint)
 
-        # ----------------------------------------------------------
-        # Rolling recovery checkpoint
-        #
-        # This overwrites latest.keras every epoch.
-        # ----------------------------------------------------------
+        # Immutable per-epoch recovery checkpoint.  The epoch number is in
+        # the filename so a successful epoch is never overwritten.
+        epoch_pattern = str(
+            checkpoint_directory / "checkpoint_epoch_{epoch:03d}.keras"
+        )
+        rolling_checkpoint = ModelCheckpoint(
+            filepath=epoch_pattern,
+            save_weights_only=False,
+            save_best_only=False,
+            save_freq="epoch",
+            verbose=0,
+        )
+        callbacks.append(rolling_checkpoint)
 
-        scheduler = LearningRateScheduler(
-            tn.cyclic_lr(
-                10,
-                0.002,
-                0.0001,
+        callbacks.append(
+            EpochStateCallback(
+                state_path=state_path,
+                seed=self.seed,
+                condition=condition,
+                replicate=replicate,
+                total_epochs=self.epochs,
+                config_hash=run_config_hash,
+                checkpoint_directory=checkpoint_directory,
             )
-            )
-
-        callbacks = [
-            best_checkpoint,
-            scheduler,
-        ]
-
-        if checkpoint_path is not None:
-            checkpoint_path.parent.mkdir(
-                parents=True,
-                exist_ok=True,
-            )
-
-            rolling_checkpoint = ModelCheckpoint(
-                filepath=str(checkpoint_path),
-                save_weights_only=False,
-                save_best_only=False,
-                save_freq="epoch",
-                verbose=0,
-            )
-
-            callbacks.append(
-                rolling_checkpoint
-            )
-
-        if state_path is not None:
-            callbacks.append(
-                EpochStateCallback(
-                    state_path=state_path,
-                    seed=self.seed,
-                    condition=condition,
-                    replicate=replicate,
-                    total_epochs=self.epochs,
-                )
-            )
-
-        # ----------------------------------------------------------
-        # Continue training
-        # ----------------------------------------------------------
+        )
 
         self.history = self.model.fit(
             train_x,
             train_y,
-            validation_data=(
-                self.validation_x,
-                self.validation_y,
-            ),
+            validation_data=(self.validation_x, self.validation_y),
             epochs=self.epochs,
             initial_epoch=completed_epochs,
             batch_size=self.batch_size,
+            # Fixed order makes epoch-boundary resume independent of a
+            # process-local shuffle RNG.  The training protocol therefore
+            # remains identical across sessions once this is frozen.
+            shuffle=False,
             callbacks=callbacks,
             verbose=1,
         )
 
         return self.model
+
     # ==========================================================
     # Evaluation
     # ==========================================================

@@ -41,10 +41,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import hashlib
+from tensorflow.keras.callbacks import Callback
 from pathlib import Path
 
 import numpy as np
-from keras.callbacks import Callback
 from audit.dataset.adapters.gohr import GohrAdapter
 from audit.dataset.d4_controlled_perturbation import (
     generate_certificate,
@@ -464,6 +465,16 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--epochs",
+        type=int,
+        default=EPOCHS,
+        help=(
+            "Total training epochs. This is part of the immutable "
+            "experiment configuration and is resume-checked."
+        ),
+    )
+
+    parser.add_argument(
         "--bootstrap-replicates",
         type=int,
         default=DEFAULT_BOOTSTRAP_REPLICATES,
@@ -525,6 +536,11 @@ def validate_args(
             "--replicates must be >= 2."
         )
 
+    if args.epochs < 1:
+        raise ValueError(
+            "--epochs must be >= 1."
+        )
+
     if args.bootstrap_replicates < 1000:
         raise ValueError(
             "--bootstrap-replicates must be >= 1000."
@@ -576,6 +592,7 @@ def save_dataset_cache(
     validation_y: np.ndarray,
     test_x: np.ndarray,
     test_y: np.ndarray,
+    run_config_hash: str,
 ) -> None:
 
     paths = dataset_cache_paths(root)
@@ -611,6 +628,19 @@ def save_dataset_cache(
             final_path,
         )
 
+    metadata = {
+        "schema_version": "2.0",
+        "config_hash": run_config_hash,
+        "shapes": {name: list(np.asarray(array).shape) for name, array in arrays.items()},
+        "dtypes": {name: str(np.asarray(array).dtype) for name, array in arrays.items()},
+    }
+    metadata_path = paths["metadata"]
+    temporary_metadata = metadata_path.with_suffix(".tmp")
+    with temporary_metadata.open("w", encoding="utf-8") as handle:
+        json.dump(metadata, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    os.replace(temporary_metadata, metadata_path)
+
 def load_dataset_cache(
     root: Path,
 ):
@@ -642,6 +672,24 @@ def load_dataset_cache(
             mmap_mode="r",
         ),
     )
+
+def validate_dataset_cache(root: Path, run_config_hash: str) -> None:
+    paths = dataset_cache_paths(root)
+    with paths["metadata"].open("r", encoding="utf-8") as handle:
+        metadata = json.load(handle)
+    if metadata.get("config_hash") != run_config_hash:
+        raise RuntimeError(
+            "Cached D4 dataset configuration does not match the requested "
+            "run. Refusing to reuse or mix datasets from another experiment."
+        )
+    for name in ("train_x", "train_y", "validation_x", "validation_y", "test_x", "test_y"):
+        arr = np.load(paths[name], mmap_mode="r")
+        expected_shape = metadata.get("shapes", {}).get(name)
+        expected_dtype = metadata.get("dtypes", {}).get(name)
+        if expected_shape is None or list(arr.shape) != expected_shape or str(arr.dtype) != expected_dtype:
+            raise RuntimeError(f"Cached dataset file {name} failed integrity metadata validation.")
+
+
 # ============================================================
 # Gohr data generation
 # ============================================================
@@ -801,6 +849,7 @@ def make_adapter(
     test_y: np.ndarray,
     seed: int,
     model_directory: Path,
+    epochs: int,
 ) -> GohrAdapter:
     """
     Construct a fresh Gohr adapter for one independent fit.
@@ -819,10 +868,88 @@ def make_adapter(
         test_y=test_y,
         num_rounds=NUM_ROUNDS,
         depth=DEPTH,
-        epochs=EPOCHS,
+        epochs=epochs,
         seed=seed,
         model_directory=str(model_directory),
     )
+
+def experiment_root(args: argparse.Namespace) -> Path:
+    """Return an immutable run directory keyed by the full experiment size."""
+    return (
+        OUTPUT_DIRECTORY
+        / (
+            f"run_train{args.train_samples}"
+            f"_val{args.validation_samples}"
+            f"_test{args.test_samples}"
+            f"_rep{args.replicates}"
+            f"_epochs{args.epochs}"
+            f"_seed{args.audit_seed}"
+        )
+    )
+
+
+def build_run_config(args: argparse.Namespace) -> dict:
+    return {
+        "schema_version": "2.0",
+        "audit": "D4",
+        "perturbation": "label_shuffle",
+        "dataset_id": DATASET_ID,
+        "dataset_version": DATASET_VERSION,
+        "generator": "speck.make_train_data",
+        "num_rounds": NUM_ROUNDS,
+        "depth": DEPTH,
+        "epochs": int(args.epochs),
+        "batch_size": 5000,
+        "train_samples": int(args.train_samples),
+        "validation_samples": int(args.validation_samples),
+        "test_samples": int(args.test_samples),
+        "replicates": int(args.replicates),
+        "audit_seed": int(args.audit_seed),
+        "bootstrap_replicates": int(args.bootstrap_replicates),
+        "effect_threshold": float(args.effect_threshold),
+        "alpha": float(args.alpha),
+        "training_protocol": {
+            "optimizer": "adam",
+            "loss": "mse",
+            "learning_rate_schedule": "train_nets.cyclic_lr(10,0.002,0.0001)",
+            "shuffle": False,
+            "checkpoint_every_epoch": True,
+            "checkpoint_format": "keras_full_model",
+        },
+        "generator_randomness": "os.urandom",
+        "input_difference": {"left_word": "0x0040", "right_word": "0x0000"},
+    }
+
+
+def config_hash(config: dict) -> str:
+    payload = json.dumps(config, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def save_or_validate_manifest(root: Path, config: dict, digest: str) -> None:
+    path = root / "run_manifest.json"
+    root.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        with path.open("r", encoding="utf-8") as handle:
+            existing = json.load(handle)
+        if existing.get("config_hash") != digest or existing.get("config") != config:
+            raise RuntimeError(
+                "Existing D4 run configuration does not match the requested "
+                "configuration. Refusing to mix parameters or resume a different run."
+            )
+        return
+    payload = {
+        "schema_version": "2.0",
+        "config_hash": digest,
+        "config": config,
+    }
+    tmp = path.with_suffix(".tmp")
+    with tmp.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    os.replace(tmp, path)
+
+
 # ============================================================
 # Main
 # ============================================================
@@ -832,10 +959,12 @@ def main() -> None:
     args = parse_args()
     validate_args(args)
 
-    dataset_root = (
-        OUTPUT_DIRECTORY
-        / "persistent_data"
-    )
+    config = build_run_config(args)
+    run_digest = config_hash(config)
+    run_root = experiment_root(args)
+    save_or_validate_manifest(run_root, config, run_digest)
+
+    dataset_root = run_root / "dataset"
 
     if cached_dataset_exists(
         dataset_root
@@ -855,6 +984,7 @@ def main() -> None:
         ) = load_dataset_cache(
             dataset_root
         )
+        validate_dataset_cache(dataset_root, run_digest)
 
     else:
 
@@ -879,6 +1009,7 @@ def main() -> None:
             validation_y=validation_y,
             test_x=test_x,
             test_y=test_y,
+            run_config_hash=run_digest,
         )
 
         print(
@@ -891,7 +1022,7 @@ def main() -> None:
 
     def adapter_factory(seed: int):
         model_directory = (
-            OUTPUT_DIRECTORY
+            run_root
             / "models"
             / f"seed{seed}"
         )
@@ -903,6 +1034,7 @@ def main() -> None:
             test_y=test_y,
             seed=seed,
             model_directory=model_directory,
+            epochs=args.epochs,
         )
 
     print("=" * 72)
@@ -916,16 +1048,14 @@ def main() -> None:
         test_features=test_x,
         test_labels=test_y,
         adapter_factory=adapter_factory,
-        checkpoint_root=(
-            OUTPUT_DIRECTORY
-            / "checkpoints"
-        ),
+        checkpoint_root=(run_root / "checkpoints"),
         replicates=args.replicates,
         audit_seed=args.audit_seed,
         effect_threshold=args.effect_threshold,
         bootstrap_replicates=args.bootstrap_replicates,
         confidence_level=0.95,
         alpha=args.alpha,
+        run_config_hash=run_digest,
     )
 
     provenance = {
@@ -938,7 +1068,7 @@ def main() -> None:
             "generator": "speck.make_train_data",
             "num_rounds": NUM_ROUNDS,
             "depth": DEPTH,
-            "epochs": EPOCHS,
+            "epochs": args.epochs,
             "train_samples": args.train_samples,
             "validation_samples": args.validation_samples,
             "test_samples": args.test_samples,
@@ -973,14 +1103,7 @@ def main() -> None:
         Path(args.output)
         if args.output is not None
         else (
-            OUTPUT_DIRECTORY
-            / (
-                "d4_gohr_label_shuffle_"
-                f"{args.train_samples}_"
-                f"{args.test_samples}_"
-                f"{args.replicates}replicates_"
-                f"seed{args.audit_seed}.json"
-            )
+            run_root / "d4_gohr_label_shuffle.json"
         )
     )
 
