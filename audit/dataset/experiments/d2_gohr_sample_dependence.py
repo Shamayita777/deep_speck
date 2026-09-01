@@ -39,10 +39,10 @@ from audit.dataset.d2_sample_dependence import (
     run_d2,
 )
 
-DEFAULT_TRAIN_SAMPLES = 1_000_000
+DEFAULT_TRAIN_SAMPLES = 10_000_000
 DEFAULT_VALIDATION_SAMPLES = 1_000_000
 DEFAULT_TEST_SAMPLES = 1_000_000
-DEFAULT_CALIBRATION_REPLICATES = 10
+DEFAULT_CALIBRATION_REPLICATES = 20
 DEFAULT_CALIBRATION_FRACTIONS = (0.001, 0.005, 0.01, 0.05)
 DEFAULT_CALIBRATION_PAIRS = 20_000
 DEFAULT_CALIBRATION_PERMUTATIONS = 200
@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--multivariate-permutations", type=int, default=DEFAULT_MULTIVARIATE_PERMUTATIONS)
     parser.add_argument("--audit-seed", type=int, default=0)
     parser.add_argument("--calibrate", action="store_true", help="Run controlled duplicate/lag-copy sensitivity calibration.")
-    parser.add_argument("--calibration-replicates", type=int, default=DEFAULT_CALIBRATION_REPLICATES)
+    parser.add_argument("--calibration-replicates", type=int, default=DEFAULT_CALIBRATION_REPLICATES, help="Independent sensitivity-calibration replicates (default: 20).")
     parser.add_argument("--calibration-pairs", type=int, default=DEFAULT_CALIBRATION_PAIRS)
     parser.add_argument("--calibration-permutations", type=int, default=DEFAULT_CALIBRATION_PERMUTATIONS)
     parser.add_argument("--output", type=str, default=None)
@@ -158,8 +158,6 @@ def main() -> None:
     adapter = GohrD2Adapter(num_rounds=5)
     partitions: dict[str, np.ndarray] = {}
     structured_views: dict[str, dict[str, Any]] = {}
-    labels: dict[str, np.ndarray] = {}
-
     for name, count in (
         ("train", args.train_samples),
         ("validation", args.validation_samples),
@@ -168,7 +166,6 @@ def main() -> None:
         print(f"Generating {name}: {count:,} samples...")
         x, y, views = adapter.generate_partition(count)
         partitions[name] = x
-        labels[name] = y
         for view_name, spec in views.items():
             structured_views[f"{name}:{view_name}"] = spec
         print(f"  shape={x.shape}, dtype={x.dtype}")

@@ -4,17 +4,19 @@ Exact Duplicate and Partition Overlap Census.
 
 D1 audits a concrete dataset instance for:
 
-1. exact duplicate samples within each partition;
-2. exact feature overlap between partitions;
-3. optional exact-feature label conflicts.
+1. dataset schema consistency across audited partitions;
+2. exact duplicate samples within each partition;
+3. exact feature overlap between compatible partitions;
+4. optional exact-feature label conflicts.
 
 Scientific scope
 ----------------
 D1 answers the narrow question:
 
-    "Does the audited dataset instance contain exact duplicate
-     feature representations within partitions or exact feature
-     overlap across audited partitions?"
+    "Does the audited dataset instance have a consistent feature/label
+     schema, and does it contain exact duplicate feature representations
+     within partitions or exact feature overlap across compatible audited
+     partitions?"
 
 D1 does NOT establish:
 
@@ -55,6 +57,146 @@ from .common import (
     make_certificate,
     write_certificate,
 )
+
+
+# ============================================================
+# Dataset schema validation
+# ============================================================
+
+def _sample_schema(array: np.ndarray) -> Dict[str, Any]:
+    """Describe the computational schema of one dataset partition."""
+
+    array = np.asarray(array)
+    if array.ndim < 1:
+        raise ValueError("Dataset must contain a sample dimension.")
+    if array.shape[0] < 1:
+        raise ValueError("Dataset must contain at least one sample.")
+
+    return {
+        "dtype": str(array.dtype),
+        "ndim": int(array.ndim),
+        "sample_shape": list(array.shape[1:]),
+    }
+
+
+def validate_dataset_schema(
+    partitions: Mapping[str, np.ndarray],
+    labels: Optional[Mapping[str, np.ndarray]] = None,
+    *,
+    expected_feature_schema: Optional[Mapping[str, Any]] = None,
+    expected_label_schema: Optional[Mapping[str, Any]] = None,
+    representation_convention: Optional[str] = None,
+    feature_encoding: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Validate dataset schema before exact-equality census.
+
+    The validation has two levels:
+
+    1. All supplied feature partitions must use the same computational
+       schema (dtype, dimensionality, and per-sample shape).
+    2. If an expected schema is supplied, every partition must match it.
+
+    Representation convention and feature encoding are semantic metadata and
+    cannot safely be inferred from NumPy arrays alone. They are therefore
+    recorded only when explicitly supplied by the dataset-specific driver.
+
+    Label schema is checked analogously when labels are supplied.
+    """
+
+    if not partitions:
+        raise ValueError("At least one feature partition is required.")
+
+    feature_schemas = {
+        name: _sample_schema(array)
+        for name, array in partitions.items()
+    }
+
+    reference_name = next(iter(feature_schemas))
+    reference = feature_schemas[reference_name]
+
+    cross_partition_mismatches: Dict[str, Dict[str, Any]] = {}
+    for name, schema in feature_schemas.items():
+        mismatches = {
+            key: {"reference": reference[key], "observed": schema[key]}
+            for key in ("dtype", "ndim", "sample_shape")
+            if schema[key] != reference[key]
+        }
+        if mismatches:
+            cross_partition_mismatches[name] = mismatches
+
+    expected_feature_mismatches: Dict[str, Dict[str, Any]] = {}
+    if expected_feature_schema is not None:
+        for name, schema in feature_schemas.items():
+            mismatches = {
+                key: {
+                    "expected": expected_feature_schema[key],
+                    "observed": schema[key],
+                }
+                for key in ("dtype", "ndim", "sample_shape")
+                if key in expected_feature_schema
+                and schema[key] != expected_feature_schema[key]
+            }
+            if mismatches:
+                expected_feature_mismatches[name] = mismatches
+
+    label_schemas: Dict[str, Dict[str, Any]] = {}
+    label_mismatches: Dict[str, Dict[str, Any]] = {}
+    if labels is not None:
+        for name, feature_array in partitions.items():
+            if name not in labels:
+                raise ValueError(f"Missing labels for partition {name!r}.")
+            label_array = np.asarray(labels[name])
+            if label_array.ndim < 1:
+                raise ValueError(f"Labels for partition {name!r} must have a sample dimension.")
+            if label_array.shape[0] != np.asarray(feature_array).shape[0]:
+                raise ValueError(
+                    f"Label/sample count mismatch for partition {name!r}: "
+                    f"{label_array.shape[0]} labels for {np.asarray(feature_array).shape[0]} samples."
+                )
+            label_schemas[name] = {
+                "dtype": str(label_array.dtype),
+                "ndim": int(label_array.ndim),
+                "sample_shape": list(label_array.shape[1:]),
+            }
+
+        label_reference = label_schemas[reference_name]
+        for name, schema in label_schemas.items():
+            mismatches = {
+                key: {"reference": label_reference[key], "observed": schema[key]}
+                for key in ("dtype", "ndim", "sample_shape")
+                if schema[key] != label_reference[key]
+            }
+            if mismatches:
+                label_mismatches[name] = mismatches
+
+        if expected_label_schema is not None:
+            for name, schema in label_schemas.items():
+                mismatches = {
+                    key: {
+                        "expected": expected_label_schema[key],
+                        "observed": schema[key],
+                    }
+                    for key in ("dtype", "ndim", "sample_shape")
+                    if key in expected_label_schema
+                    and schema[key] != expected_label_schema[key]
+                }
+                if mismatches:
+                    label_mismatches[name] = mismatches
+
+    valid = not cross_partition_mismatches and not expected_feature_mismatches and not label_mismatches
+
+    return {
+        "valid": bool(valid),
+        "features": feature_schemas,
+        "labels": label_schemas,
+        "cross_partition_feature_mismatches": cross_partition_mismatches,
+        "expected_feature_schema": dict(expected_feature_schema) if expected_feature_schema is not None else None,
+        "expected_feature_mismatches": expected_feature_mismatches,
+        "expected_label_schema": dict(expected_label_schema) if expected_label_schema is not None else None,
+        "label_mismatches": label_mismatches,
+        "representation_convention": representation_convention,
+        "feature_encoding": feature_encoding,
+    }
 
 
 # ============================================================
@@ -267,6 +409,11 @@ def audit_duplicates(
     train_labels: Optional[np.ndarray] = None,
     validation_labels: Optional[np.ndarray] = None,
     test_labels: Optional[np.ndarray] = None,
+    *,
+    expected_feature_schema: Optional[Mapping[str, Any]] = None,
+    expected_label_schema: Optional[Mapping[str, Any]] = None,
+    representation_convention: Optional[str] = None,
+    feature_encoding: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Execute Dataset Integrity Audit D1.
@@ -301,17 +448,38 @@ def audit_duplicates(
     train = np.asarray(train)
     validation = np.asarray(validation)
 
-    if train.ndim < 1:
-        raise ValueError(
-            "Training dataset must contain a sample dimension."
-        )
+    partitions: Dict[str, np.ndarray] = {
+        "train": train,
+        "validation": validation,
+    }
+    if test is not None:
+        partitions["test"] = np.asarray(test)
 
-    if validation.ndim < 1:
-        raise ValueError(
-            "Validation dataset must contain a sample dimension."
-        )
+    label_partitions: Optional[Dict[str, np.ndarray]] = None
+    supplied_labels = {
+        "train": train_labels,
+        "validation": validation_labels,
+        "test": test_labels,
+    }
+    if any(value is not None for value in supplied_labels.values()):
+        label_partitions = {}
+        for name in partitions:
+            value = supplied_labels[name]
+            if value is None:
+                raise ValueError(f"Labels must be supplied for every audited partition; missing {name!r}.")
+            label_partitions[name] = np.asarray(value)
+
+    schema = validate_dataset_schema(
+        partitions,
+        label_partitions,
+        expected_feature_schema=expected_feature_schema,
+        expected_label_schema=expected_label_schema,
+        representation_convention=representation_convention,
+        feature_encoding=feature_encoding,
+    )
 
     results: Dict[str, Any] = {
+        "schema": schema,
         "audit_id": "D1",
         "audit_name": (
             "Exact Duplicate and Partition Overlap Census"
@@ -324,13 +492,24 @@ def audit_duplicates(
                 validation
             ),
         },
-        "partition_overlap": {
-            "train_validation": partition_overlap(
-                train,
-                validation,
-            ),
-        },
+        "partition_overlap": {},
     }
+
+    # Exact cross-partition comparison is meaningful only when the
+    # computational schemas of the two partitions agree. If they do not,
+    # record the comparison as unavailable rather than manufacturing a
+    # misleading zero-overlap result from incompatible representations.
+    feature_schema_pairs = [("train", "validation")]
+    if test is not None:
+        feature_schema_pairs.extend([("train", "test"), ("validation", "test")])
+
+    for left, right in feature_schema_pairs:
+        if schema["features"][left] == schema["features"][right]:
+            results["partition_overlap"][f"{left}_{right}"] = partition_overlap(
+                partitions[left], partitions[right]
+            )
+        else:
+            results["partition_overlap"][f"{left}_{right}"] = None
 
     # --------------------------------------------------------
     # Optional test partition
@@ -349,16 +528,7 @@ def audit_duplicates(
             partition_duplicate_statistics(test)
         )
 
-        results["partition_overlap"].update({
-            "train_test": partition_overlap(
-                train,
-                test,
-            ),
-            "validation_test": partition_overlap(
-                validation,
-                test,
-            ),
-        })
+
 
     # --------------------------------------------------------
     # Optional label diagnostics
@@ -428,6 +598,7 @@ def evaluate_d1(
     exact_partition_overlap = sum(
         int(value)
         for value in results["partition_overlap"].values()
+        if value is not None
     )
 
     label_conflict_groups = sum(
@@ -443,8 +614,11 @@ def evaluate_d1(
         for partition in results["partitions"].values()
     )
 
+    schema_valid = bool(results.get("schema", {}).get("valid", True))
+
     if (
-        duplicate_samples == 0
+        schema_valid
+        and duplicate_samples == 0
         and exact_partition_overlap == 0
     ):
         outcome = "PASS"
@@ -458,10 +632,12 @@ def evaluate_d1(
             exact_partition_overlap
         ),
         "label_conflict_groups": label_conflict_groups,
+        "schema_valid": schema_valid,
         "rule": (
-            "PASS iff every audited partition contains zero "
-            "exact duplicate samples and every audited partition "
-            "pair contains zero exact feature overlap."
+            "PASS iff all audited feature/label schemas are consistent, "
+            "every audited partition contains zero exact duplicate samples, "
+            "and every compatible audited partition pair contains zero "
+            "exact feature overlap."
         ),
     }
 
@@ -531,6 +707,9 @@ def build_d1_certificate(
             ),
             "exact_duplicate_detection": True,
             "exact_partition_overlap_detection": True,
+            "schema_consistency_check": True,
+            "representation_convention": results["schema"].get("representation_convention"),
+            "feature_encoding": results["schema"].get("feature_encoding"),
             "label_conflict_diagnostic": (
                 any(
                     "label_consistency" in partition
@@ -553,6 +732,7 @@ def build_d1_certificate(
         ),
         outcome=decision["outcome"],
         findings={
+            "schema": results["schema"],
             "duplicate_samples": decision[
                 "duplicate_samples"
             ],
@@ -583,6 +763,14 @@ def build_d1_certificate(
         },
         provenance=provenance,
         limitations=[
+            (
+                "D1 requires consistent computational schema across audited partitions "
+                "before exact duplicate/overlap results are considered valid."
+            ),
+            (
+                "Representation convention and feature encoding are semantic properties "
+                "and are enforced only when explicitly supplied by the dataset-specific driver."
+            ),
             (
                 "D1 addresses exact equality only. It does not "
                 "establish the absence of near duplicates or "
@@ -682,6 +870,14 @@ def print_report(
             )
 
         print()
+
+    print("[Dataset schema]")
+
+    schema = results.get("schema", {})
+    print(f"  Valid                  : {schema.get('valid')}")
+    print(f"  Representation        : {schema.get('representation_convention')}")
+    print(f"  Feature encoding      : {schema.get('feature_encoding')}")
+    print()
 
     print("[Exact partition overlap]")
 

@@ -153,10 +153,11 @@ class GohrD2Adapter:
         """Return Gohr case-study assumptions; these do not enter generic D2."""
         return {
             "feature_bits": self.FEATURE_BITS,
-            "pairwise_hamming_reference": "Binomial(64, 0.5) diagnostic null for bit-level pairwise Hamming structure",
+            "pairwise_hamming_reference": "Binomial(64, 0.5) nominal Gohr diagnostic reference; confirmatory D2 Hamming tests condition on observed per-bit marginals",
             "structured_collision_reference": "Independent uniform finite-domain collision model",
             "generator": "speck.make_train_data",
             "num_rounds": self.num_rounds,
             "randomness_source": "os.urandom",
-            "null_model_status": "case-study assumption; not a universal independence theorem",
+            "null_model_status": "case-study assumptions; these are explicit statistical null models, not universal independence theorems",
+            "audit_seed_semantics": "audit_seed controls D2 sampling and statistical resampling only; dataset generation remains OS-randomized",
         }

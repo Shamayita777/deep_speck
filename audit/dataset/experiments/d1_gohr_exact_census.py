@@ -278,6 +278,15 @@ def run_d1(
             "validation_y"
         ],
         test_labels=dataset["test_y"],
+        representation_convention=(
+            "canonical feature array returned by "
+            "speck.make_train_data"
+        ),
+        feature_encoding=(
+            "canonical Gohr feature encoding returned by "
+            "speck.make_train_data; no representation conversion "
+            "is applied by the D1 driver"
+        ),
     )
 
     generation_parameters = (
