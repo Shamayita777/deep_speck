@@ -3,16 +3,21 @@ D2 — Sample Dependence Audit.
 
 Generic Dataset Integrity implementation.
 
-D2 is distinct from D1. D1 owns exact row duplication and exact partition
-overlap. D2 evaluates non-exact repetition and dependence structures that can
-remain when exact-equality tests pass.
+D2 is intentionally distinct from D1. D1 owns exact row duplication and
+exact partition overlap. D2 evaluates dependence structures that can remain
+when exact equality tests pass.
 
-The confirmatory dependence tests are conditional on the supplied finite
-dataset instance.  Wherever possible, the null preserves the observed
-marginal feature distribution rather than assuming perfectly balanced bits.
-The Gohr adapter may additionally provide a nominal Binomial(64, 0.5)
-reference as a case-study diagnostic; that nominal reference is not used as a
-universal theorem of independence.
+Layers:
+    D2.1  Near-duplicate structure.
+    D2.2  Pairwise and serial/lagged dependence.
+    D2.3  Multivariate pair dependence using a fixed classifier and an
+          exact test-set label-permutation null.
+    D2.4  Adapter-supplied structured/semantic repetition.
+    D2.5  Controlled fault-injection sensitivity calibration.
+
+The implementation is evidence-bounded: PASS is not a proof of mutual
+independence. It means that no practically material violation was detected
+within the declared null models, tests, thresholds, and measured sensitivity.
 """
 from __future__ import annotations
 
@@ -74,30 +79,53 @@ def binomial_reference_distribution(n_bits: int, p: float = 0.5) -> np.ndarray:
     return pmf / pmf.sum()
 
 
-def independent_hamming_reference(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    """Plug-in Hamming null preserving empirical per-bit marginals.
+def empirical_independent_hamming_pmf(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """Construct the independent-row Hamming null from observed bit marginals.
 
-    Under this diagnostic null, rows are independent and each bit uses its
-    observed marginal probability.  The resulting Poisson-binomial model is
-    therefore a *model-based approximation*: it also assumes independence of
-    mismatch indicators across bit positions. It is not a universal null for
-    arbitrary within-row bit dependence.
+    For each bit position k, let p_a[k] and p_b[k] be the observed marginal
+    probabilities of one in the two endpoint populations. Under independent
+    rows, the mismatch indicator at bit k has probability
+
+        q_k = p_a(1-p_b) + (1-p_a)p_b.
+
+    The Hamming distance is therefore modeled as a Poisson-binomial sum of
+    independent, non-identically distributed Bernoulli(q_k) variables.
+
+    This is the confirmatory D2 null. The Binomial(64, 0.5) reference remains
+    available separately as a case-study diagnostic only.
     """
-    a = _binary(a, "a", a.shape[1])
-    b = _binary(b, "b", b.shape[1])
-    if a.shape[1] != b.shape[1]:
-        raise ValueError("a and b must have the same feature width.")
-    pa = a.mean(axis=0, dtype=np.float64)
-    pb = b.mean(axis=0, dtype=np.float64)
-    mismatch = pa * (1.0 - pb) + (1.0 - pa) * pb
+    a = np.asarray(a, dtype=np.float64)
+    b = np.asarray(b, dtype=np.float64)
+    if a.ndim != 2 or b.ndim != 2 or a.shape[1] != b.shape[1]:
+        raise ValueError("a and b must be 2-D arrays with the same feature count.")
+    if len(a) < 1 or len(b) < 1:
+        raise ValueError("a and b must each contain at least one sample.")
+    pa = a.mean(axis=0)
+    pb = b.mean(axis=0)
+    q = pa * (1.0 - pb) + (1.0 - pa) * pb
     pmf = np.array([1.0], dtype=np.float64)
-    for q in mismatch:
-        pmf = np.convolve(pmf, np.array([1.0 - q, q], dtype=np.float64))
+    for prob in q:
+        pmf = np.convolve(pmf, np.array([1.0 - prob, prob], dtype=np.float64))
+    pmf = np.maximum(pmf, 0.0)
     return pmf / pmf.sum()
 
 
+def fisher_combine_pvalues(p_values: Sequence[float]) -> float:
+    """Combine independent replicate p-values with Fisher's method."""
+    from scipy.stats import chi2
+
+    p = np.asarray(p_values, dtype=np.float64)
+    if p.ndim != 1 or len(p) == 0:
+        raise ValueError("At least one p-value is required.")
+    if np.any(~np.isfinite(p)) or np.any((p < 0) | (p > 1)):
+        raise ValueError("p-values must be finite and lie in [0, 1].")
+    clipped = np.clip(p, np.finfo(float).tiny, 1.0)
+    statistic = float(-2.0 * np.sum(np.log(clipped)))
+    return float(chi2.sf(statistic, 2 * len(clipped)))
+
+
 def _sample_disjoint_pairs(n: int, count: int, rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
-    """Sample unordered pairs with no repeated endpoint in one replicate."""
+    """Sample pairs with no repeated endpoint within one replicate."""
     if n < 2 or count < 1:
         raise ValueError("Need n >= 2 and count >= 1.")
     if 2 * count > n:
@@ -107,13 +135,11 @@ def _sample_disjoint_pairs(n: int, count: int, rng: np.random.Generator) -> tupl
 
 
 def _sample_cross_pairs(n_a: int, n_b: int, count: int, rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
-    """Sample cross-partition pairs without endpoint reuse within a replicate."""
+    """Sample cross-partition pairs without reusing an index within a replicate."""
     if n_a < 1 or n_b < 1 or count < 1:
         raise ValueError("Invalid cross-partition sampling request.")
     if count > min(n_a, n_b):
-        raise ValueError(
-            f"Cannot sample {count:,} unique cross pairs from partitions of sizes {n_a:,} and {n_b:,}."
-        )
+        raise ValueError(f"Cannot sample {count:,} unique cross pairs from partitions of sizes {n_a:,} and {n_b:,}.")
     return (
         rng.choice(n_a, size=count, replace=False).astype(np.int64),
         rng.choice(n_b, size=count, replace=False).astype(np.int64),
@@ -121,32 +147,27 @@ def _sample_cross_pairs(n_a: int, n_b: int, count: int, rng: np.random.Generator
 
 
 def _sample_disjoint_lag_pairs(n: int, lag: int, count: int, rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
-    """Sample vertex-disjoint (i, i+lag) pairs efficiently and exactly within the matching bound."""
+    """Sample lagged pairs with no repeated endpoint within one replicate."""
     if lag < 1 or lag >= n:
         raise ValueError("lag must satisfy 1 <= lag < number of samples.")
-    candidate_blocks: list[np.ndarray] = []
-    max_pairs = 0
-    for r in range(min(lag, n)):
-        length = 1 + (n - 1 - r) // lag
-        block_count = length // 2
-        if block_count:
-            # Path vertices are r, r+lag, ...; taking every other vertex gives
-            # a maximum vertex-disjoint matching on that path.
-            candidate_blocks.append(r + 2 * lag * np.arange(block_count, dtype=np.int64))
-            max_pairs += block_count
-    if count > max_pairs:
-        raise ValueError(
-            f"Cannot sample {count:,} disjoint lag-{lag} pairs from {n:,} samples; maximum is {max_pairs:,}."
-        )
-    candidates = np.concatenate(candidate_blocks) if candidate_blocks else np.empty(0, dtype=np.int64)
-    rng.shuffle(candidates)
-    chosen = candidates[:count]
-    return chosen, chosen + lag
+    starts = rng.permutation(n - lag)
+    chosen: list[int] = []
+    used = np.zeros(n, dtype=np.bool_)
+    for start in starts:
+        end = int(start + lag)
+        if not used[start] and not used[end]:
+            chosen.append(int(start))
+            used[start] = True
+            used[end] = True
+            if len(chosen) == count:
+                break
+    if len(chosen) < count:
+        raise ValueError(f"Could not construct {count:,} disjoint lag-{lag} pairs from {n:,} samples.")
+    starts = np.asarray(chosen, dtype=np.int64)
+    return starts, starts + lag
 
 
 def hamming_distances(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    if len(a) != len(b):
-        raise ValueError("Pair arrays must have equal length.")
     return np.count_nonzero(a != b, axis=1).astype(np.int16, copy=False)
 
 
@@ -165,14 +186,21 @@ def sample_lagged_distances(x: np.ndarray, lag: int, count: int, rng: np.random.
     return hamming_distances(x[i], x[j])
 
 
-def _merge_expected_bins(obs: np.ndarray, exp: np.ndarray, minimum: float = 5.0) -> tuple[np.ndarray, np.ndarray]:
-    mo: list[float] = []
-    me: list[float] = []
-    ro = re = 0.0
+def _chi_square_gof(distances: np.ndarray, pmf: np.ndarray, alpha: float) -> dict[str, Any]:
+    from scipy.stats import chi2
+
+    obs = np.bincount(distances.astype(np.int64), minlength=len(pmf)).astype(float)
+    exp = pmf * len(distances)
+    keep = exp > 0
+    obs, exp = obs[keep], exp[keep]
+
+    # Pearson's approximation requires adequate expected counts. Merge
+    # adjacent categories until every reported bin has expected count >= 5.
+    mo, me, ro, re = [], [], 0.0, 0.0
     for o, e in zip(obs, exp):
-        ro += float(o)
-        re += float(e)
-        if re >= minimum:
+        ro += o
+        re += e
+        if re >= 5:
             mo.append(ro)
             me.append(re)
             ro = re = 0.0
@@ -183,20 +211,11 @@ def _merge_expected_bins(obs: np.ndarray, exp: np.ndarray, minimum: float = 5.0)
         else:
             mo.append(ro)
             me.append(re)
-    return np.asarray(mo), np.asarray(me)
 
-
-def _chi_square_gof(distances: np.ndarray, pmf: np.ndarray, alpha: float) -> dict[str, Any]:
-    from scipy.stats import chi2
-    obs = np.bincount(distances.astype(np.int64), minlength=len(pmf)).astype(float)
-    exp = pmf * len(distances)
-    keep = exp > 0
-    obs, exp = obs[keep], exp[keep]
-    obs, exp = _merge_expected_bins(obs, exp)
-    if len(exp) < 2:
+    if len(me) < 2:
         raise ValueError("Reference distribution produced fewer than two usable chi-square bins.")
-    stat = float(np.sum((obs - exp) ** 2 / exp))
-    dof = len(exp) - 1
+    stat = float(np.sum((np.asarray(mo) - np.asarray(me)) ** 2 / np.asarray(me)))
+    dof = len(me) - 1
     p = float(chi2.sf(stat, dof))
     return {
         "statistic": stat,
@@ -204,8 +223,8 @@ def _chi_square_gof(distances: np.ndarray, pmf: np.ndarray, alpha: float) -> dic
         "p_value": p,
         "alpha": alpha,
         "reject": p < alpha,
-        "minimum_expected_count": float(exp.min()),
-        "merged_bins": len(exp),
+        "minimum_expected_count": float(min(me)),
+        "merged_bins": len(me),
     }
 
 
@@ -216,27 +235,20 @@ def tvd(distances: np.ndarray, pmf: np.ndarray) -> float:
 
 
 def bootstrap_tvd(distances: np.ndarray, pmf: np.ndarray, rng: np.random.Generator, reps: int) -> dict[str, Any]:
-    """Percentile bootstrap for the categorical TVD statistic.
-
-    This is a pair-level Monte Carlo uncertainty approximation.  Pair
-    endpoints are disjoint within each sampling replicate; the bootstrap is
-    therefore an approximation rather than an exact finite-population CI.
-    """
-    if reps < 100:
-        raise ValueError("bootstrap_replicates must be >= 100.")
+    """Percentile bootstrap uncertainty for the empirical TVD statistic."""
     empirical_counts = np.bincount(distances.astype(np.int64), minlength=len(pmf)).astype(float)
     empirical = empirical_counts / len(distances)
     draws = rng.multinomial(len(distances), empirical, size=reps) / len(distances)
     values = 0.5 * np.abs(draws - pmf).sum(axis=1)
-    lo = float(np.quantile(values, 0.025))
-    hi = float(np.quantile(values, 0.975))
+    lo = float(np.quantile(values, (1 - TVD_CONFIDENCE_LEVEL) / 2))
+    hi = float(np.quantile(values, 1 - (1 - TVD_CONFIDENCE_LEVEL) / 2))
     return {
         "confidence_level": TVD_CONFIDENCE_LEVEL,
         "replicates": reps,
         "lower": lo,
         "upper": hi,
         "within_threshold": hi <= TVD_THRESHOLD,
-        "interpretation": "percentile pair-level bootstrap approximation for observed TVD",
+        "interpretation": "percentile bootstrap uncertainty interval for the observed TVD statistic",
     }
 
 
@@ -260,30 +272,22 @@ def summarize_distances(
     }
 
 
-def _fisher_combine(p_values: Sequence[float]) -> dict[str, Any]:
-    from scipy.stats import chi2
-    p = np.clip(np.asarray(p_values, dtype=float), np.finfo(float).tiny, 1.0)
-    stat = float(-2.0 * np.sum(np.log(p)))
-    dof = int(2 * len(p))
-    combined = float(chi2.sf(stat, dof))
-    return {"method": "Fisher combination across independent Monte Carlo replicates", "statistic": stat, "degrees_of_freedom": dof, "p_value": combined}
-
-
-def _aggregate(results: Sequence[Mapping[str, Any]], *, alpha: float) -> dict[str, Any]:
+def _aggregate(results: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     if not results:
         raise ValueError("At least one replicate is required.")
-    combined = _fisher_combine([float(r["chi_square"]["p_value"]) for r in results])
+    p_values = [float(r["chi_square"]["p_value"]) for r in results]
+    combined_p = fisher_combine_pvalues(p_values)
     return {
         "replicate_count": len(results),
         "replicate_type": "independent Monte Carlo sampling replicates conditional on one audited dataset instance",
         "replicates": [dict(r) for r in results],
         "max_tvd": max(float(r["tvd"]) for r in results),
         "max_tvd_ci_upper": max(float(r["tvd_uncertainty"]["upper"]) for r in results),
-        "combined_p_value": combined["p_value"],
-        "combined_p_value_method": combined["method"],
+        "min_p_value": min(p_values),
+        "combined_p_value": combined_p,
+        "combined_p_value_method": "Fisher combination across independent Monte Carlo sampling replicates",
         "practical_pass": all(bool(r["tvd_uncertainty"]["within_threshold"]) for r in results),
-        "statistical_warning": combined["p_value"] < alpha,
-        "alpha": alpha,
+        "statistical_warning": combined_p < float(results[0]["chi_square"]["alpha"]),
     }
 
 
@@ -295,33 +299,40 @@ def near_duplicate_summary(
     rng: np.random.Generator,
     practical_relative_excess: float = 0.25,
     alpha: float = FAMILYWISE_ALPHA,
-    independent_reference_pmf: np.ndarray | None = None,
 ) -> dict[str, Any]:
-    """Summarize near-duplicate rates against an explicit independent-row null."""
+    """Summarize near-duplicate rates, preserving replicate structure."""
     from scipy.stats import binom
+
     if not distance_replicates:
         raise ValueError("At least one distance replicate is required.")
     distances = np.concatenate(distance_replicates)
     total = len(distances)
-    pmf = validate_reference_pmf(independent_reference_pmf if independent_reference_pmf is not None else reference_pmf, len(reference_pmf) - 1)
     out: dict[str, Any] = {}
+
     for r in radii:
-        if r < 0 or r >= len(pmf):
+        if r < 0 or r >= len(reference_pmf):
             raise ValueError("Near-duplicate radius outside feature space.")
         observed = int(np.count_nonzero(distances <= r))
-        q = float(pmf[: r + 1].sum())
+        q = float(reference_pmf[: r + 1].sum())
         expected = total * q
         observed_rate = observed / total
         excess_ratio = float(observed / expected) if expected > 0 else (1.0 if observed == 0 else float("inf"))
+
+        # Model-based one-sided excess diagnostic. It is reported transparently
+        # but the primary practical decision is based on the observed excess.
         p = float(binom.sf(observed - 1, total, q)) if q > 0 else (1.0 if observed == 0 else 0.0)
+
+        # Bootstrap the empirical near-duplicate rate. This quantifies sampling
+        # uncertainty without treating the repeated audit replicates as new data.
+        bootstrap_rates = np.empty(bootstrap_replicates, dtype=float)
         replicate_rates = np.asarray([np.mean(d <= r) for d in distance_replicates], dtype=float)
-        # Bootstrap the pooled Bernoulli event count rather than resampling
-        # only the small number of audit replicates.  This uses the same
-        # pair-level approximation as bootstrap_tvd and preserves the actual
-        # number of observed pair trials.
-        boot = rng.binomial(total, observed_rate, size=bootstrap_replicates) / total
-        rate_lo, rate_hi = float(np.quantile(boot, 0.025)), float(np.quantile(boot, 0.975))
+        for k in range(bootstrap_replicates):
+            resampled = rng.choice(replicate_rates, size=len(replicate_rates), replace=True)
+            bootstrap_rates[k] = float(np.mean(resampled))
+        rate_lo = float(np.quantile(bootstrap_rates, (1 - TVD_CONFIDENCE_LEVEL) / 2))
+        rate_hi = float(np.quantile(bootstrap_rates, 1 - (1 - TVD_CONFIDENCE_LEVEL) / 2))
         practical = excess_ratio > (1.0 + practical_relative_excess)
+
         out[str(r)] = {
             "observed_pairs": observed,
             "sampled_pairs": total,
@@ -331,16 +342,26 @@ def near_duplicate_summary(
             "excess_ratio": excess_ratio,
             "practical_relative_excess_threshold": practical_relative_excess,
             "one_sided_excess_p_value": p,
-            "bootstrap_rate_uncertainty": {"confidence_level": TVD_CONFIDENCE_LEVEL, "lower": rate_lo, "upper": rate_hi, "replicates": bootstrap_replicates, "unit": "audit-replicate rate"},
+            "bootstrap_rate_uncertainty": {
+                "confidence_level": TVD_CONFIDENCE_LEVEL,
+                "lower": rate_lo,
+                "upper": rate_hi,
+                "replicates": bootstrap_replicates,
+                "unit": "audit replicate rate",
+            },
             "statistically_excessive": p < alpha,
             "practically_excessive": practical,
-            "reference_basis": "empirical independent-row Hamming null preserving observed per-bit marginals",
         }
     return out
 
 
-def analyze_structured_views(structured_views: Mapping[str, Mapping[str, Any]], alpha: float, practical_relative_excess: float = 0.25) -> dict[str, Any]:
+def analyze_structured_views(
+    structured_views: Mapping[str, Mapping[str, Any]],
+    alpha: float,
+    practical_relative_excess: float = 0.25,
+) -> dict[str, Any]:
     from scipy.stats import poisson
+
     results = {}
     for name, spec in structured_views.items():
         values = np.asarray(spec["values"]).reshape(-1)
@@ -389,49 +410,6 @@ def _roc_auc_from_scores(scores: np.ndarray, labels: np.ndarray) -> float:
     return float(roc_auc_score(labels, scores))
 
 
-def _deranged_partner(j: np.ndarray, rng: np.random.Generator) -> np.ndarray:
-    if len(j) < 2:
-        raise ValueError("At least two partners are required for a negative pairing.")
-    for _ in range(32):
-        candidate = rng.permutation(j)
-        if not np.any(candidate == j):
-            return candidate
-    # Deterministic cyclic shift is a guaranteed derangement for length >= 2.
-    return np.roll(j, 1)
-
-
-def _auc_permutation_normal_p_value(scores: np.ndarray, labels: np.ndarray) -> dict[str, Any]:
-    """Normal approximation to the fixed-score label-permutation null for AUC.
-
-    With fixed scores and a fixed number of positive labels, AUC is a scaled
-    Wilcoxon rank-sum statistic.  The mean is 0.5.  The variance below includes
-    the standard tie correction, making the calculation conditional on the
-    observed score ranks and label count.
-    """
-    from scipy.stats import norm, rankdata
-    scores = np.asarray(scores, dtype=float)
-    labels = np.asarray(labels, dtype=np.int8)
-    n1 = int(labels.sum())
-    n = len(labels)
-    n0 = n - n1
-    if n1 < 1 or n0 < 1:
-        raise ValueError("AUC permutation null requires both classes.")
-    ranks = rankdata(scores, method="average")
-    rsum = float(ranks[labels == 1].sum())
-    u = rsum - n1 * (n1 + 1) / 2.0
-    auc = u / (n1 * n0)
-    _, tie_counts = np.unique(scores, return_counts=True)
-    tie_term = float(np.sum(tie_counts**3 - tie_counts))
-    variance_u = n1 * n0 / 12.0 * (n + 1.0 - tie_term / (n * (n - 1.0)))
-    sd_auc = math.sqrt(variance_u) / (n1 * n0)
-    if sd_auc == 0:
-        p = 1.0 if math.isclose(auc, 0.5) else 0.0
-        z = 0.0 if p == 1.0 else math.copysign(float("inf"), auc - 0.5)
-    else:
-        z = (auc - 0.5) / sd_auc
-        p = float(2.0 * norm.sf(abs(z)))
-    return {"auc": float(auc), "null_mean": 0.5, "null_sd": sd_auc, "z": float(z), "p_value": p, "method": "tie-corrected normal approximation to fixed-score label-permutation AUC null"}
-
 def multivariate_pair_discrimination(
     x: np.ndarray,
     *,
@@ -440,93 +418,78 @@ def multivariate_pair_discrimination(
     rng: np.random.Generator,
     c: float = DEFAULT_DETECTOR_C,
     alpha: float = FAMILYWISE_ALPHA,
-    lag: int = 1,
 ) -> dict[str, Any]:
-    """Detect multivariate generation-order dependence at a specified lag.
+    """Test whether real pairs are distinguishable from permuted partners.
 
-    The detector is trained on one set of disjoint lag pairs.  It is evaluated
-    on a separate set of disjoint lag pairs against a negative set created by
-    deranging the second endpoints.  The randomization test then regenerates
-    the negative partner assignment on the untouched test endpoints and
-    recomputes the held-out AUC.  This avoids treating the two examples derived
-    from one endpoint pair as exchangeable labels after the classifier has
-    already seen that pairing.
+    Positive and negative pair construction uses the same endpoints. The
+    classifier is fit once. The null distribution is generated by permuting
+    labels on the untouched test set, which is an exact randomization test
+    conditional on the fitted predictor and test scores. This avoids the
+    invalid practice of refitting the detector against a null training set
+    while leaving test labels fixed.
     """
     from sklearn.linear_model import LogisticRegression
     from sklearn.model_selection import train_test_split
 
-    if pairs < 4 or permutations < 1:
-        raise ValueError("pairs must be >= 4 and permutations >= 1.")
-    # Generate 2*pairs natural lag pairs, with no endpoint reuse, then split
-    # the pair groups into detector-training and held-out groups.
-    i, j = _sample_disjoint_lag_pairs(len(x), lag, 2 * pairs, rng)
-    pair_ids = np.arange(2 * pairs, dtype=np.int64)
-    train_groups, test_groups = train_test_split(
-        pair_ids, test_size=0.30, random_state=int(rng.integers(0, 2**31 - 1))
+    if pairs < 2 or permutations < 1:
+        raise ValueError("pairs must be >= 2 and permutations >= 1.")
+    i, j = _sample_disjoint_pairs(len(x), pairs, rng)
+    negative_j = rng.permutation(j)
+    bad = negative_j == i
+    if np.any(bad):
+        # A cyclic shift within the negative partner set avoids self-pairs
+        # without changing endpoint multiplicities.
+        negative_j[bad] = np.roll(negative_j, 1)[bad]
+        if np.any(negative_j == i):
+            raise RuntimeError("Unable to construct self-pair-free negative controls.")
+
+    positive = _pair_matrix(x, i, j)
+    negative = _pair_matrix(x, i, negative_j)
+    X = np.vstack([positive, negative])
+    y = np.concatenate([np.ones(pairs, dtype=np.int8), np.zeros(pairs, dtype=np.int8)])
+
+    indices = np.arange(len(y))
+    train_idx, test_idx = train_test_split(
+        indices,
+        test_size=0.30,
+        stratify=y,
+        random_state=int(rng.integers(0, 2**31 - 1)),
     )
-    train_i, train_j = i[train_groups], j[train_groups]
-    test_i, test_j = i[test_groups], j[test_groups]
-
-    train_neg_j = _deranged_partner(train_j, rng)
-    test_neg_j = _deranged_partner(test_j, rng)
-    X_train = np.vstack([_pair_matrix(x, train_i, train_j), _pair_matrix(x, train_i, train_neg_j)])
-    y_train = np.concatenate([np.ones(len(train_groups), dtype=np.int8), np.zeros(len(train_groups), dtype=np.int8)])
-    model = LogisticRegression(C=c, solver="liblinear", max_iter=2000, random_state=int(rng.integers(0, 2**31 - 1)))
-    model.fit(X_train, y_train)
-
-    def score_for_partner(partners: np.ndarray) -> tuple[float, np.ndarray]:
-        positive = _pair_matrix(x, test_i, test_j)
-        negative = _pair_matrix(x, test_i, partners)
-        X_test = np.vstack([positive, negative])
-        y_test = np.concatenate([np.ones(len(test_groups), dtype=np.int8), np.zeros(len(test_groups), dtype=np.int8)])
-        scores = model.predict_proba(X_test)[:, 1]
-        return _roc_auc_from_scores(scores, y_test), scores
-
-    observed_auc, observed_scores = score_for_partner(test_neg_j)
-    observed_excess = abs(observed_auc - 0.5)
+    model = LogisticRegression(
+        C=c,
+        solver="liblinear",
+        max_iter=2000,
+        random_state=int(rng.integers(0, 2**31 - 1)),
+    )
+    model.fit(X[train_idx], y[train_idx])
+    test_scores = model.predict_proba(X[test_idx])[:, 1]
+    y_test = y[test_idx]
+    auc = _roc_auc_from_scores(test_scores, y_test)
+    observed_excess = abs(auc - 0.5)
 
     null = np.empty(permutations, dtype=float)
-    # The null randomizes the partner assignment on the held-out endpoints,
-    # while the trained detector remains fixed and the test set is untouched.
     for k in range(permutations):
-        null_partner = _deranged_partner(test_j, rng)
-        # Randomly designate which of the two partnerings is treated as the
-        # observed/natural side.  This creates the conditional null directly.
-        if rng.integers(0, 2):
-            positive_partner, negative_partner = null_partner, test_j
-        else:
-            positive_partner, negative_partner = test_j, null_partner
-        positive = _pair_matrix(x, test_i, positive_partner)
-        negative = _pair_matrix(x, test_i, negative_partner)
-        X_test = np.vstack([positive, negative])
-        y_test = np.concatenate([np.ones(len(test_groups), dtype=np.int8), np.zeros(len(test_groups), dtype=np.int8)])
-        scores = model.predict_proba(X_test)[:, 1]
-        null[k] = _roc_auc_from_scores(scores, y_test)
+        permuted_labels = rng.permutation(y_test)
+        null[k] = _roc_auc_from_scores(test_scores, permuted_labels)
     null_excess = np.abs(null - 0.5)
-    mc_p = float((1 + np.count_nonzero(null_excess >= observed_excess)) / (permutations + 1))
-    analytic = _auc_permutation_normal_p_value(observed_scores, np.concatenate([np.ones(len(test_groups), dtype=np.int8), np.zeros(len(test_groups), dtype=np.int8)]))
+    p = float((1 + np.count_nonzero(null_excess >= observed_excess)) / (permutations + 1))
+
     return {
-        "pairs": int(2 * pairs),
-        "lag": lag,
-        "train_pair_groups": int(len(train_groups)),
-        "test_pair_groups": int(len(test_groups)),
-        "detector": "logistic_regression_on_[x_i, x_i+lag, abs(x_i-x_i+lag)]",
+        "pairs": pairs,
+        "train_examples": int(len(train_idx)),
+        "test_examples": int(len(test_idx)),
+        "detector": "logistic_regression_on_[x_i, x_j, xor(x_i,x_j)]",
         "detector_C": c,
-        "auc": observed_auc,
+        "auc": auc,
         "auc_excess_over_chance": observed_excess,
         "practical_tolerance": MULTIVARIATE_AUC_TOLERANCE,
         "permutations": permutations,
-        "permutation_null": "held-out partner-assignment randomization with fixed detector; natural and randomized partnerings are reconstituted on untouched test endpoints",
+        "permutation_null": "test-set label permutation conditional on fixed fitted detector and test scores",
         "null_auc_mean": float(null.mean()),
         "null_auc_95_upper": float(np.quantile(null, 0.95)),
         "null_excess_95_upper": float(np.quantile(null_excess, 0.95)),
-        "permutation_p_value": mc_p,
-        "permutation_p_value_resolution": 1.0 / (permutations + 1),
-        "analytic_permutation_p_value": analytic["p_value"],
-        "analytic_permutation_null_sd": analytic["null_sd"],
-        "analytic_permutation_z": analytic["z"],
-        "analytic_permutation_method": analytic["method"],
-        "statistically_excessive": analytic["p_value"] < alpha,
+        "permutation_p_value": p,
+        "statistically_excessive": p < alpha,
         "practically_excessive": observed_excess > MULTIVARIATE_AUC_TOLERANCE,
     }
 
@@ -557,29 +520,71 @@ def inject_lag_copy(x: np.ndarray, fraction: float, lag: int, rng: np.random.Gen
     return y
 
 
-def calibrate_fault(*, clean_features: np.ndarray, injector: Callable[[np.ndarray, np.random.Generator], np.ndarray], detector: Callable[[np.ndarray, np.random.Generator], bool], replicates: int, seed: int) -> dict[str, Any]:
+def calibrate_fault(
+    *,
+    clean_features: np.ndarray,
+    injector: Callable[[np.ndarray, np.random.Generator], np.ndarray],
+    detector: Callable[[np.ndarray, np.random.Generator], bool | Mapping[str, bool]],
+    replicates: int,
+    seed: int,
+) -> dict[str, Any]:
+    """Estimate empirical fault-detection sensitivity over independent trials."""
     if replicates < CALIBRATION_MIN_REPLICATES:
         raise ValueError(f"Calibration requires at least {CALIBRATION_MIN_REPLICATES} replicates.")
     ss = np.random.SeedSequence(seed)
-    detected = []
+    outcomes: list[bool] = []
     for child in ss.spawn(replicates):
         rng = np.random.default_rng(child)
-        detected.append(bool(detector(injector(clean_features, rng), rng)))
-    rate = float(np.mean(detected))
-    return {"replicates": replicates, "detections": int(sum(detected)), "detection_rate": rate, "target": CALIBRATION_DETECTION_TARGET, "target_met": rate >= CALIBRATION_DETECTION_TARGET}
+        outcome = detector(injector(clean_features, rng), rng)
+        if isinstance(outcome, Mapping):
+            outcomes.append(bool(outcome.get("detected", False)))
+        else:
+            outcomes.append(bool(outcome))
+    rate = float(np.mean(outcomes))
+    # Wilson interval gives a stable finite-sample uncertainty interval for the
+    # detection probability, including when the observed count is 0 or n.
+    z = 1.959963984540054
+    n = len(outcomes)
+    phat = rate
+    denom = 1.0 + z * z / n
+    center = (phat + z * z / (2.0 * n)) / denom
+    half = z * math.sqrt(phat * (1.0 - phat) / n + z * z / (4.0 * n * n)) / denom
+    return {
+        "replicates": replicates,
+        "detections": int(sum(outcomes)),
+        "detection_rate": rate,
+        "detection_rate_95_ci": {"lower": max(0.0, center - half), "upper": min(1.0, center + half)},
+        "target": CALIBRATION_DETECTION_TARGET,
+        "target_met": rate >= CALIBRATION_DETECTION_TARGET,
+    }
 
 
-def _count_hypotheses(*, comparisons: int, lag_tests: int, near_radii: int, structured: int, multivariate: int) -> int:
-    # One p-value per comparison after replicate aggregation; replicates are
-    # not counted as separate hypotheses.
-    return max(1, comparisons + lag_tests + comparisons * near_radii + structured + multivariate)
+def familywise_test_count(
+    *,
+    partition_count: int,
+    lag_count: int,
+    near_duplicate_radius_count: int,
+    structured_view_count: int,
+    multivariate_count: int,
+) -> int:
+    """Return the number of hypothesis-level tests in one D2 execution.
+
+    Replicates are sampling repetitions for the same hypothesis and therefore
+    are combined before multiplicity correction; they are not separate
+    familywise hypotheses.
+    """
+    if partition_count < 1:
+        raise ValueError("partition_count must be >= 1.")
+    comparisons = partition_count + partition_count * (partition_count - 1) // 2
+    return max(1, comparisons + lag_count + near_duplicate_radius_count * comparisons
+               + structured_view_count + multivariate_count)
 
 
 def run_d2(
     *,
     partitions: Mapping[str, np.ndarray],
-    reference_pmf: np.ndarray,
     feature_bits: int,
+    reference_pmf: np.ndarray | None = None,
     structured_views: Mapping[str, Mapping[str, Any]] | None = None,
     pairs_per_test: int = DEFAULT_PAIRS_PER_TEST,
     audit_replicates: int = DEFAULT_AUDIT_REPLICATES,
@@ -593,20 +598,23 @@ def run_d2(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     if not partitions or pairs_per_test < 1 or audit_replicates < 1 or bootstrap_replicates < 100:
         raise ValueError("Invalid D2 configuration.")
-    nominal_pmf = validate_reference_pmf(reference_pmf, feature_bits)
+    nominal_pmf = validate_reference_pmf(reference_pmf, feature_bits) if reference_pmf is not None else None
     arrays = {name: _binary(x, name, feature_bits) for name, x in partitions.items()}
     structured_views = structured_views or {}
     lags = tuple(int(k) for k in lags)
     near_duplicate_radii = tuple(int(r) for r in near_duplicate_radii)
     if any(k < 1 for k in lags):
         raise ValueError("All lags must be positive.")
-    if any(r < 0 or r >= feature_bits for r in near_duplicate_radii):
-        raise ValueError("Near-duplicate radii must lie in [0, feature_bits-1].")
 
     comparisons = [(f"within:{n}", x, x) for n, x in arrays.items()]
     names = list(arrays)
-    comparisons += [(f"cross:{names[i]}:{names[j]}", arrays[names[i]], arrays[names[j]]) for i in range(len(names)) for j in range(i + 1, len(names))]
+    comparisons += [
+        (f"cross:{names[i]}:{names[j]}", arrays[names[i]], arrays[names[j]])
+        for i in range(len(names))
+        for j in range(i + 1, len(names))
+    ]
     lag_tests = [(f"{n}:lag{k}", x, k) for n, x in arrays.items() for k in lags if k < len(x)]
+
     selected_mv = tuple(multivariate_partitions or arrays.keys())
     for name in selected_mv:
         if name not in arrays:
@@ -614,12 +622,15 @@ def run_d2(
         if 2 * multivariate_pairs > len(arrays[name]):
             raise ValueError(f"Multivariate pair count exceeds half the size of partition {name!r}.")
 
-    total_tests = _count_hypotheses(
-        comparisons=len(comparisons),
-        lag_tests=len(lag_tests),
-        near_radii=len(near_duplicate_radii),
-        structured=len(structured_views),
-        multivariate=len(selected_mv),
+    # The family includes every hypothesis-level p-value reported by D2.
+    # Bonferroni therefore also covers near-duplicate, structured-collision,
+    # and multivariate tests, which the previous implementation omitted.
+    total_tests = familywise_test_count(
+        partition_count=len(arrays),
+        lag_count=len(lag_tests),
+        near_duplicate_radius_count=len(near_duplicate_radii),
+        structured_view_count=len(structured_views),
+        multivariate_count=len(selected_mv),
     )
     alpha = FAMILYWISE_ALPHA / total_tests
     ss = np.random.SeedSequence(audit_seed)
@@ -627,39 +638,42 @@ def run_d2(
     hamming: dict[str, Any] = {}
     near_dups: dict[str, Any] = {}
     for name, a, b in comparisons:
-        # Primary Hamming reference preserves the empirical bit marginals.
-        empirical_null = independent_hamming_reference(a, b)
         reps = []
         distance_replicates = []
         for child in ss.spawn(audit_replicates):
             rng = np.random.default_rng(child)
-            d = sample_within_distances(a, pairs_per_test, rng) if a is b else sample_cross_distances(a, b, pairs_per_test, rng)
+            if a is b:
+                d = sample_within_distances(a, pairs_per_test, rng)
+            else:
+                d = sample_cross_distances(a, b, pairs_per_test, rng)
             distance_replicates.append(d)
-            reps.append(summarize_distances(d, empirical_null, rng, alpha, bootstrap_replicates))
-        hamming[name] = _aggregate(reps, alpha=alpha)
-        hamming[name]["reference_basis"] = "empirical independent-row Hamming null preserving observed per-bit marginals"
-        hamming[name]["nominal_gohr_reference_tvd"] = [tvd(d, nominal_pmf) for d in distance_replicates]
+            pmf = empirical_independent_hamming_pmf(a, b)
+            reps.append(summarize_distances(d, pmf, rng, alpha, bootstrap_replicates))
+        hamming[name] = _aggregate(reps)
         near_dups[name] = near_duplicate_summary(
             distance_replicates,
             near_duplicate_radii,
-            nominal_pmf,
+            empirical_independent_hamming_pmf(a, b),
             bootstrap_replicates,
             np.random.default_rng(ss.spawn(1)[0]),
-            independent_reference_pmf=empirical_null,
             alpha=alpha,
         )
 
     lagged: dict[str, Any] = {}
     for name, x, lag in lag_tests:
-        empirical_null = independent_hamming_reference(x, x)
         reps = []
         for child in ss.spawn(audit_replicates):
             rng = np.random.default_rng(child)
-            reps.append(summarize_distances(sample_lagged_distances(x, lag, pairs_per_test, rng), empirical_null, rng, alpha, bootstrap_replicates))
-        lagged[name] = _aggregate(reps, alpha=alpha)
-        lagged[name]["lag"] = lag
-        lagged[name]["reference_basis"] = "empirical independent-row Hamming null preserving observed per-bit marginals"
-        lagged[name]["nominal_gohr_reference"] = "Binomial(64, 0.5) retained as a case-study diagnostic only"
+            reps.append(
+                summarize_distances(
+                    sample_lagged_distances(x, lag, pairs_per_test, rng),
+                    empirical_independent_hamming_pmf(x, x),
+                    rng,
+                    alpha,
+                    bootstrap_replicates,
+                )
+            )
+        lagged[name] = _aggregate(reps)
 
     structured = analyze_structured_views(structured_views, alpha)
 
@@ -667,36 +681,80 @@ def run_d2(
     for name in selected_mv:
         rng = np.random.default_rng(ss.spawn(1)[0])
         mv[name] = multivariate_pair_discrimination(
-            arrays[name], pairs=multivariate_pairs, permutations=multivariate_permutations, rng=rng, alpha=alpha, lag=1
+            arrays[name],
+            pairs=multivariate_pairs,
+            permutations=multivariate_permutations,
+            rng=rng,
+            alpha=alpha,
         )
 
     failures: list[dict[str, Any]] = []
     warnings: list[dict[str, Any]] = []
+
     for name, result in {**hamming, **lagged}.items():
         if not result["practical_pass"]:
-            failures.append({"component": name, "type": "distributional", "reason": "Upper bootstrap TVD uncertainty bound exceeded the pre-specified practical tolerance.", "max_tvd_ci_upper": result["max_tvd_ci_upper"]})
+            failures.append({
+                "component": name,
+                "type": "distributional",
+                "reason": "Upper bootstrap TVD uncertainty bound exceeded the pre-specified practical tolerance.",
+            })
         elif result["statistical_warning"]:
-            warnings.append({"component": name, "type": "statistical", "reason": "Replicate-level evidence rejected the empirical independent-row reference after multiplicity correction while remaining practically below the TVD tolerance.", "combined_p_value": result["combined_p_value"]})
+            warnings.append({
+                "component": name,
+                "type": "statistical",
+                "reason": "The replicate-level p-value combination rejected the declared independent-row reference after Bonferroni correction; the observed TVD remained practically below tolerance.",
+                "minimum_p_value": result["min_p_value"],
+                "combined_p_value": result["combined_p_value"],
+            })
 
     for comparison, radii_results in near_dups.items():
         for radius, result in radii_results.items():
             if result["practically_excessive"]:
-                failures.append({"component": f"{comparison}:radius{radius}", "type": "near_duplicate_structure", "reason": "Observed near-duplicate rate exceeded the pre-specified practical excess threshold relative to the empirical independent-row null.", "excess_ratio": result["excess_ratio"]})
+                failures.append({
+                    "component": f"{comparison}:radius{radius}",
+                    "type": "near_duplicate_structure",
+                    "reason": "Observed near-duplicate rate exceeded the pre-specified practical excess threshold relative to the supplied null model.",
+                    "excess_ratio": result["excess_ratio"],
+                })
             elif result["statistically_excessive"]:
-                warnings.append({"component": f"{comparison}:radius{radius}", "type": "near_duplicate_structure", "reason": "Near-duplicate rate was statistically excessive under the empirical independent-row null but not practically excessive.", "p_value": result["one_sided_excess_p_value"]})
+                warnings.append({
+                    "component": f"{comparison}:radius{radius}",
+                    "type": "near_duplicate_structure",
+                    "reason": "Near-duplicate rate was statistically excessive under the model-based diagnostic but not practically excessive.",
+                    "p_value": result["one_sided_excess_p_value"],
+                })
 
     for name, result in structured.items():
         ref = result["reference"]
         if ref["practically_excessive"]:
-            failures.append({"component": name, "type": "structured_collision", "reason": "Structured-value collision excess exceeded the practical tolerance."})
+            failures.append({
+                "component": name,
+                "type": "structured_collision",
+                "reason": "Structured-value collision excess exceeded the practical tolerance.",
+            })
         elif ref["statistically_excessive"]:
-            warnings.append({"component": name, "type": "structured_collision", "reason": "Structured-value collision count was statistically excessive but not practically excessive.", "p_value": ref["one_sided_excess_p_value"]})
+            warnings.append({
+                "component": name,
+                "type": "structured_collision",
+                "reason": "Structured-value collision count was statistically excessive but not practically excessive.",
+            })
 
     for name, result in mv.items():
         if result["practically_excessive"]:
-            failures.append({"component": name, "type": "multivariate_dependence", "reason": "Lagged pairs were distinguishable from independently permuted partners beyond the practical AUC tolerance.", "auc": result["auc"], "auc_excess_over_chance": result["auc_excess_over_chance"]})
+            failures.append({
+                "component": name,
+                "type": "multivariate_dependence",
+                "reason": "Real pairs were distinguishable from permuted partners beyond the practical AUC tolerance.",
+                "auc": result["auc"],
+                "auc_excess_over_chance": result["auc_excess_over_chance"],
+            })
         elif result["statistically_excessive"]:
-            warnings.append({"component": name, "type": "multivariate_dependence", "reason": "The permutation test detected statistical evidence of lagged pair dependence without a practically material AUC effect.", "p_value": result["permutation_p_value"]})
+            warnings.append({
+                "component": name,
+                "type": "multivariate_dependence",
+                "reason": "The permutation test detected statistical evidence of pair dependence without a practically material AUC effect.",
+                "p_value": result["permutation_p_value"],
+            })
 
     outcome = "FAIL" if failures else ("CONDITIONAL_PASS" if warnings else "PASS")
     results = {
@@ -710,6 +768,10 @@ def run_d2(
             "familywise_alpha": FAMILYWISE_ALPHA,
             "effective_test_alpha": alpha,
             "familywise_test_count": total_tests,
+            "hypothesis_counting": "one hypothesis per comparison after replicate-level p-value aggregation; audit replicates are not counted as separate familywise hypotheses",
+            "confirmatory_hamming_null": "empirical independent-row Poisson-binomial Hamming null preserving observed endpoint bit marginals; independence of mismatch indicators across bit positions is an explicit model assumption",
+            "nominal_hamming_reference": "optional Binomial(feature_bits, 0.5) case-study diagnostic; not used as the universal independence null",
+            "nominal_reference_supplied": nominal_pmf is not None,
             "pairs_per_test": pairs_per_test,
             "audit_replicates": audit_replicates,
             "bootstrap_replicates": bootstrap_replicates,
@@ -720,68 +782,97 @@ def run_d2(
             "multivariate_auc_tolerance": MULTIVARIATE_AUC_TOLERANCE,
             "tvd_threshold": TVD_THRESHOLD,
             "audit_seed": audit_seed,
-            "pair_sampling": "within and lagged pairs use disjoint endpoints within each replicate; cross-partition pairs sample without replacement within each partition",
+            "pair_sampling": "within and lagged pairs use disjoint endpoints within each sampling replicate; cross-partition pairs sample without replacement within each partition",
             "replication_semantics": "replicates are Monte Carlo sampling replicates from one fixed audited dataset instance, not independent dataset generations",
-            "confirmatory_hamming_null": "per-bit-marginal Poisson-binomial Hamming null under independent rows; mismatch-indicator independence across bit positions is an explicit model assumption",
-            "nominal_case_study_hamming_null": "adapter-supplied Binomial(64, 0.5) diagnostic; not used as the universal independence null",
-            "multivariate_positive_pairs": "generation-order lag-1 pairs",
-            "multivariate_statistical_null": "fixed-score test-label permutation null; analytic tie-corrected normal approximation is primary because finite Monte Carlo permutation resolution can be coarser than the Bonferroni-adjusted alpha",
-            "hypothesis_counting": "one hypothesis per comparison after replicate-level p-value aggregation; replicate observations are not counted as separate familywise hypotheses",
         },
     }
     decision = {
         "outcome": outcome,
         "failures": failures,
         "warnings": warnings,
-        "interpretation": "No practically material dependence detected within the tested classes, declared null models, practical thresholds, and measured sensitivity envelope." if outcome == "PASS" else "The decision is limited to the explicitly tested dependence classes, null models, practical thresholds, and measured sensitivity envelope.",
+        "interpretation": (
+            "No practically material dependence detected within the tested classes, declared null models, and measured sensitivity envelope."
+            if outcome == "PASS"
+            else "The decision is limited to the explicitly tested dependence classes, null models, practical thresholds, and sensitivity demonstrated by the recorded calibration experiments."
+        ),
         "not_proof_of_independence": True,
     }
     return results, decision
 
 
-def build_d2_certificate(*, results: Mapping[str, Any], decision: Mapping[str, Any], partitions: Mapping[str, np.ndarray], dataset_id: str, dataset_version: str | None, generation_procedure: str | None, generation_parameters: Mapping[str, Any] | None, generation_random_seed: int | None, reference_description: str, reference_model_description: str, audit_seed: int, output_path: str) -> dict[str, Any]:
+def build_d2_certificate(
+    *,
+    results: Mapping[str, Any],
+    decision: Mapping[str, Any],
+    partitions: Mapping[str, np.ndarray],
+    dataset_id: str,
+    dataset_version: str | None,
+    generation_procedure: str | None,
+    generation_parameters: Mapping[str, Any] | None,
+    generation_random_seed: int | None,
+    reference_description: str,
+    reference_model_description: str,
+    audit_seed: int,
+    output_path: str,
+) -> dict[str, Any]:
     provenance = build_provenance(
         dataset_id=dataset_id,
         dataset_version=dataset_version,
         generation_procedure=generation_procedure,
         generation_parameters=generation_parameters,
         random_seed=generation_random_seed,
-        partitions={name: {"sample_count": int(x.shape[0]), "feature_count": int(x.shape[1]), "dtype": str(x.dtype), "shape": list(x.shape), "sha256": array_sha256(x)} for name, x in partitions.items()},
-        audit_configuration={**dict(results["configuration"]), "reference_distribution": reference_description, "reference_model": reference_model_description},
+        partitions={
+            name: {
+                "sample_count": int(x.shape[0]),
+                "feature_count": int(x.shape[1]),
+                "dtype": str(x.dtype),
+                "shape": list(x.shape),
+                "sha256": array_sha256(x),
+            }
+            for name, x in partitions.items()
+        },
+        audit_configuration={
+            **dict(results["configuration"]),
+            "reference_distribution": reference_description,
+            "reference_model": reference_model_description,
+        },
     )
     certificate = make_certificate(
         audit_id=AUDIT_ID,
         audit_name=AUDIT_NAME,
-        claim="The supplied dataset instance was audited for detectable near-duplicate structure, generation-order dependence, pairwise Hamming structure, multivariate lag dependence, and adapter-exposed structured repetition.",
+        claim=(
+            "The supplied dataset instance was audited for detectable near-duplicate structure, "
+            "pairwise and serial dependence, multivariate pair dependence, and adapter-exposed structured repetition."
+        ),
         outcome=str(decision["outcome"]),
         findings={"results": dict(results), "decision": dict(decision)},
         methodology={
             "scope": "Dataset Integrity D2 Sample Dependence Audit",
             "d1_boundary": "D1 owns exact row duplication and exact partition overlap; D2 does not repeat those exact-equality claims.",
-            "d2_1": "Near-duplicate rates are evaluated at pre-specified Hamming radii against the declared per-bit-marginal independent-row null.",
-            "d2_2": "Generation-order lagged Hamming distributions are tested against the declared per-bit-marginal independent-row null. Within/cross pairwise comparisons are retained as feature-space controls; the lag tests carry the primary generation-order dependence interpretation.",
-            "d2_3": "A fixed logistic detector distinguishes natural lag-1 pairs from independently permuted partners on untouched endpoints. The primary p-value uses the tie-corrected normal approximation to the fixed-score test-label permutation null; finite Monte Carlo permutations are retained as a direct randomization diagnostic and resolution check.",
+            "d2_1": "Near-duplicate rates are evaluated at pre-specified Hamming radii against the empirical independent-row Poisson-binomial null derived from observed endpoint marginals, with model-based excess tests and replicate-level uncertainty.",
+            "d2_2": "Generation-order lagged Hamming structure is tested over the pre-specified lag family against the empirical independent-row Poisson-binomial null. Within/cross pairwise comparisons are retained as feature-space controls; lag tests carry the primary serial-dependence interpretation.",
+            "d2_3": "A fixed logistic detector attempts to distinguish real pairs from permuted partners. The classifier is fitted once and significance is evaluated by permuting held-out test labels conditional on the fixed test scores.",
             "d2_4": "Adapter-supplied semantic views are evaluated for excess finite-domain collisions under the stated independent-uniform reference model.",
-            "d2_5": "Controlled duplicate and lag-copy injectors are available for empirical sensitivity calibration; calibration results are recorded separately and are not clean-data findings.",
-            "multiple_comparison_control": "Bonferroni familywise control at 0.01 across hypothesis-level tests after replicate-level aggregation; audit replicates are not themselves counted as separate hypotheses.",
-            "replication": "Repeated sampling replicates quantify Monte Carlo variability conditional on the same audited dataset instance; they are not independent dataset generations.",
+            "d2_5": "Controlled duplicate and lag-copy injectors are available for empirical sensitivity calibration; calibration results are recorded separately and are not treated as clean-data findings.",
+            "multiple_comparison_control": "Bonferroni familywise control at 0.01 across one hypothesis per reported comparison after replicate-level p-value aggregation; audit replicates are not counted as separate hypotheses.",
+            "replication": "Repeated sampling replicates quantify Monte Carlo variability conditional on the same audited dataset instance; they are not treated as independent dataset generations.",
             "decision_semantics": "PASS is evidence against the tested dependence hypotheses within the declared scope, not proof of universal independence.",
-            "nominal_reference": reference_description,
-            "confirmatory_reference": "Empirical independent-row Poisson-binomial Hamming null preserving observed per-bit marginals.",
+            "reference_distribution": reference_description,
             "reference_model": reference_model_description,
             "audit_seed": audit_seed,
         },
         provenance=provenance,
         limitations=[
             "Finite statistical testing cannot establish universal mutual independence.",
-            "The Hamming null conditions on observed per-bit marginals and assumes row independence plus independence of mismatch indicators across bit positions; it is therefore a model-based diagnostic, not a universal independence null.",
-            "Pearson chi-square p-values are model-based diagnostics; the primary practical criterion also requires the pre-specified TVD tolerance and bootstrap uncertainty.",
-            "The pair-level bootstrap is an approximation because disjoint endpoint sampling creates finite-population dependence among pair statistics.",
-            "Near-duplicate and structured-collision p-values rely on their stated finite-domain or empirical null approximations.",
-            "Multivariate discrimination is specifically a lag-1 detector and therefore has sensitivity only to dependence represented by that detector and feature construction. The finite Monte Carlo permutation p-value is diagnostic; the primary hypothesis p-value uses the stated fixed-score permutation-null normal approximation so that familywise alpha is not below the Monte Carlo resolution.",
-            "Audit replicates reuse the same dataset instance; they quantify sampling variability rather than dataset-to-dataset variability.",
+            "D2 is a falsification battery for explicitly tested dependence mechanisms, not a proof of the full joint independence property.",
+            "Sensitivity is specific to the declared tests, sample sizes, detector, null models, practical thresholds, and completed calibration experiments.",
+            "The Binomial(64, 0.5) Hamming reference is retained only as a case-study diagnostic; confirmatory Hamming inference uses an empirical independent-row Poisson-binomial null.",
+            "Pearson chi-square p-values are diagnostic model-based evidence; practical decisions also require the pre-specified TVD tolerance and bootstrap uncertainty.",
+            "Near-duplicate and structured-collision p-values rely on their stated finite-domain null approximations and should not be interpreted as formal proofs.",
+            "Structured repetition tests are conditional on adapter-exposed representations.",
+            "Multivariate discrimination detects dependence only to the extent represented by the fixed detector and feature construction.",
+            "Audit replicates reuse the same dataset instance; they quantify sampling variability rather than independent dataset-to-dataset variability.",
             "Calibration must be run and reported before claiming a corresponding detection sensitivity level.",
-            "The nominal Binomial(64, 0.5) Gohr reference is retained as a diagnostic and is not treated as a universal independence theorem.",
         ],
         evidence_level="DATASET_INTEGRITY_D2_SAMPLE_DEPENDENCE",
         certificate_version=SCHEMA_VERSION,
@@ -802,5 +893,4 @@ def print_report(results: Mapping[str, Any], certificate: Mapping[str, Any]) -> 
     print(f"Outcome              : {certificate['decision']['outcome']}")
     print(f"FWER alpha           : {results['configuration']['familywise_alpha']}")
     print(f"Effective test alpha : {results['configuration']['effective_test_alpha']:.3e}")
-    print(f"Familywise tests     : {results['configuration']['familywise_test_count']}")
     print("=" * 78)

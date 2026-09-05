@@ -153,7 +153,7 @@ class GohrD2Adapter:
         """Return Gohr case-study assumptions; these do not enter generic D2."""
         return {
             "feature_bits": self.FEATURE_BITS,
-            "pairwise_hamming_reference": "Binomial(64, 0.5) nominal Gohr diagnostic reference; confirmatory D2 Hamming tests condition on observed per-bit marginals",
+            "pairwise_hamming_reference": "Binomial(64, 0.5) nominal diagnostic for pairwise Hamming structure under independent balanced bits; confirmatory D2 inference uses an empirical independent-row Poisson-binomial null preserving observed bit marginals",
             "structured_collision_reference": "Independent uniform finite-domain collision model",
             "generator": "speck.make_train_data",
             "num_rounds": self.num_rounds,
