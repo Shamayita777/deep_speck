@@ -1,299 +1,287 @@
-"""
-Gohr-specific D2 experiment driver.
-
-This is the only layer that knows the Gohr/Speck case-study details:
-    * 5-round configuration
-    * 64-bit feature representation
-    * Gohr generator instrumentation
-    * the case-study Hamming reference
-    * calibration fault strengths
-
-The statistical engine remains in d2_sample_dependence.py and is generic.
-The existing audit.dataset.adapters.gohr.GohrAdapter is retained for the
-project's dataset/model/training functionality. D2 uses GohrD2Adapter only
-for its dataset-integrity observations.
-"""
+"""Gohr/Speck driver for the generic D2 sample-dependence audit."""
 from __future__ import annotations
 
 import argparse
 from pathlib import Path
-from typing import Any
-
-import numpy as np
 
 from audit.dataset.adapters.gohr_d2 import GohrD2Adapter
 from audit.dataset.d2_sample_dependence import (
+    CALIBRATION_DETECTION_TARGET,
+    CALIBRATION_MIN_REPLICATES,
     DEFAULT_AUDIT_REPLICATES,
     DEFAULT_BOOTSTRAP_REPLICATES,
-    DEFAULT_LAGS,
     DEFAULT_MULTIVARIATE_PAIRS,
     DEFAULT_MULTIVARIATE_PERMUTATIONS,
+    DEFAULT_NULL_PERMUTATIONS,
+    DEFAULT_NULL_REFERENCE_PERMUTATIONS,
     DEFAULT_PAIRS_PER_TEST,
-    NEAR_DUPLICATE_RADII,
+    DEFAULT_LAGS,
     FAMILYWISE_ALPHA,
-    TVD_THRESHOLD,
-    familywise_test_count,
+    NEAR_DUPLICATE_RADII,
+    PRACTICAL_EXCESS_TVD_THRESHOLD,
+    binomial_reference_distribution,
     build_d2_certificate,
     calibrate_fault,
-    inject_duplicates,
+    familywise_test_count,
     inject_lag_copy,
-    binomial_reference_distribution,
-    empirical_independent_hamming_pmf,
-    sample_within_distances,
-    sample_lagged_distances,
-    near_duplicate_summary,
-    summarize_distances,
+    inject_near_duplicates,
+    multivariate_pair_discrimination,
+    near_neighbor_summary,
     print_report,
     run_d2,
+    summarize_randomization_test,
+    _null_pair_histogram,
+    _sample_disjoint_lag_pairs,
+    hamming_distances,
 )
 
 DEFAULT_TRAIN_SAMPLES = 10_000_000
 DEFAULT_VALIDATION_SAMPLES = 1_000_000
 DEFAULT_TEST_SAMPLES = 1_000_000
-DEFAULT_CALIBRATION_REPLICATES = 20
-DEFAULT_CALIBRATION_FRACTIONS = (0.001, 0.005, 0.01, 0.05)
-DEFAULT_CALIBRATION_PAIRS = 20_000
+DEFAULT_CALIBRATION_REPLICATES = 100
+DEFAULT_CALIBRATION_FRACTIONS = (0.001, 0.005, 0.01, 0.025, 0.05)
+DEFAULT_CALIBRATION_QUERY_COUNT = 2048
+DEFAULT_CALIBRATION_TABLES = 8
+DEFAULT_CALIBRATION_NULL_PAIRS = 100_000
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the Gohr D2 Sample Dependence Audit.")
-    parser.add_argument("--train-samples", type=int, default=DEFAULT_TRAIN_SAMPLES)
-    parser.add_argument("--validation-samples", type=int, default=DEFAULT_VALIDATION_SAMPLES)
-    parser.add_argument("--test-samples", type=int, default=DEFAULT_TEST_SAMPLES)
-    parser.add_argument("--pairs-per-test", type=int, default=DEFAULT_PAIRS_PER_TEST)
-    parser.add_argument("--audit-replicates", type=int, default=DEFAULT_AUDIT_REPLICATES)
-    parser.add_argument("--bootstrap-replicates", type=int, default=DEFAULT_BOOTSTRAP_REPLICATES)
-    parser.add_argument("--multivariate-pairs", type=int, default=DEFAULT_MULTIVARIATE_PAIRS)
-    parser.add_argument("--multivariate-permutations", type=int, default=DEFAULT_MULTIVARIATE_PERMUTATIONS)
-    parser.add_argument("--audit-seed", type=int, default=0)
-    parser.add_argument("--calibrate", action="store_true", help="Run controlled duplicate/lag-copy sensitivity calibration.")
-    parser.add_argument("--calibration-replicates", type=int, default=DEFAULT_CALIBRATION_REPLICATES, help="Independent sensitivity-calibration replicates (default: 20).")
-    parser.add_argument("--calibration-pairs", type=int, default=DEFAULT_CALIBRATION_PAIRS)
-    parser.add_argument("--calibration-bootstrap-replicates", type=int, default=1_000)
-    parser.add_argument("--output", type=str, default=None)
-    return parser.parse_args()
+def parse_args():
+    p = argparse.ArgumentParser(description="Run Gohr D2 Sample Dependence Audit")
+    p.add_argument("--train-samples", type=int, default=DEFAULT_TRAIN_SAMPLES)
+    p.add_argument("--validation-samples", type=int, default=DEFAULT_VALIDATION_SAMPLES)
+    p.add_argument("--test-samples", type=int, default=DEFAULT_TEST_SAMPLES)
+    p.add_argument("--pairs-per-test", type=int, default=DEFAULT_PAIRS_PER_TEST)
+    p.add_argument("--audit-replicates", type=int, default=DEFAULT_AUDIT_REPLICATES)
+    p.add_argument("--null-permutations", type=int, default=DEFAULT_NULL_PERMUTATIONS, help="Maximum complete-row randomization draws including the separate reference draw; adaptive stopping may use fewer.")
+    p.add_argument("--bootstrap-replicates", type=int, default=DEFAULT_BOOTSTRAP_REPLICATES)
+    p.add_argument("--multivariate-pairs", type=int, default=DEFAULT_MULTIVARIATE_PAIRS)
+    p.add_argument("--multivariate-permutations", type=int, default=DEFAULT_MULTIVARIATE_PERMUTATIONS)
+    p.add_argument("--audit-seed", type=int, default=0)
+    p.add_argument("--near-duplicate-query-count", type=int, default=2048)
+    p.add_argument("--near-duplicate-projection-tables", type=int, default=8)
+    p.add_argument("--near-duplicate-null-pairs", type=int, default=DEFAULT_CALIBRATION_NULL_PAIRS)
+    p.add_argument(
+        "--practical-excess-tvd-threshold",
+        type=float,
+        default=PRACTICAL_EXCESS_TVD_THRESHOLD,
+        help="Pre-specified practical-effect threshold for null-centered excess TVD (default: 0.01).",
+    )
+    p.add_argument("--calibrate", action="store_true")
+    p.add_argument("--calibration-replicates", type=int, default=DEFAULT_CALIBRATION_REPLICATES)
+    p.add_argument("--calibration-query-count", type=int, default=DEFAULT_CALIBRATION_QUERY_COUNT)
+    p.add_argument("--calibration-projection-tables", type=int, default=DEFAULT_CALIBRATION_TABLES)
+    p.add_argument("--output", default=None)
+    return p.parse_args()
 
 
-def validate_args(args: argparse.Namespace) -> None:
-    values = {
-        "train-samples": args.train_samples,
-        "validation-samples": args.validation_samples,
-        "test-samples": args.test_samples,
-        "pairs-per-test": args.pairs_per_test,
-        "audit-replicates": args.audit_replicates,
-        "bootstrap-replicates": args.bootstrap_replicates,
-        "multivariate-pairs": args.multivariate_pairs,
-        "multivariate-permutations": args.multivariate_permutations,
-        "calibration-replicates": args.calibration_replicates,
-        "calibration-pairs": args.calibration_pairs,
-        "calibration-bootstrap-replicates": args.calibration_bootstrap_replicates,
-    }
-    for name, value in values.items():
-        if value < 1:
-            raise ValueError(f"--{name} must be >= 1.")
-    if args.train_samples < 2 or args.validation_samples < 2 or args.test_samples < 2:
-        raise ValueError("All partitions must contain at least two samples.")
-    if args.bootstrap_replicates < 100:
-        raise ValueError("--bootstrap-replicates must be >= 100.")
-    if args.audit_seed < 0:
-        raise ValueError("--audit-seed must be >= 0.")
-    if args.calibrate and args.calibration_replicates < 10:
-        raise ValueError("Calibration requires at least 10 independent replicates.")
+def validate_args(a):
+    positive = (
+        "train_samples", "validation_samples", "test_samples", "pairs_per_test",
+        "audit_replicates", "null_permutations", "bootstrap_replicates",
+        "multivariate_pairs", "multivariate_permutations", "near_duplicate_query_count",
+        "near_duplicate_projection_tables", "near_duplicate_null_pairs",
+        "calibration_replicates", "calibration_query_count", "calibration_projection_tables",
+    )
+    for name in positive:
+        if getattr(a, name) < 1:
+            raise ValueError(f"--{name.replace('_', '-')} must be >= 1")
+    if min(a.train_samples, a.validation_samples, a.test_samples) < 2:
+        raise ValueError("Partitions must have >=2 rows")
+    if a.null_permutations < 100 or a.bootstrap_replicates < 100:
+        raise ValueError("--null-permutations and --bootstrap-replicates must be >=100")
+    if a.calibrate and a.calibration_replicates < CALIBRATION_MIN_REPLICATES:
+        raise ValueError(f"Calibration requires >= {CALIBRATION_MIN_REPLICATES} independent trials")
+    if a.audit_seed < 0:
+        raise ValueError("--audit-seed must be >=0")
+    if not 0 <= a.practical_excess_tvd_threshold <= 1:
+        raise ValueError("--practical-excess-tvd-threshold must be in [0, 1]")
 
 
-def default_output_path(args: argparse.Namespace) -> Path:
+def default_output_path(a):
     return Path("audit/dataset/evidence/d2") / (
-        f"d2_gohr_sample_dependence_{args.train_samples}_{args.validation_samples}_"
-        f"{args.test_samples}_{args.pairs_per_test}pairs_{args.audit_replicates}replicates_"
-        f"seed{args.audit_seed}.json"
+        f"d2_gohr_sample_dependence_{a.train_samples}_{a.validation_samples}_{a.test_samples}_"
+        f"{a.pairs_per_test}pairs_{a.audit_replicates}replicates_seed{a.audit_seed}.json"
     )
 
 
-def _calibration_detector(*, target_component: str, pairs: int, bootstrap_replicates: int, alpha: float):
-    """Return a detector using the same component-level rule as production D2.
-
-    Calibration intentionally targets one D2 component at a time. This avoids
-    allowing an unrelated detector to satisfy the calibration criterion and
-    makes the resulting detection rate interpretable for the injected fault.
-    The confirmatory Hamming null is the same empirical independent-row
-    Poisson-binomial null used by production D2; the Gohr Binomial reference
-    is retained only as a diagnostic.
-    """
-    if target_component == "d2_1_near_duplicate_structure":
-        def detector(features: np.ndarray, rng: np.random.Generator) -> bool:
-            reference = empirical_independent_hamming_pmf(features, features)
-            distance_replicates = [sample_within_distances(features, pairs, rng)]
-            result = near_duplicate_summary(
-                distance_replicates,
-                NEAR_DUPLICATE_RADII,
-                reference,
-                bootstrap_replicates,
-                rng,
-                alpha=alpha,
-            )
-            return any(v["practically_excessive"] for v in result.values())
-        return detector
-
-    if target_component == "d2_2_serial_dependence":
-        def detector(features: np.ndarray, rng: np.random.Generator) -> bool:
-            reference = empirical_independent_hamming_pmf(features, features)
-            for lag in DEFAULT_LAGS:
-                if lag >= len(features):
-                    continue
-                distances = sample_lagged_distances(features, lag, pairs, rng)
-                result = summarize_distances(
-                    distances,
-                    reference,
-                    rng,
-                    alpha,
-                    bootstrap_replicates,
-                )
-                if not result["tvd_uncertainty"]["within_threshold"]:
-                    return True
-            return False
-        return detector
-
-    raise ValueError(f"Unsupported calibration target: {target_component}")
+def _near_detector(radius, query_count, tables, null_pairs, alpha):
+    def detector(x, rng):
+        result = near_neighbor_summary(
+            x,
+            (radius,),
+            rng=rng,
+            query_count=query_count,
+            projection_tables=tables,
+            null_pairs=null_pairs,
+            alpha=alpha,
+        )[str(radius)]
+        return {"detected": bool(result["practically_excessive"] or result["statistically_excessive"]), "result": result}
+    return detector
 
 
-def run_calibration(
-    clean_features: np.ndarray,
-    *,
-    replicates: int,
-    pairs: int,
-    bootstrap_replicates: int,
-    seed: int,
-    alpha: float,
-) -> dict[str, Any]:
-    fractions = DEFAULT_CALIBRATION_FRACTIONS
-    out: dict[str, Any] = {
-        "protocol": "controlled fault-injection sensitivity calibration",
-        "replicates": replicates,
-        "detection_target": 0.95,
-        "production_null": "empirical independent-row Poisson-binomial Hamming null preserving observed bit marginals",
-        "nominal_gohr_reference": "Binomial(64, 0.5) diagnostic only; not used for confirmatory detection",
-        "calibration_sampling": {
-            "pairs_per_test": pairs,
-            "bootstrap_replicates": bootstrap_replicates,
-            "lags": list(DEFAULT_LAGS),
-            "near_duplicate_radii": list(NEAR_DUPLICATE_RADII),
-            "tvd_threshold": TVD_THRESHOLD,
-        },
-        "duplicate_injection": {},
+def _lag_detector(query_pairs, null_permutations, alpha, practical_excess_tvd_threshold):
+    def detector(x, rng):
+        lag = 1
+        count = min(query_pairs, (len(x) - lag) // 2)
+        i, j = _sample_disjoint_lag_pairs(len(x), lag, count, rng)
+        left, right = x[i], x[j]
+        observed = hamming_distances(left, right)
+        null_pmf, null_stats, null_meta = _null_pair_histogram(
+        left,
+        right,
+        permutations=null_permutations,
+        rng=rng,
+        within=False,
+        reference_permutations=min(DEFAULT_NULL_REFERENCE_PERMUTATIONS, max(1, null_permutations - 1)),
+        alpha=alpha,
+        observed_distances=observed,
+    )
+        result = summarize_randomization_test(
+            observed,
+            null_pmf,
+            null_stats,
+            alpha=alpha,
+            rng=rng,
+            bootstrap_replicates=100,
+            practical_excess_tvd_threshold=practical_excess_tvd_threshold,
+            null_sampling_metadata=null_meta,
+        )
+        return {"detected": bool(result["practically_excessive"] or result["randomization_test"]["statistically_excessive"]), "result": result}
+    return detector
+
+
+def run_calibration(clean, *, replicates, seed, query_count, tables, null_pairs, pairs, null_permutations, alpha, practical_excess_tvd_threshold):
+    out = {
+        "protocol": "component-specific controlled fault-injection sensitivity calibration",
+        "replicates": int(replicates),
+        "detection_target": CALIBRATION_DETECTION_TARGET,
+        "target_semantics": "Wilson lower bound is the only confidence-supported target criterion; point estimate is reported separately",
+        "calibration_is_not_clean_evidence": True,
+        "near_duplicate_injection": {},
         "lag_copy_injection": {},
     }
-    detector_dup = _calibration_detector(
-        target_component="d2_1_near_duplicate_structure",
-        pairs=pairs,
-        bootstrap_replicates=bootstrap_replicates,
-        alpha=alpha,
-    )
-    detector_lag = _calibration_detector(
-        target_component="d2_2_serial_dependence",
-        pairs=pairs,
-        bootstrap_replicates=bootstrap_replicates,
-        alpha=alpha,
-    )
-    for fraction in fractions:
-        key = f"{fraction:.6g}"
-        out["duplicate_injection"][key] = calibrate_fault(
-            clean_features=clean_features,
-            injector=lambda x, r, f=fraction: inject_duplicates(x, f, r),
-            detector=detector_dup,
-            replicates=replicates,
-            seed=seed + int(fraction * 1_000_000) + 10,
-        )
-        out["duplicate_injection"][key]["target_component"] = "d2_1_near_duplicate_structure"
-        out["lag_copy_injection"][key] = calibrate_fault(
-            clean_features=clean_features,
+
+    for radius in NEAR_DUPLICATE_RADII:
+        out["near_duplicate_injection"][str(radius)] = {}
+        for fraction in DEFAULT_CALIBRATION_FRACTIONS:
+            seed_here = seed + 10_000 + radius * 100 + int(fraction * 1_000_000)
+            result = calibrate_fault(
+                clean_features=clean,
+                injector=lambda x, r, f=fraction, rad=radius: inject_near_duplicates(x, f, rad, r),
+                detector=_near_detector(radius, query_count, tables, null_pairs, alpha),
+                replicates=replicates,
+                seed=seed_here,
+            )
+            result["target_component"] = "d2_1_near_duplicate_structure"
+            out["near_duplicate_injection"][str(radius)][f"{fraction:.6g}"] = result
+
+    for fraction in DEFAULT_CALIBRATION_FRACTIONS:
+        seed_here = seed + 50_000 + int(fraction * 1_000_000)
+        result = calibrate_fault(
+            clean_features=clean,
             injector=lambda x, r, f=fraction: inject_lag_copy(x, f, 1, r),
-            detector=detector_lag,
+            detector=_lag_detector(pairs, null_permutations, alpha, practical_excess_tvd_threshold),
             replicates=replicates,
-            seed=seed + int(fraction * 1_000_000) + 20,
+            seed=seed_here,
         )
-        out["lag_copy_injection"][key]["target_component"] = "d2_2_serial_dependence"
+        result["target_component"] = "d2_2_serial_dependence"
+        out["lag_copy_injection"][f"{fraction:.6g}"] = result
     return out
 
 
-def main() -> None:
-    args = parse_args()
-    validate_args(args)
-
+def main():
+    a = parse_args()
+    validate_args(a)
     adapter = GohrD2Adapter(num_rounds=5)
-    partitions: dict[str, np.ndarray] = {}
-    structured_views: dict[str, dict[str, Any]] = {}
-    for name, count in (
-        ("train", args.train_samples),
-        ("validation", args.validation_samples),
-        ("test", args.test_samples),
-    ):
-        print(f"Generating {name}: {count:,} samples...")
-        x, y, views = adapter.generate_partition(count)
-        partitions[name] = x
-        for view_name, spec in views.items():
-            structured_views[f"{name}:{view_name}"] = spec
-        print(f"  shape={x.shape}, dtype={x.dtype}")
+    parts, views = {}, {}
 
-    reference = binomial_reference_distribution(adapter.FEATURE_BITS, 0.5)
+    for name, n in (
+        ("train", a.train_samples),
+        ("validation", a.validation_samples),
+        ("test", a.test_samples),
+    ):
+        print(f"Generating {name}: {n:,} samples...")
+        x, y, v = adapter.generate_partition(n)
+        parts[name] = x
+        for view_name, spec in v.items():
+            views[f"{name}:{view_name}"] = spec
+        print(f"  shape={x.shape}, dtype={x.dtype}, labels={y.shape}")
+
+    nominal_reference = binomial_reference_distribution(adapter.FEATURE_BITS, 0.5)
     results, decision = run_d2(
-        partitions=partitions,
-        reference_pmf=reference,
+        partitions=parts,
         feature_bits=adapter.FEATURE_BITS,
-        structured_views=structured_views,
-        pairs_per_test=args.pairs_per_test,
-        audit_replicates=args.audit_replicates,
-        bootstrap_replicates=args.bootstrap_replicates,
+        reference_pmf=nominal_reference,
+        structured_views=views,
+        pairs_per_test=a.pairs_per_test,
+        audit_replicates=a.audit_replicates,
+        null_permutations=a.null_permutations,
+        bootstrap_replicates=a.bootstrap_replicates,
         lags=DEFAULT_LAGS,
         near_duplicate_radii=NEAR_DUPLICATE_RADII,
         multivariate_partitions=("train", "validation", "test"),
-        multivariate_pairs=args.multivariate_pairs,
-        multivariate_permutations=args.multivariate_permutations,
-        audit_seed=args.audit_seed,
+        multivariate_pairs=a.multivariate_pairs,
+        multivariate_permutations=a.multivariate_permutations,
+        audit_seed=a.audit_seed,
+        near_duplicate_query_count=a.near_duplicate_query_count,
+        near_duplicate_projection_tables=a.near_duplicate_projection_tables,
+        near_duplicate_null_pairs=a.near_duplicate_null_pairs,
+        practical_excess_tvd_threshold=a.practical_excess_tvd_threshold,
     )
 
-    # Calibration uses one clean partition and is intentionally recorded as a
-    # sensitivity result, never as evidence that the clean dataset is faulty.
-    if args.calibrate:
+    if a.calibrate:
         print("Running controlled D2 sensitivity calibration...")
-        results["d2_5_detection_calibration"] = run_calibration(
-            partitions["train"],
-            replicates=args.calibration_replicates,
-            pairs=args.calibration_pairs,
-            bootstrap_replicates=args.calibration_bootstrap_replicates,
-            seed=args.audit_seed + 50_000,
-            alpha=FAMILYWISE_ALPHA / familywise_test_count(
-                partition_count=3,
-                lag_count=3 * len(DEFAULT_LAGS),
-                near_duplicate_radius_count=len(NEAR_DUPLICATE_RADII),
-                structured_view_count=15,
-                multivariate_count=3,
-            ),
+        total = familywise_test_count(
+            partition_count=3,
+            lag_count=3 * len(DEFAULT_LAGS),
+            near_duplicate_radius_count=len(NEAR_DUPLICATE_RADII),
+            structured_view_count=15,
+            multivariate_count=3,
         )
+        results["d2_5_detection_calibration"] = run_calibration(
+            parts["train"],
+            replicates=a.calibration_replicates,
+            seed=a.audit_seed + 50_000,
+            query_count=a.calibration_query_count,
+            tables=a.calibration_projection_tables,
+            null_pairs=a.near_duplicate_null_pairs,
+            pairs=a.pairs_per_test,
+            null_permutations=a.null_permutations,
+            alpha=FAMILYWISE_ALPHA / total,
+            practical_excess_tvd_threshold=a.practical_excess_tvd_threshold,
+        )
+    else:
+        results["d2_5_detection_calibration"] = {
+            "status": "NOT_RUN",
+            "reason": "Controlled fault-injection calibration was not requested; no empirical sensitivity claim is made.",
+        }
 
-    provenance = adapter.reference_specification()
-    output_path = Path(args.output) if args.output else default_output_path(args)
-    certificate = build_d2_certificate(
+    out = Path(a.output) if a.output else default_output_path(a)
+    spec = adapter.reference_specification()
+    cert = build_d2_certificate(
         results=results,
         decision=decision,
-        partitions=partitions,
+        partitions=parts,
         dataset_id=adapter.DATASET_ID,
         dataset_version=adapter.DATASET_VERSION,
         generation_procedure="GohrAdapter.generate_partition -> speck.make_train_data",
         generation_parameters={
             "num_rounds": adapter.num_rounds,
-            "train_samples": args.train_samples,
-            "validation_samples": args.validation_samples,
-            "test_samples": args.test_samples,
+            "train_samples": a.train_samples,
+            "validation_samples": a.validation_samples,
+            "test_samples": a.test_samples,
             "randomness_source": "os.urandom",
+            "exact_replay_available": False,
+            "practical_excess_tvd_threshold": a.practical_excess_tvd_threshold,
         },
         generation_random_seed=None,
-        reference_description=provenance["pairwise_hamming_reference"],
-        reference_model_description=provenance["structured_collision_reference"],
-        audit_seed=args.audit_seed,
-        output_path=str(output_path),
+        reference_description=spec["pairwise_hamming_reference"],
+        reference_model_description=spec["structured_collision_reference"],
+        audit_seed=a.audit_seed,
+        output_path=str(out),
     )
-    print_report(results, certificate)
-    print(f"Certificate: {output_path}")
+    print_report(results, cert)
+    print(f"Certificate: {out}")
 
 
 if __name__ == "__main__":

@@ -1,13 +1,9 @@
-"""
-Gohr-specific D2 adapter.
+"""Gohr/Speck adapter for the generic D2 sample-dependence engine.
 
-This module contains ONLY the assumptions needed to expose the Gohr
-representation to the generic D2 engine. The generic D2 implementation
-never imports this module.
-
-The existing GohrAdapter remains responsible for dataset generation and
-model/training behavior. This adapter observes the original generator's
-random streams; it does not reimplement make_train_data().
+The adapter contains only case-study-specific assumptions.  It delegates
+actual dataset generation to the existing GohrAdapter and observes the
+original generator's random streams rather than reimplementing
+``make_train_data``.
 """
 from __future__ import annotations
 
@@ -20,8 +16,6 @@ from audit.dataset.adapters.gohr import GohrAdapter
 
 
 class GohrD2Adapter:
-    """Expose Gohr's observable D2 representations."""
-
     DATASET_ID = "gohr-speck"
     DATASET_VERSION = "original-make-train-data"
     NUM_ROUNDS = 5
@@ -52,8 +46,10 @@ class GohrD2Adapter:
             ).astype(np.uint16)
         return words[:, 0], words[:, 1], words[:, 2], words[:, 3]
 
-    def generate_partition(self, samples: int) -> tuple[np.ndarray, np.ndarray, dict[str, dict[str, Any]]]:
-        """Generate through the original GohrAdapter and expose semantic views."""
+    def generate_partition(
+        self, samples: int
+    ) -> tuple[np.ndarray, np.ndarray, dict[str, dict[str, Any]]]:
+        """Generate through the original GohrAdapter and expose D2 views."""
         if samples < 2:
             raise ValueError("samples must be >= 2.")
 
@@ -85,27 +81,25 @@ class GohrD2Adapter:
                 "Gohr generator urandom structure changed. "
                 f"Expected prefix {expected_prefix}, got {actual_prefix}."
             )
-
-        labels = np.asarray(labels).reshape(-1)
-        captured_labels = np.frombuffer(captured[0], dtype=np.uint8) & 1
-        if not np.array_equal(captured_labels, labels):
-            raise RuntimeError("Captured Gohr label stream does not match returned labels.")
-
         if len(captured) != 6:
             raise RuntimeError(
                 "Gohr make_train_data() changed its urandom call count; "
                 f"expected 6 calls, got {len(captured)}."
             )
 
+        labels = np.asarray(labels).reshape(-1)
+        captured_labels = np.frombuffer(captured[0], dtype=np.uint8) & 1
+        if not np.array_equal(captured_labels, labels):
+            raise RuntimeError("Captured Gohr label stream does not match returned labels.")
+
         plain0l = np.frombuffer(captured[2], dtype=np.uint16).copy()
         plain0r = np.frombuffer(captured[3], dtype=np.uint16).copy()
         plain1l = plain0l ^ np.uint16(0x0040)
-        plain1r = plain0r
+        plain1r = plain0r.copy()
 
         random_count = int(np.sum(captured_labels == 0))
         if len(captured[4]) != 2 * random_count or len(captured[5]) != 2 * random_count:
             raise RuntimeError("Gohr conditional plaintext random-stream length changed.")
-
         random_plain1l = np.frombuffer(captured[4], dtype=np.uint16)
         random_plain1r = np.frombuffer(captured[5], dtype=np.uint16)
         plain1l[captured_labels == 0] = random_plain1l
@@ -123,41 +117,47 @@ class GohrD2Adapter:
         views = {
             "key64": {
                 "values": key64,
-                "domain_size": 2 ** 64,
-                "description": "64-bit Gohr key reconstructed from generator random words.",
+                "domain_size": 2**64,
+                "collision_null": "uniform",
+                "description": "64-bit Gohr key reconstructed from uniformly random generator words.",
             },
             "plaintext0_block32": {
                 "values": self._combine_u16(plain0l, plain0r),
-                "domain_size": 2 ** 32,
-                "description": "32-bit first plaintext block.",
+                "domain_size": 2**32,
+                "collision_null": "uniform",
+                "description": "32-bit first plaintext block from uniformly random generator words.",
             },
             "plaintext1_block32": {
                 "values": self._combine_u16(plain1l, plain1r),
-                "domain_size": 2 ** 32,
-                "description": "32-bit second plaintext block after Gohr's label-conditioned construction.",
+                "domain_size": 2**32,
+                "collision_null": "uniform",
+                "description": "32-bit second plaintext block under Gohr's label-conditioned construction; each branch is uniform over the 32-bit domain.",
             },
             "ciphertext0_block32": {
                 "values": self._combine_u16(ct0l, ct0r),
-                "domain_size": 2 ** 32,
-                "description": "32-bit first ciphertext block recovered from the Gohr feature representation.",
+                "domain_size": 2**32,
+                "collision_null": "uniform",
+                "description": "32-bit first ciphertext block; Speck encryption is a permutation of the 32-bit block space, so uniform plaintext under an independent key remains uniform.",
             },
             "ciphertext1_block32": {
                 "values": self._combine_u16(ct1l, ct1r),
-                "domain_size": 2 ** 32,
-                "description": "32-bit second ciphertext block recovered from the Gohr feature representation.",
+                "domain_size": 2**32,
+                "collision_null": "uniform",
+                "description": "32-bit second ciphertext block; Speck encryption is a permutation of the 32-bit block space, so uniform plaintext under an independent key remains uniform.",
             },
         }
         return np.asarray(features), labels, views
 
     def reference_specification(self) -> dict[str, Any]:
-        """Return Gohr case-study assumptions; these do not enter generic D2."""
         return {
             "feature_bits": self.FEATURE_BITS,
-            "pairwise_hamming_reference": "Binomial(64, 0.5) nominal diagnostic for pairwise Hamming structure under independent balanced bits; confirmatory D2 inference uses an empirical independent-row Poisson-binomial null preserving observed bit marginals",
-            "structured_collision_reference": "Independent uniform finite-domain collision model",
-            "generator": "speck.make_train_data",
+            "pairwise_hamming_reference": "Binomial(64, 0.5) is diagnostic only; confirmatory D2 uses fixed-dataset complete-row randomization.",
+            "near_duplicate_reference": "Empirical complete-row resampling; no independent-bit assumption.",
+            "structured_collision_reference": "Uniform finite-domain collision model is declared only for views for which the Gohr/Speck construction supplies a justified uniform marginal.",
+            "generator": "speck.make_train_data via GohrAdapter.generate_partition",
             "num_rounds": self.num_rounds,
             "randomness_source": "os.urandom",
-            "null_model_status": "case-study assumptions; these are explicit statistical null models, not universal independence theorems",
-            "audit_seed_semantics": "audit_seed controls D2 sampling and statistical resampling only; dataset generation remains OS-randomized",
+            "null_model_status": "case-study assumptions are explicit and separate from generic D2",
+            "audit_seed_semantics": "audit_seed controls D2 sampling/randomization only; dataset generation remains OS-randomized",
+            "exact_replay_status": "not available from the generator interface; exact replay requires recording the generator random streams or adding a deterministic adapter mode",
         }
