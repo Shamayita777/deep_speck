@@ -619,6 +619,12 @@ def near_neighbor_summary(
         # fixed-dataset randomization inference.
         p_value = None
         ratio = float(hit_count / expected) if expected > 0 else (1.0 if hit_count == 0 else float("inf"))
+        if math.isinf(ratio):
+            serialized_ratio = None
+            ratio_status = "UNBOUNDED"
+        else:
+            serialized_ratio = ratio
+            ratio_status = "FINITE"
         out[str(radius)] = {
             "queried_rows": int(qn),
             "rows_with_verified_neighbor_within_radius": int(hit_count),
@@ -633,7 +639,8 @@ def near_neighbor_summary(
             "null_query_probability": query_q,
             "null_pair_simulation_pairs": int(null_pairs),
             "expected_query_hits": float(expected),
-            "excess_ratio": ratio,
+            "excess_ratio": serialized_ratio,
+            "excess_ratio_status": ratio_status,
             "one_sided_excess_p_value": p_value,
             "statistical_inference": "not_claimed; shared reference set induces dependence among query-hit indicators",
             "statistically_excessive": False,
