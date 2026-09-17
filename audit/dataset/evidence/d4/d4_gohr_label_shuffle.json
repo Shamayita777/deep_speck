@@ -1,0 +1,127 @@
+{
+  "audit": {
+    "claim": "Whether the specified controlled perturbation produces a reproducible change in predictive performance under the stated experimental and inferential design.",
+    "id": "D4",
+    "name": "Controlled Perturbation Audit"
+  },
+  "decision": {
+    "effect_detected": true,
+    "inference_supported": true,
+    "outcome": "EFFECT_DETECTED"
+  },
+  "findings": {
+    "bootstrap_ci": {
+      "confidence_level": 0.95,
+      "high": -0.4295666000000001,
+      "low": -0.42997680000000005
+    },
+    "mcnemar": {
+      "bonferroni_adjusted_alpha": 0.01,
+      "familywise_alpha": 0.05,
+      "maximum_pvalue": 0.0,
+      "minimum_pvalue": 0.0
+    },
+    "mean_accuracy_difference": -0.42974760000000006,
+    "mean_baseline_accuracy": 0.9293625999999999,
+    "mean_perturbed_accuracy": 0.49961500000000003,
+    "mean_relative_difference_percent": -46.24110807886349,
+    "perturbation": "label_shuffle",
+    "replicates": [
+      {
+        "accuracy_difference": -0.42978900000000003,
+        "baseline_accuracy": 0.929404,
+        "mcnemar_b": 47634,
+        "mcnemar_c": 477423,
+        "mcnemar_pvalue": 0.0,
+        "perturbed_accuracy": 0.499615,
+        "relative_difference_percent": -46.243506591320894,
+        "replicate": 1,
+        "seed": 3757552657
+      },
+      {
+        "accuracy_difference": -0.429483,
+        "baseline_accuracy": 0.929098,
+        "mcnemar_b": 48571,
+        "mcnemar_c": 478054,
+        "mcnemar_pvalue": 0.0,
+        "perturbed_accuracy": 0.499615,
+        "relative_difference_percent": -46.22580179916435,
+        "replicate": 2,
+        "seed": 673228719
+      },
+      {
+        "accuracy_difference": -0.42960500000000007,
+        "baseline_accuracy": 0.92922,
+        "mcnemar_b": 47529,
+        "mcnemar_c": 477134,
+        "mcnemar_pvalue": 0.0,
+        "perturbed_accuracy": 0.499615,
+        "relative_difference_percent": -46.23286197025463,
+        "replicate": 3,
+        "seed": 3241444873
+      },
+      {
+        "accuracy_difference": -0.430204,
+        "baseline_accuracy": 0.929819,
+        "mcnemar_b": 47082,
+        "mcnemar_c": 477286,
+        "mcnemar_pvalue": 0.0,
+        "perturbed_accuracy": 0.499615,
+        "relative_difference_percent": -46.26749937353399,
+        "replicate": 4,
+        "seed": 3685993406
+      },
+      {
+        "accuracy_difference": -0.429657,
+        "baseline_accuracy": 0.929272,
+        "mcnemar_b": 47880,
+        "mcnemar_c": 477537,
+        "mcnemar_pvalue": 0.0,
+        "perturbed_accuracy": 0.499615,
+        "relative_difference_percent": -46.23587066004357,
+        "replicate": 5,
+        "seed": 1216546553
+      }
+    ],
+    "sd_accuracy_difference": 0.0002777459270628267
+  },
+  "interpretation": "A reproducible performance effect was detected under the specified perturbation, with the pre-specified practical-effect criterion and conservative paired inference criterion both satisfied.",
+  "limitations": [
+    "The perturbation result establishes dependence on the original feature/label correspondence, not cryptographic dependence specifically.",
+    "A label shuffle can disrupt any predictive relationship between features and labels, including relationships arising from dataset construction or implementation artifacts.",
+    "Inference is conditional on the specified model architecture, optimization procedure, dataset generation procedure, perturbation, and held-out test partition.",
+    "The bootstrap confidence interval quantifies uncertainty across independent training replicates; it is not a confidence interval for the population of all possible datasets.",
+    "The experiment does not by itself establish security, cryptographic hardness, or absence of alternative predictive shortcuts."
+  ],
+  "methodology": {
+    "bootstrap_replicates": 5000,
+    "confidence_interval": "percentile bootstrap over independent training replicates",
+    "decision_rule": "EFFECT_DETECTED iff the mean absolute accuracy difference meets the practical-effect threshold, the replicate-level bootstrap confidence interval excludes zero, and every replicate satisfies the Bonferroni-adjusted paired McNemar criterion.",
+    "effect_size": "absolute accuracy difference in percentage points",
+    "evaluation_design": "same fixed held-out test partition for baseline and perturbed models",
+    "multiple_comparison_control": "Bonferroni correction across independent replicate-level McNemar tests",
+    "paired_test": "exact two-sided McNemar test on paired test-example correctness",
+    "practical_effect_threshold": 0.01,
+    "unit_of_independent_replication": "independent model training replicate"
+  },
+  "provenance": {
+    "audit_seed": 0,
+    "dataset_id": "gohr-speck",
+    "dataset_version": "original-make-train-data",
+    "generation_parameters": {
+      "depth": 10,
+      "epochs": 200,
+      "generator": "speck.make_train_data",
+      "input_difference": {
+        "left_word": "0x0040",
+        "right_word": "0x0000"
+      },
+      "num_rounds": 5,
+      "randomness_source": "os.urandom",
+      "test_samples": 1000000,
+      "train_samples": 10000000,
+      "validation_samples": 1000000
+    },
+    "generation_procedure": "speck.make_train_data(n, nr)"
+  }
+}

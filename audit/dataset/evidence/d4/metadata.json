@@ -1,0 +1,35 @@
+{
+  "config_hash": "b41cf02aaf5e83a86270ebe00c965ae79c3518fd413dc09dd1818e0bdfff64fa",
+  "dtypes": {
+    "test_x": "uint8",
+    "test_y": "uint8",
+    "train_x": "uint8",
+    "train_y": "uint8",
+    "validation_x": "uint8",
+    "validation_y": "uint8"
+  },
+  "schema_version": "2.0",
+  "shapes": {
+    "test_x": [
+      1000000,
+      64
+    ],
+    "test_y": [
+      1000000
+    ],
+    "train_x": [
+      10000000,
+      64
+    ],
+    "train_y": [
+      10000000
+    ],
+    "validation_x": [
+      1000000,
+      64
+    ],
+    "validation_y": [
+      1000000
+    ]
+  }
+}

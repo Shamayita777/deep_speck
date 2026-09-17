@@ -141,5 +141,6 @@ def write_certificate(
             handle,
             indent=2,
             sort_keys=True,
+            allow_nan=False,
         )
         handle.write("\n")
