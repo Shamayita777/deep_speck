@@ -963,13 +963,13 @@ def run_d5(
             condition = f"replicate_{r:02d}/n_{n}"
             expected_train_x_hash, expected_train_y_hash = prefix_hashes_for(train_meta, n)
 
-            checkpoint_state_status = _validate_checkpoint_state_pair(
+            checkpoint_state_pair_valid = _validate_checkpoint_state_pair(
                 p,
                 condition,
             )
 
             state = None
-            if checkpoint_state_status == "complete":
+            if checkpoint_state_pair_valid:
                 state = json.loads(p["state"].read_text(encoding="utf-8"))
                 _validate_condition_state_matches_current_data(
                     state,
