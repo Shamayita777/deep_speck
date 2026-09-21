@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-EV_ROOT = REPO_ROOT / "experimental_validity"
+EV_ROOT = REPO_ROOT / "audit" / "experimental_validity"
 for p in (REPO_ROOT, EV_ROOT):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
