@@ -1,0 +1,14 @@
+{
+    "framework": "Cryptographic Evidence Framework",
+    "test": "Signal Destruction",
+    "decision": "INCONCLUSIVE",
+    "rationale": "Observed performance degradation is insufficient for strong support.",
+    "baseline_score": 0.6107940077781677,
+    "test_score": 0.5002120137214661,
+    "performance_drop": 0.11058199405670166,
+    "relative_difference": 0.18104629817662451,
+    "threshold": 0.05,
+    "observed_effect": 0.18104629817662451,
+    "runtime": 16700.544564261,
+    "timestamp": "2026-08-06T22:51:13.963715"
+}

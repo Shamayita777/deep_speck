@@ -1,0 +1,37 @@
+{
+  "config": {
+    "alpha": 0.05,
+    "audit": "D4",
+    "audit_seed": 0,
+    "batch_size": 5000,
+    "bootstrap_replicates": 5000,
+    "dataset_id": "gohr-speck",
+    "dataset_version": "original-make-train-data",
+    "depth": 10,
+    "effect_threshold": 0.01,
+    "epochs": 200,
+    "generator": "speck.make_train_data",
+    "generator_randomness": "os.urandom",
+    "input_difference": {
+      "left_word": "0x0040",
+      "right_word": "0x0000"
+    },
+    "num_rounds": 5,
+    "perturbation": "label_shuffle",
+    "replicates": 5,
+    "schema_version": "2.0",
+    "test_samples": 1000000,
+    "train_samples": 10000000,
+    "training_protocol": {
+      "checkpoint_every_epoch": true,
+      "checkpoint_format": "keras_full_model",
+      "learning_rate_schedule": "train_nets.cyclic_lr(10,0.002,0.0001)",
+      "loss": "mse",
+      "optimizer": "adam",
+      "shuffle": false
+    },
+    "validation_samples": 1000000
+  },
+  "config_hash": "b41cf02aaf5e83a86270ebe00c965ae79c3518fd413dc09dd1818e0bdfff64fa",
+  "schema_version": "2.0"
+}

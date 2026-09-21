@@ -1,0 +1,191 @@
+{
+  "artifact_count": 18,
+  "artifacts": {
+    "audit/evidence_bundle/cryptography/ce1/ce1_certificate.json": {
+      "artifact_path": "audit/evidence_bundle/cryptography/ce1/ce1_certificate.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "27a7dcb48c819ee44f9d3653e90932d5757357912cb057fc1e215be9898fc4e7",
+      "referenced_by": [
+        "EV-CE1-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce1/ce1_certificate.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/cryptography/ce2/ce2_certificate_1.json": {
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_1.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "dcef7f5e6459f52e2c6f22170260051bcf2edec20068218c35e018a608441894",
+      "referenced_by": [
+        "EV-CE2-RUN1-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce2/ce2_certificate_1.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/cryptography/ce2/ce2_certificate_2.json": {
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_2.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "bd59bc60d80a2718c6367ccc25d6801d8899fe94ff925a6495efc240041c1ed6",
+      "referenced_by": [
+        "EV-CE2-RUN2-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce2/ce2_certificate_2.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/cryptography/ce2/ce2_certificate_3.json": {
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_3.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "abb079a279b3509b78a011047576a4eecd79373779ff0cbb81d22b8bbdede420",
+      "referenced_by": [
+        "EV-CE2-RUN3-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce2/ce2_certificate_3.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/cryptography/ce2/ce2_certificate_4.json": {
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_4.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "4177c34216a1fc10ee2a37d424288298e8beaff8e0512898dc8dfb8a5f7fe46c",
+      "referenced_by": [
+        "EV-CE2-RUN4-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce2/ce2_certificate_4.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/cryptography/ce2/ce2_certificate_5.json": {
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_5.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "9859e69722bb508d31ac48cfbf4be1a3913f0c9f47128569f53c106b6f939ad3",
+      "referenced_by": [
+        "EV-CE2-RUN5-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce2/ce2_certificate_5.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/cryptography/ce3/ce3_certificate.json": {
+      "artifact_path": "audit/evidence_bundle/cryptography/ce3/ce3_certificate.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "695ec93d3095aedc87c25b9b54b10860f4491140624ba07a3576d42b2edf7aad",
+      "referenced_by": [
+        "EV-CE3-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce3/ce3_certificate.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/cryptography/ce4/ce4_certificate.json": {
+      "artifact_path": "audit/evidence_bundle/cryptography/ce4/ce4_certificate.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "34f16cb6ce97d3faea5999ce4bf7ff0e3b688fc17088898c50abdfae71bcedea",
+      "referenced_by": [
+        "EV-CE4-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce4/ce4_certificate.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/dataset/d1/d1_gohr_10000000_1000000_1000000_5r.json": {
+      "artifact_path": "audit/evidence_bundle/dataset/d1/d1_gohr_10000000_1000000_1000000_5r.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "cffc1d6416b5bd62fb0a4d19358b87ea297afb1cfdecb8925b5c35bc72c0bdca",
+      "referenced_by": [
+        "EV-D1-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/dataset/d1/d1_gohr_10000000_1000000_1000000_5r.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/dataset/d2/d2_full_v64.json": {
+      "artifact_path": "audit/evidence_bundle/dataset/d2/d2_full_v64.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "3f7b37bd9fc7f9c540ea9f6fde83dcaf89caa3c4f7367ed0d1d7b175942c4612",
+      "referenced_by": [
+        "EV-D2-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/dataset/d2/d2_full_v64.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/dataset/d3/d3_gohr_10000000_1000000_1000000_5r.json": {
+      "artifact_path": "audit/evidence_bundle/dataset/d3/d3_gohr_10000000_1000000_1000000_5r.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "757e62bfebc237f806134ba0e036ee23797048fe891b58a17cb52ce435633ed2",
+      "referenced_by": [
+        "EV-D3-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/dataset/d3/d3_gohr_10000000_1000000_1000000_5r.json.",
+      "verification_status": "VERIFIED"
+    },
+    "audit/evidence_bundle/dataset/d4/d4_gohr_label_shuffle.json": {
+      "artifact_path": "audit/evidence_bundle/dataset/d4/d4_gohr_label_shuffle.json",
+      "artifact_role": "historical_evidence_certificate",
+      "recorded_hash": "76ef648fce078338273cd14aeadb6f39b216e497d0cf3b647598a9498e38a322",
+      "referenced_by": [
+        "EV-D4-INGESTED"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/dataset/d4/d4_gohr_label_shuffle.json.",
+      "verification_status": "VERIFIED"
+    },
+    "best5depth10 (10).h5": {
+      "artifact_path": "best5depth10 (10).h5",
+      "artifact_role": "inspected_artifact",
+      "recorded_hash": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea",
+      "referenced_by": [
+        "EV-II-DEPTH-001"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce1/best5depth10 (10).h5.",
+      "verification_status": "VERIFIED"
+    },
+    "reference/speck.py": {
+      "artifact_path": "reference/speck.py",
+      "artifact_role": "reference_source",
+      "recorded_hash": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce",
+      "referenced_by": [
+        "EV-II-DEPTH-001"
+      ],
+      "verification_detail": "Hash matches file at audit/implementation/reference/speck.py.",
+      "verification_status": "VERIFIED"
+    },
+    "reference/train_5_rounds.py": {
+      "artifact_path": "reference/train_5_rounds.py",
+      "artifact_role": "reference_source",
+      "recorded_hash": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+      "referenced_by": [
+        "EV-II-DEPTH-001"
+      ],
+      "verification_detail": "Hash matches file at audit/implementation/reference/train_5_rounds.py.",
+      "verification_status": "VERIFIED"
+    },
+    "reference/train_nets.py": {
+      "artifact_path": "reference/train_nets.py",
+      "artifact_role": "reference_source",
+      "recorded_hash": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669",
+      "referenced_by": [
+        "EV-II-DEPTH-001"
+      ],
+      "verification_detail": "Hash matches file at audit/implementation/reference/train_nets.py.",
+      "verification_status": "VERIFIED"
+    },
+    "run_manifest_ii-core-run-001.json": {
+      "artifact_path": "run_manifest_ii-core-run-001.json",
+      "artifact_role": "run_manifest",
+      "recorded_hash": "2820ba36d360913f7fbf7831e79db639f4605cc13ebf53b102d864a5f656ca1f",
+      "referenced_by": [
+        "EV-II-DEPTH-001"
+      ],
+      "verification_detail": "Hash matches file at audit/implementation/evidence/run_manifest_ii-core-run-001.json.",
+      "verification_status": "VERIFIED"
+    },
+    "signal_destroyed.h5": {
+      "artifact_path": "signal_destroyed.h5",
+      "artifact_role": "inspected_artifact",
+      "recorded_hash": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308",
+      "referenced_by": [
+        "EV-II-DEPTH-001"
+      ],
+      "verification_detail": "Hash matches file at audit/evidence_bundle/cryptography/ce1/signal_destroyed.h5.",
+      "verification_status": "VERIFIED"
+    }
+  },
+  "generated_at_utc": "2026-09-19T16:09:33.287284+00:00",
+  "hash_conflicts": [],
+  "schema_version": "artifact-index-v1",
+  "verification_summary": {
+    "VERIFIED": 18
+  }
+}

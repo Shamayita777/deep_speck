@@ -1,0 +1,33 @@
+# Smoke-mode configuration for ALL four EV experiments.
+# NON_EVIDENTIARY: results from this configuration must never enter
+# the scientific evidence tables. Purpose: verify imports, dataset
+# generation, model construction, training, evaluation, statistics,
+# manifest/certificate generation, and provenance end-to-end on a
+# drastically reduced problem.
+run_mode: smoke
+
+ev_baseline:
+  requested_replicates: 3
+  minimum_valid_replicates: 2
+  base_model_seed: 1000
+
+ev_noise:
+  requested_reruns: 3
+  minimum_valid_reruns: 2
+  model_seed: 2000
+
+h_ev_shuffle:
+  requested_pairs: 3
+  minimum_valid_pairs: 2
+  base_model_seed: 3000
+
+h_ev_representation:
+  requested_pairs: 3
+  minimum_valid_pairs: 2
+  base_model_seed: 4000
+  permutation_generation_seed: 999
+
+# Smoke overrides (see gohr/experiments.py::_baseline_overrides_for_run_mode):
+# rounds=3, depth=1, epochs=1, batch_size=64, train_size=256, val_size=64,
+# confirmatory_test_size=64. These are NOT the frozen baseline and must
+# never be copied into a production config.

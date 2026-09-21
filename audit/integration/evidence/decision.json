@@ -1,0 +1,202 @@
+{
+  "ce_mappings": [
+    {
+      "ce_id": "CE1",
+      "claim": "Observed distinguishing performance reflects signal in the ciphertext pair, not an artifact.",
+      "control": "Baseline model trained on the intact dataset.",
+      "cryptographic_mechanism": "Signal destruction applied to the dataset generation.",
+      "data_source": "Freshly generated 5-round Speck32/64 datasets.",
+      "dependent_variable": "Distinguishing accuracy.",
+      "differential": [
+        64,
+        0
+      ],
+      "evidence_artifact": "evidence/ce1/ce1_certificate.json",
+      "hypothesis": "Destroying the differential signal should collapse performance toward chance.",
+      "limitations": [
+        "baseline_score=0.6108 is far below the reference protocol's reported 0.9291. The Implementation Integrity finding identifies the depth-5/depth-10 divergence as a confirmed candidate explanation, but causal attribution is UNDEMONSTRATED.",
+        "Single run per arm: no replication, therefore no uncertainty estimate and no inferential statistic. A threshold comparison on two point estimates cannot distinguish a real effect from run-to-run variation."
+      ],
+      "manipulated_variable": "Presence/absence of the differential signal in the training data.",
+      "model_provenance": "TRAINS its own baseline and signal-destroyed models via adapter.train(). The default GohrModel depth (5) is never overridden to the reference protocol's depth=10.",
+      "open_specification_gaps": [
+        "No preregistered practical-significance justification for the 0.05 relative-difference threshold."
+      ],
+      "recorded_decision": "INCONCLUSIVE",
+      "rounds": 5,
+      "statistical_method": "Relative performance-drop threshold (0.05); no inferential test.",
+      "statistical_unit": "One trained model per arm (single run, not replicated).",
+      "test_name": "Signal Destruction"
+    },
+    {
+      "ce_id": "CE2",
+      "claim": "The model's outputs track the analytically derived single-trail probability.",
+      "control": "None (observational correlation, no intervention or control arm).",
+      "cryptographic_mechanism": "Lipmaa-Moriai closed-form modular-addition XOR differential probability, chained along each sample's realized round-by-round trajectory under a Markov/independence assumption, interpreted as a single-trail quantity. NOT the cipher's exact differential probability, NOT the full trail probability, and NOT established to be the quantity the network learned.",
+      "data_source": "Theory dataset of 1e5 samples.",
+      "dependent_variable": "Rank correlation between model output and the theoretical reference.",
+      "differential": [
+        64,
+        0
+      ],
+      "evidence_artifact": "evidence/ce2/ce2_certificate_{1..5}.json (5 independent runs)",
+      "hypothesis": "Model output and the theoretical reference should be positively rank-correlated.",
+      "limitations": [
+        "Observational: a correlation with no control arm cannot separate the declared mechanism from any covarying quantity.",
+        "Per-sample statistical unit within ONE model instance: the result characterizes that instance, not the population of models the protocol would produce."
+      ],
+      "manipulated_variable": "None - observational.",
+      "model_provenance": "Loads frozen checkpoint 'best5depth10 (10).h5' (sha256 de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea), whose REALIZED architecture is depth-5 despite its filename - see II-FINDING-DEPTH-V1.",
+      "open_specification_gaps": [],
+      "recorded_decision": "NOT_SUPPORTED",
+      "rounds": 5,
+      "statistical_method": "Rank correlation with p-value against a 0.1 threshold.",
+      "statistical_unit": "Per-sample (n=1e5) within a single model instance.",
+      "test_name": "Theory Consistency"
+    },
+    {
+      "ce_id": "CE3",
+      "claim": "The trained model's hidden representation encodes the declared quantity beyond a control representation.",
+      "control": "Adapter-supplied control model representation, plus an independent calibration target that gates the decision.",
+      "cryptographic_mechanism": "Lipmaa-Moriai closed-form modular-addition XOR differential probability, chained along each sample's realized round-by-round trajectory under a Markov/independence assumption, interpreted as a single-trail quantity. NOT the cipher's exact differential probability, NOT the full trail probability, and NOT established to be the quantity the network learned.",
+      "data_source": "Per-replicate independently generated evaluation datasets.",
+      "dependent_variable": "Control-normalized decodability (selectivity).",
+      "differential": [
+        64,
+        0
+      ],
+      "evidence_artifact": "evidence/ce3/ce3_certificate.json",
+      "hypothesis": "The declared target is more decodable from the trained model's representation than from the control's.",
+      "limitations": [
+        "Decodability is not mechanism: a quantity being linearly recoverable from a representation does not establish that the model USES it to produce its output.",
+        "Scoped to the depth-5 checkpoint instance, not to the declared reference protocol."
+      ],
+      "manipulated_variable": "Which representation is probed (trained model vs control model).",
+      "model_provenance": "Loads frozen checkpoint 'best5depth10 (10).h5' (sha256 de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea), whose REALIZED architecture is depth-5 despite its filename - see II-FINDING-DEPTH-V1.",
+      "open_specification_gaps": [
+        "The driver passes supported/inconclusive thresholds (0.20/0.05) that the evaluator's CE3 branch never reads - a code-clarity defect recorded as II-FINDING-CE3-DEADPARAMS-V1. It does not affect the recorded decision."
+      ],
+      "recorded_decision": "SUPPORTED",
+      "rounds": 5,
+      "statistical_method": "Paired significance across replicates, Bonferroni-corrected alpha=0.025 (m=2), calibration-gated.",
+      "statistical_unit": "Independent evaluation replicate (n=20); CV folds averaged within replicate, NOT treated as independent.",
+      "test_name": "Representation Interpretation"
+    },
+    {
+      "ce_id": "CE4",
+      "claim": "The model's output causally depends on the declared structure, not on perturbation magnitude alone.",
+      "control": "Magnitude-matched mirrored-pair perturbation drawn from the SAME eligible pool, which provably preserves the XOR difference at every intervened position via the identity (a^1)^(b^1) == a^b. Inert with respect to the DECLARED target only - it still alters 32 raw input bits.",
+      "cryptographic_mechanism": "Lipmaa-Moriai closed-form modular-addition XOR differential probability, chained along each sample's realized round-by-round trajectory under a Markov/independence assumption, interpreted as a single-trail quantity. NOT the cipher's exact differential probability, NOT the full trail probability, and NOT established to be the quantity the network learned.",
+      "data_source": "CE3's primary task dataset, reused literally.",
+      "dependent_variable": "Absolute output-probability difference; necessity gap = targeted - control.",
+      "differential": [
+        64,
+        0
+      ],
+      "evidence_artifact": "evidence/ce4/ce4_certificate.json",
+      "hypothesis": "A targeted structural perturbation should change the output more than a magnitude-matched control perturbation.",
+      "limitations": [
+        "Per-sample unit within a single model instance: establishes intervention-sensitive dependence FOR THAT MODEL, not a property of models the protocol produces. p-value underflowed to 0.0 at n~1e5; the effect size (d_z=0.545) is the informative quantity.",
+        "Population narrowed by excluding 252/100000 samples whose realized trail could not support the intervention magnitude. Disclosed in the certificate (verified).",
+        "'Causal necessity' is stronger than what is established: the evidence supports intervention-sensitive dependence on the declared structure within the tested population and model instance."
+      ],
+      "manipulated_variable": "Single-sided (structural) vs mirrored (control) bit perturbation.",
+      "model_provenance": "Loads frozen checkpoint 'best5depth10 (10).h5' (sha256 de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea), whose REALIZED architecture is depth-5 despite its filename - see II-FINDING-DEPTH-V1.",
+      "open_specification_gaps": [],
+      "recorded_decision": "SUPPORTED",
+      "rounds": 5,
+      "statistical_method": "Wilcoxon signed-rank with bootstrap CI; thresholds scaled to an empirically calibrated all-bits-flipped output-change ceiling.",
+      "statistical_unit": "Per-sample necessity gap (n=99,748 after 0.252% exclusion) within ONE model instance.",
+      "test_name": "Causal Intervention"
+    }
+  ],
+  "claim_id": "C1",
+  "claim_text": "For the 5-round Gohr/Speck32/64 neural distinguisher under differential (0x0040, 0x0000), the observed above-chance distinguishing performance is supported by cryptographically meaningful evidence after dataset, implementation and experimental alternative explanations have been evaluated.",
+  "conflicts": [
+    {
+      "blocks_claim": true,
+      "candidate_confounders": [
+        "All three tests were run against the SAME depth-5 checkpoint (II-FINDING-DEPTH-V1), which diverges from the declared reference protocol's depth=10. A shared upstream artifact defect cannot by itself explain a DISAGREEMENT between tests run on that same artifact, so it does not resolve this conflict - but it does mean all three observations are scoped to a non-conformant model instance.",
+        "The tests measure genuinely different things: CE2 tests OUTPUT AGREEMENT with the target; CE3 tests REPRESENTATIONAL DECODABILITY; CE4 tests OUTPUT SENSITIVITY to perturbing the target. These are not logically equivalent, and it is coherent for a model to encode and be sensitive to a quantity whose monotone ordering its output nonetheless fails to track. This is a plausible reconciliation, but it is a HYPOTHESIS, not an established finding, and it is not adopted as a resolution here."
+      ],
+      "conflict_id": "CONFLICT-CE2-CE34-V1",
+      "observations": [
+        {
+          "decision": "NOT_SUPPORTED",
+          "evidence_reference": "evidence/ce2/ce2_certificate_{1..5}.json",
+          "methodological_notes": [
+            "Observational, no control arm.",
+            "Per-sample unit (n=1e5) within one model instance.",
+            "Five independent runs, which strengthens it against being a one-off.",
+            "Measures the model's OUTPUT against the target."
+          ],
+          "observation": "Model output does NOT positively rank-correlate with the analytical target; the observed correlation is negative.",
+          "source_id": "CE2"
+        },
+        {
+          "decision": "SUPPORTED",
+          "evidence_reference": "evidence/ce3/ce3_certificate.json",
+          "methodological_notes": [
+            "Replicate-level unit (n=20 independent evaluation replicates).",
+            "Calibration-gated and Bonferroni-corrected - methodologically the strongest of the three designs.",
+            "Measures the model's INTERNAL REPRESENTATION, not its output."
+          ],
+          "observation": "The analytical target IS selectively decodable from the trained model's hidden representation relative to a control representation.",
+          "source_id": "CE3"
+        },
+        {
+          "decision": "SUPPORTED",
+          "evidence_reference": "evidence/ce4/ce4_certificate.json",
+          "methodological_notes": [
+            "Per-sample unit within one model instance; p underflowed at n~1e5, d_z=0.545.",
+            "Control provably preserves the declared target (XOR identity).",
+            "Measures output SENSITIVITY to perturbation, not output AGREEMENT with the target."
+          ],
+          "observation": "Perturbing the analytical structure changes the model's output more than a magnitude-matched, target-preserving control perturbation.",
+          "source_id": "CE4"
+        }
+      ],
+      "rationale": "Both the contradicting and the supporting observations are RETAINED. The conflict is NOT resolved by majority vote (two SUPPORTED against one NOT_SUPPORTED), which methodology 3.8.8 prohibits and which would here amount to discarding the only observation contradicting the desired conclusion. It is also not resolved by methodological quality alone: although CE3 has the strongest design (replicate-level unit, calibration gate, multiplicity correction), a stronger design for a DIFFERENT measurement does not overturn a weaker design's finding about its own measurement. Per 3.8.8 the conflict therefore stands as requiring additional controlled experimentation, and the affected claim cannot be certified while it stands.",
+      "required_experimentation": [
+        "Re-execute CE2, CE3 and CE4 against a reference-conformant (depth=10) model so that all three observations describe the declared protocol rather than a divergent artifact.",
+        "Test the measurement-target hypothesis directly: determine whether the output-agreement/representational-decodability divergence persists under a conformant model, which would distinguish a genuine dissociation from an artifact of this instance."
+      ],
+      "shared_subject": "The same analytical target quantity (Lipmaa-Moriai chained single-trail differential probability), verified identical across CE2/CE3/CE4 by source: CE4 reuses CE3's primary task object literally, and CE3's target and CE2's reference both read TheoryDataset.theoretical_probabilities.",
+      "status": "REQUIRES_ADDITIONAL_EXPERIMENTATION"
+    }
+  ],
+  "decision": {
+    "blocking_conflicts": [
+      "CONFLICT-CE2-CE34-V1"
+    ],
+    "claim_id": "C1",
+    "dimension_outcomes": {
+      "cryptographic_evidence": "INCONCLUSIVE",
+      "dataset_integrity": "INCONCLUSIVE",
+      "experimental_validity": "INCONCLUSIVE",
+      "implementation_integrity": "INCONCLUSIVE"
+    },
+    "evidence_level": "LEVEL_1_PREDICTIVE",
+    "final_outcome": "INCONCLUSIVE",
+    "limitations": [
+      "No Experimental Validity production evidence exists yet.",
+      "Dataset Integrity is not fully established: D2 is INCONCLUSIVE and explicitly records that it is not proof of independence; D5 has smoke evidence only.",
+      "All CE1-CE4 evidence was produced against a depth-5 checkpoint that diverges from the declared reference protocol's depth=10 (II-FINDING-DEPTH-V1).",
+      "No independent convergence source exists, so LEVEL_4 is unreachable on the current evidence - this reflects absent convergence evidence, not a policy cap.",
+      "Gohr's 11/12-round key-recovery apparatus (key_rank.py, test_key_recovery.py, key_averaging.py and released weights) exists in the repository but is NOT part of this claim chain. No CE1-CE4 experiment exercises it, and no evidence chain currently supports a key-recovery claim. It is recorded here solely so its exclusion is explicit rather than accidental."
+    ],
+    "policy_version": "ciphermind-decision-policy-v1",
+    "rationale": "Unresolved conflict(s) ['CONFLICT-CE2-CE34-V1'] persist after the 3.8.8 procedure; the affected claim is INCONCLUSIVE. An unresolved conflict among cryptographic observations on the same target quantity prevents any claim that observations are consistent with cryptographic reasoning. Evidence remains at the predictive level.",
+    "supporting_evidence_ids": [
+      "implementation-certificate-V3",
+      "evidence/ce1/ce1_certificate.json",
+      "evidence/ce2/ce2_certificate_{1..5}.json",
+      "evidence/ce3/ce3_certificate.json",
+      "evidence/ce4/ce4_certificate.json",
+      "dataset/evidence/d1..d5"
+    ]
+  },
+  "scope_notes": {
+    "key_recovery": "Gohr's 11/12-round key-recovery apparatus (key_rank.py, test_key_recovery.py, key_averaging.py and released weights) exists in the repository but is NOT part of this claim chain. No CE1-CE4 experiment exercises it, and no evidence chain currently supports a key-recovery claim. It is recorded here solely so its exclusion is explicit rather than accidental."
+  }
+}

@@ -1,0 +1,606 @@
+{
+  "entries": [
+    {
+      "adjusted_p_value": null,
+      "artifact_hashes": {
+        "best5depth10 (10).h5": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea",
+        "reference/speck.py": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce",
+        "reference/train_5_rounds.py": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+        "reference/train_nets.py": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669",
+        "run_manifest_ii-core-run-001.json": "2820ba36d360913f7fbf7831e79db639f4605cc13ebf53b102d864a5f656ca1f",
+        "signal_destroyed.h5": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308"
+      },
+      "claim_id": "C1",
+      "confidence_interval": null,
+      "decision": "INCONCLUSIVE",
+      "dimension": "IMPLEMENTATION_INTEGRITY",
+      "effect_size": null,
+      "entry_kind": "NATIVE",
+      "evidence_id": "EV-II-DEPTH-001",
+      "experiment_id": "II-CORE-GOHR-5R",
+      "input_artifacts": [
+        "best5depth10 (10).h5",
+        "reference/speck.py",
+        "reference/train_5_rounds.py",
+        "reference/train_nets.py",
+        "run_manifest_ii-core-run-001.json",
+        "signal_destroyed.h5"
+      ],
+      "limitations": [
+        "Independent reimplementation (ENHANCED stage II-2) is NOT_ASSESSED. Independent reimplementation was NOT assessed, so Implementation Integrity contributes no independent-implementation convergence source. This says nothing about convergence sources from independent datasets or architectures elsewhere in the audit; LEVEL_4 remains determinable by the integration engine from whatever qualifying convergence evidence actually exists.",
+        "CORE stages not satisfied in this execution: ['II-4_COMPARATIVE_EVALUATION']. No implementation-integrity verdict is issued on their behalf.",
+        "II-FINDING-DEPTH-V1: discrepancy CONFIRMED, scientific impact UNDEMONSTRATED. A controlled re-execution under the declared protocol is required before any claim that this discrepancy changed a scientific conclusion.",
+        "Whether depth alone quantitatively accounts for the 0.9291 -> 0.6108 gap is NOT established; confirming it requires a controlled depth-10 re-execution under the reference protocol. Recorded as OPEN, not asserted.",
+        "Whether the depth-5 default was intentional, accidental, or a filename mismatch is not determinable from the available artifacts: no run manifest exists for the historical CE executions. Recorded as OPEN.",
+        "CE2 (NOT_SUPPORTED) vs CE3/CE4 (SUPPORTED) on the same verified-identical target quantity is an unresolved scientific conflict, independent of this finding; it is deferred to audit/integration/conflict_resolution.py.",
+        "A dimension-agnostic evaluator that branches on a hard-coded test name contradicts its own module docstring ('contains no knowledge of any specific cryptographic test'). Recommended cleanup, not a scientific defect.",
+        "No pre-execution preregistration artifact exists for this execution, so the evidence is tagged EXPLORATORY. It records a confirmed, reproducible artifact-vs-declared-protocol conformance check, but it is not preregistered confirmatory evidence and must not be presented as such."
+      ],
+      "observation": {
+        "convergence_contribution": {
+          "contributes": false,
+          "rationale": "Independent reimplementation was NOT assessed, so Implementation Integrity contributes no independent-implementation convergence source. This says nothing about convergence sources from independent datasets or architectures elsewhere in the audit; LEVEL_4 remains determinable by the integration engine from whatever qualifying convergence evidence actually exists.",
+          "source_kind": null
+        },
+        "core_stages_satisfied": false,
+        "core_stages_unsatisfied": [
+          "II-4_COMPARATIVE_EVALUATION"
+        ],
+        "discrepancy_confirmed": true,
+        "downstream_requires_reevaluation": [
+          "evidence/ce1/ce1_certificate.json",
+          "evidence/ce2/ce2_certificate_{1..5}.json",
+          "evidence/ce3/ce3_certificate.json",
+          "evidence/ce4/ce4_certificate.json"
+        ],
+        "findings": [
+          {
+            "actual": {
+              "depth": 5,
+              "derivation": "depth = (n_conv1d_layers - 1) / 2 = (11 - 1) / 2 = 5",
+              "mechanism": "The CE GohrModel constructor defaults to depth=5 and no CE driver script passes an explicit depth override, so the reference protocol's depth=10 is never applied.",
+              "n_conv1d_layers": 11,
+              "observed_ce1_baseline_score": 0.6108
+            },
+            "declared": {
+              "depth": 10,
+              "reference_reported_best_val_accuracy": 0.9291,
+              "source": "reference/train_5_rounds.py: train_speck_distinguisher(200, num_rounds=5, depth=10)"
+            },
+            "downstream": [
+              {
+                "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+                "evidence_reference": "evidence/ce1/ce1_certificate.json",
+                "historical_artifact_preserved": true,
+                "rationale": "CE1 trains its own models via adapter.train() with no depth override, so its baseline and signal-destroyed models are both depth-5. Its INCONCLUSIVE verdict was produced at an architecture that does not match the reference protocol.",
+                "status": "REQUIRES_REEVALUATION"
+              },
+              {
+                "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+                "evidence_reference": "evidence/ce2/ce2_certificate_{1..5}.json",
+                "historical_artifact_preserved": true,
+                "rationale": "CE2 loads the depth-5 checkpoint. Its NOT_SUPPORTED verdict is a property of that model instance and is not established for a reference-conformant depth-10 model.",
+                "status": "REQUIRES_REEVALUATION"
+              },
+              {
+                "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+                "evidence_reference": "evidence/ce3/ce3_certificate.json",
+                "historical_artifact_preserved": true,
+                "rationale": "CE3 loads the same depth-5 checkpoint. Its statistical design is sound (replicate-level unit, calibration-gated, Bonferroni-corrected), so this is a scope/applicability issue rather than a methodological defect: the SUPPORTED verdict holds for the depth-5 model, not necessarily for the declared baseline.",
+                "status": "REQUIRES_REEVALUATION"
+              },
+              {
+                "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+                "evidence_reference": "evidence/ce4/ce4_certificate.json",
+                "historical_artifact_preserved": true,
+                "rationale": "CE4 loads the same depth-5 checkpoint and reuses CE3's task object. Its per-example causal finding is scoped to that one model instance.",
+                "status": "REQUIRES_REEVALUATION"
+              },
+              {
+                "dimension": "DATASET_INTEGRITY",
+                "evidence_reference": "dataset/evidence/d1..d5",
+                "historical_artifact_preserved": true,
+                "rationale": "The finding is downstream of the dataset: it concerns model construction, not dataset generation, serialization, preprocessing, or storage. Per the project's dependency rule, Dataset Integrity is therefore NOT reopened and D1-D5 are neither rerun nor modified.",
+                "status": "UNAFFECTED"
+              },
+              {
+                "dimension": "EXPERIMENTAL_VALIDITY",
+                "evidence_reference": "experimental_validity (EV-BASELINE, EV-NOISE, H-EV-SHUFFLE, H-EV-REPRESENTATION)",
+                "historical_artifact_preserved": true,
+                "rationale": "EV constructs its own models through its own independent adapter with depth supplied explicitly from its frozen baseline, and does not load the CE checkpoint. No EV evidence depends on this artifact. (EV production evidence does not yet exist in any case.)",
+                "status": "UNAFFECTED"
+              }
+            ],
+            "finding_id": "II-FINDING-DEPTH-V1",
+            "open_questions": [
+              "Whether depth alone quantitatively accounts for the 0.9291 -> 0.6108 gap is NOT established; confirming it requires a controlled depth-10 re-execution under the reference protocol. Recorded as OPEN, not asserted.",
+              "Whether the depth-5 default was intentional, accidental, or a filename mismatch is not determinable from the available artifacts: no run manifest exists for the historical CE executions. Recorded as OPEN.",
+              "CE2 (NOT_SUPPORTED) vs CE3/CE4 (SUPPORTED) on the same verified-identical target quantity is an unresolved scientific conflict, independent of this finding; it is deferred to audit/integration/conflict_resolution.py."
+            ],
+            "recorded_at_utc": "2026-09-19T07:22:10.826309+00:00",
+            "scientific_impact": "UNDEMONSTRATED",
+            "severity": "MATERIAL",
+            "stage_id": "II-3_CONTROLLED_VERIFICATION",
+            "supporting_artifacts": {
+              "best5depth10 (10).h5": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea",
+              "reference/train_5_rounds.py": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+              "reference/train_nets.py": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669",
+              "signal_destroyed.h5": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308"
+            },
+            "title": "Realized residual depth of the audited checkpoint is 5, while the reference protocol (train_5_rounds.py) declares depth=10",
+            "verification_method": "h5py layer-group census on the actual .h5 weight files (no TensorFlow, no model deserialization), cross-checked against the reference architecture's implied Conv1D count of 1 + 2*depth. Architecture read from the artifact itself, not inferred from its filename."
+          },
+          {
+            "actual": {
+              "effective_gate": "evaluation.py's `test.name == 'Representation Interpretation'` branch decides SUPPORTED from metadata flags calibration_validated and primary_supported, which are computed inside the CE3 test from a Bonferroni-corrected alpha of 0.025 (m=2). The 0.20/0.05 constructor arguments are never consulted on this path.",
+              "scientific_effect": "None - the historical CE3 decision is unaffected."
+            },
+            "declared": {
+              "driver_passes": "CryptographicEvaluator(supported_threshold=0.20, inconclusive_threshold=0.05)"
+            },
+            "downstream": [
+              {
+                "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+                "evidence_reference": "evidence/ce3/ce3_certificate.json",
+                "historical_artifact_preserved": true,
+                "rationale": "The unused parameters had no effect on the computed decision, so the historical CE3 evidence is not invalidated by this finding. Documentation-level correction only; the historical artifact is not edited.",
+                "status": "UNAFFECTED"
+              }
+            ],
+            "finding_id": "II-FINDING-CE3-DEADPARAMS-V1",
+            "open_questions": [
+              "A dimension-agnostic evaluator that branches on a hard-coded test name contradicts its own module docstring ('contains no knowledge of any specific cryptographic test'). Recommended cleanup, not a scientific defect."
+            ],
+            "recorded_at_utc": "2026-09-19T07:22:10.826339+00:00",
+            "scientific_impact": "NOT_APPLICABLE",
+            "severity": "CLARITY",
+            "stage_id": "II-3_CONTROLLED_VERIFICATION",
+            "supporting_artifacts": {},
+            "title": "CE3 driver passes supported/inconclusive thresholds that its evaluator branch never reads",
+            "verification_method": "Source inspection of experiments/ce3 driver and evaluation.py branch logic."
+          }
+        ],
+        "independent_reimplementation_status": "NOT_ASSESSED",
+        "preregistration_reference": null,
+        "rationale": "Rule IV: the CORE Implementation Integrity stages were not all satisfied, so no conclusion regarding implementation integrity is drawn. Missing or unperformed work is not interpreted as evidence against the original study.",
+        "run_manifest_references": [
+          {
+            "artifact_path": "run_manifest_ii-core-run-001.json",
+            "content_hash": "2820ba36d360913f7fbf7831e79db639f4605cc13ebf53b102d864a5f656ca1f",
+            "run_id": "ii-core-run-001"
+          }
+        ],
+        "scientific_impact_demonstrated": false,
+        "stages": [
+          {
+            "findings": [],
+            "stage_id": "II-1_BASELINE_RECONSTRUCTION",
+            "status": "CONFORMANCE_VERIFIED",
+            "summary": "Declared reference protocol transcribed from the original Gohr source (hash-verified): rounds=5, depth=10, epochs=200, batch_size=5000.",
+            "tier": "CORE"
+          },
+          {
+            "findings": [],
+            "stage_id": "II-2_INDEPENDENT_REIMPLEMENTATION",
+            "status": "NOT_ASSESSED",
+            "summary": "ENHANCED stage. Not performed for this audit. No independent reimplementation campaign was conducted, therefore Implementation Integrity contributes no independent-implementation convergence source to the integration engine. This imposes no cap on the attainable evidence level: convergence may arise from other qualifying sources (independent datasets or architectures) and the evidence level is determined by the integration engine from the convergence evidence that actually exists. This audit must NOT be described as an enhanced or full independent methodological reproduction.",
+            "tier": "ENHANCED"
+          },
+          {
+            "findings": [
+              "best5depth10 (10).h5: 11 Conv1D layers -> derived depth=5 (declared depth=10)",
+              "signal_destroyed.h5: 11 Conv1D layers -> derived depth=5 (declared depth=10)"
+            ],
+            "stage_id": "II-3_CONTROLLED_VERIFICATION",
+            "status": "CONFORMANCE_VERIFIED",
+            "summary": "Deterministic conformance verification: realized architecture read directly from the checkpoint artifacts via h5py layer census (not inferred from filenames). This establishes WHAT the artifact is, not what effect any divergence had.",
+            "tier": "CORE"
+          },
+          {
+            "findings": [
+              "best5depth10 (10).h5: 11 Conv1D layers -> derived depth=5 (declared depth=10)",
+              "signal_destroyed.h5: 11 Conv1D layers -> derived depth=5 (declared depth=10)"
+            ],
+            "stage_id": "II-4_COMPARATIVE_EVALUATION",
+            "status": "NOT_PERFORMED",
+            "summary": "NOT PERFORMED. A declared-vs-realized CONFIGURATION comparison was completed under II-3 and confirms the discrepancy (depth 5 realized vs 10 declared), but that is a conformance check, not a comparative EXPERIMENTAL evaluation. II-4 requires executing the reference-conformant configuration and comparing experimental outcomes; no such re-execution exists, so no comparative evaluation has been performed.",
+            "tier": "CORE"
+          },
+          {
+            "findings": [
+              "Quantitative attribution of the 0.9291 -> 0.6108 accuracy gap to depth is NOT established and is recorded as an open question requiring a controlled re-execution."
+            ],
+            "stage_id": "II-5_STATISTICAL_ASSESSMENT",
+            "status": "NOT_APPLICABLE",
+            "summary": "NOT APPLICABLE to the evidence currently available: the only completed verification is a deterministic, exactly-verified architectural mismatch with no sampling variability, for which inferential statistics are not the appropriate instrument. II-5 becomes APPLICABLE (and then required) once II-4 supplies comparable populations of training runs from a controlled re-execution.",
+            "tier": "CORE"
+          }
+        ]
+      },
+      "p_value": null,
+      "practical_threshold": null,
+      "provenance": {
+        "activities": {
+          "ii1_baseline_reconstruction": {
+            "activity_id": "ii1_baseline_reconstruction",
+            "activity_type": "verification",
+            "attributes": {},
+            "ended_at_utc": "2026-09-19T07:22:11.199610+00:00",
+            "started_at_utc": "2026-09-19T07:22:10.837024+00:00"
+          },
+          "ii3_controlled_verification": {
+            "activity_id": "ii3_controlled_verification",
+            "activity_type": "verification",
+            "attributes": {},
+            "ended_at_utc": "2026-09-19T07:22:11.199659+00:00",
+            "started_at_utc": "2026-09-19T07:22:10.837812+00:00"
+          }
+        },
+        "agents": {
+          "audit.implementation.runner": {
+            "agent_id": "audit.implementation.runner",
+            "agent_type": "software_agent",
+            "attributes": {}
+          }
+        },
+        "entities": {
+          "EV-II-DEPTH-001": {
+            "attributes": {},
+            "content_hash": null,
+            "entity_id": "EV-II-DEPTH-001",
+            "entity_type": "evidence"
+          },
+          "best5depth10 (10).h5": {
+            "attributes": {
+              "derived_depth": 5,
+              "n_batchnorm_layers": 13,
+              "n_conv1d_layers": 11,
+              "n_dense_layers": 3,
+              "path": "/home/claude/inspect2/cryptography/cryptography/evidence/ce1/best5depth10 (10).h5",
+              "sha256": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea"
+            },
+            "content_hash": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea",
+            "entity_id": "best5depth10 (10).h5",
+            "entity_type": "model_checkpoint"
+          },
+          "reference/speck.py": {
+            "attributes": {},
+            "content_hash": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce",
+            "entity_id": "reference/speck.py",
+            "entity_type": "reference_source"
+          },
+          "reference/train_5_rounds.py": {
+            "attributes": {},
+            "content_hash": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+            "entity_id": "reference/train_5_rounds.py",
+            "entity_type": "reference_source"
+          },
+          "reference/train_nets.py": {
+            "attributes": {},
+            "content_hash": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669",
+            "entity_id": "reference/train_nets.py",
+            "entity_type": "reference_source"
+          },
+          "run_manifest_ii-core-run-001.json": {
+            "attributes": {
+              "run_id": "ii-core-run-001"
+            },
+            "content_hash": "2820ba36d360913f7fbf7831e79db639f4605cc13ebf53b102d864a5f656ca1f",
+            "entity_id": "run_manifest_ii-core-run-001.json",
+            "entity_type": "run_manifest"
+          },
+          "signal_destroyed.h5": {
+            "attributes": {
+              "derived_depth": 5,
+              "n_batchnorm_layers": 13,
+              "n_conv1d_layers": 11,
+              "n_dense_layers": 3,
+              "path": "/home/claude/inspect2/cryptography/cryptography/evidence/ce1/signal_destroyed.h5",
+              "sha256": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308"
+            },
+            "content_hash": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308",
+            "entity_id": "signal_destroyed.h5",
+            "entity_type": "model_checkpoint"
+          }
+        },
+        "relations": [
+          {
+            "object_id": "audit.implementation.runner",
+            "relation_type": "associated_with",
+            "subject_id": "ii1_baseline_reconstruction"
+          },
+          {
+            "object_id": "reference/speck.py",
+            "relation_type": "used",
+            "subject_id": "ii1_baseline_reconstruction"
+          },
+          {
+            "object_id": "reference/train_nets.py",
+            "relation_type": "used",
+            "subject_id": "ii1_baseline_reconstruction"
+          },
+          {
+            "object_id": "reference/train_5_rounds.py",
+            "relation_type": "used",
+            "subject_id": "ii1_baseline_reconstruction"
+          },
+          {
+            "object_id": "audit.implementation.runner",
+            "relation_type": "associated_with",
+            "subject_id": "ii3_controlled_verification"
+          },
+          {
+            "object_id": "best5depth10 (10).h5",
+            "relation_type": "used",
+            "subject_id": "ii3_controlled_verification"
+          },
+          {
+            "object_id": "signal_destroyed.h5",
+            "relation_type": "used",
+            "subject_id": "ii3_controlled_verification"
+          },
+          {
+            "object_id": "ii3_controlled_verification",
+            "relation_type": "generated",
+            "subject_id": "run_manifest_ii-core-run-001.json"
+          },
+          {
+            "object_id": "ii3_controlled_verification",
+            "relation_type": "generated",
+            "subject_id": "EV-II-DEPTH-001"
+          },
+          {
+            "object_id": "run_manifest_ii-core-run-001.json",
+            "relation_type": "derived_from",
+            "subject_id": "EV-II-DEPTH-001"
+          },
+          {
+            "object_id": "best5depth10 (10).h5",
+            "relation_type": "derived_from",
+            "subject_id": "EV-II-DEPTH-001"
+          },
+          {
+            "object_id": "signal_destroyed.h5",
+            "relation_type": "derived_from",
+            "subject_id": "EV-II-DEPTH-001"
+          }
+        ]
+      },
+      "recorded_at_utc": "2026-09-19T16:09:33.028698+00:00",
+      "run_ids": [
+        "ii-core-run-001"
+      ],
+      "statistics": {
+        "note": "II-5 Statistical Assessment is NOT_APPLICABLE in this execution: the only completed verification was a deterministic declared-vs-realized configuration check, for which inferential statistics are not the appropriate instrument (there is no sampling variability to reason about). II-5 becomes applicable once II-4 supplies comparable populations of training runs."
+      },
+      "tag": "EXPLORATORY"
+    },
+    {
+      "artifact_hash": "cffc1d6416b5bd62fb0a4d19358b87ea297afb1cfdecb8925b5c35bc72c0bdca",
+      "artifact_path": "audit/evidence_bundle/dataset/d1/d1_gohr_10000000_1000000_1000000_5r.json",
+      "claim_id": "C1",
+      "dimension": "DATASET_INTEGRITY",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-D1-INGESTED",
+      "limitations": [],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "PASS",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "D1"
+    },
+    {
+      "artifact_hash": "3f7b37bd9fc7f9c540ea9f6fde83dcaf89caa3c4f7367ed0d1d7b175942c4612",
+      "artifact_path": "audit/evidence_bundle/dataset/d2/d2_full_v64.json",
+      "claim_id": "C1",
+      "dimension": "DATASET_INTEGRITY",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-D2-INGESTED",
+      "limitations": [],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "INCONCLUSIVE",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "D2"
+    },
+    {
+      "artifact_hash": "757e62bfebc237f806134ba0e036ee23797048fe891b58a17cb52ce435633ed2",
+      "artifact_path": "audit/evidence_bundle/dataset/d3/d3_gohr_10000000_1000000_1000000_5r.json",
+      "claim_id": "C1",
+      "dimension": "DATASET_INTEGRITY",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-D3-INGESTED",
+      "limitations": [],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "DESCRIPTIVE_ONLY",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "D3"
+    },
+    {
+      "artifact_hash": "76ef648fce078338273cd14aeadb6f39b216e497d0cf3b647598a9498e38a322",
+      "artifact_path": "audit/evidence_bundle/dataset/d4/d4_gohr_label_shuffle.json",
+      "claim_id": "C1",
+      "dimension": "DATASET_INTEGRITY",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-D4-INGESTED",
+      "limitations": [],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "EFFECT_DETECTED",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "D4"
+    },
+    {
+      "artifact_hash": "27a7dcb48c819ee44f9d3653e90932d5757357912cb057fc1e215be9898fc4e7",
+      "artifact_path": "audit/evidence_bundle/cryptography/ce1/ce1_certificate.json",
+      "claim_id": "C1",
+      "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-CE1-INGESTED",
+      "limitations": [
+        "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+      ],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "INCONCLUSIVE",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "CE1"
+    },
+    {
+      "artifact_hash": "dcef7f5e6459f52e2c6f22170260051bcf2edec20068218c35e018a608441894",
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_1.json",
+      "claim_id": "C1",
+      "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-CE2-RUN1-INGESTED",
+      "limitations": [
+        "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+      ],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "NOT_SUPPORTED",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "CE2"
+    },
+    {
+      "artifact_hash": "bd59bc60d80a2718c6367ccc25d6801d8899fe94ff925a6495efc240041c1ed6",
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_2.json",
+      "claim_id": "C1",
+      "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-CE2-RUN2-INGESTED",
+      "limitations": [
+        "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+      ],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "NOT_SUPPORTED",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "CE2"
+    },
+    {
+      "artifact_hash": "abb079a279b3509b78a011047576a4eecd79373779ff0cbb81d22b8bbdede420",
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_3.json",
+      "claim_id": "C1",
+      "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-CE2-RUN3-INGESTED",
+      "limitations": [
+        "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+      ],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "NOT_SUPPORTED",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "CE2"
+    },
+    {
+      "artifact_hash": "4177c34216a1fc10ee2a37d424288298e8beaff8e0512898dc8dfb8a5f7fe46c",
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_4.json",
+      "claim_id": "C1",
+      "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-CE2-RUN4-INGESTED",
+      "limitations": [
+        "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+      ],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "NOT_SUPPORTED",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "CE2"
+    },
+    {
+      "artifact_hash": "9859e69722bb508d31ac48cfbf4be1a3913f0c9f47128569f53c106b6f939ad3",
+      "artifact_path": "audit/evidence_bundle/cryptography/ce2/ce2_certificate_5.json",
+      "claim_id": "C1",
+      "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-CE2-RUN5-INGESTED",
+      "limitations": [
+        "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+      ],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "NOT_SUPPORTED",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "CE2"
+    },
+    {
+      "artifact_hash": "695ec93d3095aedc87c25b9b54b10860f4491140624ba07a3576d42b2edf7aad",
+      "artifact_path": "audit/evidence_bundle/cryptography/ce3/ce3_certificate.json",
+      "claim_id": "C1",
+      "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-CE3-INGESTED",
+      "limitations": [
+        "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+      ],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "SUPPORTED",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "CE3"
+    },
+    {
+      "artifact_hash": "34f16cb6ce97d3faea5999ce4bf7ff0e3b688fc17088898c50abdfae71bcedea",
+      "artifact_path": "audit/evidence_bundle/cryptography/ce4/ce4_certificate.json",
+      "claim_id": "C1",
+      "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+      "entry_kind": "INGESTED_REFERENCE",
+      "evidence_id": "EV-CE4-INGESTED",
+      "limitations": [
+        "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+      ],
+      "provenance_gaps": [
+        "No RunManifest: produced before the framework's run-manifest schema existed.",
+        "No preregistration artifact, so the entry cannot be certified CONFIRMATORY.",
+        "No structured provenance graph binding it to its inputs."
+      ],
+      "recorded_decision": "SUPPORTED",
+      "recorded_decision_note": "Transcribed verbatim from the source artifact; NOT translated into this framework's outcome vocabulary.",
+      "source_pillar_id": "CE4"
+    }
+  ],
+  "entry_counts": {
+    "ingested_reference": 12,
+    "native": 1,
+    "total": 13
+  },
+  "generated_at_utc": "2026-09-19T16:09:33.232320+00:00",
+  "schema_version": "evidence-ledger-v1"
+}

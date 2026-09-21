@@ -1,0 +1,68 @@
+# H-EV-SHUFFLE production configuration.
+experiment_id: H-EV-SHUFFLE
+hypothesis_id: H-EV-SHUFFLE
+run_mode: production
+
+# Number of matched (dataset, model_seed) pairs. REQUIRES USER INPUT -
+# to be set via framework/power.py's simulation-based sizing procedure
+# once pilot variance (from EV-BASELINE/EV-NOISE) and a compute budget
+# are known. Do not substitute a convenient number here.
+requested_pairs: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
+minimum_valid_pairs: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
+
+# Prospective power analysis record (Issue 3, Round 6). Once a pilot
+# has estimated noise_sd and epsilon has been confirmed, populate
+# required_n via framework.power.required_replicates_for_power() and
+# set minimum_valid_pairs >= required_n above. If minimum_valid_pairs
+# is ever set BELOW required_n, scripts/run_ev.py refuses to run
+# unless underpowered_justification is a non-empty, explicit string.
+power_analysis:
+  target_effect: null
+  target_effect_source: null
+  noise_sd: null
+  target_power: 0.80
+  required_n: null
+  underpowered_justification: null
+
+base_model_seed: 3000
+
+condition_a: {shuffle: true}
+condition_b: {shuffle: false}
+
+rounds: 5
+depth: 10
+epochs: 200
+batch_size: 5000
+train_size: 10000000
+val_size: 1000000
+confirmatory_test_size: 1000000
+optimizer: adam
+lr_schedule: {high: 0.002, low: 0.0001, period: 10}
+
+multiplicity_family: ev_primary_family_v1
+alpha: 0.05
+
+# Practical-significance threshold (epsilon), predeclared per the
+# Round-5 statistical plan: 0.01 absolute confirmatory accuracy.
+# GATED: this value must be confirmed (not derived) against the
+# EV-BASELINE/EV-NOISE pilot replicate-to-replicate spread before this
+# config is used for a confirmatory production run - if pilot spread
+# is comparable to or larger than 0.01, this margin is not resolvable
+# and must be revisited BEFORE any confirmatory run, never after.
+# See docs/statistical_plan.md for the full justification and the
+# gating requirement itself. Do NOT derive this from observed
+# production results.
+practical_threshold: UNSPECIFIED_REQUIRES_PILOT_SANITY_CHECK
+practical_threshold_justification: >
+  Candidate value 0.01 (absolute confirmatory accuracy) is supported as
+  an order-of-magnitude-plausible operational SESOI by Picard (2021),
+  which reports ~0.1% SD / ~0.5% max-min spread from seed variance
+  alone on a much larger, more mature benchmark (ResNet-50/ImageNet).
+  This is NOT a study of this specific task and does not by itself
+  justify 0.01 for Speck32/64 - it only establishes that 0.01 is larger
+  than typical pure-seed noise in a comparable setting, which is the
+  right qualitative property for a margin. Final adoption requires
+  confirming this project's own pilot spread is comfortably below 0.01
+  before freezing.
+
+output_dir: results/h_ev_shuffle

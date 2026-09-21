@@ -1,0 +1,29 @@
+# EV-BASELINE production configuration.
+# No hidden defaults: every scientifically relevant value is explicit here.
+experiment_id: EV-BASELINE
+run_mode: production   # smoke | production
+
+# Replicate plan - REQUIRES USER INPUT / pilot-derived value.
+# The placeholder below is NOT a scientific recommendation; it must be
+# replaced via the power-analysis procedure (framework/power.py) once
+# a compute budget and target effect are supplied. Production runs
+# must not proceed with an unexamined placeholder.
+requested_replicates: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
+minimum_valid_replicates: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
+
+base_model_seed: 1000
+
+# Frozen baseline (see gohr/baseline.py - this file must match it;
+# validate_ev.py checks this consistency and fails closed on mismatch).
+rounds: 5
+depth: 10
+epochs: 200
+batch_size: 5000
+train_size: 10000000
+val_size: 1000000
+confirmatory_test_size: 1000000
+shuffle: true
+optimizer: adam
+lr_schedule: {high: 0.002, low: 0.0001, period: 10}
+
+output_dir: results/ev_baseline

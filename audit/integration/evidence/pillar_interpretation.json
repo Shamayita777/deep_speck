@@ -1,0 +1,347 @@
+{
+  "interpretations": {
+    "CRYPTOGRAPHIC_EVIDENCE": {
+      "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+      "driving_evidence_ids": [
+        "EV-CE2-RUN1-INGESTED",
+        "EV-CE2-RUN2-INGESTED",
+        "EV-CE2-RUN3-INGESTED",
+        "EV-CE2-RUN4-INGESTED",
+        "EV-CE2-RUN5-INGESTED",
+        "EV-CE3-INGESTED",
+        "EV-CE4-INGESTED"
+      ],
+      "outcome": "INCONCLUSIVE",
+      "rationale": "Methodology 3.8.8 applied: decision-bearing evidence from ['CE2', 'CE3', 'CE4'] is party to an unresolved conflict, so the dimension is INCONCLUSIVE regardless of what the aggregation operationalization alone would have produced.\n\nMethodology Section 3.8.8 states that where contradictory evidence persists after the conflict-resolution procedure, the affected claim SHALL be classified as inconclusive, and that conflicting evidence shall not be discarded merely because it contradicts other observations. That rule is SOURCE_DEFINED.\n\nRULE-AGG-CONSERVATIVE-V1 is an INTEGRATION_OPERATIONALIZATION introduced by this layer because the methodology does not define within-dimension aggregation. An integration operationalization must never override a source-defined rule.\n\nTherefore: when a dimension's evidence includes a party to an UNRESOLVED conflict, the conflict rule takes precedence and the dimension is INCONCLUSIVE - even where the aggregation rule alone would have resolved it to NOT_SUPPORTED or SUPPORTED. Without this precedence, one arm of an unresolved contradiction would silently decide the dimension, which is exactly the outcome 3.8.8 prohibits.",
+      "records": [
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+          ],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "INCONCLUSIVE",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "CRYPTOGRAPHIC_EVIDENCE",
+          "source_evidence_id": "EV-CE1-INGESTED",
+          "source_native_status": "INCONCLUSIVE",
+          "source_pillar_id": "CE1",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/cryptography/ce1/ce1_certificate.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+          ],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "NOT_SUPPORTED",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "CRYPTOGRAPHIC_EVIDENCE",
+          "source_evidence_id": "EV-CE2-RUN1-INGESTED",
+          "source_native_status": "NOT_SUPPORTED",
+          "source_pillar_id": "CE2",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/cryptography/ce2/ce2_certificate_1.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+          ],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "NOT_SUPPORTED",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "CRYPTOGRAPHIC_EVIDENCE",
+          "source_evidence_id": "EV-CE2-RUN2-INGESTED",
+          "source_native_status": "NOT_SUPPORTED",
+          "source_pillar_id": "CE2",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/cryptography/ce2/ce2_certificate_2.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+          ],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "NOT_SUPPORTED",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "CRYPTOGRAPHIC_EVIDENCE",
+          "source_evidence_id": "EV-CE2-RUN3-INGESTED",
+          "source_native_status": "NOT_SUPPORTED",
+          "source_pillar_id": "CE2",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/cryptography/ce2/ce2_certificate_3.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+          ],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "NOT_SUPPORTED",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "CRYPTOGRAPHIC_EVIDENCE",
+          "source_evidence_id": "EV-CE2-RUN4-INGESTED",
+          "source_native_status": "NOT_SUPPORTED",
+          "source_pillar_id": "CE2",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/cryptography/ce2/ce2_certificate_4.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+          ],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "NOT_SUPPORTED",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "CRYPTOGRAPHIC_EVIDENCE",
+          "source_evidence_id": "EV-CE2-RUN5-INGESTED",
+          "source_native_status": "NOT_SUPPORTED",
+          "source_pillar_id": "CE2",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/cryptography/ce2/ce2_certificate_5.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+          ],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "SUPPORTED",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "CRYPTOGRAPHIC_EVIDENCE",
+          "source_evidence_id": "EV-CE3-INGESTED",
+          "source_native_status": "SUPPORTED",
+          "source_pillar_id": "CE3",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/cryptography/ce3/ce3_certificate.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Produced against the depth-5 checkpoint that diverges from the declared reference protocol (II-FINDING-DEPTH-V1)."
+          ],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "SUPPORTED",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "CRYPTOGRAPHIC_EVIDENCE",
+          "source_evidence_id": "EV-CE4-INGESTED",
+          "source_native_status": "SUPPORTED",
+          "source_pillar_id": "CE4",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/cryptography/ce4/ce4_certificate.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        }
+      ],
+      "rule_id": "RULE-CONFLICT-PRECEDENCE",
+      "rule_provenance": "SOURCE_DEFINED"
+    },
+    "DATASET_INTEGRITY": {
+      "dimension": "DATASET_INTEGRITY",
+      "driving_evidence_ids": [
+        "EV-D2-INGESTED",
+        "EV-D3-INGESTED",
+        "EV-D4-INGESTED",
+        "EV-D5-ABSENT"
+      ],
+      "outcome": "INCONCLUSIVE",
+      "rationale": "Rule 2 applied: decision-bearing evidence from ['D2', 'D3', 'D4', 'D5'] is INCONCLUSIVE, UNMAPPABLE or NOT_PRODUCED.\n\nWithin-dimension aggregation is NOT defined by the methodology (Section 3.10.5 takes one outcome per dimension as already given) and no pillar in this repository produces a dimension-level roll-up. This layer therefore introduces an explicit conservative rule:\n  1. any decision-bearing FAIL          -> dimension FAIL\n  2. else any decision-bearing evidence that is UNMAPPABLE, NOT_PRODUCED or INCONCLUSIVE -> dimension INCONCLUSIVE\n  3. else any CONDITIONAL_PASS           -> dimension CONDITIONAL_PASS\n  4. else all PASS and at least one present -> dimension PASS\n  5. no decision-bearing evidence at all -> dimension INCONCLUSIVE\nRule 2 is conservative because the methodology's own Rule IV logic (3.5.6) treats absent or insufficient evidence as grounds for drawing NO conclusion rather than a favourable one; extending that posture to unmapped states keeps the layer from manufacturing support the evidence does not provide. It is NOT claimed to be methodology-mandated.",
+      "records": [
+        {
+          "decision_bearing": true,
+          "limitations": [],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "PASS",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "DATASET_INTEGRITY",
+          "source_evidence_id": "EV-D1-INGESTED",
+          "source_native_status": "PASS",
+          "source_pillar_id": "D1",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/dataset/d1/d1_gohr_10000000_1000000_1000000_5r.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "INCONCLUSIVE",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "DATASET_INTEGRITY",
+          "source_evidence_id": "EV-D2-INGESTED",
+          "source_native_status": "INCONCLUSIVE",
+          "source_pillar_id": "D2",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/dataset/d2/d2_full_v64.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [],
+          "mappability": "UNMAPPABLE",
+          "normalized_outcome": null,
+          "rationale": "Refusing to coerce native status 'DESCRIPTIVE_ONLY' into the standardized vocabulary. D3's own artifact states it 'does not establish equality of the full underlying distributions'. A sub-audit that explicitly disclaims establishing its conclusion cannot be read as PASS, and it reports no failure, so it cannot be read as FAIL. Marking it UNMAPPABLE preserves the information the pillar deliberately encoded; forcing a PASS/FAIL would discard it.",
+          "rule_id": "RULE-NO-COERCION",
+          "rule_provenance": "INTEGRATION_OPERATIONALIZATION",
+          "source_dimension": "DATASET_INTEGRITY",
+          "source_evidence_id": "EV-D3-INGESTED",
+          "source_native_status": "DESCRIPTIVE_ONLY",
+          "source_pillar_id": "D3",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/dataset/d3/d3_gohr_10000000_1000000_1000000_5r.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [],
+          "mappability": "UNMAPPABLE",
+          "normalized_outcome": null,
+          "rationale": "Refusing to coerce native status 'EFFECT_DETECTED' into the standardized vocabulary. D4 reports that a controlled perturbation produced a detectable effect. Whether a detected effect is reassuring or alarming depends on the perturbation's purpose, which the status string alone does not encode; mapping it either way would add an interpretation the artifact does not make. Marking it UNMAPPABLE preserves the information the pillar deliberately encoded; forcing a PASS/FAIL would discard it.",
+          "rule_id": "RULE-NO-COERCION",
+          "rule_provenance": "INTEGRATION_OPERATIONALIZATION",
+          "source_dimension": "DATASET_INTEGRITY",
+          "source_evidence_id": "EV-D4-INGESTED",
+          "source_native_status": "EFFECT_DETECTED",
+          "source_pillar_id": "D4",
+          "supporting_evidence_references": [
+            "audit/evidence_bundle/dataset/d4/d4_gohr_label_shuffle.json"
+          ],
+          "version": "pillar-interpretation-v1"
+        },
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "D5 has no production certificate: its artifacts carry findings and interpretation but no decision/outcome field (verified by inspection)."
+          ],
+          "mappability": "NOT_PRODUCED",
+          "normalized_outcome": null,
+          "rationale": "Refusing to coerce native status 'NOT_PRODUCED' into the standardized vocabulary. No production evidence exists for this component. Marking it UNMAPPABLE preserves the information the pillar deliberately encoded; forcing a PASS/FAIL would discard it.",
+          "rule_id": "RULE-NO-COERCION",
+          "rule_provenance": "INTEGRATION_OPERATIONALIZATION",
+          "source_dimension": "DATASET_INTEGRITY",
+          "source_evidence_id": "EV-D5-ABSENT",
+          "source_native_status": "NOT_PRODUCED",
+          "source_pillar_id": "D5",
+          "supporting_evidence_references": [],
+          "version": "pillar-interpretation-v1"
+        }
+      ],
+      "rule_id": "RULE-AGG-CONSERVATIVE-V1",
+      "rule_provenance": "INTEGRATION_OPERATIONALIZATION"
+    },
+    "EXPERIMENTAL_VALIDITY": {
+      "dimension": "EXPERIMENTAL_VALIDITY",
+      "driving_evidence_ids": [
+        "EV-EV-ABSENT"
+      ],
+      "outcome": "INCONCLUSIVE",
+      "rationale": "Rule 2 applied: decision-bearing evidence from ['EV'] is INCONCLUSIVE, UNMAPPABLE or NOT_PRODUCED.\n\nWithin-dimension aggregation is NOT defined by the methodology (Section 3.10.5 takes one outcome per dimension as already given) and no pillar in this repository produces a dimension-level roll-up. This layer therefore introduces an explicit conservative rule:\n  1. any decision-bearing FAIL          -> dimension FAIL\n  2. else any decision-bearing evidence that is UNMAPPABLE, NOT_PRODUCED or INCONCLUSIVE -> dimension INCONCLUSIVE\n  3. else any CONDITIONAL_PASS           -> dimension CONDITIONAL_PASS\n  4. else all PASS and at least one present -> dimension PASS\n  5. no decision-bearing evidence at all -> dimension INCONCLUSIVE\nRule 2 is conservative because the methodology's own Rule IV logic (3.5.6) treats absent or insufficient evidence as grounds for drawing NO conclusion rather than a favourable one; extending that posture to unmapped states keeps the layer from manufacturing support the evidence does not provide. It is NOT claimed to be methodology-mandated.",
+      "records": [
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Experimental Validity has no production evidence: the framework exists but production runs remain blocked on epsilon, replicate count and runtime feasibility."
+          ],
+          "mappability": "NOT_PRODUCED",
+          "normalized_outcome": null,
+          "rationale": "Refusing to coerce native status 'NOT_PRODUCED' into the standardized vocabulary. No production evidence exists for this component. Marking it UNMAPPABLE preserves the information the pillar deliberately encoded; forcing a PASS/FAIL would discard it.",
+          "rule_id": "RULE-NO-COERCION",
+          "rule_provenance": "INTEGRATION_OPERATIONALIZATION",
+          "source_dimension": "EXPERIMENTAL_VALIDITY",
+          "source_evidence_id": "EV-EV-ABSENT",
+          "source_native_status": "NOT_PRODUCED",
+          "source_pillar_id": "EV",
+          "supporting_evidence_references": [],
+          "version": "pillar-interpretation-v1"
+        }
+      ],
+      "rule_id": "RULE-AGG-CONSERVATIVE-V1",
+      "rule_provenance": "INTEGRATION_OPERATIONALIZATION"
+    },
+    "IMPLEMENTATION_INTEGRITY": {
+      "dimension": "IMPLEMENTATION_INTEGRITY",
+      "driving_evidence_ids": [
+        "EV-II-DEPTH-001"
+      ],
+      "outcome": "INCONCLUSIVE",
+      "rationale": "Rule 2 applied: decision-bearing evidence from ['II'] is INCONCLUSIVE, UNMAPPABLE or NOT_PRODUCED.\n\nWithin-dimension aggregation is NOT defined by the methodology (Section 3.10.5 takes one outcome per dimension as already given) and no pillar in this repository produces a dimension-level roll-up. This layer therefore introduces an explicit conservative rule:\n  1. any decision-bearing FAIL          -> dimension FAIL\n  2. else any decision-bearing evidence that is UNMAPPABLE, NOT_PRODUCED or INCONCLUSIVE -> dimension INCONCLUSIVE\n  3. else any CONDITIONAL_PASS           -> dimension CONDITIONAL_PASS\n  4. else all PASS and at least one present -> dimension PASS\n  5. no decision-bearing evidence at all -> dimension INCONCLUSIVE\nRule 2 is conservative because the methodology's own Rule IV logic (3.5.6) treats absent or insufficient evidence as grounds for drawing NO conclusion rather than a favourable one; extending that posture to unmapped states keeps the layer from manufacturing support the evidence does not provide. It is NOT claimed to be methodology-mandated.",
+      "records": [
+        {
+          "decision_bearing": true,
+          "limitations": [
+            "Independent reimplementation (ENHANCED stage II-2) is NOT_ASSESSED. Independent reimplementation was NOT assessed, so Implementation Integrity contributes no independent-implementation convergence source. This says nothing about convergence sources from independent datasets or architectures elsewhere in the audit; LEVEL_4 remains determinable by the integration engine from whatever qualifying convergence evidence actually exists.",
+            "CORE stages not satisfied in this execution: ['II-4_COMPARATIVE_EVALUATION']. No implementation-integrity verdict is issued on their behalf.",
+            "II-FINDING-DEPTH-V1: discrepancy CONFIRMED, scientific impact UNDEMONSTRATED. A controlled re-execution under the declared protocol is required before any claim that this discrepancy changed a scientific conclusion.",
+            "Whether depth alone quantitatively accounts for the 0.9291 -> 0.6108 gap is NOT established; confirming it requires a controlled depth-10 re-execution under the reference protocol. Recorded as OPEN, not asserted.",
+            "Whether the depth-5 default was intentional, accidental, or a filename mismatch is not determinable from the available artifacts: no run manifest exists for the historical CE executions. Recorded as OPEN.",
+            "CE2 (NOT_SUPPORTED) vs CE3/CE4 (SUPPORTED) on the same verified-identical target quantity is an unresolved scientific conflict, independent of this finding; it is deferred to audit/integration/conflict_resolution.py.",
+            "A dimension-agnostic evaluator that branches on a hard-coded test name contradicts its own module docstring ('contains no knowledge of any specific cryptographic test'). Recommended cleanup, not a scientific defect.",
+            "No pre-execution preregistration artifact exists for this execution, so the evidence is tagged EXPLORATORY. It records a confirmed, reproducible artifact-vs-declared-protocol conformance check, but it is not preregistered confirmatory evidence and must not be presented as such."
+          ],
+          "mappability": "DIRECTLY_MAPPABLE",
+          "normalized_outcome": "INCONCLUSIVE",
+          "rationale": "The native status is already a member of the vocabulary the methodology defines for this dimension (Sections 3.5.8/3.6.8/3.7.8 for the audit dimensions, 3.8.9 for Cryptographic Evidence), so it is carried through unchanged with no interpretation added.",
+          "rule_id": "RULE-DIRECT-VOCABULARY",
+          "rule_provenance": "SOURCE_DEFINED",
+          "source_dimension": "IMPLEMENTATION_INTEGRITY",
+          "source_evidence_id": "EV-II-DEPTH-001",
+          "source_native_status": "INCONCLUSIVE",
+          "source_pillar_id": "II",
+          "supporting_evidence_references": [
+            "best5depth10 (10).h5",
+            "reference/speck.py",
+            "reference/train_5_rounds.py",
+            "reference/train_nets.py",
+            "run_manifest_ii-core-run-001.json",
+            "signal_destroyed.h5"
+          ],
+          "version": "pillar-interpretation-v1"
+        }
+      ],
+      "rule_id": "RULE-AGG-CONSERVATIVE-V1",
+      "rule_provenance": "INTEGRATION_OPERATIONALIZATION"
+    }
+  },
+  "version": "pillar-interpretation-v1"
+}

@@ -1,0 +1,47 @@
+# H-EV-REPRESENTATION production configuration.
+experiment_id: H-EV-REPRESENTATION
+hypothesis_id: H-EV-REPRESENTATION
+run_mode: production
+
+requested_pairs: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
+minimum_valid_pairs: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
+
+power_analysis:
+  target_effect: null
+  target_effect_source: null
+  noise_sd: null
+  target_power: 0.80
+  required_n: null
+  underpowered_justification: null
+
+base_model_seed: 4000
+
+condition_a: {representation: identity}
+condition_b: {representation: candidate1}
+
+# Permutation generation seed. This seed is used ONCE to generate the
+# Candidate-1 permutation, which is then persisted, hashed, and frozen
+# (see framework/firewall.py) before any confirmatory evaluation.
+# Changing this value after freezing invalidates the frozen artifact.
+permutation_generation_seed: 999
+
+rounds: 5
+depth: 10
+epochs: 200
+batch_size: 5000
+train_size: 10000000
+val_size: 1000000
+confirmatory_test_size: 1000000
+shuffle: true
+optimizer: adam
+lr_schedule: {high: 0.002, low: 0.0001, period: 10}
+
+multiplicity_family: ev_primary_family_v1
+alpha: 0.05
+practical_threshold: UNSPECIFIED_REQUIRES_PILOT_SANITY_CHECK
+practical_threshold_justification: >
+  See configs/gohr_ev_shuffle.yaml for the shared justification and
+  gating requirement (Picard 2021 seed-variance precedent; must be
+  confirmed against this project's own pilot spread before freezing).
+
+output_dir: results/h_ev_representation

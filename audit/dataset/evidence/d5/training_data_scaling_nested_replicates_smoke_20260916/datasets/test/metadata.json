@@ -1,0 +1,24 @@
+{
+  "audit_seed": 0,
+  "config_hash": "0e04fff6aacfbab61d4efe057f0247630611d97d59d6cc2fb32f3bb2979aa184",
+  "dataset_replay_available": false,
+  "dataset_replay_reason": "Gohr dataset generation delegates to speck.make_train_data() (via GohrAdapter.generate_partition), which draws from os.urandom() internally. The integer audit/replicate seed does not control dataset content and cannot be used to deterministically regenerate a bit-identical dataset. The persisted dataset files, together with their file and logical content SHA-256 hashes (including a hash for every declared nested-prefix size), are the reproducibility/resumability object instead.",
+  "dataset_seed": null,
+  "dtype": {
+    "test_x": "uint8",
+    "test_y": "uint8"
+  },
+  "samples": 1000,
+  "schema_version": "2.1",
+  "test_x_file_sha256": "c5bb53504874b30ae0af633437f92d1dc2ca909a0cf007ee82f21239bfb67a18",
+  "test_x_logical_sha256": "ac68399a16b45e78832bca39eb6c71b3ea2e0c0435273f5b1e01998e60abe134",
+  "test_x_shape": [
+    1000,
+    64
+  ],
+  "test_y_file_sha256": "7a69b5d072f8d28d36a8f6504abb5194eb815b7f10111da7853e31ef0cd05239",
+  "test_y_logical_sha256": "3ef03b4d8ecb8a515b46967653d50a7a471585eb08a0901bb9de92824bd0ef6d",
+  "test_y_shape": [
+    1000
+  ]
+}

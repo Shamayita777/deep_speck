@@ -1,0 +1,50 @@
+{
+  "audit_seed": 0,
+  "config_hash": "0e04fff6aacfbab61d4efe057f0247630611d97d59d6cc2fb32f3bb2979aa184",
+  "dataset_replay_available": false,
+  "dataset_replay_reason": "Gohr dataset generation delegates to speck.make_train_data() (via GohrAdapter.generate_partition), which draws from os.urandom() internally. The integer audit/replicate seed does not control dataset content and cannot be used to deterministically regenerate a bit-identical dataset. The persisted dataset files, together with their file and logical content SHA-256 hashes (including a hash for every declared nested-prefix size), are the reproducibility/resumability object instead.",
+  "dataset_seed": null,
+  "dtype": {
+    "train_x": "uint8",
+    "train_y": "uint8"
+  },
+  "max_samples": 4000,
+  "nested_prefix_hashes": {
+    "1000": {
+      "samples": 1000,
+      "train_x_logical_sha256": "145a1c3a7abfd895f250bbdd1c2ae1b06f82455d3d2facff1f924755f3626da9",
+      "train_y_logical_sha256": "3b1927d657bd3ac219cf2896e0bbcdc44c6162a221814da933b153cf8b9da15e"
+    },
+    "2000": {
+      "samples": 2000,
+      "train_x_logical_sha256": "1fd8108522ba53ab24762d9ca0e155d7546a9be23af8105de991027c1e051357",
+      "train_y_logical_sha256": "2662df1c1dff1fc8674117c8f3fcd08225c719140967384e8d4910b942668619"
+    },
+    "4000": {
+      "samples": 4000,
+      "train_x_logical_sha256": "a1a0c2cd853b7234c567620dca373bad46968186c799ca0e5514b064b6530be8",
+      "train_y_logical_sha256": "932d8976281ecf2912d890aa11542428dd4f6e931bfd8ccab963af3d8b44352f"
+    }
+  },
+  "nested_prefix_sizes": [
+    1000,
+    2000,
+    4000
+  ],
+  "replicate": 1,
+  "replicate_seed": 3757552657,
+  "replicate_seed_role": "model_initialization_and_audit_RNG_stream; NOT dataset generation. Gohr's generator (speck.make_train_data via os.urandom) is independent of this seed.",
+  "samples": 4000,
+  "schema_version": "2.1",
+  "train_x_file_sha256": "686bc7b32af56f78de4a91f55aec33bb0a195001032ee1413121b0d2bfb115ee",
+  "train_x_logical_sha256": "a1a0c2cd853b7234c567620dca373bad46968186c799ca0e5514b064b6530be8",
+  "train_x_shape": [
+    4000,
+    64
+  ],
+  "train_y_file_sha256": "35909bd69a46267a97a11f0b9e5bc51d222252e17b750a5698f8322b2feb00af",
+  "train_y_logical_sha256": "932d8976281ecf2912d890aa11542428dd4f6e931bfd8ccab963af3d8b44352f",
+  "train_y_shape": [
+    4000
+  ]
+}

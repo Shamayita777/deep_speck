@@ -1,0 +1,28 @@
+{
+  "implementation-certificate": [
+    {
+      "base_name": "implementation-certificate",
+      "content_hash": "76ce4b59327599473746d9420aa2e95d73b397042a349929c50f54a2b5baa6f7",
+      "created_at_utc": "2026-09-19T05:56:29.699223+00:00",
+      "identifier": "implementation-certificate-V1",
+      "note": "Core Implementation Integrity audit of the Gohr 5-round distinguisher.",
+      "version": 1
+    },
+    {
+      "base_name": "implementation-certificate",
+      "content_hash": "cf55bd4ffc77f4509792c31daee7846518d8f125d8dada98d5c97dd6f5e72bc6",
+      "created_at_utc": "2026-09-19T07:01:20.575999+00:00",
+      "identifier": "implementation-certificate-V2",
+      "note": "Core Implementation Integrity audit of the Gohr 5-round distinguisher.",
+      "version": 2
+    },
+    {
+      "base_name": "implementation-certificate",
+      "content_hash": "485dbe82671eb26fcc48741a8b8ed9748a84291530d00044163dd3ee63985450",
+      "created_at_utc": "2026-09-19T07:22:13.668504+00:00",
+      "identifier": "implementation-certificate-V3",
+      "note": "Core Implementation Integrity audit of the Gohr 5-round distinguisher.",
+      "version": 3
+    }
+  ]
+}

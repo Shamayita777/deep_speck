@@ -1,0 +1,92 @@
+{
+  "bundle_id": "CIPHERMIND-EVIDENCE-BUNDLE-V1",
+  "description": "Vendored copies of the historical Dataset Integrity (D1-D4) and Cryptographic Evidence (CE1-CE4) certificates, plus the two inspected model checkpoints. Copied BYTE-IDENTICALLY from the authoritative source trees so the frozen audit archive is independently verifiable without access to any external path.",
+  "file_count": 14,
+  "files": {
+    "cryptography/ce1/best5depth10 (10).h5": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce1/best5depth10 (10).h5",
+      "sha256": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea",
+      "size_bytes": 1043896
+    },
+    "cryptography/ce1/ce1_certificate.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce1/ce1_certificate.json",
+      "sha256": "27a7dcb48c819ee44f9d3653e90932d5757357912cb057fc1e215be9898fc4e7",
+      "size_bytes": 529
+    },
+    "cryptography/ce1/signal_destroyed.h5": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce1/signal_destroyed.h5",
+      "sha256": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308",
+      "size_bytes": 1043720
+    },
+    "cryptography/ce2/ce2_certificate_1.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce2/1st_run/ce2_certificate_1.json",
+      "sha256": "dcef7f5e6459f52e2c6f22170260051bcf2edec20068218c35e018a608441894",
+      "size_bytes": 658
+    },
+    "cryptography/ce2/ce2_certificate_2.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce2/2nd_run/ce2_certificate_2.json",
+      "sha256": "bd59bc60d80a2718c6367ccc25d6801d8899fe94ff925a6495efc240041c1ed6",
+      "size_bytes": 654
+    },
+    "cryptography/ce2/ce2_certificate_3.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce2/3rd_run/ce2_certificate_3.json",
+      "sha256": "abb079a279b3509b78a011047576a4eecd79373779ff0cbb81d22b8bbdede420",
+      "size_bytes": 655
+    },
+    "cryptography/ce2/ce2_certificate_4.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce2/4th_run/ce2_certificate_4.json",
+      "sha256": "4177c34216a1fc10ee2a37d424288298e8beaff8e0512898dc8dfb8a5f7fe46c",
+      "size_bytes": 659
+    },
+    "cryptography/ce2/ce2_certificate_5.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce2/5th_run/ce2_certificate_5.json",
+      "sha256": "9859e69722bb508d31ac48cfbf4be1a3913f0c9f47128569f53c106b6f939ad3",
+      "size_bytes": 660
+    },
+    "cryptography/ce3/ce3_certificate.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce3/ce3_certificate.json",
+      "sha256": "695ec93d3095aedc87c25b9b54b10860f4491140624ba07a3576d42b2edf7aad",
+      "size_bytes": 3318
+    },
+    "cryptography/ce4/ce4_certificate.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "cryptography/cryptography/evidence/ce4/ce4_certificate.json",
+      "sha256": "34f16cb6ce97d3faea5999ce4bf7ff0e3b688fc17088898c50abdfae71bcedea",
+      "size_bytes": 2105
+    },
+    "dataset/d1/d1_gohr_10000000_1000000_1000000_5r.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "dataset/dataset/evidence/d1/d1_gohr_10000000_1000000_1000000_5r.json",
+      "sha256": "cffc1d6416b5bd62fb0a4d19358b87ea297afb1cfdecb8925b5c35bc72c0bdca",
+      "size_bytes": 6025
+    },
+    "dataset/d2/d2_full_v64.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "dataset/dataset/evidence/d2/clean/d2_full_v64.json",
+      "sha256": "3f7b37bd9fc7f9c540ea9f6fde83dcaf89caa3c4f7367ed0d1d7b175942c4612",
+      "size_bytes": 27972700
+    },
+    "dataset/d3/d3_gohr_10000000_1000000_1000000_5r.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "dataset/dataset/evidence/d3/d3_gohr_10000000_1000000_1000000_5r.json",
+      "sha256": "757e62bfebc237f806134ba0e036ee23797048fe891b58a17cb52ce435633ed2",
+      "size_bytes": 23512
+    },
+    "dataset/d4/d4_gohr_label_shuffle.json": {
+      "byte_identical_to_original": true,
+      "original_source_path": "dataset/dataset/evidence/d4/d4_gohr_label_shuffle.json",
+      "sha256": "76ef648fce078338273cd14aeadb6f39b216e497d0cf3b647598a9498e38a322",
+      "size_bytes": 5210
+    }
+  },
+  "immutability_note": "These are HISTORICAL artifacts. They are vendored read-only and are never modified. Byte-identity with the original source tree is recorded per file below and is re-checkable wherever the original tree is available."
+}

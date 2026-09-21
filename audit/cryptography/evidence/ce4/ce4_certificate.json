@@ -1,0 +1,50 @@
+{
+    "framework": "Cryptographic Evidence Framework",
+    "test": "Causal Intervention",
+    "decision": "SUPPORTED",
+    "rationale": "Perturbing the declared structure produced a significantly larger output change than a matched control perturbation, supporting causal necessity of the structure identified by CE2/CE3.",
+    "baseline_score": 0.0,
+    "test_score": 0.0722961500287056,
+    "performance_drop": 0.0722961500287056,
+    "relative_difference": 0.0722961500287056,
+    "threshold": 0.0007190272677689791,
+    "observed_effect": 0.0722961500287056,
+    "runtime": 78.55541991599966,
+    "timestamp": "2026-08-17T11:42:42.153882",
+    "metadata": {
+        "primary_target": "Analytical Trail Probability",
+        "tasks": {
+            "Analytical Trail Probability": {
+                "is_primary": true,
+                "metric_name": "Absolute Output Probability Difference",
+                "targeted_effect_mean": 0.12619397044181824,
+                "control_effect_mean": 0.05389781296253204,
+                "necessity_gap_mean": 0.0722961500287056,
+                "effect_size": 0.5452545478371448,
+                "ci_low": 0.07148444808720006,
+                "ci_high": 0.07310963618553502,
+                "p_value": 0.0,
+                "statistical_test": "wilcoxon_signed_rank",
+                "n_samples": 99748,
+                "n_excluded": 252,
+                "n_total_before_filtering": 100000,
+                "exclusion_rate": 0.00252
+            }
+        },
+        "metric_name": "Absolute Output Probability Difference",
+        "targeted_effect_mean": 0.12619397044181824,
+        "control_effect_mean": 0.05389781296253204,
+        "necessity_gap_mean": 0.0722961500287056,
+        "effect_size": 0.5452545478371448,
+        "ci_low": 0.07148444808720006,
+        "ci_high": 0.07310963618553502,
+        "p_value": 0.0,
+        "statistical_test": "wilcoxon_signed_rank",
+        "n_samples": 99748,
+        "n_excluded": 252,
+        "n_total_before_filtering": 100000,
+        "exclusion_rate": 0.00252
+    },
+    "p_value": 0.0,
+    "sample_size": 99748
+}

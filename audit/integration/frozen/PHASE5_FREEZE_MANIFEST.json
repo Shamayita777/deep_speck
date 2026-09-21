@@ -1,0 +1,25 @@
+{
+  "authoritative_snapshot": "audit-snapshot-V4.json",
+  "change_from_freeze_version_1": "PACKAGING ONLY. Historical evidence artifacts were vendored into audit/evidence_bundle (byte-identical, verified) and ledger paths made archive-relative, so the gate runs 8/8 from a clean extraction with no external dependency. No scientific result, aggregation rule, decision logic or CE conclusion was altered; V4 records the same outcomes as V3.",
+  "components": {
+    "artifact_index.json": "4a6e660ce5495b268ff7fc75125dfa4ee22cdaeef17a015c5916b8cb637f8a80",
+    "audit-snapshot-V4.json": "ef38669d10d89c04a1bcc0934d74a9f0f7ff0e247c348e8e9c9d6a1b8695d328",
+    "decision.json": "2bd5a1ed0289c5e012bbbc2b0afa6f5176b78ba8cbbee0c99d0fdaf29cab7006",
+    "evidence_ledger.json": "5035345260cf8b3adbce52531deec44bf114a56473c6c0ae070398e7e1939e8c",
+    "pillar_interpretation.json": "029dabb3adc90250f980f2201266b14ef8466b632a21fd86fa3c31786f4f65f8"
+  },
+  "evidence_bundle": {
+    "bundle_id": "CIPHERMIND-EVIDENCE-BUNDLE-V1",
+    "manifest_path": "audit/evidence_bundle/BUNDLE_MANIFEST.json",
+    "manifest_sha256": "99b4e82485a27008125bdb08c77b1c257a340ef6a6419352b724bc9c19dac683"
+  },
+  "freeze_version": 2,
+  "independently_verifiable": true,
+  "phase": "PHASE-5",
+  "status": "FROZEN",
+  "superseded_snapshots": [
+    "audit-snapshot-V1.json (preserved)",
+    "audit-snapshot-V2.json (preserved)",
+    "audit-snapshot-V3.json (preserved; freeze v1 authoritative)"
+  ]
+}

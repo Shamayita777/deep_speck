@@ -1,0 +1,36 @@
+{
+  "audit-snapshot": [
+    {
+      "base_name": "audit-snapshot",
+      "content_hash": "fa5a8ca36512756a29c5e355951908e60524bd740658299b302976aa1a386138",
+      "created_at_utc": "2026-09-19T11:15:54.116690+00:00",
+      "identifier": "audit-snapshot-V1",
+      "note": "Cross-pillar audit snapshot for the 5-round Gohr distinguisher case study.",
+      "version": 1
+    },
+    {
+      "base_name": "audit-snapshot",
+      "content_hash": "7abdabd3162390fbab9a965739b105e160ee9cecc36ef13aca547c63a48db3ac",
+      "created_at_utc": "2026-09-19T12:15:56.228146+00:00",
+      "identifier": "audit-snapshot-V2",
+      "note": "Cross-pillar audit snapshot for the 5-round Gohr distinguisher case study.",
+      "version": 2
+    },
+    {
+      "base_name": "audit-snapshot",
+      "content_hash": "ced9b5b9f512f9a4ce1c3a127c2747240653bb5445ede6c72c50a7b73ce8a8ea",
+      "created_at_utc": "2026-09-19T15:53:32.933566+00:00",
+      "identifier": "audit-snapshot-V3",
+      "note": "Cross-pillar audit snapshot for the 5-round Gohr distinguisher case study.",
+      "version": 3
+    },
+    {
+      "base_name": "audit-snapshot",
+      "content_hash": "ef38669d10d89c04a1bcc0934d74a9f0f7ff0e247c348e8e9c9d6a1b8695d328",
+      "created_at_utc": "2026-09-19T16:09:33.289663+00:00",
+      "identifier": "audit-snapshot-V4",
+      "note": "Cross-pillar audit snapshot for the 5-round Gohr distinguisher case study.",
+      "version": 4
+    }
+  ]
+}

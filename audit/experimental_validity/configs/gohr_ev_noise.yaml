@@ -1,0 +1,23 @@
+# EV-NOISE production configuration.
+experiment_id: EV-NOISE
+run_mode: production
+
+# Small, predetermined number of exact reruns of one fixed
+# (dataset, seed) configuration. REQUIRES USER INPUT: exact count.
+requested_reruns: UNSPECIFIED_REQUIRES_USER_INPUT
+minimum_valid_reruns: UNSPECIFIED_REQUIRES_USER_INPUT
+
+model_seed: 2000
+
+rounds: 5
+depth: 10
+epochs: 200
+batch_size: 5000
+train_size: 10000000
+val_size: 1000000
+confirmatory_test_size: 1000000
+shuffle: true
+optimizer: adam
+lr_schedule: {high: 0.002, low: 0.0001, period: 10}
+
+output_dir: results/ev_noise

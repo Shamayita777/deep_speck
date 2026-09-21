@@ -1,0 +1,283 @@
+{
+  "audit": {
+    "claim": "Characterizes how predictive performance changes with training-set size; it does not by itself establish cryptographic learning or a universal dataset-size law.",
+    "id": "D5",
+    "name": "Training-Data Scaling Audit",
+    "scope": "sample-size scaling under a fixed dataset/model/training protocol"
+  },
+  "configuration": {
+    "audit_seed": 0,
+    "baseline_training_size": 1000,
+    "batch_size": 100,
+    "bootstrap_replicates": 1000,
+    "config_hash": "0e04fff6aacfbab61d4efe057f0247630611d97d59d6cc2fb32f3bb2979aa184",
+    "dataset_id": "gohr-speck",
+    "dataset_replay_available": false,
+    "dataset_replay_reason": "Gohr dataset generation delegates to speck.make_train_data() (via GohrAdapter.generate_partition), which draws from os.urandom() internally. The integer audit/replicate seed does not control dataset content and cannot be used to deterministically regenerate a bit-identical dataset. The persisted dataset files, together with their file and logical content SHA-256 hashes (including a hash for every declared nested-prefix size), are the reproducibility/resumability object instead.",
+    "dataset_seed": null,
+    "dataset_version": "original-make-train-data",
+    "design": {
+      "fixed_test_partition": true,
+      "independent_experimental_unit": "replicate",
+      "independent_replicate_datasets": true,
+      "individual_test_examples_are_not_independent_replicates": true,
+      "nested_prefixes_are_not_independent_datasets": true,
+      "nested_prefixes_within_replicate": true,
+      "same_model_seed_across_sizes_within_replicate": true
+    },
+    "epochs": 2,
+    "experiment": "Gohr Speck training-data scaling with nested independent replicates",
+    "generation": {
+      "dataset_replay_available": false,
+      "dataset_replay_reason": "Gohr dataset generation delegates to speck.make_train_data() (via GohrAdapter.generate_partition), which draws from os.urandom() internally. The integer audit/replicate seed does not control dataset content and cannot be used to deterministically regenerate a bit-identical dataset. The persisted dataset files, together with their file and logical content SHA-256 hashes (including a hash for every declared nested-prefix size), are the reproducibility/resumability object instead.",
+      "deterministic_seed": null,
+      "input_difference": {
+        "left_word": "0x0040",
+        "right_word": "0x0000"
+      },
+      "num_rounds": 5,
+      "procedure": "speck.make_train_data(n, nr)",
+      "randomness_source": "os.urandom"
+    },
+    "loss": "mse",
+    "model": {
+      "architecture": "Gohr tn.make_resnet",
+      "depth": 10,
+      "reg_param": 1e-05
+    },
+    "optimizer": "adam",
+    "replicate_seed_role": "model_initialization_and_audit_RNG_stream; NOT dataset generation. Gohr's generator (speck.make_train_data via os.urandom) is independent of this seed.",
+    "replicates": 2,
+    "schema_version": "2.1",
+    "test_samples": 1000,
+    "total_epochs": 2,
+    "training_procedure": "Gohr original cyclic learning-rate schedule",
+    "training_sizes": [
+      1000,
+      2000,
+      4000
+    ]
+  },
+  "design": {
+    "fixed_test_partition": true,
+    "independent_experimental_unit": "replicate",
+    "independent_replicate_datasets": true,
+    "individual_test_examples_are_not_independent_replicates": true,
+    "nested_prefixes_are_not_independent_datasets": true,
+    "nested_prefixes_within_replicate": true,
+    "same_model_seed_across_sizes_within_replicate": true
+  },
+  "findings": {
+    "baseline_training_size": 1000,
+    "observations": [
+      {
+        "completed_epochs": 2,
+        "replicate": 1,
+        "seed": 3757552657,
+        "test_accuracy": 0.5339999794960022,
+        "test_loss": 0.25815528631210327,
+        "test_samples": 1000,
+        "total_epochs": 2,
+        "training_samples": 1000
+      },
+      {
+        "completed_epochs": 2,
+        "replicate": 1,
+        "seed": 3757552657,
+        "test_accuracy": 0.6010000109672546,
+        "test_loss": 0.2455911785364151,
+        "test_samples": 1000,
+        "total_epochs": 2,
+        "training_samples": 2000
+      },
+      {
+        "completed_epochs": 2,
+        "replicate": 1,
+        "seed": 3757552657,
+        "test_accuracy": 0.6399999856948853,
+        "test_loss": 0.23138019442558289,
+        "test_samples": 1000,
+        "total_epochs": 2,
+        "training_samples": 4000
+      },
+      {
+        "completed_epochs": 2,
+        "replicate": 2,
+        "seed": 673228719,
+        "test_accuracy": 0.5230000019073486,
+        "test_loss": 0.25772565603256226,
+        "test_samples": 1000,
+        "total_epochs": 2,
+        "training_samples": 1000
+      },
+      {
+        "completed_epochs": 2,
+        "replicate": 2,
+        "seed": 673228719,
+        "test_accuracy": 0.5730000138282776,
+        "test_loss": 0.2491963654756546,
+        "test_samples": 1000,
+        "total_epochs": 2,
+        "training_samples": 2000
+      },
+      {
+        "completed_epochs": 2,
+        "replicate": 2,
+        "seed": 673228719,
+        "test_accuracy": 0.5950000286102295,
+        "test_loss": 0.2469225525856018,
+        "test_samples": 1000,
+        "total_epochs": 2,
+        "training_samples": 4000
+      }
+    ],
+    "paired_contrasts": {
+      "1000_vs_2000": {
+        "baseline_size": 1000,
+        "bootstrap_ci95": [
+          0.050000011920928955,
+          0.06700003147125244
+        ],
+        "comparison_size": 2000,
+        "mean_accuracy_difference": 0.0585000216960907,
+        "paired_p_value": 0.09185755208676531,
+        "paired_t_statistic": 6.882347578827053,
+        "replicates": 2,
+        "sd_accuracy_difference": 0.012020829104337619
+      },
+      "1000_vs_4000": {
+        "baseline_size": 1000,
+        "bootstrap_ci95": [
+          0.07200002670288086,
+          0.10600000619888306
+        ],
+        "comparison_size": 4000,
+        "mean_accuracy_difference": 0.08900001645088196,
+        "paired_p_value": 0.12015410215858707,
+        "paired_t_statistic": 5.235298242538458,
+        "replicates": 2,
+        "sd_accuracy_difference": 0.02404161606182673
+      },
+      "baseline_role": "The smallest declared training size is the fixed baseline condition. Every paired contrast below is (comparison size) minus (this baseline), computed within-replicate.",
+      "baseline_training_size": 1000,
+      "multiple_comparison_correction": {
+        "adjusted_p_values": {
+          "1000_vs_2000": 0.18371510417353062,
+          "1000_vs_4000": 0.18371510417353062
+        },
+        "alpha": 0.05,
+        "method": "Holm step-down",
+        "rejections": {
+          "1000_vs_2000": false,
+          "1000_vs_4000": false
+        }
+      }
+    },
+    "scaling_analysis": {
+      "mean_slope": 0.1478258275468106,
+      "mean_slope_bootstrap_ci95": [
+        0.11958945576846958,
+        0.1760621993251516
+      ],
+      "model": "ordinary least squares accuracy ~ log10(training_samples), fit separately per replicate",
+      "monotone_non_decreasing_replicates": 2,
+      "replicate_slopes": [
+        0.1760621993251516,
+        0.11958945576846958
+      ],
+      "replicates_with_complete_curves": 2,
+      "role": "SECONDARY/DESCRIPTIVE diagnostic. Does not override, replace, or supersede the primary paired-contrast analysis above. Not a causal claim and not a claim of a universal scaling law or of cryptographic learning."
+    },
+    "summary_by_training_size": {
+      "1000": {
+        "accuracy_ci95_bootstrap": [
+          0.5230000019073486,
+          0.5339999794960022
+        ],
+        "accuracy_max": 0.5339999794960022,
+        "accuracy_mean": 0.5284999907016754,
+        "accuracy_min": 0.5230000019073486,
+        "accuracy_sd": 0.007778158745836983,
+        "loss_mean": 0.25794047117233276,
+        "loss_sd": 0.0003037944840665242,
+        "n": 1000,
+        "replicates": 2
+      },
+      "2000": {
+        "accuracy_ci95_bootstrap": [
+          0.5730000138282776,
+          0.6010000109672546
+        ],
+        "accuracy_max": 0.6010000109672546,
+        "accuracy_mean": 0.5870000123977661,
+        "accuracy_min": 0.5730000138282776,
+        "accuracy_sd": 0.0197989878501746,
+        "loss_mean": 0.24739377200603485,
+        "loss_sd": 0.0025492521321814256,
+        "n": 2000,
+        "replicates": 2
+      },
+      "4000": {
+        "accuracy_ci95_bootstrap": [
+          0.5950000286102295,
+          0.6399999856948853
+        ],
+        "accuracy_max": 0.6399999856948853,
+        "accuracy_mean": 0.6175000071525574,
+        "accuracy_min": 0.5950000286102295,
+        "accuracy_sd": 0.03181977480766371,
+        "loss_mean": 0.23915137350559235,
+        "loss_sd": 0.01099010685057945,
+        "n": 4000,
+        "replicates": 2
+      }
+    }
+  },
+  "interpretation": "D5 is a descriptive/estimative scaling experiment. The nested-prefix component controls the sampled population within each replicate, while independent replicate maximum datasets quantify between-dataset and training stochastic variation. The primary analysis is the paired contrast of each training size against the smallest declared size (the baseline); the scaling slope is a secondary, descriptive diagnostic only.",
+  "limitations": [
+    "D5 is conditional on the specified model architecture, optimizer, training procedure, epoch budget, batch size, and dataset generator; it does not generalize beyond them.",
+    "Nested prefixes are not independent datasets; their purpose is paired sample-size comparison within a replicate, not additional independent sampling.",
+    "Independent maximum-size replicate datasets provide the between-dataset (and between-model-initialization) variation; the nested prefixes alone do not.",
+    "The fixed test set is deliberately shared across every condition.",
+    "Individual test examples are therefore NOT treated as independent experimental replicates; the independent experimental unit is the replicate, and the nested prefixes within a replicate are paired conditions, not additional independent units.",
+    "Dataset generation for this experiment is not guaranteed deterministic with respect to the audit seed (see provenance.dataset_replay_reason); exact historical dataset replay from the integer audit seed is not available.",
+    "Exact historical dataset replay is unavailable from the integer audit seed; the persisted dataset files and their hashes are the reproducibility/resumability object instead.",
+    "Persisted dataset hashes (file and logical/content, for the full replicate dataset, every declared nested prefix, and the fixed test set) are therefore part of the resumability contract, not merely diagnostic metadata.",
+    "The scaling curve is a secondary, descriptive diagnostic; it does not establish a universal scaling law and does not override the primary paired-contrast analysis.",
+    "D5 does not by itself establish cryptographic learning."
+  ],
+  "provenance": {
+    "audit_seed": 0,
+    "dataset_id": "gohr-speck",
+    "dataset_replay_available": false,
+    "dataset_replay_reason": "Gohr dataset generation delegates to speck.make_train_data() (via GohrAdapter.generate_partition), which draws from os.urandom() internally. The integer audit/replicate seed does not control dataset content and cannot be used to deterministically regenerate a bit-identical dataset. The persisted dataset files, together with their file and logical content SHA-256 hashes (including a hash for every declared nested-prefix size), are the reproducibility/resumability object instead.",
+    "dataset_seed": null,
+    "dataset_version": "original-make-train-data",
+    "generation_parameters": {
+      "baseline_training_size": 1000,
+      "batch_size": 100,
+      "dataset_replay_available": false,
+      "dataset_replay_reason": "Gohr dataset generation delegates to speck.make_train_data() (via GohrAdapter.generate_partition), which draws from os.urandom() internally. The integer audit/replicate seed does not control dataset content and cannot be used to deterministically regenerate a bit-identical dataset. The persisted dataset files, together with their file and logical content SHA-256 hashes (including a hash for every declared nested-prefix size), are the reproducibility/resumability object instead.",
+      "deterministic_seed": null,
+      "epochs": 2,
+      "generator": "speck.make_train_data",
+      "input_difference": {
+        "left_word": "0x0040",
+        "right_word": "0x0000"
+      },
+      "num_rounds": 5,
+      "randomness_source": "os.urandom",
+      "replicates": 2,
+      "smoke_runs_non_evidentiary": true,
+      "test_samples": 1000,
+      "training_sizes": [
+        1000,
+        2000,
+        4000
+      ]
+    },
+    "generation_procedure": "speck.make_train_data(n, nr)",
+    "replicate_seed_role": "model_initialization_and_audit_RNG_stream; NOT dataset generation. Gohr's generator (speck.make_train_data via os.urandom) is independent of this seed.",
+    "resume_integrity_contract": "Persisted dataset files (full replicate datasets, every declared nested prefix, and the fixed test set) are identified by both a file SHA-256 and a logical content SHA-256 (dtype+shape+bytes). Per-condition checkpoints additionally record the exact configuration hash and dataset/test content hashes they were produced against. On resume, all of these are re-verified before any further computation; a mismatch or an incomplete persisted dataset is a hard failure, never a silent regeneration."
+  }
+}

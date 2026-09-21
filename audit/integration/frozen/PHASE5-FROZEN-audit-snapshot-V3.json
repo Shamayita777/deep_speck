@@ -1,0 +1,170 @@
+{
+  "artifact_index_summary": {
+    "artifact_count": 18,
+    "hash_conflicts": [],
+    "verification_summary": {
+      "VERIFIED": 18
+    }
+  },
+  "claim_id": "C1",
+  "claim_text": "For the 5-round Gohr/Speck32/64 neural distinguisher under differential (0x0040, 0x0000), the observed above-chance distinguishing performance is supported by cryptographically meaningful evidence after dataset, implementation and experimental alternative explanations have been evaluated.",
+  "component_bindings": [
+    {
+      "artifact_path": "pillar_interpretation.json",
+      "component": "pillar_interpretation",
+      "content_hash": "6a46a95d97860734254fdba53fc1cf8271944f3786720bb268632e5d194b10f7"
+    },
+    {
+      "artifact_path": "evidence_ledger.json",
+      "component": "evidence_ledger",
+      "content_hash": "e4b7c3149d111a52223b1c15974083b2eee86bee4075c7a44f43d72ee9264b43"
+    },
+    {
+      "artifact_path": "artifact_index.json",
+      "component": "artifact_index",
+      "content_hash": "a5f05ec472057bbb3ff3dce58687fa17a78a3a4d0b999bd505143252e38cf3ac"
+    },
+    {
+      "artifact_path": "decision.json",
+      "component": "decision",
+      "content_hash": "2bd5a1ed0289c5e012bbbc2b0afa6f5176b78ba8cbbee0c99d0fdaf29cab7006"
+    }
+  ],
+  "conflicts": [
+    {
+      "blocks_claim": true,
+      "candidate_confounders": [
+        "All three tests were run against the SAME depth-5 checkpoint (II-FINDING-DEPTH-V1), which diverges from the declared reference protocol's depth=10. A shared upstream artifact defect cannot by itself explain a DISAGREEMENT between tests run on that same artifact, so it does not resolve this conflict - but it does mean all three observations are scoped to a non-conformant model instance.",
+        "The tests measure genuinely different things: CE2 tests OUTPUT AGREEMENT with the target; CE3 tests REPRESENTATIONAL DECODABILITY; CE4 tests OUTPUT SENSITIVITY to perturbing the target. These are not logically equivalent, and it is coherent for a model to encode and be sensitive to a quantity whose monotone ordering its output nonetheless fails to track. This is a plausible reconciliation, but it is a HYPOTHESIS, not an established finding, and it is not adopted as a resolution here."
+      ],
+      "conflict_id": "CONFLICT-CE2-CE34-V1",
+      "observations": [
+        {
+          "decision": "NOT_SUPPORTED",
+          "evidence_reference": "evidence/ce2/ce2_certificate_{1..5}.json",
+          "methodological_notes": [
+            "Observational, no control arm.",
+            "Per-sample unit (n=1e5) within one model instance.",
+            "Five independent runs, which strengthens it against being a one-off.",
+            "Measures the model's OUTPUT against the target."
+          ],
+          "observation": "Model output does NOT positively rank-correlate with the analytical target; the observed correlation is negative.",
+          "source_id": "CE2"
+        },
+        {
+          "decision": "SUPPORTED",
+          "evidence_reference": "evidence/ce3/ce3_certificate.json",
+          "methodological_notes": [
+            "Replicate-level unit (n=20 independent evaluation replicates).",
+            "Calibration-gated and Bonferroni-corrected - methodologically the strongest of the three designs.",
+            "Measures the model's INTERNAL REPRESENTATION, not its output."
+          ],
+          "observation": "The analytical target IS selectively decodable from the trained model's hidden representation relative to a control representation.",
+          "source_id": "CE3"
+        },
+        {
+          "decision": "SUPPORTED",
+          "evidence_reference": "evidence/ce4/ce4_certificate.json",
+          "methodological_notes": [
+            "Per-sample unit within one model instance; p underflowed at n~1e5, d_z=0.545.",
+            "Control provably preserves the declared target (XOR identity).",
+            "Measures output SENSITIVITY to perturbation, not output AGREEMENT with the target."
+          ],
+          "observation": "Perturbing the analytical structure changes the model's output more than a magnitude-matched, target-preserving control perturbation.",
+          "source_id": "CE4"
+        }
+      ],
+      "rationale": "Both the contradicting and the supporting observations are RETAINED. The conflict is NOT resolved by majority vote (two SUPPORTED against one NOT_SUPPORTED), which methodology 3.8.8 prohibits and which would here amount to discarding the only observation contradicting the desired conclusion. It is also not resolved by methodological quality alone: although CE3 has the strongest design (replicate-level unit, calibration gate, multiplicity correction), a stronger design for a DIFFERENT measurement does not overturn a weaker design's finding about its own measurement. Per 3.8.8 the conflict therefore stands as requiring additional controlled experimentation, and the affected claim cannot be certified while it stands.",
+      "required_experimentation": [
+        "Re-execute CE2, CE3 and CE4 against a reference-conformant (depth=10) model so that all three observations describe the declared protocol rather than a divergent artifact.",
+        "Test the measurement-target hypothesis directly: determine whether the output-agreement/representational-decodability divergence persists under a conformant model, which would distinguish a genuine dissociation from an artifact of this instance."
+      ],
+      "shared_subject": "The same analytical target quantity (Lipmaa-Moriai chained single-trail differential probability), verified identical across CE2/CE3/CE4 by source: CE4 reuses CE3's primary task object literally, and CE3's target and CE2's reference both read TheoryDataset.theoretical_probabilities.",
+      "status": "REQUIRES_ADDITIONAL_EXPERIMENTATION"
+    }
+  ],
+  "decision": {
+    "blocking_conflicts": [
+      "CONFLICT-CE2-CE34-V1"
+    ],
+    "claim_id": "C1",
+    "dimension_outcomes": {
+      "cryptographic_evidence": "INCONCLUSIVE",
+      "dataset_integrity": "INCONCLUSIVE",
+      "experimental_validity": "INCONCLUSIVE",
+      "implementation_integrity": "INCONCLUSIVE"
+    },
+    "evidence_level": "LEVEL_1_PREDICTIVE",
+    "final_outcome": "INCONCLUSIVE",
+    "limitations": [
+      "No Experimental Validity production evidence exists yet.",
+      "Dataset Integrity is not fully established: D2 is INCONCLUSIVE and explicitly records that it is not proof of independence; D5 has smoke evidence only.",
+      "All CE1-CE4 evidence was produced against a depth-5 checkpoint that diverges from the declared reference protocol's depth=10 (II-FINDING-DEPTH-V1).",
+      "No independent convergence source exists, so LEVEL_4 is unreachable on the current evidence - this reflects absent convergence evidence, not a policy cap.",
+      "Gohr's 11/12-round key-recovery apparatus (key_rank.py, test_key_recovery.py, key_averaging.py and released weights) exists in the repository but is NOT part of this claim chain. No CE1-CE4 experiment exercises it, and no evidence chain currently supports a key-recovery claim. It is recorded here solely so its exclusion is explicit rather than accidental."
+    ],
+    "policy_version": "ciphermind-decision-policy-v1",
+    "rationale": "Unresolved conflict(s) ['CONFLICT-CE2-CE34-V1'] persist after the 3.8.8 procedure; the affected claim is INCONCLUSIVE. An unresolved conflict among cryptographic observations on the same target quantity prevents any claim that observations are consistent with cryptographic reasoning. Evidence remains at the predictive level.",
+    "supporting_evidence_ids": [
+      "implementation-certificate-V3",
+      "evidence/ce1/ce1_certificate.json",
+      "evidence/ce2/ce2_certificate_{1..5}.json",
+      "evidence/ce3/ce3_certificate.json",
+      "evidence/ce4/ce4_certificate.json",
+      "dataset/evidence/d1..d5"
+    ]
+  },
+  "evidence_ledger_summary": {
+    "entry_counts": {
+      "ingested_reference": 12,
+      "native": 1,
+      "total": 13
+    },
+    "evidence_ids": [
+      "EV-II-DEPTH-001",
+      "EV-D1-INGESTED",
+      "EV-D2-INGESTED",
+      "EV-D3-INGESTED",
+      "EV-D4-INGESTED",
+      "EV-CE1-INGESTED",
+      "EV-CE2-RUN1-INGESTED",
+      "EV-CE2-RUN2-INGESTED",
+      "EV-CE2-RUN3-INGESTED",
+      "EV-CE2-RUN4-INGESTED",
+      "EV-CE2-RUN5-INGESTED",
+      "EV-CE3-INGESTED",
+      "EV-CE4-INGESTED"
+    ],
+    "schema_version": "evidence-ledger-v1"
+  },
+  "generated_at_utc": "2026-09-19T15:53:32.933074+00:00",
+  "integrity_checks": {
+    "artifact_index_hash_conflicts": [],
+    "ledger_artifact_hash_problems": [],
+    "ledger_artifact_hash_reverification": "ALL_VERIFIED"
+  },
+  "limitations": [
+    "No Experimental Validity production evidence exists yet.",
+    "Dataset Integrity is not fully established: D2 is INCONCLUSIVE and explicitly records that it is not proof of independence; D5 has smoke evidence only.",
+    "All CE1-CE4 evidence was produced against a depth-5 checkpoint that diverges from the declared reference protocol's depth=10 (II-FINDING-DEPTH-V1).",
+    "No independent convergence source exists, so LEVEL_4 is unreachable on the current evidence - this reflects absent convergence evidence, not a policy cap.",
+    "Gohr's 11/12-round key-recovery apparatus (key_rank.py, test_key_recovery.py, key_averaging.py and released weights) exists in the repository but is NOT part of this claim chain. No CE1-CE4 experiment exercises it, and no evidence chain currently supports a key-recovery claim. It is recorded here solely so its exclusion is explicit rather than accidental."
+  ],
+  "open_blockers": [
+    "CONFLICT-CE2-CE34-V1 unresolved; blocks claim C1.",
+    "CE1-CE4 evidence bound to a non-conformant depth-5 checkpoint.",
+    "No Experimental Validity production evidence (epsilon, replicate count, runtime benchmark all unresolved).",
+    "Dataset Integrity incomplete: D2 INCONCLUSIVE, D5 smoke-only.",
+    "No independent convergence source, so LEVEL_4 is unreachable on current evidence."
+  ],
+  "pillar_outcomes": {
+    "cryptographic_evidence": "INCONCLUSIVE",
+    "dataset_integrity": "INCONCLUSIVE",
+    "experimental_validity": "INCONCLUSIVE",
+    "implementation_integrity": "INCONCLUSIVE"
+  },
+  "schema_version": "audit-snapshot-v1",
+  "scope_notes": {
+    "key_recovery": "Gohr's 11/12-round key-recovery apparatus (key_rank.py, test_key_recovery.py, key_averaging.py and released weights) exists in the repository but is NOT part of this claim chain. No CE1-CE4 experiment exercises it, and no evidence chain currently supports a key-recovery claim. It is recorded here solely so its exclusion is explicit rather than accidental."
+  }
+}

@@ -1,0 +1,25 @@
+# Exact-pinned dependencies for the environment in which this codebase
+# was implemented and its full test suite (93 tests) was actually
+# executed and verified to pass, Round 6.
+#
+# Python: 3.12.3
+#
+# THIS IS NOT THE DOCUMENTED GOHR REPRODUCTION BASELINE ENVIRONMENT.
+# The original reproduction (archive/notebooks/gohr_reproduction_tf2.ipynb)
+# used Python 3.12.13 / TensorFlow 2.20.0 / Keras 3.13.2. That exact
+# environment has NOT been built or verified in this session (no Docker
+# daemon is available in the sandbox used for development/testing - see
+# Dockerfile for the documented-baseline target, which is likewise
+# unverified as of this writing). This mismatch is recorded honestly,
+# not silently reconciled - see docs/statistical_plan.md and the
+# Round-6 audit report's "Remaining blockers" section.
+#
+# Every version below is an EXACT pin (==), not a range, because a
+# range would defeat the purpose of a reproducible artifact.
+
+numpy==2.4.4
+scipy==1.17.1
+tensorflow-cpu==2.21.0
+keras==3.15.1
+pyyaml==6.0.3
+pytest==9.1.1

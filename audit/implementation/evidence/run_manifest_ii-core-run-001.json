@@ -1,0 +1,51 @@
+{
+  "checkpoint": null,
+  "claim_ids": [
+    "C1"
+  ],
+  "code_hashes": {
+    "speck.py": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce",
+    "train_5_rounds.py": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+    "train_nets.py": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669"
+  },
+  "command": "python3 -m audit.implementation.run_implementation_audit",
+  "condition_id": "declared_vs_realized_conformance",
+  "config_hash": "b3daf2aca3e989f5c4a4ddd959895244829475672caf04e1e2991ba4c24cab44",
+  "dataset_hashes": {},
+  "dataset_snapshot_id": null,
+  "end_time_utc": "2026-09-19T07:22:13.666728+00:00",
+  "environment": {
+    "cpu": "x86_64",
+    "git_commit": null,
+    "gpu": null,
+    "keras_version": "3.15.1",
+    "numpy_version": "2.4.4",
+    "os": "Linux-6.18.44-fc-v37-x86_64-with-glibc2.39",
+    "python_version": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]",
+    "scipy_version": "1.17.1",
+    "tensorflow_version": "2.21.0",
+    "working_tree_dirty": null
+  },
+  "execution_mode": "PRODUCTION",
+  "exit_code": 0,
+  "experiment_id": "II-CORE-GOHR-5R",
+  "hypothesis_ids": [
+    "H-II-CONFORMANCE"
+  ],
+  "limitations": [],
+  "metrics": {
+    "architectural_discrepancy_confirmed": true,
+    "checkpoints_probed": 2
+  },
+  "model_source_hash": null,
+  "preregistration_hash": null,
+  "replicate_id": null,
+  "run_id": "ii-core-run-001",
+  "seeds": {},
+  "start_time_utc": "2026-09-19T07:22:10.837024+00:00",
+  "statistics": {},
+  "status": "COMPLETED",
+  "stderr_path": null,
+  "stdout_path": null,
+  "warnings": []
+}

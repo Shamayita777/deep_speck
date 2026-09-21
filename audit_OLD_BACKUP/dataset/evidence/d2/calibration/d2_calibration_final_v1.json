@@ -1,0 +1,748 @@
+{
+  "calibration": {
+    "_checkpoint_meta": {
+      "conditions_already_checkpointed_at_start": 0,
+      "conditions_computed_this_invocation": 25,
+      "max_workers": 4,
+      "wall_clock_seconds_this_invocation": 21146.096453562
+    },
+    "calibration_is_not_clean_evidence": true,
+    "detection_target": 0.95,
+    "lag_copy_injection": {
+      "0.001": {
+        "confidence_lower_bound_target_met": false,
+        "detection_rate": 0.0,
+        "detection_rate_95_ci": {
+          "lower": 3.469446951953614e-18,
+          "upper": 0.03699349820698568
+        },
+        "detections": 0,
+        "injected_fault_metadata_summary": {
+          "first_trial": {
+            "actual_modified_rows": 100,
+            "lag": 1,
+            "realized_fraction_of_eligible_rows": 0.001000010000100001,
+            "requested_fraction": 0.001,
+            "requested_rows": 100
+          }
+        },
+        "point_estimate_target_met": false,
+        "replicates": 100,
+        "target": 0.95,
+        "target_component": "d2_2_serial_dependence",
+        "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+      },
+      "0.005": {
+        "confidence_lower_bound_target_met": false,
+        "detection_rate": 0.0,
+        "detection_rate_95_ci": {
+          "lower": 3.469446951953614e-18,
+          "upper": 0.03699349820698568
+        },
+        "detections": 0,
+        "injected_fault_metadata_summary": {
+          "first_trial": {
+            "actual_modified_rows": 500,
+            "lag": 1,
+            "realized_fraction_of_eligible_rows": 0.005000050000500005,
+            "requested_fraction": 0.005,
+            "requested_rows": 500
+          }
+        },
+        "point_estimate_target_met": false,
+        "replicates": 100,
+        "target": 0.95,
+        "target_component": "d2_2_serial_dependence",
+        "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+      },
+      "0.01": {
+        "confidence_lower_bound_target_met": false,
+        "detection_rate": 0.0,
+        "detection_rate_95_ci": {
+          "lower": 3.469446951953614e-18,
+          "upper": 0.03699349820698568
+        },
+        "detections": 0,
+        "injected_fault_metadata_summary": {
+          "first_trial": {
+            "actual_modified_rows": 1000,
+            "lag": 1,
+            "realized_fraction_of_eligible_rows": 0.01000010000100001,
+            "requested_fraction": 0.01,
+            "requested_rows": 1000
+          }
+        },
+        "point_estimate_target_met": false,
+        "replicates": 100,
+        "target": 0.95,
+        "target_component": "d2_2_serial_dependence",
+        "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+      },
+      "0.025": {
+        "confidence_lower_bound_target_met": true,
+        "detection_rate": 1.0,
+        "detection_rate_95_ci": {
+          "lower": 0.9630065017930143,
+          "upper": 1.0
+        },
+        "detections": 100,
+        "injected_fault_metadata_summary": {
+          "first_trial": {
+            "actual_modified_rows": 2500,
+            "lag": 1,
+            "realized_fraction_of_eligible_rows": 0.025000250002500026,
+            "requested_fraction": 0.025,
+            "requested_rows": 2500
+          }
+        },
+        "point_estimate_target_met": true,
+        "replicates": 100,
+        "target": 0.95,
+        "target_component": "d2_2_serial_dependence",
+        "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+      },
+      "0.05": {
+        "confidence_lower_bound_target_met": true,
+        "detection_rate": 1.0,
+        "detection_rate_95_ci": {
+          "lower": 0.9630065017930143,
+          "upper": 1.0
+        },
+        "detections": 100,
+        "injected_fault_metadata_summary": {
+          "first_trial": {
+            "actual_modified_rows": 5000,
+            "lag": 1,
+            "realized_fraction_of_eligible_rows": 0.05000050000500005,
+            "requested_fraction": 0.05,
+            "requested_rows": 5000
+          }
+        },
+        "point_estimate_target_met": true,
+        "replicates": 100,
+        "target": 0.95,
+        "target_component": "d2_2_serial_dependence",
+        "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+      }
+    },
+    "lag_copy_injection_monotonicity_diagnostic": {
+      "decreases": [],
+      "detection_rates": [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "fractions": [
+        0.001,
+        0.005,
+        0.01,
+        0.025,
+        0.05
+      ],
+      "interpretation": "Descriptive diagnostic only. A decrease does not constitute a statistical failure of the calibration and does not alter any detector decision.",
+      "nondecreasing_point_estimate": true
+    },
+    "near_duplicate_injection": {
+      "1": {
+        "0.001": {
+          "confidence_lower_bound_target_met": true,
+          "detection_rate": 1.0,
+          "detection_rate_95_ci": {
+            "lower": 0.9630065017930143,
+            "upper": 1.0
+          },
+          "detections": 100,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 100,
+              "radius": 1,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.001,
+              "requested_fraction": 0.001,
+              "requested_rows": 100
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.005": {
+          "confidence_lower_bound_target_met": true,
+          "detection_rate": 1.0,
+          "detection_rate_95_ci": {
+            "lower": 0.9630065017930143,
+            "upper": 1.0
+          },
+          "detections": 100,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 500,
+              "radius": 1,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.005,
+              "requested_fraction": 0.005,
+              "requested_rows": 500
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.01": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.99,
+          "detection_rate_95_ci": {
+            "lower": 0.9455138038212946,
+            "upper": 0.9982325679358593
+          },
+          "detections": 99,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 1000,
+              "radius": 1,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.01,
+              "requested_fraction": 0.01,
+              "requested_rows": 1000
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.025": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.96,
+          "detection_rate_95_ci": {
+            "lower": 0.9016292856411208,
+            "upper": 0.9843366960084523
+          },
+          "detections": 96,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 2500,
+              "radius": 1,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.025,
+              "requested_fraction": 0.025,
+              "requested_rows": 2500
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.05": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.95,
+          "detection_rate_95_ci": {
+            "lower": 0.8882495307680808,
+            "upper": 0.9784563208456319
+          },
+          "detections": 95,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 5000,
+              "radius": 1,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.05,
+              "requested_fraction": 0.05,
+              "requested_rows": 5000
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        }
+      },
+      "2": {
+        "0.001": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.97,
+          "detection_rate_95_ci": {
+            "lower": 0.9154806357094724,
+            "upper": 0.9897454759759611
+          },
+          "detections": 97,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 100,
+              "radius": 2,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.001,
+              "requested_fraction": 0.001,
+              "requested_rows": 100
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.005": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.99,
+          "detection_rate_95_ci": {
+            "lower": 0.9455138038212946,
+            "upper": 0.9982325679358593
+          },
+          "detections": 99,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 500,
+              "radius": 2,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.005,
+              "requested_fraction": 0.005,
+              "requested_rows": 500
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.01": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.98,
+          "detection_rate_95_ci": {
+            "lower": 0.929988209271456,
+            "upper": 0.9944980324498376
+          },
+          "detections": 98,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 1000,
+              "radius": 2,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.01,
+              "requested_fraction": 0.01,
+              "requested_rows": 1000
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.025": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.95,
+          "detection_rate_95_ci": {
+            "lower": 0.8882495307680808,
+            "upper": 0.9784563208456319
+          },
+          "detections": 95,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 2500,
+              "radius": 2,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.025,
+              "requested_fraction": 0.025,
+              "requested_rows": 2500
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.05": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.88,
+          "detection_rate_95_ci": {
+            "lower": 0.8018790057328857,
+            "upper": 0.9300059356298052
+          },
+          "detections": 88,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 5000,
+              "radius": 2,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.05,
+              "requested_fraction": 0.05,
+              "requested_rows": 5000
+            }
+          },
+          "point_estimate_target_met": false,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        }
+      },
+      "4": {
+        "0.001": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.99,
+          "detection_rate_95_ci": {
+            "lower": 0.9455138038212946,
+            "upper": 0.9982325679358593
+          },
+          "detections": 99,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 100,
+              "radius": 4,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.001,
+              "requested_fraction": 0.001,
+              "requested_rows": 100
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.005": {
+          "confidence_lower_bound_target_met": true,
+          "detection_rate": 1.0,
+          "detection_rate_95_ci": {
+            "lower": 0.9630065017930143,
+            "upper": 1.0
+          },
+          "detections": 100,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 500,
+              "radius": 4,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.005,
+              "requested_fraction": 0.005,
+              "requested_rows": 500
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.01": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.97,
+          "detection_rate_95_ci": {
+            "lower": 0.9154806357094724,
+            "upper": 0.9897454759759611
+          },
+          "detections": 97,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 1000,
+              "radius": 4,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.01,
+              "requested_fraction": 0.01,
+              "requested_rows": 1000
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.025": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.91,
+          "detection_rate_95_ci": {
+            "lower": 0.837737871472837,
+            "upper": 0.9519274599974348
+          },
+          "detections": 91,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 2500,
+              "radius": 4,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.025,
+              "requested_fraction": 0.025,
+              "requested_rows": 2500
+            }
+          },
+          "point_estimate_target_met": false,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.05": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.89,
+          "detection_rate_95_ci": {
+            "lower": 0.8136870349691969,
+            "upper": 0.9374580364293543
+          },
+          "detections": 89,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 5000,
+              "radius": 4,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.05,
+              "requested_fraction": 0.05,
+              "requested_rows": 5000
+            }
+          },
+          "point_estimate_target_met": false,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        }
+      },
+      "8": {
+        "0.001": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.84,
+          "detection_rate_95_ci": {
+            "lower": 0.7557973061072976,
+            "upper": 0.8990471151119521
+          },
+          "detections": 84,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 100,
+              "radius": 8,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.001,
+              "requested_fraction": 0.001,
+              "requested_rows": 100
+            }
+          },
+          "point_estimate_target_met": false,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.005": {
+          "confidence_lower_bound_target_met": true,
+          "detection_rate": 1.0,
+          "detection_rate_95_ci": {
+            "lower": 0.9630065017930143,
+            "upper": 1.0
+          },
+          "detections": 100,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 500,
+              "radius": 8,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.005,
+              "requested_fraction": 0.005,
+              "requested_rows": 500
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.01": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.96,
+          "detection_rate_95_ci": {
+            "lower": 0.9016292856411208,
+            "upper": 0.9843366960084523
+          },
+          "detections": 96,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 1000,
+              "radius": 8,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.01,
+              "requested_fraction": 0.01,
+              "requested_rows": 1000
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.025": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.95,
+          "detection_rate_95_ci": {
+            "lower": 0.8882495307680808,
+            "upper": 0.9784563208456319
+          },
+          "detections": 95,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 2500,
+              "radius": 8,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.025,
+              "requested_fraction": 0.025,
+              "requested_rows": 2500
+            }
+          },
+          "point_estimate_target_met": true,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        },
+        "0.05": {
+          "confidence_lower_bound_target_met": false,
+          "detection_rate": 0.93,
+          "detection_rate_95_ci": {
+            "lower": 0.8625048526092651,
+            "upper": 0.9656807389327273
+          },
+          "detections": 93,
+          "injected_fault_metadata_summary": {
+            "first_trial": {
+              "actual_modified_rows": 5000,
+              "radius": 8,
+              "realized_exact_radius_fraction": 0.0,
+              "realized_fraction_of_rows": 0.05,
+              "requested_fraction": 0.05,
+              "requested_rows": 5000
+            }
+          },
+          "point_estimate_target_met": false,
+          "replicates": 100,
+          "target": 0.95,
+          "target_component": "d2_1_near_duplicate_structure",
+          "trial_semantics": "independent fault-injection trials conditional on one fixed clean dataset instance"
+        }
+      }
+    },
+    "protocol": "component-specific controlled fault-injection sensitivity calibration",
+    "replicates": 100,
+    "target_semantics": "Wilson lower bound is the only confidence-supported target criterion; point estimate is reported separately"
+  },
+  "calibration_engine_provenance": {
+    "calibrate_fault_engine": {
+      "file": "/kaggle/working/deep_speck/audit/dataset/d2_sample_dependence.py",
+      "file_sha256": "810c2cf25f457fcea9eaf293cca3cd2c22b918af8e1dfa5dc8eec8f2358b8497",
+      "module": "audit.dataset.d2_sample_dependence",
+      "qualname": "calibrate_fault",
+      "schema_version": "6.4"
+    },
+    "expected": {
+      "engine_module": "audit.dataset.d2_sample_dependence",
+      "run_calibration_module": "audit.dataset.experiments.d2_gohr_sample_dependence",
+      "schema_version": "6.4"
+    },
+    "git": {
+      "commit": "95f5fa58984fcfbaefd90ae62fa52f83b940c454",
+      "status": "captured",
+      "working_tree_dirty": false
+    },
+    "run_calibration": {
+      "file": "/kaggle/working/deep_speck/audit/dataset/experiments/d2_gohr_sample_dependence.py",
+      "file_sha256": "3d7c7759d1e7e30abbbff94c3b6f331c962249551558fb9e2208fbca9682910e",
+      "module": "audit.dataset.experiments.d2_gohr_sample_dependence",
+      "qualname": "run_calibration"
+    },
+    "this_driver": {
+      "file": "/kaggle/working/deep_speck/audit/dataset/experiments/d2_gohr_calibration.py",
+      "file_sha256": "82418bc9a50b8c51b60f764d6b671b2e0a0912cfea681b4ea71a2c859d7fc2cf"
+    },
+    "verification_status": "VERIFIED"
+  },
+  "calibration_is_not_clean_evidence": true,
+  "configuration": {
+    "audit_seed": 0,
+    "calibration_fractions": [
+      0.001,
+      0.005,
+      0.01,
+      0.025,
+      0.05
+    ],
+    "calibration_replicates": 100,
+    "calibration_samples": 100000,
+    "effective_test_alpha": 9.80392156862745e-05,
+    "familywise_alpha": 0.01,
+    "familywise_test_count": 102,
+    "lag": 1,
+    "lag_null_permutations": 120000,
+    "lag_pairs": 20000,
+    "near_duplicate_null_pairs": 100000,
+    "near_duplicate_projection_tables": 8,
+    "near_duplicate_query_count": 2048,
+    "near_duplicate_radii": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "practical_excess_tvd_threshold": 0.01,
+    "production_detector_configuration_matched": true
+  },
+  "dataset": {
+    "dataset_id": "gohr-speck",
+    "dataset_version": "original-make-train-data",
+    "dtype": "uint8",
+    "exact_replay_available": false,
+    "feature_bits": 64,
+    "num_rounds": 5,
+    "randomness_source": "os.urandom",
+    "samples": 100000
+  },
+  "execution": {
+    "calibration_seed_offset": 50000,
+    "checkpoint_dir": "d2_calibration_checkpoints",
+    "command_seed": 0,
+    "git_commit": {
+      "commit": "95f5fa58984fcfbaefd90ae62fa52f83b940c454",
+      "status": "captured",
+      "working_tree_dirty": false
+    },
+    "implementation": "CPython",
+    "max_workers": 4,
+    "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+    "python_version": "3.12.13",
+    "utc_completed_at": "2026-09-14T10:55:23.136642+00:00"
+  },
+  "execution_mode": "checkpointed_kaggle_runner",
+  "execution_mode_note": "Executed via d2_gohr_calibration_final_kaggle_runner.py, not the single-process reference driver. max_workers=1 is proven byte-identical to d2_gohr_calibration_final.py's output; max_workers>1 is proven to produce identical per-condition results, just computed in parallel -- see test_parallel_matches_serial.py.",
+  "integrity": {
+    "calibration_engine_verification_status": "VERIFIED",
+    "frozen_configuration_sha256": "ba0139c2f4521d9236d7c8b89a545bdcc34376961dcb8e31ce0a39c15b507f88",
+    "production_clean_logic_invoked": false,
+    "production_clean_logic_modified": false,
+    "production_dataset_generated": false
+  },
+  "limitations": [
+    "This is sensitivity calibration, not evidence that the clean production dataset is independent.",
+    "Trials are independent fault-injection trials conditional on one fixed calibration dataset instance.",
+    "The calibration dataset is smaller than the 12M-row production audit dataset; sensitivity is therefore demonstrated at the calibration scale and is not assumed to be scale-invariant.",
+    "The near-duplicate component is screening-only and does not receive a formal Type-I error interpretation.",
+    "The lag-copy calibration characterizes the frozen detector under the specified injected fault model; it does not establish sensitivity to every possible form of serial dependence.",
+    "Gohr dataset generation uses os.urandom, so this dataset is a fresh calibration instance rather than an exact replay of historical data.",
+    "The monotonicity diagnostic is descriptive and does not alter calibration decisions."
+  ],
+  "purpose": "Controlled fault-injection sensitivity calibration; does not audit clean data.",
+  "schema_version": "d2-calibration-final-v1",
+  "scope_statement": "This artifact calibrates detector sensitivity only. It must not be used as evidence that the clean production dataset passes D2. Clean-data evidence comes only from the separately executed production D2 audit.",
+  "status": "COMPLETED"
+}
