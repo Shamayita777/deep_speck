@@ -47,14 +47,15 @@ from typing import Any, Optional
 
 import numpy as np
 
-from audit.experimental_validity.framework.certificate import (
+from framework.certificate import (
+    require_confirmatory_certificate,
     DecisionState,
     assess_practical_equivalence,
     build_certificate,
     decide_difference_detection,
     decide_final,
 )
-from audit.experimental_validity.framework.experiment import (
+from framework.experiment import (
     Condition,
     DesignType,
     Experiment,
@@ -63,18 +64,18 @@ from audit.experimental_validity.framework.experiment import (
     PracticalSignificance,
     ReplicatePlan,
 )
-from audit.experimental_validity.framework.failures import ReplicateOutcome, ReplicateStatus
-from audit.experimental_validity.framework.firewall import TestSetFirewall
-from audit.experimental_validity.framework.multiplicity import holm_correction
-from audit.experimental_validity.framework.provenance import config_hash, utc_timestamp
-from audit.experimental_validity.framework.replication import ReplicateSet
-from audit.experimental_validity.framework.resumability import ResumeLedger, RunState
-from audit.experimental_validity.framework.statistics import descriptive_statistics, paired_analysis
-from audit.experimental_validity.framework.seeds import statistics_rng
-from audit.experimental_validity.gohr.adapter import GohrAdapter, MatchedDatasets, ReplicateConfig, generate_matched_datasets
-from audit.experimental_validity.gohr import dataset as gohr_dataset
-from audit.experimental_validity.gohr.baseline import BASELINE
-from audit.experimental_validity.gohr.representation import Candidate1Permutation, generate_candidate1_permutation, identity_permutation, run_full_validation
+from framework.failures import ReplicateOutcome, ReplicateStatus
+from framework.firewall import TestSetFirewall
+from framework.multiplicity import holm_correction
+from framework.provenance import config_hash, utc_timestamp
+from framework.replication import ReplicateSet
+from framework.resumability import ResumeLedger, RunState
+from framework.statistics import descriptive_statistics, paired_analysis
+from framework.seeds import statistics_rng
+from gohr.adapter import GohrAdapter, MatchedDatasets, ReplicateConfig, generate_matched_datasets
+from gohr import dataset as gohr_dataset
+from gohr.baseline import BASELINE
+from gohr.representation import Candidate1Permutation, generate_candidate1_permutation, identity_permutation, run_full_validation
 
 PRIMARY_HYPOTHESIS_FAMILY_ID = "ev_primary_family_v1"
 
@@ -102,7 +103,12 @@ def _baseline_overrides_for_run_mode(run_mode: str) -> dict[str, Any]:
             "rounds": 3, "depth": 1, "epochs": 1, "batch_size": 64,
             "train_size": 256, "val_size": 64, "confirmatory_test_size": 64,
         }
-    if run_mode == "production":
+    if run_mode in ("production", "calibration"):
+        # CALIBRATION deliberately uses the IDENTICAL frozen protocol to
+        # production. A pilot run at reduced fidelity would estimate the
+        # variance of a different experiment and could not support a power
+        # analysis for this one. The tiers differ only in evidentiary
+        # status, which is enforced separately (validation.is_non_evidentiary).
         return {
             "rounds": BASELINE.rounds, "depth": BASELINE.depth, "epochs": BASELINE.epochs,
             "batch_size": BASELINE.batch_size, "train_size": BASELINE.train_size,
@@ -142,6 +148,61 @@ def _save_replicate_result_sidecar(output_dir: Path, experiment_id: str, replica
     data[replicate_id] = metric_value
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True))
+
+
+def _pair_dataset_manifest_path(output_dir: Path, experiment_id: str, replicate_id: str) -> Path:
+    return Path(output_dir) / "pair_datasets" / f"{experiment_id}_{replicate_id}_manifest.json"
+
+
+def _load_or_generate_pair_datasets(
+    output_dir: Path, experiment_id: str, replicate_id: str, *, rounds: int,
+    differential: tuple, train_size: int, val_size: int, confirmatory_test_size: int,
+) -> MatchedDatasets:
+    """
+    Per-pair matched-dataset persistence (resumability fix).
+
+    A matched pair is defined by the ONE dataset both arms share. Because
+    Gohr generation uses os.urandom and is not seed-replayable, calling
+    generate_matched_datasets() again on resume produced a DIFFERENT
+    dataset for a pair that was already partly trained - silently changing
+    the scientific pair. Training may be retried; the pair's dataset may
+    not change.
+
+    First execution persists all three partitions and records their paths
+    and content hashes; resume reloads those exact arrays and verifies the
+    hashes. exact_replay_available remains False (the generator is still
+    not seedable); the guarantee is narrower and accurate: once generated,
+    this pair's dataset instance is the one both arms use, forever.
+    """
+    import json as _json
+
+    manifest_path = _pair_dataset_manifest_path(output_dir, experiment_id, replicate_id)
+    if manifest_path.exists():
+        m = _json.loads(manifest_path.read_text())
+        parts = {}
+        for role in ("train", "validation", "confirmatory_test"):
+            parts[role] = gohr_dataset.load_dataset(
+                m[role]["path"], dataset_id=m[role]["dataset_id"], role=role,
+                rounds=rounds, differential=differential,
+                expected_combined_hash=m[role]["hash"],
+            )
+        return MatchedDatasets(train=parts["train"], validation=parts["validation"],
+                               confirmatory_test=parts["confirmatory_test"])
+
+    datasets = generate_matched_datasets(
+        rounds=rounds, differential=differential, train_size=train_size,
+        val_size=val_size, confirmatory_test_size=confirmatory_test_size,
+    )
+    directory = Path(output_dir) / "pair_datasets" / f"{experiment_id}_{replicate_id}"
+    manifest = {}
+    for role, bundle in (("train", datasets.train), ("validation", datasets.validation),
+                         ("confirmatory_test", datasets.confirmatory_test)):
+        path = gohr_dataset.persist_dataset(bundle, directory)
+        manifest[role] = {"path": str(path), "dataset_id": bundle.dataset_id,
+                          "hash": bundle.combined_hash}
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(_json.dumps(manifest, indent=2, sort_keys=True))
+    return datasets
 
 
 def _ev_noise_dataset_manifest_path(output_dir: Path) -> Path:
@@ -236,11 +297,25 @@ def _load_pair_results_sidecar(output_dir: Path, experiment_id: str) -> dict[str
 
 def _save_pair_result_sidecar(
     output_dir: Path, experiment_id: str, replicate_id: str, acc_a: float, acc_b: float,
+    raw_a: Optional[dict] = None, raw_b: Optional[dict] = None,
+    initial_weight_record: Optional[dict] = None,
 ) -> None:
+    """
+    Persist EVERYTHING a resumed run needs to rebuild identical provenance.
+
+    Storing only the two accuracies meant a resumed run produced a
+    certificate with fewer raw_replicate_results and an empty
+    initial_weight_hashes list than an uninterrupted one - the numbers
+    matched but the provenance silently did not.
+    """
     import json
     path = _pair_results_sidecar_path(output_dir, experiment_id)
     data = _load_pair_results_sidecar(output_dir, experiment_id)
-    data[replicate_id] = {"acc_a": acc_a, "acc_b": acc_b}
+    data[replicate_id] = {
+        "acc_a": acc_a, "acc_b": acc_b,
+        "raw_a": raw_a or {}, "raw_b": raw_b or {},
+        "initial_weight_record": initial_weight_record or {},
+    }
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True))
 
@@ -385,6 +460,8 @@ def run_ev_baseline(
     )
     cert["sufficiency_summary"] = sufficiency_summary
     cert["non_evidentiary"] = not is_evidentiary
+    cert["calibration"] = (run_mode == "calibration")
+    cert["run_mode"] = run_mode
     return cert
 
 
@@ -516,6 +593,8 @@ def run_ev_noise(
     )
     cert["sufficiency_summary"] = sufficiency_summary
     cert["non_evidentiary"] = not is_evidentiary
+    cert["calibration"] = (run_mode == "calibration")
+    cert["run_mode"] = run_mode
     return cert
 
 
@@ -538,6 +617,7 @@ def _run_paired_experiment(
     output_dir: str | Path, base_model_seed: int, representation_a: Candidate1Permutation,
     representation_b: Candidate1Permutation, shuffle_a: bool, shuffle_b: bool,
     firewall: TestSetFirewall,
+    firewall_path: Optional[Path] = None,
 ) -> tuple[dict[str, Any], np.ndarray, np.ndarray, list[dict], list[dict]]:
     """
     Run `requested_pairs` matched pairs. Firewall lifecycle enforced
@@ -563,6 +643,7 @@ def _run_paired_experiment(
     acc_a, acc_b = [], []
     raw_a, raw_b = [], []
     pair_sidecar = _load_pair_results_sidecar(output_dir, spec.experiment_id)
+    initial_weight_hashes: list = []
 
     for i in range(requested_pairs):
         replicate_id = f"pair{i}"
@@ -592,11 +673,24 @@ def _run_paired_experiment(
                     experiment_id=spec.experiment_id, replicate_id=replicate_id,
                     previous_config_hash=previous["config_hash"], resumed_config_hash=cfg_hash,
                 )
-                acc_a.append(pair_sidecar[replicate_id]["acc_a"])
-                acc_b.append(pair_sidecar[replicate_id]["acc_b"])
+                entry = pair_sidecar[replicate_id]
+                acc_a.append(entry["acc_a"])
+                acc_b.append(entry["acc_b"])
+                # Restore the FULL provenance of a completed pair so the
+                # certificate after a resume is identical to one produced by
+                # an uninterrupted run.
+                if entry.get("raw_a"):
+                    raw_a.append(entry["raw_a"])
+                if entry.get("raw_b"):
+                    raw_b.append(entry["raw_b"])
+                if entry.get("initial_weight_record"):
+                    initial_weight_hashes.append(entry["initial_weight_record"])
                 continue
 
-        datasets = generate_matched_datasets(
+        # Per-pair persistence: an incomplete pair MUST reuse its exact
+        # dataset on resume, never a freshly generated one.
+        datasets = _load_or_generate_pair_datasets(
+            output_dir, spec.experiment_id, replicate_id,
             rounds=overrides["rounds"], differential=BASELINE.differential,
             train_size=overrides["train_size"], val_size=overrides["val_size"],
             confirmatory_test_size=overrides["confirmatory_test_size"],
@@ -647,10 +741,37 @@ def _run_paired_experiment(
             )
             acc_a.append(result_a.outcome.metric_value)
             acc_b.append(result_b.outcome.metric_value)
+            # Verify the DECLARED pairing against what actually happened:
+            # both arms declare same_model_initialization=True, so their
+            # realized initial-weight hashes must be identical. A mismatch
+            # means the pair is not matched and the declaration is false.
+            iw_a = result_a.manifest_fields.get("initial_weight_hash")
+            iw_b = result_b.manifest_fields.get("initial_weight_hash")
+            initial_weight_record = {
+                "replicate_id": replicate_id, "condition_a": iw_a, "condition_b": iw_b,
+                "identical": (iw_a is not None and iw_a == iw_b),
+            }
+            initial_weight_hashes.append(initial_weight_record)
+            if iw_a is None or iw_b is None or iw_a != iw_b:
+                raise RuntimeError(
+                    f"{spec.experiment_id} {replicate_id}: matched pair declares "
+                    f"same_model_initialization=True but the realized initial-weight hashes "
+                    f"differ (condition_a={iw_a}, condition_b={iw_b}). The seed integer alone "
+                    "is not proof of identical initialization; refusing to record a pair whose "
+                    "declared pairing is false.")
             _save_pair_result_sidecar(
                 output_dir, spec.experiment_id, replicate_id,
                 acc_a=result_a.outcome.metric_value, acc_b=result_b.outcome.metric_value,
+                raw_a=result_a.manifest_fields, raw_b=result_b.manifest_fields,
+                initial_weight_record=initial_weight_record,
             )
+            # TRANSACTIONAL firewall persistence: the seal and the two
+            # consumed evaluation keys for this pair are flushed to disk as
+            # soon as the pair completes, so a crash cannot leave the ledger
+            # and sidecar recording a finished pair while the firewall has
+            # forgotten that its confirmatory data were already consumed.
+            if firewall_path is not None:
+                firewall.save(firewall_path)
             ledger.record_state(RunState(
                 experiment_id=spec.experiment_id, replicate_id=replicate_id, stage="complete",
                 completed_stages=["seal", "train_a", "train_b", "consume", "evaluate"],
@@ -667,13 +788,15 @@ def _run_paired_experiment(
         raw_b.append(result_b.manifest_fields)
 
     return (
-        {}, np.array(acc_a, dtype=float), np.array(acc_b, dtype=float), raw_a, raw_b,
+        {"initial_weight_hashes": initial_weight_hashes},
+        np.array(acc_a, dtype=float), np.array(acc_b, dtype=float), raw_a, raw_b,
     )
 
 
 def run_h_ev_shuffle(
     *, run_mode: str, requested_pairs: int, minimum_valid_pairs: int, output_dir: str | Path,
-    firewall: TestSetFirewall, base_model_seed: int = 3000,
+    firewall: TestSetFirewall,
+    firewall_path: Optional[Path] = None, base_model_seed: int = 3000,
     practical_significance: PracticalSignificance = NO_PRACTICAL_SIGNIFICANCE,
 ) -> dict[str, Any]:
     spec = PairedExperimentSpec(
@@ -692,11 +815,12 @@ def run_h_ev_shuffle(
                   "and the documented baseline/CE adapter (shuffle=True, by omission).",
     )
     identity = identity_permutation()
-    _, acc_true, acc_false, raw_true, raw_false = _run_paired_experiment(
+    _pair_meta, acc_true, acc_false, raw_true, raw_false = _run_paired_experiment(
         spec, run_mode=run_mode, requested_pairs=requested_pairs, minimum_valid_pairs=minimum_valid_pairs,
         output_dir=output_dir, base_model_seed=base_model_seed,
         representation_a=identity, representation_b=identity,
         shuffle_a=True, shuffle_b=False, firewall=firewall,
+        firewall_path=firewall_path,
     )
     return _finalize_paired_certificate(
         spec=spec, run_mode=run_mode, values_a=acc_true, values_b=acc_false,
@@ -722,12 +846,14 @@ def run_h_ev_shuffle(
                 "distinguishing accuracy; this does not establish that no such effect exists."
             ),
         },
+        initial_weight_hashes=_pair_meta["initial_weight_hashes"],
     )
 
 
 def run_h_ev_representation(
     *, run_mode: str, requested_pairs: int, minimum_valid_pairs: int, output_dir: str | Path,
-    permutation: Candidate1Permutation, firewall: TestSetFirewall, base_model_seed: int = 4000,
+    permutation: Candidate1Permutation, firewall: TestSetFirewall,
+    firewall_path: Optional[Path] = None, base_model_seed: int = 4000,
     practical_significance: PracticalSignificance = NO_PRACTICAL_SIGNIFICANCE,
 ) -> dict[str, Any]:
     if not firewall.is_frozen():
@@ -768,11 +894,12 @@ def run_h_ev_representation(
         rationale="Central CipherMind evidence-attribution experiment per the frozen Round-4 design.",
     )
     identity = identity_permutation()
-    _, acc_orig, acc_scrambled, raw_orig, raw_scrambled = _run_paired_experiment(
+    _pair_meta, acc_orig, acc_scrambled, raw_orig, raw_scrambled = _run_paired_experiment(
         spec, run_mode=run_mode, requested_pairs=requested_pairs, minimum_valid_pairs=minimum_valid_pairs,
         output_dir=output_dir, base_model_seed=base_model_seed,
         representation_a=identity, representation_b=permutation,
         shuffle_a=BASELINE.shuffle, shuffle_b=BASELINE.shuffle, firewall=firewall,
+        firewall_path=firewall_path,
     )
     cert = _finalize_paired_certificate(
         spec=spec, run_mode=run_mode, values_a=acc_orig, values_b=acc_scrambled,
@@ -808,6 +935,7 @@ def run_h_ev_representation(
                 "or architecture."
             ),
         },
+        initial_weight_hashes=_pair_meta["initial_weight_hashes"],
     )
     cert["representation_transform_validation"] = validation
     return cert
@@ -817,7 +945,7 @@ def _finalize_paired_certificate(
     *, spec: PairedExperimentSpec, run_mode: str, values_a: np.ndarray, values_b: np.ndarray,
     raw_a: list[dict], raw_b: list[dict], minimum_valid_pairs: int, requested_pairs: int,
     what_changed: str, dataset_summary: dict, practical_significance: PracticalSignificance,
-    conservative_wording: dict[str, str],
+    conservative_wording: dict[str, str], initial_weight_hashes: Optional[list] = None,
 ) -> dict[str, Any]:
     is_evidentiary = (run_mode == "production")
     n_valid_pairs = len(values_a)
@@ -845,7 +973,12 @@ def _finalize_paired_certificate(
         practical_equiv = assess_practical_equivalence(paired_result, practical_significance)
         limitations.extend(paired_result.warnings)
 
-    decision = decide_final(difference_decision=difference_decision, practical_equivalence=practical_equiv)
+    _ci = ({"low": paired_result.ci_low, "high": paired_result.ci_high}
+           if paired_result else None)
+    decision = decide_final(
+        difference_decision=difference_decision, practical_equivalence=practical_equiv,
+        confidence_interval=_ci, epsilon=practical_significance.threshold,
+    )
 
     if decision == DecisionState.SUPPORTED:
         conservative_conclusion = conservative_wording["supported"]
@@ -886,58 +1019,140 @@ def _finalize_paired_certificate(
         practical_equivalence=practical_equiv, limitations=limitations, is_evidentiary=is_evidentiary,
     )
     cert["raw_paired_values"] = {"condition_a": values_a.tolist(), "condition_b": values_b.tolist()}
+    cert["initial_weight_hashes"] = list(initial_weight_hashes or [])
     cert["conservative_conclusion"] = conservative_conclusion
+    # Retained so apply_primary_family_correction() can recompute the
+    # narrative consistently with the Holm-corrected decision rather than
+    # leaving pre-correction prose beside a corrected verdict.
+    cert["conservative_wording"] = dict(conservative_wording)
     cert["non_evidentiary"] = not is_evidentiary
+    cert["calibration"] = (run_mode == "calibration")
+    cert["run_mode"] = run_mode
     return cert
+
+
+EQUIVALENCE_FAMILY_ID = "ev_primary_equivalence_family_v1"
+
+
+def _conclusion_for(cert: dict, decision) -> str:
+    wording = cert.get("conservative_wording") or {}
+    key = {"SUPPORTED": "supported", "NOT_SUPPORTED": "equivalent"}.get(
+        decision.value, "inconclusive")
+    return wording.get(key, cert.get("conservative_conclusion", ""))
 
 
 def apply_primary_family_correction(shuffle_cert: dict, representation_cert: dict) -> dict[str, Any]:
     """
-    Apply Holm correction jointly across the frozen primary hypothesis
-    family {H-EV-SHUFFLE, H-EV-REPRESENTATION} to the PRIMARY
-    DIFFERENCE-DETECTION p-values, then recompute each certificate's
-    final decision via decide_final() using the Holm-adjusted decision
-    together with its own (unaffected) TOST equivalence assessment.
+    Apply multiplicity correction across the frozen primary family
+    {H-EV-SHUFFLE, H-EV-REPRESENTATION} and recompute both final
+    decisions.
 
-    Must be called once both raw p-values exist - never per-experiment
-    in isolation, and never re-run after re-examining results to
-    "improve" the family composition.
+    TWO SEPARATE HOLM FAMILIES, by design:
+
+      1. DIFFERENCE-DETECTION family - Holm across the two primary
+         difference-detection p-values at alpha=0.05.
+
+      2. EQUIVALENCE family - Holm across the two OVERALL TOST p-values
+         (p_tost = max(p_lower, p_upper)) at alpha=0.05. NOT_SUPPORTED is
+         a formal final conclusion asserted for two hypotheses, so it
+         carries its own multiplicity risk and needs its own correction.
+         No extra correction is applied INSIDE each TOST: the
+         intersection-union structure already controls the error rate of
+         the individual equivalence claim, and correcting within it as
+         well would double-penalise.
+
+    The final decision then comes from decide_final() using, for each
+    certificate, its Holm-adjusted difference decision, its Holm-adjusted
+    equivalence status, and its OWN primary confidence interval and
+    epsilon - so a corrected-significant result whose CI lies entirely
+    outside +/-epsilon can reach SUPPORTED. The conservative narrative is
+    recomputed from the corrected decision, never left stale.
+
+    Must be called once both certificates exist - never per-experiment in
+    isolation, and never re-run to "improve" the family composition.
     """
-    p_shuffle = shuffle_cert["statistics"]["raw_p_value"]
-    p_repr = representation_cert["statistics"]["raw_p_value"]
+    require_confirmatory_certificate(shuffle_cert, context="primary-family Holm correction")
+    require_confirmatory_certificate(representation_cert, context="primary-family Holm correction")
 
-    result = holm_correction(
-        family_id=PRIMARY_HYPOTHESIS_FAMILY_ID,
-        hypothesis_ids=["H-EV-SHUFFLE", "H-EV-REPRESENTATION"],
-        p_values=[p_shuffle, p_repr], alpha=0.05,
+    pairs = [(shuffle_cert, "H-EV-SHUFFLE"), (representation_cert, "H-EV-REPRESENTATION")]
+    hyp_ids = [h for _, h in pairs]
+
+    # --- family 1: difference detection -------------------------------
+    diff_result = holm_correction(
+        family_id=PRIMARY_HYPOTHESIS_FAMILY_ID, hypothesis_ids=hyp_ids,
+        p_values=[c["statistics"]["raw_p_value"] for c, _ in pairs], alpha=0.05,
     )
 
-    for cert, hyp_id in [(shuffle_cert, "H-EV-SHUFFLE"), (representation_cert, "H-EV-REPRESENTATION")]:
-        adj = result.for_hypothesis(hyp_id)
+    # --- family 2: equivalence (overall TOST p-values) ----------------
+    tost_p = []
+    for cert, _ in pairs:
+        assessment = cert["practical_significance"]["assessment"]
+        tost_p.append((assessment.get("tost") or {}).get("p_tost"))
+    equivalence_result = None
+    if all(p is not None for p in tost_p):
+        equivalence_result = holm_correction(
+            family_id=EQUIVALENCE_FAMILY_ID, hypothesis_ids=hyp_ids,
+            p_values=tost_p, alpha=0.05,
+        )
+
+    for cert, hyp_id in pairs:
+        adj = diff_result.for_hypothesis(hyp_id)
         cert["statistics"]["adjusted_p_value"] = adj["adjusted_p_value"]
         cert["multiplicity"] = adj
 
-        if adj["adjusted_p_value"] is None:
-            corrected_difference_decision = DecisionState.INCONCLUSIVE
-        elif adj["adjusted_p_value"] < 0.05:
+        if adj["adjusted_p_value"] is not None and adj["adjusted_p_value"] < 0.05:
             corrected_difference_decision = DecisionState.SUPPORTED
         else:
             corrected_difference_decision = DecisionState.INCONCLUSIVE
 
-        cert["decision"] = decide_final(
-            difference_decision=corrected_difference_decision,
-            practical_equivalence=cert["practical_significance"]["assessment"],
-        ).value
+        assessment = dict(cert["practical_significance"]["assessment"])
+        if equivalence_result is not None:
+            eq_adj = equivalence_result.for_hypothesis(hyp_id)
+            adjusted_tost_p = eq_adj["adjusted_p_value"]
+            assessment["multiplicity"] = eq_adj
+            assessment["adjusted_p_tost"] = adjusted_tost_p
+            # equivalence survives only if it holds AFTER correction
+            assessment["formal_practical_equivalence"] = (
+                "EQUIVALENT_WITHIN_THRESHOLD"
+                if (adjusted_tost_p is not None and adjusted_tost_p < 0.05
+                    and assessment.get("formal_practical_equivalence")
+                    == "EQUIVALENT_WITHIN_THRESHOLD")
+                else "INCONCLUSIVE")
+            cert["practical_significance"]["assessment"] = assessment
 
-    return {
+        decision = decide_final(
+            difference_decision=corrected_difference_decision,
+            practical_equivalence=assessment,
+            confidence_interval=cert.get("confidence_interval"),
+            epsilon=(cert.get("practical_significance") or {}).get("threshold"),
+        )
+        cert["decision"] = decision.value
+        cert["conservative_conclusion"] = _conclusion_for(cert, decision)
+
+    out = {
         "multiplicity_result": {
-            "family_id": result.family_id, "correction_method": result.correction_method,
-            "alpha": result.alpha, "hypothesis_ids": result.hypothesis_ids,
-            "raw_p_values": result.raw_p_values, "adjusted_p_values": result.adjusted_p_values,
-            "reject_null": result.reject_null,
+            "family_id": diff_result.family_id, "correction_method": diff_result.correction_method,
+            "alpha": diff_result.alpha, "hypothesis_ids": diff_result.hypothesis_ids,
+            "raw_p_values": diff_result.raw_p_values,
+            "adjusted_p_values": diff_result.adjusted_p_values,
+            "reject_null": diff_result.reject_null,
         },
+        "equivalence_multiplicity_result": (
+            {
+                "family_id": equivalence_result.family_id,
+                "correction_method": equivalence_result.correction_method,
+                "alpha": equivalence_result.alpha,
+                "hypothesis_ids": equivalence_result.hypothesis_ids,
+                "raw_p_values": equivalence_result.raw_p_values,
+                "adjusted_p_values": equivalence_result.adjusted_p_values,
+                "reject_null": equivalence_result.reject_null,
+                "note": ("Holm across the two OVERALL TOST p-values. No additional correction "
+                         "inside each TOST: its intersection-union structure already controls "
+                         "the individual equivalence claim."),
+            } if equivalence_result is not None else None),
         "shuffle_certificate": shuffle_cert, "representation_certificate": representation_cert,
     }
+    return out
 
 
 def _merge_manifest(base: dict, **overrides) -> dict:

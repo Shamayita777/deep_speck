@@ -67,37 +67,43 @@ TOST says, and only consults the TOST outcome
 decision is INCONCLUSIVE. This is "Option B" from the Round-6 audit:
 always compute, decision-gate on the primary test's outcome.
 
-## Practical significance (epsilon)
+## Practical significance (epsilon) - FROZEN
 
-**Candidate: epsilon = 0.01 absolute confirmatory accuracy.**
+**epsilon = 0.01 absolute accuracy on the confirmatory test set.**
 
-Research basis: Picard (2021), *"torch.manual_seed(3407) is all you
-need"*, reports ~0.1% SD and ~0.5% max-min spread in ResNet-50/ImageNet
-test accuracy from random seed alone across 50 seeds, and describes
-that gap as "widely considered significant" in that literature. This
-does **not** establish 0.01 as correct for Speck32/64 specifically (no
-published seed-variance study exists for this task), but it shows 0.01
-is larger than typical pure-seed noise in a comparable, more mature
-setting - the right qualitative property for a margin.
+Justification: 0.01 is the audit-wide smallest effect treated as
+practically meaningful for accuracy on the confirmatory test set. The
+SAME margin is frozen for II-4, so the audit applies a single
+predeclared practical-significance scale. This is a **methodological
+judgment, not a literature-derived universal threshold**.
 
-**Gating requirement (not yet satisfied):** before this value is used
-in a confirmatory production run, it must be checked against this
-project's own EV-BASELINE/EV-NOISE pilot replicate-to-replicate spread.
-If pilot s_D turns out comparable to or larger than 0.01, the margin is
-not resolvable at any feasible replicate count and must be revisited -
-not silently kept. Both `configs/gohr_ev_shuffle.yaml` and
-`configs/gohr_ev_representation.yaml` currently carry
-`practical_threshold: UNSPECIFIED_REQUIRES_PILOT_SANITY_CHECK`, which
-`scripts/run_ev.py`'s fail-closed placeholder check refuses to run
-against, by construction - not merely by convention. This value is
-**not** presented as a universal ML or cryptanalysis standard; if the
-pilot fails to support it, the margin must be revised before freeze,
-not after.
+SUPERSEDED (statistical plan v1): earlier text required epsilon to be
+"sanity-checked against pilot replicate-to-replicate spread". That is
+withdrawn. Validating a practical-significance margin against observed
+noise confuses measurement precision with scientific consequence, and
+would let pilot data influence a confirmatory decision rule. **Pilot
+data estimate nuisance variance ONLY**; epsilon is never derived from,
+selected by, or validated against them.
 
 ## Alpha
 0.05, both for the primary difference-detection test and for TOST.
 
-## Multiplicity
+## Multiplicity - TWO SEPARATE HOLM FAMILIES
+
+1. **Difference-detection family** - Holm across the two primary
+   difference-detection p-values, alpha=0.05.
+2. **Equivalence family** - Holm across the two OVERALL TOST p-values
+   (`p_tost = max(p_lower, p_upper)`), alpha=0.05. NOT_SUPPORTED is a
+   formal conclusion asserted for two hypotheses, so it carries its own
+   multiplicity risk. **No additional correction is applied inside each
+   TOST**: its intersection-union structure already controls the
+   individual equivalence claim, and correcting twice would
+   double-penalise.
+
+Prospective planning powers BOTH families at alpha/2 per hypothesis, a
+conservative Bonferroni-style approximation - **not exact Holm power**.
+
+## Multiplicity (detail)
 Holm step-down across the frozen primary family
 {H-EV-SHUFFLE, H-EV-REPRESENTATION} at family alpha=0.05, applied to
 the **primary difference-detection p-values only**
@@ -121,6 +127,38 @@ source reviewed mandates 90% specifically for this experiment type;
 requirement.
 
 ## Power analysis
+
+**Simulation assumptions (explicit).** The prospective power simulation
+assumes INDEPENDENT paired differences that are NORMALLY distributed with
+mean equal to the target effect (0 for the equivalence scenario) and
+standard deviation equal to `sigma_Delta_upper_95`. Departures from
+normality or independence change the required n; the simulation cannot
+detect them.
+
+Prospective sizing uses each hypothesis's one-sided **95% UPPER
+confidence bound** for sigma_Delta (chi-square), not the point estimate:
+a ~10-pair pilot leaves sigma uncertain enough that point-estimate
+sizing under-powers the experiment roughly half the time.
+
+Planning applies **alpha/2 per hypothesis** for difference detection as
+a CONSERVATIVE BONFERRONI-STYLE APPROXIMATION to Holm. This is **not
+exact Holm power**: Holm's step-down tests the larger p-value at alpha,
+so alpha/2 for both yields an upper bound on required n. TOST is planned
+at full alpha at true effect 0 and is excluded from the Holm family
+(intersection-union control).
+
+The common production replicate count K is the **maximum** over four
+requirements: difference detection and TOST equivalence, for each of the
+two primary hypotheses.
+
+SUPERSEDED: earlier text implied sigma_Delta could be obtained from
+EV-BASELINE/EV-NOISE. It cannot. Both primary hypotheses are PAIRED with
+a shared dataset and shared model seed; EV-BASELINE measures variability
+across exactly the components pairing removes (overestimating n), and
+EV-NOISE holds the manipulated factor fixed (underestimating it).
+sigma_Delta must come from a PAIRED calibration run of the same
+hypothesis.
+
 Simulates the **actual final procedures**:
 `framework.power.simulate_power(procedure="difference_ttest", ...)`
 for the primary test, and `procedure="equivalence_tost"` for power to
@@ -171,10 +209,25 @@ benchmark (Issue 10) to confirm the resulting plan is executable at
 all within the available compute/time budget.
 
 ## Decision semantics
-See `framework/certificate.py`'s module docstring for the fixed
-vocabulary (SUPPORTED / NOT_SUPPORTED / INCONCLUSIVE / NOT_RUN /
-INVALID) and `decide_final()` for how the Holm-corrected
-difference-detection decision and the TOST equivalence assessment are
-combined. A non-significant difference-detection result is INCONCLUSIVE
-unless TOST separately and formally establishes equivalence - it is
-never NOT_SUPPORTED on its own.
+
+    SUPPORTED       Holm-corrected difference test significant AND the
+                    95% CI for the signed mean difference lies entirely
+                    outside [-epsilon, +epsilon].
+    NOT_SUPPORTED   difference test not significant AND TOST establishes
+                    equivalence within +/-epsilon.
+    INCONCLUSIVE    everything else.
+
+Vocabulary: SUPPORTED / NOT_SUPPORTED / INCONCLUSIVE / NOT_RUN / INVALID
+(`framework/certificate.py`), combined by `decide_final()`. A
+non-significant difference-detection result is INCONCLUSIVE unless TOST
+separately and formally establishes equivalence - never NOT_SUPPORTED on
+its own.
+
+CHANGE FROM v1 (v1 wording removed entirely, not retained alongside):
+v1 returned SUPPORTED on any significant difference. With
+enough replicates an accuracy difference of 1e-4 is detectable, and
+reporting that as support would conflate statistical with practical
+significance. **A tiny statistically significant effect that lies inside
+epsilon is NOT material** and is now INCONCLUSIVE. Where epsilon or the
+CI is unavailable, SUPPORTED is unreachable.
+

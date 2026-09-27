@@ -123,21 +123,48 @@ def decide_final(
     *,
     difference_decision: DecisionState,
     practical_equivalence: dict[str, Any],
+    confidence_interval: Optional[dict[str, float]] = None,
+    epsilon: Optional[float] = None,
 ) -> DecisionState:
     """
-    Combine the (multiplicity-corrected) difference-detection decision
-    with the equivalence assessment into the final certificate decision.
+    Combine the multiplicity-corrected difference-detection decision with
+    the practical-significance margin into the final decision.
 
-        - difference_decision == SUPPORTED           -> SUPPORTED
-          (a detected difference is reported regardless of what TOST
-          says; TOST is only consulted when no difference was detected)
-        - difference_decision == INCONCLUSIVE and
-              formal_practical_equivalence == EQUIVALENT_WITHIN_THRESHOLD
-                                                        -> NOT_SUPPORTED
-        - otherwise                                    -> INCONCLUSIVE
+    STATISTICAL PLAN v2 (see docs/statistical_plan.md, "Decision
+    semantics"). The v1 rule returned SUPPORTED on any significant
+    difference, which let an arbitrarily small but statistically
+    detectable effect be reported as support. With enough replicates a
+    difference of 1e-4 accuracy is detectable; reporting that as SUPPORT
+    for a procedural factor mattering would conflate statistical with
+    practical significance. The corrected rule:
+
+        SUPPORTED       Holm-corrected difference test is significant
+                        AND the 95% CI for the signed mean difference
+                        lies ENTIRELY OUTSIDE [-epsilon, +epsilon]
+                        (i.e. ci_low > +epsilon or ci_high < -epsilon).
+
+        NOT_SUPPORTED   difference test NOT significant AND TOST
+                        establishes equivalence within +/-epsilon.
+
+        INCONCLUSIVE    every other case - including a significant but
+                        practically negligible effect, and a
+                        non-significant result without formal
+                        equivalence.
+
+    A significant effect whose CI is not entirely outside the margin is
+    explicitly NOT called material. Where epsilon or the CI is
+    unavailable, SUPPORTED is unreachable: the framework cannot certify
+    practical significance it has no margin for.
     """
     if difference_decision == DecisionState.SUPPORTED:
-        return DecisionState.SUPPORTED
+        if epsilon is None or confidence_interval is None:
+            return DecisionState.INCONCLUSIVE
+        low, high = confidence_interval.get("low"), confidence_interval.get("high")
+        if low is None or high is None:
+            return DecisionState.INCONCLUSIVE
+        if low > epsilon or high < -epsilon:
+            return DecisionState.SUPPORTED
+        return DecisionState.INCONCLUSIVE
     if practical_equivalence.get("formal_practical_equivalence") == "EQUIVALENT_WITHIN_THRESHOLD":
         return DecisionState.NOT_SUPPORTED
     return DecisionState.INCONCLUSIVE
@@ -217,3 +244,47 @@ def build_certificate(
         "is_evidentiary": is_evidentiary,
         "generated_at_utc": utc_timestamp(),
     }
+
+
+class NonConfirmatoryEvidenceError(RuntimeError):
+    """
+    Raised when a non-evidentiary certificate (smoke or calibration) is
+    offered where confirmatory evidence is required.
+    """
+
+
+def require_confirmatory_certificate(cert: dict, *, context: str) -> dict:
+    """
+    Gate every consumer of confirmatory EV evidence.
+
+    A calibration certificate is produced by the REAL protocol and is
+    numerically indistinguishable from a production certificate at a
+    glance; only its recorded status separates them. Any path that
+    performs or feeds a confirmatory conclusion - the primary-family
+    Holm correction, the integration ledger, a final decision - must call
+    this first. Missing status fields are treated as NOT confirmatory:
+    absence of a claim is never read as a claim.
+    """
+    if not isinstance(cert, dict):
+        raise NonConfirmatoryEvidenceError(f"{context}: certificate is not a mapping.")
+    experiment = (cert.get("audit") or {}).get("id") or cert.get("experiment_id") or "<unknown>"
+
+    # FULLY FAIL-CLOSED: all three markers must be present and exactly
+    # right. A missing marker is not a passing marker - an older or
+    # hand-edited certificate that simply omits the field must not be
+    # admitted as confirmatory evidence.
+    required = {"run_mode": "production", "non_evidentiary": False, "calibration": False}
+    for key, expected in required.items():
+        if key not in cert:
+            raise NonConfirmatoryEvidenceError(
+                f"{context}: certificate for {experiment} is missing the required status field "
+                f"{key!r}. Absence of a claim is never read as a claim; refusing.")
+        value = cert[key]
+        if value is not expected and value != expected:
+            raise NonConfirmatoryEvidenceError(
+                f"{context}: certificate for {experiment} has {key}={value!r}, required "
+                f"{expected!r}. Refusing to use it as confirmatory evidence.")
+        if isinstance(expected, bool) and not isinstance(value, bool):
+            raise NonConfirmatoryEvidenceError(
+                f"{context}: certificate for {experiment} has non-boolean {key}={value!r}.")
+    return cert

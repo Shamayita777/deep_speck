@@ -1,14 +1,33 @@
-# H-EV-SHUFFLE production configuration.
+# H-EV-SHUFFLE PAIRED calibration (pilot) configuration
+#
+# CALIBRATION TIER - NON-EVIDENTIARY BY CONSTRUCTION.
+# Purpose: estimate nuisance VARIANCE for the prospective power analysis.
+# It runs the IDENTICAL frozen protocol to production (5 rounds, depth 10,
+# 200 epochs, reference batch size / optimizer / LR schedule / reg_param,
+# full 10M/1M/1M data), because a reduced-fidelity pilot would characterise
+# a different experiment.
+#
+# HARD PROHIBITIONS (enforced in code, not convention):
+#   * results are marked non_evidentiary=true and calibration=true;
+#   * they may NEVER enter a confirmatory test, the primary-family Holm
+#     correction, or the integration ledger as evidence;
+#   * they may NEVER be used to choose epsilon - epsilon is a
+#     scientific-consequence margin, not an observed-effect quantity;
+#   * this output_dir is mode-locked and may never hold production results.
 experiment_id: H-EV-SHUFFLE
 hypothesis_id: H-EV-SHUFFLE
-run_mode: production
+run_mode: calibration
 
 # Number of matched (dataset, model_seed) pairs. REQUIRES USER INPUT -
 # to be set via framework/power.py's simulation-based sizing procedure
 # once pilot variance (from EV-BASELINE/EV-NOISE) and a compute budget
 # are known. Do not substitute a convenient number here.
-requested_pairs: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
-minimum_valid_pairs: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
+# PAIRED pilot. Required because EV-BASELINE/EV-NOISE do NOT estimate
+# sigma_Delta, the SD of the paired difference that actually drives power
+# for the two primary hypotheses (docs/ev_calibration_plan.md, Gap 1).
+requested_pairs: 10        # FROZEN predeclared pilot size (operational, not a
+                           # claimed universal statistical minimum)
+minimum_valid_pairs: 10    # no attrition allowance declared
 
 # Prospective power analysis record (Issue 3, Round 6). Once a pilot
 # has estimated noise_sd and epsilon has been confirmed, populate
@@ -24,7 +43,7 @@ power_analysis:
   required_n: null
   underpowered_justification: null
 
-base_model_seed: 3000
+base_model_seed: 92000   # disjoint from production seeds
 
 condition_a: {shuffle: true}
 condition_b: {shuffle: false}
@@ -67,4 +86,4 @@ practical_threshold_justification: >
   NOT a literature-derived universal threshold, and it was NOT selected from
   or validated against pilot noise: pilot data estimate nuisance variance only.
 
-output_dir: results/h_ev_shuffle
+output_dir: results/calibration/ev_shuffle

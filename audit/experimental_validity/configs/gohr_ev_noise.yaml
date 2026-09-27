@@ -20,4 +20,11 @@ shuffle: true
 optimizer: adam
 lr_schedule: {high: 0.002, low: 0.0001, period: 10}
 
+# --- frozen baseline restatement (checked field-by-field against
+# --- gohr.baseline.BASELINE by run_ev.py::_check_baseline_consistency) ---
+reg_param: 1.0e-05
+checkpoint_monitor: val_loss
+checkpoint_save_best_only: true
+confirmatory_evaluation_protocol: final_epoch_weights
+
 output_dir: results/ev_noise

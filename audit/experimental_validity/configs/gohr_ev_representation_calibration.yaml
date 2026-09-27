@@ -1,10 +1,15 @@
-# H-EV-REPRESENTATION production configuration.
+# H-EV-REPRESENTATION calibration (pilot) configuration.
+# CALIBRATION TIER - NON-EVIDENTIARY. Estimates sigma_Delta for prospective
+# power planning only. Identical frozen protocol and identical Candidate-1
+# permutation as production (hash-verified below).
 experiment_id: H-EV-REPRESENTATION
 hypothesis_id: H-EV-REPRESENTATION
-run_mode: production
+run_mode: calibration
 
-requested_pairs: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
-minimum_valid_pairs: UNSPECIFIED_REQUIRES_PILOT_AND_COMPUTE_BUDGET
+requested_pairs: 10        # FROZEN predeclared pilot size (operational, not a
+                           # claimed universal statistical minimum)
+minimum_valid_pairs: 10    # no attrition allowance declared; any failure means the
+                           # pilot is re-planned, never a silently reduced denominator
 
 power_analysis:
   target_effect: null
@@ -14,7 +19,7 @@ power_analysis:
   required_n: null
   underpowered_justification: null
 
-base_model_seed: 4000
+base_model_seed: 93000   # disjoint from production seeds
 
 condition_a: {representation: identity}
 condition_b: {representation: candidate1}
@@ -64,4 +69,4 @@ practical_threshold_justification: >
 # realized permutation hash against this expected value and refuses on mismatch.
 expected_candidate1_permutation_sha256: d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427
 
-output_dir: results/h_ev_representation
+output_dir: results/calibration/ev_representation

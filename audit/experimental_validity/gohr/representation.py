@@ -29,7 +29,7 @@ from pathlib import Path
 
 import numpy as np
 
-from audit.experimental_validity.framework.provenance import array_sha256
+from framework.provenance import array_sha256
 
 WORD_SIZE = 16
 NUM_WORDS = 4  # ct0a, ct1a, ct0b, ct1b

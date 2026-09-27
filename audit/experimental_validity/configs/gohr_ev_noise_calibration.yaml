@@ -1,0 +1,46 @@
+# EV-NOISE calibration (pilot) configuration
+#
+# CALIBRATION TIER - NON-EVIDENTIARY BY CONSTRUCTION.
+# Purpose: estimate nuisance VARIANCE for the prospective power analysis.
+# It runs the IDENTICAL frozen protocol to production (5 rounds, depth 10,
+# 200 epochs, reference batch size / optimizer / LR schedule / reg_param,
+# full 10M/1M/1M data), because a reduced-fidelity pilot would characterise
+# a different experiment.
+#
+# HARD PROHIBITIONS (enforced in code, not convention):
+#   * results are marked non_evidentiary=true and calibration=true;
+#   * they may NEVER enter a confirmatory test, the primary-family Holm
+#     correction, or the integration ledger as evidence;
+#   * they may NEVER be used to choose epsilon - epsilon is a
+#     scientific-consequence margin, not an observed-effect quantity;
+#   * this output_dir is mode-locked and may never hold production results.
+experiment_id: EV-NOISE
+run_mode: calibration
+
+# Small, predetermined number of exact reruns of one fixed
+# (dataset, seed) configuration. REQUIRES USER INPUT: exact count.
+# Execution-variability pilot; see docs/ev_calibration_plan.md.
+requested_reruns: UNSPECIFIED_REQUIRES_PILOT_PRECISION_DECISION
+minimum_valid_reruns: UNSPECIFIED_REQUIRES_PILOT_PRECISION_DECISION
+
+model_seed: 91000   # disjoint from production seeds
+
+rounds: 5
+depth: 10
+epochs: 200
+batch_size: 5000
+train_size: 10000000
+val_size: 1000000
+confirmatory_test_size: 1000000
+shuffle: true
+optimizer: adam
+lr_schedule: {high: 0.002, low: 0.0001, period: 10}
+
+# --- frozen baseline restatement (checked field-by-field against
+# --- gohr.baseline.BASELINE by run_ev.py::_check_baseline_consistency) ---
+reg_param: 1.0e-05
+checkpoint_monitor: val_loss
+checkpoint_save_best_only: true
+confirmatory_evaluation_protocol: final_epoch_weights
+
+output_dir: results/calibration/ev_noise

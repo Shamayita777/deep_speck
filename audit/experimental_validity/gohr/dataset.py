@@ -25,8 +25,8 @@ from typing import Any, Optional
 
 import numpy as np
 
-from audit.experimental_validity.framework.provenance import array_sha256, dataset_provenance
-from audit.experimental_validity.gohr import speck
+from framework.provenance import array_sha256, dataset_provenance
+from gohr import speck
 
 EXACT_REPLAY_REASON = "dataset generation uses os.urandom(), which is not seedable"
 

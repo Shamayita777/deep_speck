@@ -37,8 +37,9 @@ import yaml
 from framework.experiment import PracticalSignificance
 from framework.firewall import FreezeRecord, TestSetFirewall
 from framework.power import UnderpoweredReplicatePlanError, validate_replicate_plan_against_power
-from framework.provenance import config_hash, utc_timestamp
-from gohr.baseline import BASELINE
+from framework.validation import ConfigValidationError, require_run_mode
+from framework.provenance import config_hash, sha256_file, utc_timestamp
+from gohr.baseline import BASELINE, CONFIRMATORY_EVALUATION_PROTOCOL
 from gohr.experiments import (
     apply_primary_family_correction,
     run_ev_baseline,
@@ -54,6 +55,191 @@ class ConfigNotFrozenError(RuntimeError):
     pass
 
 
+class RunModeConflictError(RuntimeError):
+    pass
+
+
+def _lock_output_dir_to_mode(output_dir: Path, run_mode: str) -> None:
+    """
+    Bind an output directory to exactly one run mode, permanently.
+
+    Calibration and production use the IDENTICAL protocol, so their
+    artifacts are indistinguishable by inspection. If both wrote into one
+    directory, a resumed or re-analysed run could silently mix pilot and
+    confirmatory replicates into a single denominator. The marker is
+    written on first use and checked on every subsequent use.
+    """
+    output_dir.mkdir(parents=True, exist_ok=True)
+    marker = output_dir / "RUN_MODE"
+    if marker.exists():
+        recorded = marker.read_text().strip()
+        if recorded != run_mode:
+            raise RunModeConflictError(
+                f"output_dir {output_dir} was already used for run_mode={recorded!r}; refusing "
+                f"to write {run_mode!r} results into it. Calibration and production must never "
+                "share an output directory.")
+    else:
+        marker.write_text(run_mode)
+
+
+#: Frozen design values a production power artifact must have been computed under.
+FROZEN_DESIGN = {
+    "epsilon": 0.01, "target_effect": 0.01, "target_effect_source": "predeclared",
+    "alpha": 0.05, "target_power": 0.80, "n_simulations": 50_000,
+    "sigma_source": "upper95", "plan_artifact": "ev-power-plan-v2",
+    "primary_family": ["H-EV-SHUFFLE", "H-EV-REPRESENTATION"],
+}
+
+
+def _require_power_artifact(config: dict, experiment_id: str) -> None:
+    """
+    Production of a paired primary requires a prospective power artifact
+    that was computed under EXACTLY the frozen design, and enough valid
+    pairs to meet its required_n.
+
+    Every field is checked rather than trusted: an artifact produced under
+    a different epsilon, alpha, effect, simulation count or sigma source
+    would authorise a replicate count that does not correspond to this
+    experiment's decision procedure. The artifact hash must be declared in
+    the config and must match, so the plan cannot be swapped after the
+    config was frozen.
+    """
+    if experiment_id not in ("H-EV-SHUFFLE", "H-EV-REPRESENTATION"):
+        return
+    pa = config.get("power_analysis") or {}
+    artifact = pa.get("artifact_path")
+    if not artifact:
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: production requires power_analysis.artifact_path pointing at a "
+            "power plan produced by scripts/plan_ev_power.py.")
+    path = Path(artifact)
+    if not path.is_file():
+        raise ConfigNotFrozenError(f"{experiment_id}: power artifact {artifact} does not exist.")
+
+    declared_hash = pa.get("artifact_sha256")
+    actual_hash = sha256_file(path)
+    if not declared_hash:
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: power_analysis.artifact_sha256 must be declared so the plan "
+            "cannot be substituted after the config was frozen.")
+    if declared_hash != actual_hash:
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: power artifact hash mismatch (config {declared_hash}, "
+            f"actual {actual_hash}).")
+
+    plan = json.loads(path.read_text())
+    inputs = plan.get("inputs") or {}
+    problems = []
+    if plan.get("artifact") != FROZEN_DESIGN["plan_artifact"]:
+        problems.append(f"plan schema={plan.get('artifact')!r} "
+                        f"(required {FROZEN_DESIGN['plan_artifact']!r})")
+    if plan.get("non_evidentiary") is not True:
+        problems.append("power plan is not marked non_evidentiary=true")
+    if list(plan.get("primary_family") or []) != FROZEN_DESIGN["primary_family"]:
+        problems.append(f"primary_family={plan.get('primary_family')!r}")
+    for key, expected in (("epsilon", FROZEN_DESIGN["epsilon"]),
+                          ("target_effect", FROZEN_DESIGN["target_effect"]),
+                          ("target_effect_source", FROZEN_DESIGN["target_effect_source"]),
+                          ("alpha", FROZEN_DESIGN["alpha"]),
+                          ("target_power", FROZEN_DESIGN["target_power"]),
+                          ("n_simulations", FROZEN_DESIGN["n_simulations"]),
+                          ("sigma_source", FROZEN_DESIGN["sigma_source"])):
+        if inputs.get(key) != expected:
+            problems.append(f"plan {key}={inputs.get(key)!r} (frozen {expected!r})")
+
+    # the config's own declared parameters must agree with the artifact
+    for key in ("epsilon", "target_effect", "alpha", "target_power"):
+        if key in pa and pa[key] != inputs.get(key):
+            problems.append(f"config power_analysis.{key}={pa[key]!r} disagrees with plan "
+                            f"{inputs.get(key)!r}")
+    if config.get("practical_threshold") != inputs.get("epsilon"):
+        problems.append(f"config practical_threshold={config.get('practical_threshold')!r} "
+                        f"disagrees with plan epsilon={inputs.get('epsilon')!r}")
+
+    required_n = pa.get("required_n")
+    plan_n = (plan.get("common_design") or {}).get("required_n")
+    if required_n is None:
+        problems.append("power_analysis.required_n is not declared")
+    elif plan_n is None:
+        problems.append("power plan records no common_design.required_n "
+                        "(no design reached target power)")
+    elif int(required_n) != int(plan_n):
+        problems.append(f"power_analysis.required_n={required_n} disagrees with the power "
+                        f"artifact ({plan_n})")
+    elif int(config["minimum_valid_pairs"]) < int(required_n):
+        problems.append(f"minimum_valid_pairs={config['minimum_valid_pairs']} is below the "
+                        f"power-required n={required_n}")
+    if problems:
+        raise ConfigNotFrozenError(f"{experiment_id}: " + "; ".join(problems))
+
+
+def _require_permutation_binding(config: dict, experiment_id: str) -> None:
+    """
+    Verify the Candidate-1 permutation binding during PRE-FLIGHT validation.
+
+    Calibration and production must use the identical permutation, or the
+    pilot characterises a different intervention and its variance cannot
+    size the production design. The permutation is generated
+    deterministically from permutation_generation_seed, so the realized
+    hash can be checked before anything is generated or trained - which is
+    where it belongs: a validation-only invocation must be able to detect
+    a broken binding without launching an experiment.
+    """
+    if experiment_id != "H-EV-REPRESENTATION":
+        return
+    expected = config.get("expected_candidate1_permutation_sha256")
+    if not expected:
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: requires 'expected_candidate1_permutation_sha256' so the "
+            "Candidate-1 permutation is bound across calibration and production.")
+    seed = config.get("permutation_generation_seed")
+    if seed is None:
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: 'permutation_generation_seed' is not declared.")
+    realized = generate_candidate1_permutation(np.random.default_rng(seed)).hash
+    if realized != expected:
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: Candidate-1 permutation hash mismatch - expected {expected}, "
+            f"seed {seed} realizes {realized}. Calibration and production must use the "
+            "identical permutation.")
+
+
+def _require_epsilon_for_confirmatory(config: dict, experiment_id: str) -> None:
+    """
+    Production runs of the two PAIRED primary experiments must carry a
+    predeclared epsilon. Without it no equivalence conclusion is possible
+    and a non-significant result can only ever be INCONCLUSIVE - which is
+    a design defect, not a finding, if it was foreseeable before running.
+    """
+    if experiment_id not in ("H-EV-SHUFFLE", "H-EV-REPRESENTATION"):
+        return
+    threshold = config.get("practical_threshold")
+    if threshold is None:
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: production requires a PREDECLARED practical-significance margin "
+            "('practical_threshold'). Without epsilon no equivalence conclusion is possible and "
+            "a non-significant result can only ever be INCONCLUSIVE. epsilon must be justified "
+            "from scientific consequence, never derived from an observed effect.")
+    try:
+        threshold = float(threshold)
+    except (TypeError, ValueError):
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: practical_threshold must be numeric, got {threshold!r}.")
+    if threshold <= 0:
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: practical_threshold must be positive, got {threshold}.")
+    if not str(config.get("practical_threshold_justification") or "").strip():
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: 'practical_threshold_justification' must be a non-empty, "
+            "consequence-based justification. A margin without a recorded justification is "
+            "indistinguishable from a fabricated one.")
+    if config.get("practical_threshold_predeclared") is not True:
+        raise ConfigNotFrozenError(
+            f"{experiment_id}: set 'practical_threshold_predeclared: true' to affirm that "
+            "epsilon was frozen BEFORE any confirmatory data existed. The framework cannot "
+            "verify this from the value alone, so it must be asserted explicitly.")
+
+
 def _check_no_placeholders(config: dict, path_prefix: str = "") -> None:
     for key, value in config.items():
         full_key = f"{path_prefix}.{key}" if path_prefix else key
@@ -66,29 +252,120 @@ def _check_no_placeholders(config: dict, path_prefix: str = "") -> None:
             _check_no_placeholders(value, full_key)
 
 
-def _check_baseline_consistency(config: dict) -> None:
-    mismatches = []
-    for field_name, baseline_value in [
-        ("rounds", BASELINE.rounds), ("depth", BASELINE.depth),
-        ("epochs", BASELINE.epochs), ("batch_size", BASELINE.batch_size),
-        ("train_size", BASELINE.train_size), ("val_size", BASELINE.val_size),
-    ]:
-        if field_name in config and config[field_name] != baseline_value:
-            mismatches.append((field_name, config[field_name], baseline_value))
+#: Every frozen baseline parameter a config may express, with the
+#: accessor that reads the authoritative value from gohr.baseline.BASELINE.
+#: BASELINE is the single source of truth; the config merely restates it
+#: and MUST agree. Any parameter present here and absent from the config
+#: is reported, so a duplicated field can never silently diverge and a
+#: required field can never be silently dropped.
+_BASELINE_CHECKS: dict = {
+    "rounds": lambda b: b.rounds,
+    "depth": lambda b: b.depth,
+    "epochs": lambda b: b.epochs,
+    "batch_size": lambda b: b.batch_size,
+    "train_size": lambda b: b.train_size,
+    "val_size": lambda b: b.val_size,
+    "confirmatory_test_size": lambda b: b.test_size,
+    "optimizer": lambda b: b.optimizer,
+    "shuffle": lambda b: b.shuffle,
+    "reg_param": lambda b: b.reg_param,
+    "checkpoint_monitor": lambda b: b.checkpoint_monitor,
+    "checkpoint_save_best_only": lambda b: b.checkpoint_save_best_only,
+    "confirmatory_evaluation_protocol": lambda b: CONFIRMATORY_EVALUATION_PROTOCOL,
+}
+
+#: Nested lr_schedule keys -> BASELINE accessor.
+_LR_CHECKS: dict = {
+    "high": lambda b: b.lr_schedule_high,
+    "low": lambda b: b.lr_schedule_low,
+    "period": lambda b: b.lr_schedule_period,
+}
+
+#: Parameters every evidentiary (production/calibration) config must state
+#: explicitly. Silence is not agreement.
+_REQUIRED_IN_EVIDENTIARY_CONFIG = (
+    "rounds", "depth", "epochs", "batch_size", "train_size", "val_size",
+    "confirmatory_test_size", "optimizer", "shuffle", "lr_schedule",
+)
+
+
+#: The factor each experiment DELIBERATELY varies. A manipulated factor is
+#: exempt from the baseline-equality check: pinning the factor under test to
+#: the baseline would defeat the experiment. H-EV-SHUFFLE varies `shuffle`
+#: across its two arms and therefore must NOT declare a single baseline value
+#: for it; H-EV-REPRESENTATION varies the representation, which is not a
+#: baseline field at all.
+_MANIPULATED_FACTORS: dict = {
+    "H-EV-SHUFFLE": ("shuffle",),
+    "H-EV-REPRESENTATION": (),
+    "EV-BASELINE": (),
+    "EV-NOISE": (),
+}
+
+
+def _check_baseline_consistency(config: dict, *, require_complete: bool = False,
+                                experiment_id: str = "") -> None:
+    """
+    Verify the config against EVERY frozen baseline parameter it expresses.
+
+    Previously only six fields were checked, so a config could silently
+    diverge from the baseline on optimizer, shuffle, reg_param, the LR
+    schedule, the checkpoint rule or the evaluation protocol - exactly the
+    class of undeclared-parameter defect that produced the depth-5 and
+    reg_param findings.
+    """
+    manipulated = set(_MANIPULATED_FACTORS.get(experiment_id, ()))
+    mismatches, missing = [], []
+    for field_name, accessor in _BASELINE_CHECKS.items():
+        if field_name in manipulated:
+            if field_name in config:
+                mismatches.append(
+                    (field_name, config[field_name],
+                     f"<manipulated factor of {experiment_id}: must not be pinned in config>"))
+            continue
+        baseline_value = accessor(BASELINE)
+        if field_name in config:
+            if config[field_name] != baseline_value:
+                mismatches.append((field_name, config[field_name], baseline_value))
+        elif require_complete and field_name in _REQUIRED_IN_EVIDENTIARY_CONFIG:
+            missing.append(field_name)
+
+    lr = config.get("lr_schedule")
+    if isinstance(lr, dict):
+        for key, accessor in _LR_CHECKS.items():
+            baseline_value = accessor(BASELINE)
+            if key in lr:
+                if lr[key] != baseline_value:
+                    mismatches.append((f"lr_schedule.{key}", lr[key], baseline_value))
+            elif require_complete:
+                missing.append(f"lr_schedule.{key}")
+    elif require_complete and "lr_schedule" in _REQUIRED_IN_EVIDENTIARY_CONFIG:
+        missing.append("lr_schedule")
+
+    problems = []
     if mismatches:
+        problems.append(
+            f"values diverge from the frozen baseline (gohr.baseline.BASELINE): {mismatches}")
+    if missing:
+        problems.append(
+            f"required frozen parameters are absent from the config: {sorted(missing)}")
+    if problems:
         raise ConfigNotFrozenError(
-            f"Config values diverge from the frozen baseline (gohr.baseline.BASELINE): "
-            f"{mismatches}. Refusing to run - if this divergence is intentional, it must "
-            "be represented as an explicit EV factor/condition, not a silent config edit."
-        )
+            "; ".join(problems) + ". Refusing to run - if a divergence is intentional it must "
+            "be represented as an explicit EV factor/condition, not a silent config edit.")
 
 
 def _practical_significance_from_config(config: dict) -> PracticalSignificance:
     threshold = config.get("practical_threshold")
     if threshold is None:
         return PracticalSignificance(threshold=None, predeclared=False, justification=None)
+    # Predeclaration is an ASSERTION the config must make; it can never be
+    # inferred from the mere presence of a number. A threshold added after
+    # results existed would otherwise be indistinguishable from one frozen
+    # beforehand.
+    predeclared = bool(config.get("practical_threshold_predeclared", False))
     return PracticalSignificance(
-        threshold=float(threshold), predeclared=True,
+        threshold=float(threshold), predeclared=predeclared,
         justification=config.get(
             "practical_threshold_justification",
             "epsilon=0.01 absolute confirmatory accuracy, predeclared per the Round-5 "
@@ -164,6 +441,9 @@ def _load_or_freeze_firewall(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("config", type=str, help="Path to a YAML config in configs/")
+    parser.add_argument(
+        "--confirm-execute", action="store_true",
+        help="actually run a calibration/production experiment (validation-only without it)")
     args = parser.parse_args()
 
     config = yaml.safe_load(Path(args.config).read_text())
@@ -172,23 +452,52 @@ def main() -> int:
     print(f"Loaded config for {experiment_id} from {args.config}")
     print(f"config_hash={config_hash(config)}")
 
+    run_mode_declared = config.get("run_mode")
     try:
+        require_run_mode(run_mode_declared)
+        # Placeholders are refused in EVERY mode: a calibration run is also a
+        # predeclared experiment, not an exploratory sweep.
         _check_no_placeholders(config)
-        if config.get("run_mode") == "production":
-            _check_baseline_consistency(config)
-        if experiment_id in ("H-EV-SHUFFLE", "H-EV-REPRESENTATION"):
+        if run_mode_declared in ("production", "calibration"):
+            _check_baseline_consistency(config, require_complete=True,
+                                        experiment_id=experiment_id)
+            _require_permutation_binding(config, experiment_id)
+        if run_mode_declared == "production":
+            _require_epsilon_for_confirmatory(config, experiment_id)
+            _require_power_artifact(config, experiment_id)
+        if run_mode_declared == "production" and experiment_id in ("H-EV-SHUFFLE", "H-EV-REPRESENTATION"):
             power_analysis = config.get("power_analysis") or {}
             validate_replicate_plan_against_power(
                 minimum_valid_replicates=config["minimum_valid_pairs"],
                 power_analysis_required_n=power_analysis.get("required_n"),
                 underpowered_justification=power_analysis.get("underpowered_justification"),
             )
-    except (ConfigNotFrozenError, UnderpoweredReplicatePlanError) as exc:
+    except (ConfigNotFrozenError, UnderpoweredReplicatePlanError, RunModeConflictError,
+            ConfigValidationError) as exc:
         print(f"\nREFUSING TO RUN (fail-closed): {exc}\n")
         return 1
 
     output_dir = Path(config["output_dir"])
     run_mode = config["run_mode"]
+
+    # EXECUTION CONFIRMATION. Validation must never start an experiment.
+    # Calibration uses the full production protocol (10M samples, 200
+    # epochs), so an accidental launch is as costly as a production one and
+    # writes real data. Both evidentiary-protocol tiers therefore require an
+    # explicit flag; without it this is a validation-only dry run.
+    if run_mode in ("calibration", "production") and not args.confirm_execute:
+        print(f"\nVALIDATION ONLY - all pre-flight checks passed for {experiment_id} "
+              f"({run_mode}).\nNothing was generated or trained. Re-run with "
+              f"--confirm-execute to actually launch this {run_mode} experiment.\n")
+        return 0
+    try:
+        _lock_output_dir_to_mode(output_dir, run_mode)
+    except RunModeConflictError as exc:
+        print(f"\nREFUSING TO RUN (fail-closed): {exc}\n")
+        return 1
+    if run_mode != "production":
+        print(f"*** {run_mode.upper()} RUN - NON-EVIDENTIARY. Results may not be used as "
+              f"confirmatory evidence. ***")
     practical_significance = _practical_significance_from_config(config)
 
     if experiment_id == "EV-BASELINE":
@@ -211,7 +520,8 @@ def main() -> int:
         cert = run_h_ev_shuffle(
             run_mode=run_mode, requested_pairs=config["requested_pairs"],
             minimum_valid_pairs=config["minimum_valid_pairs"], output_dir=output_dir,
-            firewall=firewall, base_model_seed=config["base_model_seed"],
+            firewall=firewall, firewall_path=output_dir / "firewall.json",
+            base_model_seed=config["base_model_seed"],
             practical_significance=practical_significance,
         )
         firewall.save(output_dir / "firewall.json")
@@ -226,6 +536,18 @@ def main() -> int:
         validation = run_full_validation(X_probe, Y_probe, permutation)
         if not validation["all_passed"]:
             print(f"\nREFUSING TO RUN: Candidate-1 permutation failed validation: {validation}\n")
+            return 1
+        # Step 2b: bind the realized permutation to the expected hash. The
+        # calibration pilot and the production run MUST use the identical
+        # Candidate-1 permutation, or the pilot characterises a different
+        # intervention and its variance cannot size the production design.
+        # Re-checked here as well: pre-flight already verified the binding,
+        # but the object actually used downstream must be the bound one.
+        expected_perm = config.get("expected_candidate1_permutation_sha256")
+        if permutation.hash != expected_perm:
+            print(f"\nREFUSING TO RUN: Candidate-1 permutation hash mismatch.\n"
+                  f"  expected {expected_perm}\n  realized {permutation.hash}\n"
+                  "Calibration and production must use the identical permutation.\n")
             return 1
         # Step 3: persist it (hash is already computed as part of the object).
         output_dir.mkdir(parents=True, exist_ok=True)

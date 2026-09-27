@@ -71,12 +71,53 @@ def test_practical_equivalence_matches_manual_tost_computation():
     assert abs(assessment["tost"]["p_tost"] - manual_tost.p_tost) < 1e-9
 
 
-def test_decide_final_supported_overrides_equivalence():
+def test_decide_final_significant_but_within_epsilon_is_not_supported():
+    """
+    STATISTICAL PLAN v2: a statistically significant but practically
+    negligible effect must NOT be reported as SUPPORTED. Under v1 this
+    returned SUPPORTED, conflating statistical with practical significance.
+    """
     decision = decide_final(
         difference_decision=DecisionState.SUPPORTED,
         practical_equivalence={"formal_practical_equivalence": "EQUIVALENT_WITHIN_THRESHOLD"},
+        confidence_interval={"low": 0.0005, "high": 0.0015},   # inside +/-0.01
+        epsilon=0.01,
     )
-    assert decision == DecisionState.SUPPORTED
+    assert decision == DecisionState.INCONCLUSIVE
+
+
+def test_decide_final_supported_requires_ci_entirely_outside_epsilon():
+    assert decide_final(
+        difference_decision=DecisionState.SUPPORTED,
+        practical_equivalence={"formal_practical_equivalence": "NOT_ESTABLISHED"},
+        confidence_interval={"low": 0.012, "high": 0.030}, epsilon=0.01,
+    ) == DecisionState.SUPPORTED
+    # negative direction
+    assert decide_final(
+        difference_decision=DecisionState.SUPPORTED,
+        practical_equivalence={"formal_practical_equivalence": "NOT_ESTABLISHED"},
+        confidence_interval={"low": -0.030, "high": -0.012}, epsilon=0.01,
+    ) == DecisionState.SUPPORTED
+    # CI straddles the margin -> not material
+    assert decide_final(
+        difference_decision=DecisionState.SUPPORTED,
+        practical_equivalence={"formal_practical_equivalence": "NOT_ESTABLISHED"},
+        confidence_interval={"low": 0.008, "high": 0.030}, epsilon=0.01,
+    ) == DecisionState.INCONCLUSIVE
+
+
+def test_decide_final_supported_unreachable_without_epsilon_or_ci():
+    """Practical significance cannot be certified without a margin."""
+    assert decide_final(
+        difference_decision=DecisionState.SUPPORTED,
+        practical_equivalence={"formal_practical_equivalence": "NOT_ESTABLISHED"},
+        confidence_interval={"low": 0.5, "high": 0.9}, epsilon=None,
+    ) == DecisionState.INCONCLUSIVE
+    assert decide_final(
+        difference_decision=DecisionState.SUPPORTED,
+        practical_equivalence={"formal_practical_equivalence": "NOT_ESTABLISHED"},
+        confidence_interval=None, epsilon=0.01,
+    ) == DecisionState.INCONCLUSIVE
 
 
 def test_decide_final_not_supported_requires_formal_equivalence():

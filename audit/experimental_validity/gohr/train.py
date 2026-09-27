@@ -25,8 +25,8 @@ import numpy as np
 import tensorflow as tf
 from keras.callbacks import LearningRateScheduler, ModelCheckpoint
 
-from audit.experimental_validity.framework.failures import FailureReason, detect_failure_from_history
-from audit.experimental_validity.framework.provenance import sha256_file
+from framework.failures import FailureReason, detect_failure_from_history
+from framework.provenance import sha256_file
 
 
 def set_seed(seed: int) -> None:

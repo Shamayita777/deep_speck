@@ -17,14 +17,33 @@ from typing import Any, Optional
 
 import numpy as np
 
-from audit.experimental_validity.framework.failures import FailureReason, ReplicateOutcome, ReplicateStatus
-from audit.experimental_validity.framework.provenance import config_hash, software_provenance, utc_timestamp
-from audit.experimental_validity.gohr import dataset as gohr_dataset
-from audit.experimental_validity.gohr import evaluate as gohr_evaluate
-from audit.experimental_validity.gohr import model as gohr_model
-from audit.experimental_validity.gohr import train as gohr_train
-from audit.experimental_validity.gohr.baseline import BASELINE, CONFIRMATORY_EVALUATION_PROTOCOL
-from audit.experimental_validity.gohr.representation import Candidate1Permutation, apply_candidate1, identity_permutation
+from framework.failures import FailureReason, ReplicateOutcome, ReplicateStatus
+from framework.provenance import config_hash, software_provenance, utc_timestamp
+from gohr import dataset as gohr_dataset
+from gohr import evaluate as gohr_evaluate
+from gohr import model as gohr_model
+from gohr import train as gohr_train
+from gohr.baseline import BASELINE, CONFIRMATORY_EVALUATION_PROTOCOL
+
+
+def hash_initial_weights(model) -> str:
+    """
+    sha256 over the model's weight tensors in layer order, taken before
+    training. Identity of this hash across a matched pair is the actual
+    evidence that both arms started from the same initialization.
+    """
+    import hashlib
+
+    import numpy as np
+
+    digest = hashlib.sha256()
+    for w in model.get_weights():
+        arr = np.ascontiguousarray(w)
+        digest.update(str(arr.shape).encode())
+        digest.update(str(arr.dtype).encode())
+        digest.update(arr.tobytes())
+    return digest.hexdigest()
+from gohr.representation import Candidate1Permutation, apply_candidate1, identity_permutation
 
 
 @dataclass(frozen=True)
@@ -145,6 +164,13 @@ class GohrAdapter:
         model_config_hash = config_hash(
             {"depth": config.depth, "architecture": BASELINE.architecture}
         )
+        # Hash the ACTUAL initial weights, immediately after construction and
+        # BEFORE any training. Within a matched pair the two arms declare
+        # same_model_initialization=True; the seed integer alone is not proof
+        # of that (different RNG consumption, framework version or layer order
+        # can diverge). This records the realized initialization so identity
+        # is verifiable after the fact rather than assumed.
+        initial_weight_hash = hash_initial_weights(model)
 
         checkpoint_path = str(
             Path(config.output_dir) / f"{config.condition_id}_{config.replicate_id}_checkpoint.weights.h5"
@@ -216,6 +242,7 @@ class GohrAdapter:
             "timestamps": {"started": run_started_at, "finished": utc_timestamp()},
             "model_config_hash": model_config_hash,
             "checkpoint_hash": training_result.checkpoint_hash,
+            "initial_weight_hash": initial_weight_hash,
             "confirmatory_evaluation_protocol": CONFIRMATORY_EVALUATION_PROTOCOL,
             "historical_reporting_convention_value": training_result.max_val_acc,
         }

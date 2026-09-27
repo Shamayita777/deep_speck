@@ -24,12 +24,35 @@ def require_positive_int(value: Any, *, name: str) -> int:
     return value
 
 
+RUN_MODES = ("smoke", "calibration", "production")
+
+#: Modes whose output may NEVER be used as confirmatory evidence.
+NON_EVIDENTIARY_MODES = ("smoke", "calibration")
+
+
 def require_run_mode(mode: str) -> str:
-    if mode not in ("smoke", "production"):
-        raise ConfigValidationError(f"run_mode must be 'smoke' or 'production', got {mode!r}")
+    if mode not in RUN_MODES:
+        raise ConfigValidationError(
+            f"run_mode must be one of {RUN_MODES}, got {mode!r}")
     return mode
 
 
 def is_non_evidentiary(run_mode: str) -> bool:
-    """Smoke results are never evidentiary, by construction."""
-    return run_mode == "smoke"
+    """
+    Smoke AND calibration results are never evidentiary, by construction.
+
+    CALIBRATION is a distinct tier from SMOKE: it runs the REAL frozen
+    protocol (5 rounds, depth 10, 200 epochs, reference batch size /
+    optimizer / LR schedule / reg_param, full dataset sizes), so its
+    numbers are physically comparable to production. That is exactly why
+    it needs a hard, separate guard: a calibration certificate looks like
+    a production certificate in every respect except this flag. Its sole
+    legitimate use is estimating nuisance variance for power planning; it
+    must never enter a confirmatory hypothesis test, a practical-margin
+    choice, or the primary-family multiplicity correction.
+    """
+    return run_mode in NON_EVIDENTIARY_MODES
+
+
+def is_calibration(run_mode: str) -> bool:
+    return run_mode == "calibration"
