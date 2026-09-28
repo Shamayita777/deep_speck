@@ -245,3 +245,133 @@ def validate_replicate_plan_against_power(
             "for its own predeclared target effect/power without an explicit, "
             "recorded justification for accepting that."
         )
+
+
+# =====================================================================
+# Joint primary-family power (statistical plan v2 decision rule)
+# =====================================================================
+
+@dataclass(frozen=True)
+class JointFamilyPowerResult:
+    """Per-hypothesis power for the COMPLETE final decision rule."""
+    n_pairs: int
+    alpha: float
+    epsilon: float
+    n_simulations: int
+    hypotheses: tuple
+    power_supported: dict
+    power_not_supported: dict
+    power_difference_significant: dict
+    power_equivalence_after_holm: dict
+
+    def to_dict(self) -> dict:
+        return {
+            "n_pairs": self.n_pairs, "alpha": self.alpha, "epsilon": self.epsilon,
+            "n_simulations": self.n_simulations, "hypotheses": list(self.hypotheses),
+            "power_supported": self.power_supported,
+            "power_not_supported": self.power_not_supported,
+            "power_difference_significant": self.power_difference_significant,
+            "power_equivalence_after_holm": self.power_equivalence_after_holm,
+        }
+
+
+def _holm_two(p_a, p_b, alpha):
+    """
+    Vectorised Holm for a family of exactly two hypotheses.
+
+    Step-down: the smaller p is tested at alpha/2; if it is rejected the
+    larger is tested at alpha. Adjusted p-values are therefore
+    min(1, 2*p_min) for the smaller and max(that, p_max) for the larger -
+    the ACTUAL procedure, not the alpha/2 approximation used for
+    conservative sizing.
+    """
+    import numpy as np
+
+    p_min = np.minimum(p_a, p_b)
+    p_max = np.maximum(p_a, p_b)
+    adj_min = np.minimum(1.0, 2.0 * p_min)
+    adj_max = np.maximum(adj_min, p_max)
+    adj_a = np.where(p_a <= p_b, adj_min, adj_max)
+    adj_b = np.where(p_b < p_a, adj_min, adj_max)
+    return adj_a, adj_b
+
+
+def simulate_joint_primary_family(
+    *, hypotheses, sigmas: dict, true_effects: dict, n_pairs: int, alpha: float,
+    epsilon: float, n_simulations: int, rng, target_effect_source: str,
+) -> JointFamilyPowerResult:
+    """
+    Simulate the COMPLETE final decision for both primary hypotheses.
+
+    Each trial draws `n_pairs` paired differences for BOTH hypotheses,
+    then applies, in order:
+
+        paired t-test  ->  difference Holm family (2 hypotheses)
+        TOST           ->  equivalence Holm family (2 hypotheses)
+        decide_final() semantics (statistical plan v2)
+
+    The two hypotheses must be simulated TOGETHER because Holm couples
+    them: one hypothesis's p-value changes the other's adjusted p-value.
+    Powering TOST alone (the previous behaviour) overstated the
+    achievable NOT_SUPPORTED rate, because it ignored both the
+    equivalence-family correction and the requirement that the difference
+    test be non-significant after ITS correction.
+
+    Decision semantics reproduced exactly:
+        SUPPORTED      difference significant after Holm AND the 95% CI
+                       lies entirely outside [-epsilon, +epsilon]
+        NOT_SUPPORTED  difference NOT significant after Holm AND TOST
+                       equivalent after Holm
+        INCONCLUSIVE   otherwise
+    """
+    import numpy as np
+    from scipy import stats
+
+    _validate_target_effect_source(target_effect_source)
+    if n_pairs < 2:
+        raise ValueError("n_pairs must be >= 2 for a paired analysis.")
+    hypotheses = tuple(hypotheses)
+    if len(hypotheses) != 2:
+        raise ValueError("The frozen primary family has exactly two hypotheses.")
+
+    df = n_pairs - 1
+    tcrit = stats.t.ppf(1 - alpha / 2, df)
+    per = {}
+    for hyp in hypotheses:
+        draws = rng.normal(loc=true_effects[hyp], scale=sigmas[hyp],
+                           size=(n_simulations, n_pairs))
+        mean = draws.mean(axis=1)
+        sd = draws.std(axis=1, ddof=1)
+        se = sd / np.sqrt(n_pairs)
+        se = np.where(se == 0, np.finfo(float).tiny, se)
+        t_stat = mean / se
+        p_diff = 2.0 * stats.t.sf(np.abs(t_stat), df)
+        # TOST: H0- : delta <= -eps ; H0+ : delta >= +eps
+        p_lower = stats.t.sf((mean + epsilon) / se, df)
+        p_upper = stats.t.cdf((mean - epsilon) / se, df)
+        per[hyp] = {
+            "p_diff": p_diff, "p_tost": np.maximum(p_lower, p_upper),
+            "ci_low": mean - tcrit * se, "ci_high": mean + tcrit * se,
+        }
+
+    a, b = hypotheses
+    adj_diff_a, adj_diff_b = _holm_two(per[a]["p_diff"], per[b]["p_diff"], alpha)
+    adj_tost_a, adj_tost_b = _holm_two(per[a]["p_tost"], per[b]["p_tost"], alpha)
+    adj_diff = {a: adj_diff_a, b: adj_diff_b}
+    adj_tost = {a: adj_tost_a, b: adj_tost_b}
+
+    supported, not_supported, diff_sig, equiv = {}, {}, {}, {}
+    for hyp in hypotheses:
+        sig = adj_diff[hyp] < alpha
+        equivalent = adj_tost[hyp] < alpha
+        outside = (per[hyp]["ci_low"] > epsilon) | (per[hyp]["ci_high"] < -epsilon)
+        diff_sig[hyp] = float(sig.mean())
+        equiv[hyp] = float(equivalent.mean())
+        supported[hyp] = float((sig & outside).mean())
+        not_supported[hyp] = float(((~sig) & equivalent).mean())
+
+    return JointFamilyPowerResult(
+        n_pairs=n_pairs, alpha=alpha, epsilon=epsilon, n_simulations=n_simulations,
+        hypotheses=hypotheses, power_supported=supported, power_not_supported=not_supported,
+        power_difference_significant=diff_sig, power_equivalence_after_holm=equiv,
+    )

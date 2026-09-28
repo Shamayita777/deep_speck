@@ -25,9 +25,38 @@ Fails closed (refuses to run, exits non-zero) if:
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Optional
+
+
+def _pin_gpu_before_tensorflow_import() -> Optional[str]:
+    """
+    Honour --gpu by setting CUDA_VISIBLE_DEVICES BEFORE TensorFlow is
+    imported transitively (gohr.* pull it in at module import time).
+    TensorFlow reads that variable once at initialisation, so a later
+    assignment has no effect - hence this runs at module top, ahead of
+    every other import.
+
+    Parsing argv by hand here is deliberate: argparse runs inside main(),
+    which is far too late. GPU choice is a PROCESS-level concern, never a
+    config field: putting it in the YAML would change the config hash and
+    invalidate the resume state of an in-flight calibration.
+    """
+    argv = sys.argv
+    value = None
+    for i, arg in enumerate(argv):
+        if arg == "--gpu" and i + 1 < len(argv):
+            value = argv[i + 1]
+        elif arg.startswith("--gpu="):
+            value = arg.split("=", 1)[1]
+    if value is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = value
+    return value
+
+
+_PINNED_GPU = _pin_gpu_before_tensorflow_import()
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -57,6 +86,71 @@ class ConfigNotFrozenError(RuntimeError):
 
 class RunModeConflictError(RuntimeError):
     pass
+
+
+#: Every EV experiment's output root must be unique. Two concurrent
+#: hypothesis-level jobs (e.g. H-EV-SHUFFLE on GPU 0 and
+#: H-EV-REPRESENTATION on GPU 1) share nothing: separate output dirs,
+#: separate ledgers, separate pair sidecars, separate firewalls, separate
+#: seed ranges. This table is asserted so a copy-paste edit cannot point
+#: two jobs at one directory.
+EXPECTED_OUTPUT_ROOTS = {
+    ("H-EV-SHUFFLE", "calibration"): "results/calibration/ev_shuffle",
+    ("H-EV-REPRESENTATION", "calibration"): "results/calibration/ev_representation",
+    ("EV-BASELINE", "calibration"): "results/calibration/ev_baseline",
+    ("EV-NOISE", "calibration"): "results/calibration/ev_noise",
+}
+
+
+class ConcurrentRunConflictError(RuntimeError):
+    pass
+
+
+def _check_output_isolation(config: dict, experiment_id: str) -> None:
+    """
+    Refuse an output directory that belongs to a different experiment.
+
+    Concurrency safety rests entirely on state separation: each job owns
+    its own resume ledger, pair sidecar, dataset store and firewall file
+    under its own output root. If two jobs shared a root they would
+    interleave ledger writes and could consume each other's firewall
+    seals. Nothing else about the design changes - the two hypotheses are
+    independent experiments, not two arms of one pair.
+    """
+    declared = str(config.get("output_dir", "")).rstrip("/")
+    for (exp, mode), root in EXPECTED_OUTPUT_ROOTS.items():
+        if declared.endswith(root) and exp != experiment_id:
+            raise ConfigNotFrozenError(
+                f"{experiment_id}: output_dir {declared!r} is the reserved output root of "
+                f"{exp}. Two experiments must never share an output root - they would "
+                "interleave ledger, sidecar and firewall state.")
+
+
+def _acquire_output_lock(output_dir: Path, experiment_id: str) -> Optional[Path]:
+    """
+    Advisory single-writer lock per output directory.
+
+    Two processes writing one output root would corrupt the resume ledger
+    and the firewall. A stale lock from a crashed process is reported, not
+    silently cleared: deciding whether a previous run really died is the
+    operator's call, not the framework's.
+    """
+    lock = Path(output_dir) / "RUN_LOCK"
+    if lock.exists():
+        raise ConcurrentRunConflictError(
+            f"{output_dir} is locked by a previous or concurrent run "
+            f"({lock.read_text().strip()}). If that process is definitely gone, delete "
+            f"{lock} manually after confirming no other job is writing here. Refusing to "
+            "write concurrently: it would corrupt the resume ledger and firewall state.")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    lock.write_text(f"pid={os.getpid()} experiment={experiment_id} "
+                    f"gpu={os.environ.get('CUDA_VISIBLE_DEVICES', 'unset')}")
+    # Released on normal exit AND on an unhandled exception. A hard kill
+    # (SIGKILL / OOM) deliberately leaves the lock behind so the operator
+    # sees that a run died mid-write rather than silently resuming over it.
+    import atexit
+    atexit.register(lambda: lock.unlink(missing_ok=True))
+    return lock
 
 
 def _lock_output_dir_to_mode(output_dir: Path, run_mode: str) -> None:
@@ -442,6 +536,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("config", type=str, help="Path to a YAML config in configs/")
     parser.add_argument(
+        "--gpu", default=None,
+        help=("CUDA device index this job is pinned to (e.g. 0 or 1). Applied by setting "
+              "CUDA_VISIBLE_DEVICES before TensorFlow is imported. Process-level only: it is "
+              "never a config field and does not affect the config hash or resume state."))
+    parser.add_argument(
         "--confirm-execute", action="store_true",
         help="actually run a calibration/production experiment (validation-only without it)")
     args = parser.parse_args()
@@ -462,6 +561,7 @@ def main() -> int:
             _check_baseline_consistency(config, require_complete=True,
                                         experiment_id=experiment_id)
             _require_permutation_binding(config, experiment_id)
+            _check_output_isolation(config, experiment_id)
         if run_mode_declared == "production":
             _require_epsilon_for_confirmatory(config, experiment_id)
             _require_power_artifact(config, experiment_id)
@@ -492,7 +592,15 @@ def main() -> int:
         return 0
     try:
         _lock_output_dir_to_mode(output_dir, run_mode)
-    except RunModeConflictError as exc:
+    except (RunModeConflictError, ConcurrentRunConflictError) as exc:
+        print(f"\nREFUSING TO RUN (fail-closed): {exc}\n")
+        return 1
+    gpu = os.environ.get("CUDA_VISIBLE_DEVICES")
+    print(f"[execution] experiment={experiment_id} output_dir={output_dir} "
+          f"CUDA_VISIBLE_DEVICES={gpu if gpu is not None else 'unset (all visible)'}")
+    try:
+        _run_lock = _acquire_output_lock(output_dir, experiment_id)
+    except ConcurrentRunConflictError as exc:
         print(f"\nREFUSING TO RUN (fail-closed): {exc}\n")
         return 1
     if run_mode != "production":

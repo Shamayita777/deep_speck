@@ -13,12 +13,10 @@ replicate count K = max over four requirements:
 Uses the EXISTING framework/power.py simulation, so the procedure
 simulated is the procedure actually run.
 
-MULTIPLICITY: the frozen plan applies Holm to the two difference-detection
-p-values. Prospective planning uses alpha/2 per hypothesis as a
-CONSERVATIVE BONFERRONI-STYLE APPROXIMATION. This is deliberately NOT
-exact Holm power: Holm's step-down only tests at alpha/2 for the smaller
-p-value and may test the larger at alpha, so planning at alpha/2 for both
-is an upper bound on the required n, never an exact figure.
+MULTIPLICITY: Holm is applied to two SEPARATE families - the two
+difference-detection p-values, and the two overall TOST p-values - and
+both are simulated EXACTLY inside the joint decision simulation. The
+earlier alpha/2 Bonferroni-style approximation has been removed.
 
 VARIANCE: sizing uses each hypothesis's one-sided 95% UPPER confidence
 bound for sigma, not the point estimate; a ~10-pair pilot leaves sigma
@@ -44,7 +42,7 @@ for p in (REPO, REPO.parent):
 
 from audit.common.provenance import sha256_file, utc_timestamp  # noqa: E402
 from audit.common.strict_json import dumps_strict  # noqa: E402
-from framework.power import simulate_power  # noqa: E402
+from framework.power import simulate_joint_primary_family  # noqa: E402
 from framework.seeds import statistics_rng  # noqa: E402
 
 PRIMARY_FAMILY = ("H-EV-SHUFFLE", "H-EV-REPRESENTATION")
@@ -120,27 +118,25 @@ _SEED_BASE = {("H-EV-SHUFFLE", "difference"): 11_000_000,
               ("H-EV-REPRESENTATION", "equivalence"): 14_000_000}
 
 
-def _required_n(hypothesis, procedure, *, sigma, epsilon, target_effect, target_effect_source,
-                alpha, target_power, simulations, max_n):
-    """Smallest n in 2..max_n reaching target power. None if unreachable."""
-    curve = []
-    for n in range(2, max_n + 1):
-        rng = statistics_rng(_SEED_BASE[(hypothesis, procedure)] + n)
-        if procedure == "difference":
-            res = simulate_power(
-                procedure="difference_ttest", target_effect=target_effect,
-                target_effect_source=target_effect_source, noise_sd=sigma,
-                n_replicates=n, alpha=alpha, n_simulations=simulations, rng=rng)
-        else:
-            res = simulate_power(
-                procedure="equivalence_tost", target_effect=0.0,
-                target_effect_source="predeclared", noise_sd=sigma,
-                n_replicates=n, alpha=alpha, epsilon=epsilon,
-                n_simulations=simulations, rng=rng)
-        curve.append({"n": n, "power": res.empirical_power})
-        if res.empirical_power >= target_power:
-            return n, res.empirical_power, curve
-    return None, None, curve
+def _joint_powers(art_sigmas, *, n, epsilon, target_effect, target_effect_source,
+                  alpha, simulations, seed_base):
+    """
+    One joint simulation per scenario at size n.
+
+    Returns (effect_scenario, null_scenario) JointFamilyPowerResults. Both
+    hypotheses are simulated TOGETHER because Holm couples them.
+    """
+    hyps = PRIMARY_FAMILY
+    effect = simulate_joint_primary_family(
+        hypotheses=hyps, sigmas=art_sigmas,
+        true_effects={h: target_effect for h in hyps}, n_pairs=n, alpha=alpha,
+        epsilon=epsilon, n_simulations=simulations,
+        rng=statistics_rng(seed_base + n), target_effect_source=target_effect_source)
+    null = simulate_joint_primary_family(
+        hypotheses=hyps, sigmas=art_sigmas, true_effects={h: 0.0 for h in hyps},
+        n_pairs=n, alpha=alpha, epsilon=epsilon, n_simulations=simulations,
+        rng=statistics_rng(seed_base + 500_000 + n), target_effect_source=target_effect_source)
+    return effect, null
 
 
 def main() -> int:
@@ -215,30 +211,55 @@ def build_power_plan(
     sigmas = art["sigma_Delta_upper_95"]
     points = art.get("sigma_Delta_estimates", {})
 
-    # BOTH families are planned at alpha/2 as a conservative
-    # Bonferroni-style approximation to Holm. Difference detection is
-    # Holm-corrected across the two primary hypotheses, and NOT_SUPPORTED
-    # is likewise asserted across two hypotheses, so the equivalence
-    # family carries its own Holm correction at analysis time and must be
-    # powered for it. Neither figure is exact Holm power.
-    alpha_diff = alpha_tost = alpha / 2
-    requirements, curves = [], {}
+    # The ACTUAL final decision rule is simulated end to end: paired t-test
+    # -> difference Holm family -> TOST -> equivalence Holm family ->
+    # decide_final() semantics. Holm is simulated exactly, so no alpha/2
+    # approximation is used any more; alpha stays 0.05 throughout.
+    curves, requirements = {}, []
+    achieved = {}
+    for n in range(2, max_n + 1):
+        effect_res, null_res = _joint_powers(
+            sigmas, n=n, epsilon=epsilon, target_effect=target_effect,
+            target_effect_source=target_effect_source, alpha=alpha,
+            simulations=simulations, seed_base=11_000_000)
+        achieved[n] = (effect_res, null_res)
+        for hyp in PRIMARY_FAMILY:
+            curves.setdefault(f"{hyp}:difference", []).append(
+                {"n": n, "power": effect_res.power_difference_significant[hyp]})
+            curves.setdefault(f"{hyp}:equivalence", []).append(
+                {"n": n, "power": null_res.power_not_supported[hyp]})
+            curves.setdefault(f"{hyp}:supported", []).append(
+                {"n": n, "power": effect_res.power_supported[hyp]})
+
+    def _first_n(key, hyp):
+        for n in sorted(achieved):
+            effect_res, null_res = achieved[n]
+            power = (effect_res.power_difference_significant[hyp] if key == "difference"
+                     else null_res.power_not_supported[hyp])
+            if power >= target_power:
+                return n, power
+        return None, None
+
     for hyp in PRIMARY_FAMILY:
-        sigma = float(sigmas[hyp])
-        for procedure, alpha_used in (("difference", alpha_diff), ("equivalence", alpha_tost)):
-            n, power, curve = _required_n(
-                hyp, procedure, sigma=sigma, epsilon=epsilon,
-                target_effect=target_effect, target_effect_source=target_effect_source,
-                alpha=alpha_used, target_power=target_power,
-                simulations=simulations, max_n=max_n)
+        for procedure in ("difference", "equivalence"):
+            n, power = _first_n(procedure, hyp)
+            last = achieved[max(achieved)] if achieved else (None, None)
             requirements.append({
-                "hypothesis": hyp, "procedure": procedure, "alpha_used": alpha_used,
-                "sigma_used": sigma, "sigma_source": sigma_source,
+                "hypothesis": hyp, "procedure": procedure, "alpha_used": alpha,
+                "multiplicity_simulated": "holm_exact",
+                "sigma_used": float(sigmas[hyp]), "sigma_source": sigma_source,
                 "sigma_point_estimate": points.get(hyp),
                 "required_n": n, "achieved_power": power,
                 "true_effect_assumed": (target_effect if procedure == "difference" else 0.0),
+                "decision_simulated": ("difference significant after difference-Holm"
+                                       if procedure == "difference" else
+                                       "NOT_SUPPORTED: difference NOT significant after "
+                                       "difference-Holm AND TOST equivalent after "
+                                       "equivalence-Holm"),
+                "power_supported_at_target_effect": (
+                    last[0].power_supported[hyp] if procedure == "difference" and last[0]
+                    else None),
             })
-            curves[f"{hyp}:{procedure}"] = curve
 
     unmet = [r for r in requirements if r["required_n"] is None]
     common_n = None if unmet else max(r["required_n"] for r in requirements)
@@ -266,14 +287,19 @@ def build_power_plan(
             "calibration_artifact_sha256": sha256_file(variance_artifact),
             "frozen_design": dict(FROZEN),
         },
+        "procedure_simulated": ("COMPLETE final decision rule: paired t-test -> difference "
+                                "Holm family -> TOST -> equivalence Holm family -> "
+                                "decide_final() semantics (statistical plan v2)"),
         "multiplicity": {
             "method_at_analysis": "Holm across the two difference-detection p-values",
-            "method_at_planning": "alpha/2 per hypothesis, for BOTH families",
+            "method_at_planning": ("EXACT Holm simulated for BOTH families inside the joint "
+                                   "decision simulation (no alpha/2 approximation)"),
             "equivalence_family": ("Holm across the two overall TOST p-values; no additional "
                                    "correction inside each TOST (intersection-union)"),
-            "planning_caveat": ("CONSERVATIVE BONFERRONI-STYLE APPROXIMATION - this is NOT exact "
-                                "Holm power. Holm tests the larger p-value at alpha, so planning "
-                                "at alpha/2 for both yields an upper bound on required n."),
+            "planning_caveat": ("Holm is now simulated EXACTLY within the joint decision "
+                                "simulation; the previous alpha/2 Bonferroni-style "
+                                "approximation is no longer used. NOT exact Holm power is no "
+                                "longer claimed as an approximation - it is computed."),
             "tost_excluded_from_holm": "TOST carries its own intersection-union error control",
         },
         "requirements": requirements,

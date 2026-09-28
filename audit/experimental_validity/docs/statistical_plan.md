@@ -100,8 +100,15 @@ selected by, or validated against them.
    individual equivalence claim, and correcting twice would
    double-penalise.
 
-Prospective planning powers BOTH families at alpha/2 per hypothesis, a
-conservative Bonferroni-style approximation - **not exact Holm power**.
+Prospective planning simulates **both Holm families EXACTLY** inside a
+joint simulation of the complete decision rule (paired t-test ->
+difference Holm -> TOST -> equivalence Holm -> `decide_final()`). The
+earlier alpha/2 Bonferroni-style approximation has been removed: the two
+hypotheses are simulated together because Holm couples them, and
+NOT_SUPPORTED power is computed for the JOINT requirement (difference
+non-significant after its family AND TOST equivalent after its family),
+not for TOST alone. Powering TOST alone overstated the achievable
+NOT_SUPPORTED rate.
 
 ## Multiplicity (detail)
 Holm step-down across the frozen primary family
@@ -130,8 +137,10 @@ requirement.
 
 **Simulation assumptions (explicit).** The prospective power simulation
 assumes INDEPENDENT paired differences that are NORMALLY distributed with
-mean equal to the target effect (0 for the equivalence scenario) and
-standard deviation equal to `sigma_Delta_upper_95`. Departures from
+mean equal to the target effect (0 for the equivalence/null scenario) and
+standard deviation equal to `sigma_Delta_upper_95`. Both primary
+hypotheses are drawn in the same trial so the Holm families are applied
+to jointly-realised p-values. Departures from
 normality or independence change the required n; the simulation cannot
 detect them.
 

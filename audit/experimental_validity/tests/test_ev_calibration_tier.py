@@ -474,8 +474,10 @@ def test_power_planner_logic_common_k_families_and_sigma(tmp_path):
     assert len(reqs) == 4
     assert {r["hypothesis"] for r in reqs} == set(PRIMARY_FAMILY_IDS)
     assert {r["procedure"] for r in reqs} == {"difference", "equivalence"}
-    # both families planned at alpha/2
-    assert {r["alpha_used"] for r in reqs} == {0.025}
+    # Holm is now simulated EXACTLY inside the joint decision simulation,
+    # so full alpha is used and the alpha/2 approximation is gone.
+    assert {r["alpha_used"] for r in reqs} == {0.05}
+    assert all(r["multiplicity_simulated"] == "holm_exact" for r in reqs)
     # common K is the max over all four requirements
     assert plan["common_design"]["required_n"] == max(r["required_n"] for r in reqs)
     # upper-95% sigma used, never the point estimate
@@ -483,7 +485,7 @@ def test_power_planner_logic_common_k_families_and_sigma(tmp_path):
     for r in reqs:
         assert r["sigma_used"] == art["sigma_Delta_upper_95"][r["hypothesis"]]
         assert r["sigma_used"] != r["sigma_point_estimate"]
-    assert "NOT exact Holm power" in plan["multiplicity"]["planning_caveat"]
+    assert "simulated EXACTLY" in plan["multiplicity"]["planning_caveat"]
     assert "gpu" not in json.dumps(plan).lower()
 
 
@@ -786,21 +788,16 @@ def test_planner_rejects_invalid_calibration_artifacts(tmp_path, mutation):
     assert r.returncode == 1 and "frozen design violated" in r.stdout
 
 
-def test_planner_powers_both_families_at_alpha_over_two(tmp_path):
+def test_planner_simulates_both_holm_families_exactly(tmp_path):
+    """Superseded alpha/2 planning: Holm is now simulated exactly."""
     art = _variance_artifact(tmp_path)
-    r = _plan(tmp_path, art, "--max-n", "30", "--simulations", "50000")
-    assert r.returncode == 0, r.stdout + r.stderr
+    r = _plan(tmp_path, art, "--max-n", "6")
+    assert r.returncode == 0, r.stdout
     plan = json.loads((tmp_path / "plan.json").read_text())
-    assert {x["alpha_used"] for x in plan["requirements"]} == {0.025}   # BOTH families
-    assert plan["common_design"]["required_n"] == max(
-        x["required_n"] for x in plan["requirements"])
-    assert plan["inputs"]["sigma_source"] == "upper95"
-    assert plan["inputs"]["calibration_artifact_sha256"]
-    assert "gpu" not in json.dumps(plan).lower()
-    assert any("NORMALLY distributed" in a for a in plan["assumptions"])
+    assert {x["alpha_used"] for x in plan["requirements"]} == {0.05}
+    assert all(x["multiplicity_simulated"] == "holm_exact" for x in plan["requirements"])
+    assert "COMPLETE final decision rule" in plan["procedure_simulated"]
 
-
-# --- item 6: production power-artifact gate ---------------------------------
 
 def _good_plan_file(tmp_path, required_n=12):
     plan = {"artifact": "ev-power-plan-v2", "non_evidentiary": True,
@@ -961,7 +958,7 @@ def test_docs_contain_one_coherent_v2_decision_rule():
 def test_docs_declare_two_holm_families_and_planning_caveat():
     plan = (EV / "docs" / "statistical_plan.md").read_text()
     assert "TWO SEPARATE HOLM FAMILIES" in plan
-    assert "not exact Holm power" in plan
+    assert "simulated EXACTLY" in plan or "exactly" in plan.lower()
     assert "no additional correction" in " ".join(plan.lower().split())
 
 
