@@ -1,47 +1,53 @@
 """
 Independent reconstruction of Gohr's neural distinguisher architecture.
 
-The architecture follows the public supplementary implementation
-`train_nets.py`, with the published paper used as the architectural
-description.
+SOURCE BASIS
+------------
+The architecture is reconstructed from Gohr's public supplementary
+implementation `train_nets.py`, with the published paper used as the
+scientific description of the model.
 
-Important source discrepancy:
-    The paper's prose states that the second 64-unit dense hidden layer
-    does not use batch normalization.
+Canonical 5-round Speck32/64 configuration:
 
-    The public supplementary `train_nets.py` DOES apply BatchNormalization
-    to this second dense layer.
+    num_blocks   = 2
+    word_size    = 16
+    input        = 64 bits
+    num_filters  = 32
+    depth        = 10
+    kernel_size  = 3
+    dense_1      = 64
+    dense_2      = 64
+    output       = 1 sigmoid
+    L2           = 1e-5
 
-This implementation follows the actual public supplementary code path,
-while the discrepancy is recorded by the M1 verifier.
+IMPORTANT
+---------
+The public Gohr implementation applies BatchNormalization after BOTH
+64-unit dense layers. This reconstruction follows the public executable
+code path rather than silently substituting a prose-only interpretation.
 
-For the 5-round reference network:
-    depth = 10 residual blocks
-    filters = 32
-    kernel size = 3
-    input = 64 bits
-    dense widths = 64, 64
-    output = sigmoid
-    L2 regularization = 1e-5
+The aliases `filters` and `l2_strength` exist solely for compatibility
+with the M1 verification/training drivers. They map directly onto the
+canonical `num_filters` and `reg_param` parameters and do not define a
+different architecture.
 """
 
 from __future__ import annotations
-from warnings import filters
 
-from keras import Input, Model
 from keras.layers import (
-    Input,
-    Reshape,
-    Permute,
-    Conv1D,
-    BatchNormalization,
     Activation,
     Add,
-    Flatten,
+    BatchNormalization,
+    Conv1D,
     Dense,
+    Flatten,
+    Input,
+    Permute,
+    Reshape,
 )
-from keras.regularizers import l2
 from keras.models import Model
+from keras.regularizers import l2
+
 
 DEFAULT_DEPTH = 10
 DEFAULT_FILTERS = 32
@@ -49,65 +55,72 @@ DEFAULT_DENSE_1 = 64
 DEFAULT_DENSE_2 = 64
 DEFAULT_KERNEL_SIZE = 3
 DEFAULT_WORD_SIZE = 16
-DEFAULT_INPUT_WORDS = 4
+DEFAULT_NUM_BLOCKS = 2
 DEFAULT_L2 = 1e-5
 
 
 def build_gohr_model(
     *,
-    depth: int = 10,
-    num_blocks: int = 2,
-    num_filters: int = 32,
-    d1: int = 64,
-    d2: int = 64,
-    word_size: int = 16,
-    kernel_size: int = 3,
-    reg_param: float = 1e-5,
+    depth: int = DEFAULT_DEPTH,
+    num_blocks: int = DEFAULT_NUM_BLOCKS,
+    num_filters: int = DEFAULT_FILTERS,
+    d1: int = DEFAULT_DENSE_1,
+    d2: int = DEFAULT_DENSE_2,
+    word_size: int = DEFAULT_WORD_SIZE,
+    kernel_size: int = DEFAULT_KERNEL_SIZE,
+    reg_param: float = DEFAULT_L2,
     filters: int | None = None,
     input_words: int | None = None,
-    dense_1: int | None = None,
-    dense_2: int | None = None,
-    l2_reg: float | None = None,
-):
+    l2_strength: float | None = None,
+) -> Model:
     """
-    Independently reconstructed Gohr ResNet architecture.
+    Build the independently reconstructed Gohr ResNet.
 
-    Canonical configuration used for the audited 5-round Speck32/64
-    distinguisher:
+    Canonical input representation:
 
-        depth       = 10
-        filters     = 32
-        input       = 64 bits
-        dense_1     = 64
-        dense_2     = 64
-        kernel size = 3
-        L2          = 1e-5
+        two 32-bit ciphertexts
+        = four 16-bit words
+        = 64 binary input features.
 
-    The compatibility aliases below exist because the M1 verifier uses
-    the descriptive names:
+    Compatibility aliases
+    ---------------------
+    filters:
+        Alias for `num_filters`.
 
-        filters
-        dense_1
-        dense_2
-        l2_reg
+    l2_strength:
+        Alias for `reg_param`.
 
-    They map directly onto the canonical parameters and do not change
-    the scientific architecture.
+    input_words:
+        Alias-based way of specifying the number of 16-bit words in the
+        four-word input representation.
+
+    These aliases are compatibility conveniences only. The scientific
+    configuration remains the Gohr configuration documented above.
     """
 
-    # ---------------------------------------------------------
-    # Compatibility aliases
-    # ---------------------------------------------------------
+    # ==============================================================
+    # Resolve compatibility aliases
+    # ==============================================================
 
     if filters is not None:
         filters = int(filters)
 
-        if num_filters != 32 and num_filters != filters:
+        if num_filters != DEFAULT_FILTERS and num_filters != filters:
             raise ValueError(
                 "Conflicting values supplied for num_filters and filters."
             )
 
         num_filters = filters
+
+    if l2_strength is not None:
+        l2_strength = float(l2_strength)
+
+        if reg_param != DEFAULT_L2 and reg_param != l2_strength:
+            raise ValueError(
+                "Conflicting values supplied for reg_param and l2_strength."
+            )
+
+        reg_param = l2_strength
 
     if input_words is not None:
         input_words = int(input_words)
@@ -125,7 +138,10 @@ def build_gohr_model(
 
         implied_num_blocks = input_words // 2
 
-        if num_blocks != 2 and num_blocks != implied_num_blocks:
+        if (
+            num_blocks != DEFAULT_NUM_BLOCKS
+            and num_blocks != implied_num_blocks
+        ):
             raise ValueError(
                 "Conflicting values supplied for num_blocks and "
                 "input_words."
@@ -133,39 +149,9 @@ def build_gohr_model(
 
         num_blocks = implied_num_blocks
 
-    if dense_1 is not None:
-        dense_1 = int(dense_1)
-
-        if d1 != 64 and d1 != dense_1:
-            raise ValueError(
-                "Conflicting values supplied for d1 and dense_1."
-            )
-
-        d1 = dense_1
-
-    if dense_2 is not None:
-        dense_2 = int(dense_2)
-
-        if d2 != 64 and d2 != dense_2:
-            raise ValueError(
-                "Conflicting values supplied for d2 and dense_2."
-            )
-
-        d2 = dense_2
-
-    if l2_reg is not None:
-        l2_reg = float(l2_reg)
-
-        if reg_param != 1e-5 and reg_param != l2_reg:
-            raise ValueError(
-                "Conflicting values supplied for reg_param and l2_reg."
-            )
-
-        reg_param = l2_reg
-
-    # ---------------------------------------------------------
+    # ==============================================================
     # Validate parameters
-    # ---------------------------------------------------------
+    # ==============================================================
 
     if depth < 0:
         raise ValueError(
@@ -189,7 +175,7 @@ def build_gohr_model(
 
     if d1 <= 0 or d2 <= 0:
         raise ValueError(
-            "Dense-layer widths d1 and d2 must be positive."
+            "d1 and d2 must be positive."
         )
 
     if kernel_size <= 0:
@@ -202,29 +188,19 @@ def build_gohr_model(
             "reg_param must be non-negative."
         )
 
-    # ---------------------------------------------------------
-    # Keras imports
-    # ---------------------------------------------------------
-
-    from keras.layers import (
-        Activation,
-        Add,
-        BatchNormalization,
-        Conv1D,
-        Dense,
-        Flatten,
-        Input,
-        Permute,
-        Reshape,
-    )
-    from keras.models import Model
-    from keras.regularizers import l2
-
-    # ---------------------------------------------------------
+    # ==============================================================
     # Input
-    # ---------------------------------------------------------
+    # ==============================================================
 
-    input_width = num_blocks * word_size * 2
+    # Gohr:
+    #
+    #     inp = Input(shape=(num_blocks * word_size * 2,))
+    #
+    input_width = (
+        num_blocks
+        * word_size
+        * 2
+    )
 
     inp = Input(
         shape=(input_width,)
@@ -232,24 +208,26 @@ def build_gohr_model(
 
     # Gohr:
     #
-    #   Reshape((2 * num_blocks, word_size))
-    #   Permute((2, 1))
+    #     rs = Reshape((2 * num_blocks, word_size))(inp)
     #
-    # Canonical case:
-    #
-    #   64 -> (4, 16) -> (16, 4)
-
     x = Reshape(
-        (2 * num_blocks, word_size)
+        (
+            2 * num_blocks,
+            word_size,
+        )
     )(inp)
 
+    # Gohr:
+    #
+    #     perm = Permute((2,1))(rs)
+    #
     x = Permute(
         (2, 1)
     )(x)
 
-    # ---------------------------------------------------------
+    # ==============================================================
     # Initial bit-sliced convolution
-    # ---------------------------------------------------------
+    # ==============================================================
 
     x = Conv1D(
         num_filters,
@@ -263,9 +241,9 @@ def build_gohr_model(
 
     shortcut = x
 
-    # ---------------------------------------------------------
+    # ==============================================================
     # Residual tower
-    # ---------------------------------------------------------
+    # ==============================================================
 
     for _ in range(depth):
 
@@ -296,9 +274,9 @@ def build_gohr_model(
             ]
         )
 
-    # ---------------------------------------------------------
+    # ==============================================================
     # Prediction head
-    # ---------------------------------------------------------
+    # ==============================================================
 
     x = Flatten()(shortcut)
 
