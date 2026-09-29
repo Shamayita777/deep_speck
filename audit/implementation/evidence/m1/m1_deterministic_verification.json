@@ -67,10 +67,10 @@
   },
   "experiment_id": "II2-DETERMINISTIC-GOHR-5R",
   "provenance": {
-    "git_commit": "248aae109fe6d4cdbb874168c7aa30ae8d43a5fa",
+    "git_commit": "eecf6cc080de7ef6c0ae6667b92b2bf65daaf1f2",
     "sha256": {
       "independent_dataset": "814618e8db1f90e60abd3cae7c17938903711b5255a7f942a4119920bf962834",
-      "independent_model": "05d16599edc559e8610632ee8da76e47c2e490e35ec80c1d62263035a7a1e9ef",
+      "independent_model": "c57708823b811f18c0718b20772b8f85d85a587bf884758e8ce6e65313516b8c",
       "independent_speck": "16c89236a03fcbdeab3d6fa2b956a4b9aeabf3e742a27ae4e2250bb02136d912",
       "reference_speck": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce"
     }

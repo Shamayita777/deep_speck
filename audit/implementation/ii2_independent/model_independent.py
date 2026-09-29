@@ -26,10 +26,10 @@ The public Gohr implementation applies BatchNormalization after BOTH
 64-unit dense layers. This reconstruction follows the public executable
 code path rather than silently substituting a prose-only interpretation.
 
-The aliases `filters` and `l2_strength` exist solely for compatibility
-with the M1 verification/training drivers. They map directly onto the
-canonical `num_filters` and `reg_param` parameters and do not define a
-different architecture.
+The aliases `filters`, `input_words`, `dense_1`, `dense_2`,
+`l2_reg`, and `l2_strength` are accepted for compatibility
+with the M1 verification/training drivers. They do not alter
+the scientific specification.
 """
 
 from __future__ import annotations
@@ -58,21 +58,23 @@ DEFAULT_WORD_SIZE = 16
 DEFAULT_NUM_BLOCKS = 2
 DEFAULT_L2 = 1e-5
 
-
 def build_gohr_model(
     *,
-    depth: int = DEFAULT_DEPTH,
-    num_blocks: int = DEFAULT_NUM_BLOCKS,
-    num_filters: int = DEFAULT_FILTERS,
-    d1: int = DEFAULT_DENSE_1,
-    d2: int = DEFAULT_DENSE_2,
-    word_size: int = DEFAULT_WORD_SIZE,
-    kernel_size: int = DEFAULT_KERNEL_SIZE,
-    reg_param: float = DEFAULT_L2,
+    depth: int = 10,
+    num_blocks: int = 2,
+    num_filters: int = 32,
+    d1: int = 64,
+    d2: int = 64,
+    word_size: int = 16,
+    kernel_size: int = 3,
+    reg_param: float = 1e-5,
     filters: int | None = None,
     input_words: int | None = None,
+    dense_1: int | None = None,
+    dense_2: int | None = None,
+    l2_reg: float | None = None,
     l2_strength: float | None = None,
-) -> Model:
+):
     """
     Build the independently reconstructed Gohr ResNet.
 
@@ -98,9 +100,21 @@ def build_gohr_model(
     configuration remains the Gohr configuration documented above.
     """
 
-    # ==============================================================
-    # Resolve compatibility aliases
-    # ==============================================================
+    # ------------------------------------------------------------------
+    # Compatibility aliases
+    # ------------------------------------------------------------------
+
+    # The independent implementation has canonical internal names
+    # (`num_filters`, `d1`, `d2`, `reg_param`). The M1 verification
+    # driver historically used the equivalent names:
+    #
+    #     filters
+    #     dense_1
+    #     dense_2
+    #     l2_reg
+    #
+    # These aliases are API compatibility only; they do not change
+    # the scientific architecture.
 
     if filters is not None:
         filters = int(filters)
@@ -112,10 +126,51 @@ def build_gohr_model(
 
         num_filters = filters
 
+    if dense_1 is not None:
+        dense_1 = int(dense_1)
+
+        if d1 != DEFAULT_DENSE_1 and d1 != dense_1:
+            raise ValueError(
+                "Conflicting values supplied for d1 and dense_1."
+            )
+
+        d1 = dense_1
+
+    if dense_2 is not None:
+        dense_2 = int(dense_2)
+
+        if d2 != DEFAULT_DENSE_2 and d2 != dense_2:
+            raise ValueError(
+                "Conflicting values supplied for d2 and dense_2."
+            )
+
+        d2 = dense_2
+
+    if l2_reg is not None:
+        l2_reg = float(l2_reg)
+
+        if reg_param != DEFAULT_L2 and reg_param != l2_reg:
+            raise ValueError(
+                "Conflicting values supplied for reg_param and l2_reg."
+            )
+
+        reg_param = l2_reg
+
     if l2_strength is not None:
         l2_strength = float(l2_strength)
 
-        if reg_param != DEFAULT_L2 and reg_param != l2_strength:
+        if (
+            l2_reg is not None
+            and l2_reg != l2_strength
+        ):
+            raise ValueError(
+                "Conflicting values supplied for l2_reg and l2_strength."
+            )
+
+        if (
+            reg_param != DEFAULT_L2
+            and reg_param != l2_strength
+        ):
             raise ValueError(
                 "Conflicting values supplied for reg_param and l2_strength."
             )
@@ -138,10 +193,7 @@ def build_gohr_model(
 
         implied_num_blocks = input_words // 2
 
-        if (
-            num_blocks != DEFAULT_NUM_BLOCKS
-            and num_blocks != implied_num_blocks
-        ):
+        if num_blocks != 2 and num_blocks != implied_num_blocks:
             raise ValueError(
                 "Conflicting values supplied for num_blocks and "
                 "input_words."
