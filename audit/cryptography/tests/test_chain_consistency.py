@@ -20,7 +20,7 @@ from audit.cryptography.experiments.ce2 import design as ce2
 from audit.cryptography.experiments.ce3 import design as ce3
 from audit.cryptography.experiments.ce4 import design as ce4
 
-ARCHIVE = ROOT.parents[1] / "Archive"
+ARCHIVE = Path(__file__).resolve().parents[1] / "Archive"
 
 
 def _cert(experiment_id, results, ckpt=None):
