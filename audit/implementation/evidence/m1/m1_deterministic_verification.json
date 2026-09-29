@@ -1,0 +1,84 @@
+{
+  "checks": {
+    "binary_encoding": {
+      "shape": [
+        1,
+        64
+      ],
+      "status": "PASS"
+    },
+    "dataset_construction": {
+      "differential": [
+        "0x0040",
+        "0x0000"
+      ],
+      "differing_bits": 0,
+      "one_label_samples": 4991,
+      "representation_shape": [
+        10000,
+        64
+      ],
+      "rounds": 5,
+      "samples": 10000,
+      "status": "PASS",
+      "zero_label_samples": 5009
+    },
+    "key_schedule": {
+      "master_keys_checked": 1000,
+      "round_keys_compared": 5000,
+      "rounds": 5,
+      "status": "PASS"
+    },
+    "model_architecture": {
+      "conv1d_layers": 21,
+      "dense_layers": 3,
+      "input_shape": [
+        null,
+        64
+      ],
+      "output_shape": [
+        null,
+        1
+      ],
+      "paper_code_discrepancy": "Paper prose omits BN after dense layer 2; public supplementary code includes it. M1 follows the public code path.",
+      "parameter_count": 102497,
+      "residual_add_layers": 10,
+      "status": "PASS"
+    },
+    "published_test_vector": {
+      "ciphertext": [
+        "0xa868",
+        "0x42f2"
+      ],
+      "key_schedule_rounds_checked": 22,
+      "status": "PASS"
+    },
+    "round_traces": {
+      "rounds": 5,
+      "samples": 1000,
+      "status": "PASS",
+      "word_states_compared": 10000
+    }
+  },
+  "environment": {
+    "numpy": "2.4.6",
+    "platform": "macOS-13.5-arm64-arm-64bit",
+    "python": "3.11.14 (main, Jan 10 2026, 14:09:46) [Clang 14.0.3 (clang-1403.0.22.14.1)]"
+  },
+  "experiment_id": "II2-DETERMINISTIC-GOHR-5R",
+  "provenance": {
+    "git_commit": "8c75c2100c1ced27f7adebf5df56f6abe278113c",
+    "sha256": {
+      "independent_dataset": "814618e8db1f90e60abd3cae7c17938903711b5255a7f942a4119920bf962834",
+      "independent_model": "347736c06fa6988ece182312808562db0f08b3c5b1df0261785947068be73a2e",
+      "independent_speck": "16c89236a03fcbdeab3d6fa2b956a4b9aeabf3e742a27ae4e2250bb02136d912",
+      "reference_speck": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce"
+    }
+  },
+  "source_basis": {
+    "paper": "Gohr, A. (2019), Improving Attacks on Round-Reduced Speck32/64 Using Deep Learning",
+    "supplementary_repository": "https://github.com/agohr/deep_speck"
+  },
+  "status": "PASS",
+  "training_performed": false
+}
