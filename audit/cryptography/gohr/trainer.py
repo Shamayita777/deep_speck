@@ -48,6 +48,7 @@ class GohrTrainer:
         save_best_only: bool = True,
         high_learning_rate: float = 0.002,
         low_learning_rate: float = 0.0001,
+        lr_cycle_length: int = 10,
     ) -> None:
 
         self.batch_size = batch_size
@@ -63,6 +64,16 @@ class GohrTrainer:
 
         self.high_learning_rate = high_learning_rate
         self.low_learning_rate = low_learning_rate
+
+        # Reference protocol: train_nets.py uses cyclic_lr(10, 0.002, 0.0001),
+        # i.e. a CYCLE LENGTH of 10 epochs (20 sawtooth cycles across a
+        # 200-epoch run). This was previously taken from self.epochs, which
+        # collapsed the schedule into a single 200-epoch ramp - a silent
+        # deviation from the reference training protocol.
+        if lr_cycle_length < 2:
+            raise ValueError(
+                f"lr_cycle_length must be >= 2 (the reference uses 10); got {lr_cycle_length}")
+        self.lr_cycle_length = lr_cycle_length
 
     # ---------------------------------------------------------
     # Reproducibility
@@ -92,15 +103,21 @@ class GohrTrainer:
     ) -> float:
         """
         Cyclic learning-rate schedule.
+
+        Identical to the reference `cyclic_lr(num_epochs, high_lr, low_lr)`
+        in train_nets.py, with `num_epochs` being the CYCLE LENGTH (10 in
+        the reference), not the total number of training epochs.
         """
+
+        cycle = self.lr_cycle_length
 
         return (
             self.low_learning_rate
             + (
-                (self.epochs - 1)
-                - (epoch % self.epochs)
+                (cycle - 1)
+                - (epoch % cycle)
             )
-            / (self.epochs - 1)
+            / (cycle - 1)
             * (
                 self.high_learning_rate
                 - self.low_learning_rate

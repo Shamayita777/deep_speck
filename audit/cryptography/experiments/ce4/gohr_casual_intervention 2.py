@@ -39,9 +39,7 @@ from audit.cryptography.experiments.ce4.design import (
 
 EXPERIMENT_ID = "CE4-INTERVENTION-SENSITIVITY"
 REFERENCE_CHECKPOINT = (
-    Path(__file__).resolve().parents[2]
-    / "Archive"
-    / "best5depth10.h5"
+    Path(__file__).resolve().parents[2] / "Archive" / "best5depth10.h5"
 )
 
 

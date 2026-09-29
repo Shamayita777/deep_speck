@@ -31,6 +31,16 @@ from .results import (
 
 class CryptographicEvaluator:
     """
+    LEGACY / QUARANTINED FOR CE3.
+
+    `supported_threshold` / `inconclusive_threshold` implement a historical
+    magnitude-based CE3 decision rule that the FROZEN design supersedes. The
+    frozen CE3 rule is fixed-sequence (calibration gate -> primary) at
+    alpha = 0.05 with NO practical-magnitude threshold; see
+    frozen_design.CE3 and experiments/ce3/design.py. This class is retained
+    only so historical CE3 evidence stays reproducible and must not be used
+    by any current CE production path.
+
     Evaluates the outcome of cryptographic evidence tests.
     """
 

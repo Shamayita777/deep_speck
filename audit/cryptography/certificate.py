@@ -140,3 +140,96 @@ class CertificateGenerator:
         return (
             "Produces machine-readable audit certificates."
         )
+
+# =====================================================================
+# Audit certificate schema, validation and safe writing
+# (current audit implementation; see provenance.EXPERIMENT_DESIGN_VERSION)
+# =====================================================================
+
+import json as _json
+import math as _math
+from pathlib import Path as _Path
+
+from audit.cryptography.audit_config import REFERENCE as _REFERENCE
+from audit.cryptography.output_policy import assert_audit_output_path as _assert_output
+from audit.cryptography.provenance import AUDIT_SCHEMA_VERSION
+
+CERTIFICATE_SCHEMA_VERSION = AUDIT_SCHEMA_VERSION
+
+REQUIRED_FIELDS = ("certificate_schema_version", "experiment_id",
+                   "experiment_design_version", "reference_configuration",
+                   "provenance", "results", "claim_scope")
+
+
+class CertificateSchemaError(RuntimeError):
+    pass
+
+
+def _assert_json_clean(obj, path="root"):
+    """Reject NaN/Infinity: not valid JSON, and they corrupt downstream parsing."""
+    if isinstance(obj, float):
+        if _math.isnan(obj) or _math.isinf(obj):
+            raise CertificateSchemaError(f"non-finite float at {path}: {obj!r}")
+    elif isinstance(obj, dict):
+        for k, v in obj.items():
+            if not isinstance(k, str):
+                raise CertificateSchemaError(f"non-string key at {path}: {k!r}")
+            _assert_json_clean(v, f"{path}.{k}")
+    elif isinstance(obj, (list, tuple)):
+        for i, v in enumerate(obj):
+            _assert_json_clean(v, f"{path}[{i}]")
+
+
+def validate_certificate(cert: dict) -> dict:
+    """Schema gate applied before every write."""
+    missing = [f for f in REQUIRED_FIELDS if f not in cert]
+    if missing:
+        raise CertificateSchemaError(f"certificate missing required fields: {missing}")
+    if cert["certificate_schema_version"] != CERTIFICATE_SCHEMA_VERSION:
+        raise CertificateSchemaError(
+            f"unexpected schema version {cert['certificate_schema_version']!r}")
+    blob = _json.dumps(cert)
+    if "CE1" in str(cert.get("experiment_id", "")) and "primary_test" in blob:
+        if '"H0: E[Delta] = 0' in blob or '"H0: E[\\u0394] = 0' in blob:
+            raise CertificateSchemaError(
+                "CE1 certificate states the superseded weak null 'H0: E[Delta] = 0' for an "
+                "exact sign-flip test. The sign-flip is exact under the SHARP null with "
+                "within-block arm exchangeability; see frozen_design.CE1.primary_hypothesis.")
+    if "CE1" in str(cert.get("experiment_id", "")) and "exact_paired_sign_flip" in blob:
+        if '"arm_assignment_randomized": true' not in blob.lower():
+            raise CertificateSchemaError(
+                "CE1 certificate reports an exact sign-flip test without recording that the "
+                "arm assignment was randomized. Without that randomization the 2^K sign "
+                "patterns are not a randomization distribution and the test is not exact.")
+    if "n_folds" in _json.dumps(cert):
+        raise CertificateSchemaError(
+            "stale field 'n_folds'; report n_replicates and n_splits_per_replicate")
+    if cert["reference_configuration"] != _REFERENCE.to_dict():
+        raise CertificateSchemaError(
+            "reference_configuration does not match the frozen reference")
+    _assert_json_clean(cert)
+
+    def _scan(o, path="root"):
+        if isinstance(o, dict):
+            if o.get("p_value") == 0.0:
+                raise CertificateSchemaError(
+                    f"{path}: p_value is the literal number 0.0. Underflowed p-values must "
+                    "be reported as p_value=null with p_underflow=true and p_upper_bound.")
+            if o.get("p_underflow") is True and o.get("p_value") is not None:
+                raise CertificateSchemaError(f"{path}: p_underflow=true but p_value is not null.")
+            for k, v in o.items():
+                _scan(v, f"{path}.{k}")
+        elif isinstance(o, list):
+            for i, v in enumerate(o):
+                _scan(v, f"{path}[{i}]")
+    _scan(cert)
+    return cert
+
+
+def write_certificate(cert: dict, path, *, repo_root=None) -> _Path:
+    """Validate, then write ONLY to an approved new-evidence location."""
+    validate_certificate(cert)
+    target = _assert_output(path, repo_root=repo_root)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(_json.dumps(cert, indent=2, sort_keys=True, allow_nan=False))
+    return target

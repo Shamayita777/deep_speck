@@ -1,18 +1,17 @@
 """
-CE4 - Ciphertext-Difference Intervention Sensitivity
+CE3 - Representation Decodability of the Analytical Target
 
 QUESTION
-    Is the frozen model's output more sensitive to the specified
-    difference-bearing ciphertext structure than to a magnitude-matched,
-    XOR-preserving control?
+    Is the analytical target decodable from the model's internal
+    representation beyond a matched control?
 
 DESIGN
-    Paired within-sample contrast on the eligible population. Both arms
-    change the SAME number of bits; the control preserves the pair XOR
-    exactly. Does NOT manipulate - and so cannot speak to - the analytical
-    single-trail probability.
+    20 INDEPENDENT evaluation replicates, 5-fold CV nested inside each.
+    The statistical unit is one stabilized selectivity per replicate -
+    never the CV fold. Calibration is a methodological positive control
+    for the probing pipeline, not direct cryptographic evidence.
 
-Historical CE4 artifacts under evidence/ce4/ are preserved unchanged as
+Historical CE3 artifacts under evidence/ce3/ are preserved unchanged as
 historical evidence; this file is the authoritative production path.
 """
 
@@ -27,21 +26,11 @@ from audit.cryptography.audit_config import REFERENCE
 from audit.cryptography.certificate import CERTIFICATE_SCHEMA_VERSION, write_certificate
 from audit.cryptography.preflight import preflight, require_frozen
 from audit.cryptography.provenance import EXPERIMENT_DESIGN_VERSION, build_provenance
-from audit.cryptography.experiments.ce4.design import (
-    ESTIMAND,
-    EXPERIMENT_NAME,
-    build_matched_interventions,
-    eligible_mask,
-    paired_contrast,
-    population_accounting,
-    verify_intervention_invariants,
-)
+from audit.cryptography.experiments.ce3.design import DECISION_RULE, aggregate_replicates
 
-EXPERIMENT_ID = "CE4-INTERVENTION-SENSITIVITY"
+EXPERIMENT_ID = "CE3-REPRESENTATION-INTERPRETATION"
 REFERENCE_CHECKPOINT = (
-    Path(__file__).resolve().parents[2]
-    / "Archive"
-    / "best5depth10.h5"
+    Path(__file__).resolve().parents[2] / "Archive" / "best5depth10.h5"
 )
 
 
@@ -64,26 +53,35 @@ def _certificate(results, pre, *, production, seed, scope):
     return cert
 
 
-def run(*, structural_delta, control_delta, population, invariants, output_path,
-        checkpoint=REFERENCE_CHECKPOINT, repo_root=None, production=True, seed=0):
+def run(*, selectivity_replicates, n_splits_per_replicate, calibration_validated,
+        corrected_alpha, output_path, checkpoint=REFERENCE_CHECKPOINT, repo_root=None,
+        production=True, seed=0):
+    if production:
+        require_frozen("corrected_alpha", corrected_alpha,
+                       why="the multiplicity-corrected threshold defines the decision rule.")
     pre = preflight(experiment_id=EXPERIMENT_ID, rounds=REFERENCE.rounds,
                     differential=REFERENCE.differential, depth=REFERENCE.depth,
                     l2_reg=REFERENCE.l2_reg,
                     checkpoint=checkpoint if production else None,
-                    output_path=output_path, repo_root=repo_root, production=production)
-    results = paired_contrast(structural_delta, control_delta)
-    results["population"] = population
-    results["invariants"] = invariants
+                    output_path=output_path, repo_root=repo_root,
+                    frozen={"corrected_alpha": corrected_alpha}, production=production)
+    results = aggregate_replicates(
+        selectivity_replicates, n_splits_per_replicate=n_splits_per_replicate,
+        calibration_validated=calibration_validated,
+        corrected_alpha=corrected_alpha if corrected_alpha is not None else 0.05)
+    scope = ("Decodability of the analytical target from this frozen model's "
+             "representation relative to a matched control, at the replicate level.")
     return write_certificate(_certificate(results, pre, production=production, seed=seed,
-                                          scope=results["claim_scope"]), output_path,
+                                          scope=scope), output_path,
                              repo_root=repo_root), results
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="CE4 - intervention sensitivity")
+    ap = argparse.ArgumentParser(description="CE3 - representation decodability")
     ap.add_argument("--preflight", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--output", type=Path, default=Path("evidence_current/ce4/certificate.json"))
+    ap.add_argument("--corrected-alpha", type=float, default=None)
+    ap.add_argument("--output", type=Path, default=Path("evidence_current/ce3/certificate.json"))
     ap.add_argument("--repo-root", type=Path, default=None)
     args = ap.parse_args(argv)
     production = not args.dry_run
@@ -94,6 +92,7 @@ def main(argv=None) -> int:
                             l2_reg=REFERENCE.l2_reg,
                             checkpoint=REFERENCE_CHECKPOINT if production else None,
                             output_path=args.output, repo_root=args.repo_root,
+                            frozen={"corrected_alpha": args.corrected_alpha},
                             production=production)
         except Exception as exc:
             print(f"PREFLIGHT FAILED: {exc}")
@@ -101,23 +100,12 @@ def main(argv=None) -> int:
         print(json.dumps(rep, indent=2, default=str)); return 0
     if args.dry_run:
         import numpy as np
-        rng = np.random.default_rng(5)
-        n, d = 200, 32
-        a = rng.integers(0, 2, (n, d), dtype=np.uint8); b = a.copy()
-        for i in range(n):
-            b[i, rng.choice(d, 4, replace=False)] ^= 1
-        elig = eligible_mask(a, b, n_flips=2)
-        acct = population_accounting(n, elig)
-        ae, be = a[elig], b[elig]
-        pos = np.array([np.flatnonzero(r)[:2] for r in (ae ^ be)])
-        (sa, sb), (ca, cb) = build_matched_interventions(ae, be, pos)
-        inv = verify_intervention_invariants(ae, be, sa, sb, ca, cb)
-        path, _ = run(structural_delta=rng.normal(0.30, 0.05, ae.shape[0]),
-                      control_delta=rng.normal(0.05, 0.05, ae.shape[0]),
-                      population=acct, invariants=inv, output_path=args.output,
-                      repo_root=args.repo_root, production=False)
+        sel = list(np.linspace(0.05, 0.25, 20))
+        path, _ = run(selectivity_replicates=sel, n_splits_per_replicate=5,
+                      calibration_validated=True, corrected_alpha=0.025,
+                      output_path=args.output, repo_root=args.repo_root, production=False)
         print(f"DRY RUN (non-evidentiary) wrote {path}"); return 0
-    print("Production CE4 requires model output deltas from the intervention pipeline.")
+    print("Production CE3 requires the probe pipeline outputs and a frozen corrected alpha.")
     return 2
 
 

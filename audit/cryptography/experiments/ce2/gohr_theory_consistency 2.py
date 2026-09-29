@@ -1,18 +1,17 @@
 """
-CE4 - Ciphertext-Difference Intervention Sensitivity
+CE2 - Association with the Analytical Single-Trail Quantity
 
 QUESTION
-    Is the frozen model's output more sensitive to the specified
-    difference-bearing ciphertext structure than to a magnitude-matched,
-    XOR-preserving control?
+    Is the frozen model's output monotonically consistent with the
+    independently computed analytical single-trail quantity?
 
 DESIGN
-    Paired within-sample contrast on the eligible population. Both arms
-    change the SAME number of bits; the control preserves the pair XOR
-    exactly. Does NOT manipulate - and so cannot speak to - the analytical
-    single-trail probability.
+    OBSERVATIONAL. Multiple independent theory datasets; one Spearman rho
+    per run; uncertainty reported at the RUN level, because samples inside
+    a run are not independent replicates of the model. Cannot establish
+    causal use of the target.
 
-Historical CE4 artifacts under evidence/ce4/ are preserved unchanged as
+Historical CE2 artifacts under evidence/ce2/ are preserved unchanged as
 historical evidence; this file is the authoritative production path.
 """
 
@@ -27,21 +26,11 @@ from audit.cryptography.audit_config import REFERENCE
 from audit.cryptography.certificate import CERTIFICATE_SCHEMA_VERSION, write_certificate
 from audit.cryptography.preflight import preflight, require_frozen
 from audit.cryptography.provenance import EXPERIMENT_DESIGN_VERSION, build_provenance
-from audit.cryptography.experiments.ce4.design import (
-    ESTIMAND,
-    EXPERIMENT_NAME,
-    build_matched_interventions,
-    eligible_mask,
-    paired_contrast,
-    population_accounting,
-    verify_intervention_invariants,
-)
+from audit.cryptography.experiments.ce2.design import ANALYTICAL_TARGET, run_level_association
 
-EXPERIMENT_ID = "CE4-INTERVENTION-SENSITIVITY"
+EXPERIMENT_ID = "CE2-THEORY-CONSISTENCY"
 REFERENCE_CHECKPOINT = (
-    Path(__file__).resolve().parents[2]
-    / "Archive"
-    / "best5depth10.h5"
+    Path(__file__).resolve().parents[2] / "Archive" / "best5depth10.h5"
 )
 
 
@@ -64,26 +53,27 @@ def _certificate(results, pre, *, production, seed, scope):
     return cert
 
 
-def run(*, structural_delta, control_delta, population, invariants, output_path,
-        checkpoint=REFERENCE_CHECKPOINT, repo_root=None, production=True, seed=0):
+def run(*, runs, output_path, checkpoint=REFERENCE_CHECKPOINT, repo_root=None,
+        production=True, seed=0):
     pre = preflight(experiment_id=EXPERIMENT_ID, rounds=REFERENCE.rounds,
                     differential=REFERENCE.differential, depth=REFERENCE.depth,
                     l2_reg=REFERENCE.l2_reg,
                     checkpoint=checkpoint if production else None,
                     output_path=output_path, repo_root=repo_root, production=production)
-    results = paired_contrast(structural_delta, control_delta)
-    results["population"] = population
-    results["invariants"] = invariants
+    results = run_level_association(runs)
+    scope = ("Observational association between this frozen model's output and the "
+             "analytical single-trail quantity. NOT causal; NOT the cipher's exact "
+             "differential probability.")
     return write_certificate(_certificate(results, pre, production=production, seed=seed,
-                                          scope=results["claim_scope"]), output_path,
+                                          scope=scope), output_path,
                              repo_root=repo_root), results
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description="CE4 - intervention sensitivity")
+    ap = argparse.ArgumentParser(description="CE2 - analytical single-trail association")
     ap.add_argument("--preflight", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--output", type=Path, default=Path("evidence_current/ce4/certificate.json"))
+    ap.add_argument("--output", type=Path, default=Path("evidence_current/ce2/certificate.json"))
     ap.add_argument("--repo-root", type=Path, default=None)
     args = ap.parse_args(argv)
     production = not args.dry_run
@@ -100,24 +90,12 @@ def main(argv=None) -> int:
             return 1
         print(json.dumps(rep, indent=2, default=str)); return 0
     if args.dry_run:
-        import numpy as np
-        rng = np.random.default_rng(5)
-        n, d = 200, 32
-        a = rng.integers(0, 2, (n, d), dtype=np.uint8); b = a.copy()
-        for i in range(n):
-            b[i, rng.choice(d, 4, replace=False)] ^= 1
-        elig = eligible_mask(a, b, n_flips=2)
-        acct = population_accounting(n, elig)
-        ae, be = a[elig], b[elig]
-        pos = np.array([np.flatnonzero(r)[:2] for r in (ae ^ be)])
-        (sa, sb), (ca, cb) = build_matched_interventions(ae, be, pos)
-        inv = verify_intervention_invariants(ae, be, sa, sb, ca, cb)
-        path, _ = run(structural_delta=rng.normal(0.30, 0.05, ae.shape[0]),
-                      control_delta=rng.normal(0.05, 0.05, ae.shape[0]),
-                      population=acct, invariants=inv, output_path=args.output,
-                      repo_root=args.repo_root, production=False)
+        runs = [{"run_id": f"toy{i}", "rho": r, "n": 500}
+                for i, r in enumerate([-0.21, -0.19, -0.20, -0.22, -0.18])]
+        path, _ = run(runs=runs, output_path=args.output, repo_root=args.repo_root,
+                      production=False)
         print(f"DRY RUN (non-evidentiary) wrote {path}"); return 0
-    print("Production CE4 requires model output deltas from the intervention pipeline.")
+    print("Production CE2 requires the theory/model prediction runs; supply them to run().")
     return 2
 
 
