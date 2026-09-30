@@ -166,6 +166,15 @@ def verify_legacy_block0(legacy_run_dir, config: "C.CE1RunConfig", *,
     }
 
 
+def assert_disjoint_from_legacy(run_dir, legacy_run_dir) -> None:
+    """The new run may be neither the legacy run, inside it, nor contain it."""
+    rd, ld = Path(run_dir).resolve(), Path(legacy_run_dir).resolve()
+    if rd == ld or ld in rd.parents or rd in ld.parents:
+        raise LegacyRecoveryError(
+            f"run directory {rd} overlaps the preserved legacy run {ld}; the legacy run "
+            "is read-only and must never contain or be contained in a new run")
+
+
 def recover_legacy_block0(legacy_run_dir, run_dir, config: "C.CE1RunConfig", *,
                           block_id: str = "block0") -> dict:
     """
@@ -173,6 +182,7 @@ def recover_legacy_block0(legacy_run_dir, run_dir, config: "C.CE1RunConfig", *,
     Refuses if block0 already has ANY state, data or result in the new run
     (recovery must be the first and only thing that happens to block0).
     """
+    assert_disjoint_from_legacy(run_dir, legacy_run_dir)
     run_dir = Path(run_dir)
     manifest = json.loads((run_dir / C.RUN_MANIFEST).read_text())
     if manifest.get("legacy_block0_decision") != "RECOVER":

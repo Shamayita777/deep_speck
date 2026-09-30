@@ -145,6 +145,68 @@ class ControllerError(RuntimeError):
     pass
 
 
+class RunDirectoryError(ControllerError):
+    """The run directory is missing, degenerate, misplaced, or not a CE1 run."""
+
+
+#: Production CE1 run directories are direct children of this directory,
+#: relative to the repository root (e.g. .../ce1/production_20260930).
+CE1_RUNS_RELATIVE = Path("audit/cryptography/evidence_current/ce1")
+
+_DEGENERATE_RUN_DIRS = ("", ".", "./")
+
+
+def _reject_degenerate(run_dir) -> Path:
+    """
+    `Path("")` silently equals `Path(".")` - the working directory. A run
+    directory must always be explicit; an empty value or '.' is never allowed
+    to fall back to the working directory (or the repository root).
+    """
+    raw = "" if run_dir is None else str(run_dir)
+    if raw.strip() in _DEGENERATE_RUN_DIRS:
+        raise RunDirectoryError(
+            f"an explicit CE1 run directory is required; got {raw!r}, which would resolve "
+            "to the working directory. Refusing to fall back to '.'.")
+    return Path(run_dir)
+
+
+def validate_run_dir(run_dir, config: "CE1RunConfig", *, repo_root=None,
+                     must_exist: bool = False) -> Path:
+    """
+    Fail-closed validation of a run directory, applied BEFORE anything is
+    written (in addition to, never instead of, output_policy):
+
+      * never empty / '.' (no silent fallback to the working directory);
+      * production: must be a DIRECT CHILD of <repo>/audit/cryptography/
+        evidence_current/ce1/ (so it can be neither the evidence root, nor ce1/
+        itself, nor nested inside another run such as the legacy run);
+      * an existing directory is adopted only if it is a CE1 controller run
+        (has run_manifest.json) or is empty - a non-empty directory without a
+        manifest (e.g. the preserved legacy run) is refused.
+    """
+    p = _reject_degenerate(run_dir)
+    target = p.resolve()
+    if config.production:
+        root = Path(repo_root).resolve() if repo_root is not None else Path.cwd().resolve()
+        runs_root = (root / CE1_RUNS_RELATIVE).resolve()
+        if target.parent != runs_root:
+            raise RunDirectoryError(
+                f"production run directory {str(run_dir)!r} resolves to {target}; it must be a "
+                f"direct child of {runs_root} (e.g. {runs_root / 'production_20260930'}).")
+    if target.exists():
+        if not target.is_dir():
+            raise RunDirectoryError(f"{target} exists and is not a directory")
+        if not (target / RUN_MANIFEST).exists() and any(target.iterdir()):
+            raise RunDirectoryError(
+                f"{target} exists, is not empty and is not a CE1 controller run (no "
+                f"{RUN_MANIFEST}). Refusing to adopt it: it may be a preserved legacy run.")
+    elif must_exist:
+        raise RunDirectoryError(f"run directory {target} does not exist")
+    if must_exist and not (target / RUN_MANIFEST).exists():
+        raise RunDirectoryError(f"{target} is not a CE1 controller run (no {RUN_MANIFEST})")
+    return p
+
+
 def utc() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -268,8 +330,8 @@ def open_run(run_dir, config: CE1RunConfig, *, repo_root=None,
     configuration fingerprint; anything else is a different experiment and
     is refused rather than mixed.
     """
-    run_dir = Path(run_dir)
     config.validate_frozen()
+    run_dir = validate_run_dir(run_dir, config, repo_root=repo_root)
     if legacy_block0_decision not in (None, "RECOVER", "RETRAIN"):
         raise ControllerError(f"legacy_block0_decision must be RECOVER or RETRAIN")
     if config.production:
@@ -324,7 +386,12 @@ def open_run(run_dir, config: CE1RunConfig, *, repo_root=None,
 
 
 def load_run_config(run_dir) -> CE1RunConfig:
-    manifest = json.loads((Path(run_dir) / RUN_MANIFEST).read_text())
+    run_dir = _reject_degenerate(run_dir)
+    mpath = run_dir / RUN_MANIFEST
+    if not mpath.exists():
+        raise RunDirectoryError(f"{run_dir.resolve()} is not a CE1 controller run "
+                                f"(no {RUN_MANIFEST})")
+    manifest = json.loads(mpath.read_text())
     cfg = CE1RunConfig.from_dict(manifest["config"])
     if cfg.fingerprint() != manifest["config_fingerprint"]:
         raise ControllerError("run manifest config does not reproduce its own fingerprint")

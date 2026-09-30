@@ -344,6 +344,19 @@ def _toy(seed=0):
     return data_fn, train_eval_fn
 
 
+def _explicit_dir(value: str) -> Path:
+    """
+    argparse type for every directory argument. `Path("")` silently becomes
+    `Path(".")` (the working directory), so an empty value, '.' or './' is
+    rejected here, before any import or I/O, instead of falling back.
+    """
+    if value is None or value.strip() in ("", ".", "./"):
+        raise argparse.ArgumentTypeError(
+            f"expected an explicit directory, got {value!r}; an empty value or '.' would "
+            "silently mean the current working directory")
+    return Path(value)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="CE1 - Distinguishing-Signal Destruction")
     ap.add_argument("--preflight", action="store_true", help="verify everything, run nothing")
@@ -355,16 +368,16 @@ def main(argv=None) -> int:
     ap.add_argument("--output", type=Path,
                     default=Path("audit/cryptography/evidence_current/ce1/certificate.json"))
     ap.add_argument("--repo-root", type=Path, default=None)
-    ap.add_argument("--validate-resume", type=Path, default=None,
+    ap.add_argument("--validate-resume", type=_explicit_dir, default=None,
                     help="read-only audit of an existing production run directory")
-    ap.add_argument("--resume-dry-run", type=Path, default=None,
+    ap.add_argument("--resume-dry-run", type=_explicit_dir, default=None,
                     help="show the resume/GPU schedule for a run directory; trains nothing")
     ap.add_argument("--gpus", type=int, default=2, help="(ignored: GPUs are detected)")
-    ap.add_argument("--run-dir", type=Path,
+    ap.add_argument("--run-dir", type=_explicit_dir,
                     default=Path("audit/cryptography/evidence_current/ce1/production_resumable"))
-    ap.add_argument("--legacy-run-dir", type=Path,
+    ap.add_argument("--legacy-run-dir", type=_explicit_dir,
                     default=Path("audit/cryptography/evidence_current/ce1/production_20260929"))
-    ap.add_argument("--sealed-source", type=Path,
+    ap.add_argument("--sealed-source", type=_explicit_dir,
                     default=Path("audit/cryptography/evidence_current/ce1/"
                                  "production_20260929/sealed"))
     ap.add_argument("--legacy-block0", choices=("RECOVER", "RETRAIN"), default=None,
@@ -413,6 +426,10 @@ def main(argv=None) -> int:
         target = args.validate_resume or args.resume_dry_run or run_dir
         try:
             cfg = C.load_run_config(target)
+            # the EXACT explicit directory, validated like a write target (never '.')
+            target = C.validate_run_dir(target, cfg, repo_root=args.repo_root,
+                                        must_exist=True)
+            print(f"run directory: {Path(target).resolve()}")
             sealed = C.ensure_sealed(target, cfg)
         except Exception as exc:                     # noqa: BLE001
             print(f"RESUME REFUSED: {exc}")
@@ -480,7 +497,17 @@ def main(argv=None) -> int:
 
     if args.recover_legacy_block0:
         from audit.cryptography.experiments.ce1.legacy_recovery import recover_legacy_block0
+        from audit.cryptography.experiments.ce1.legacy_recovery import (
+            LegacyRecoveryError, assert_disjoint_from_legacy)
+        try:
+            # checked BEFORE anything is written
+            assert_disjoint_from_legacy(run_dir, legacy_dir)
+            C.validate_run_dir(run_dir, cfg, repo_root=args.repo_root)
+        except (LegacyRecoveryError, C.RunDirectoryError) as exc:
+            print(f"RECOVERY REFUSED: {exc}")
+            return 1
         C.open_run(run_dir, cfg, repo_root=args.repo_root, legacy_block0_decision="RECOVER")
+        print(f"run directory: {Path(run_dir).resolve()}")
         C.ensure_sealed(run_dir, cfg, sealed_source=args.sealed_source)
         out = recover_legacy_block0(legacy_dir, run_dir, cfg)
         print(f"block0 seeded from legacy terminal models: {out['status']} "

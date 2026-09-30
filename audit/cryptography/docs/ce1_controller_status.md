@@ -6,6 +6,27 @@ The closure path (`build_production_components`, `data_fn.last_validation`)
 has been removed; `run(production=True)` is retired and refuses after the
 frozen-parameter guards.
 
+## Decisions of record (approved before any CE1 production run)
+
+1. **Legacy block0 = RECOVER.** The exact saved `block0_{baseline,destroyed}_FINAL_EPOCH.keras`
+   models are evaluated later on the pinned sealed set (`33df1f95...`); neither arm is
+   retrained; `*_bestval_DEBUG_ONLY` artifacts are never read. The block stays subject
+   to the final validity gate and is not counted as VALID automatically, because its
+   original training/validation dataset provenance was never persisted.
+2. **Retry caps are operational pause caps.** `MAX_ARM_FAILURES = 3`, `MAX_ARM_RERUNS = 2`
+   -> NEEDS_OPERATOR / PAUSED. They never consume the frozen two-block failure
+   tolerance and are not a scientific failure criterion. SIGKILL / KeyboardInterrupt /
+   SystemExit are interruptions and never count as failures.
+3. **Permanent final-gate evidence verdicts (approved):** N-INSUFFICIENT-EVIDENCE,
+   N-FINAL-EPOCH, N-PAIRING - applied only by the final gate, only when the relevant
+   invariant is permanently unverifiable or violated, never triggered by accuracy,
+   delta, p-value, validation result or any other observed outcome.
+4. **Working directory.** Launch from the repository root; any other working
+   directory fails closed (`WrongWorkingDirectoryError`) and output is never redirected.
+
+The frozen scientific design (`frozen_design.py`, `CE-frozen-design-2026-03`) is
+unchanged by all of the above.
+
 ## Claims (kept separate)
 
 | Claim | Status | Evidence |
