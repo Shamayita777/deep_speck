@@ -131,12 +131,20 @@ class GohrTrainer:
     def callbacks(
         self,
         checkpoint_name: str,
+        initial_best_val_loss: float | None = None,
     ) -> list[Any]:
         """
         Construct Keras callbacks.
+
+        `initial_best_val_loss` restores the best-so-far threshold of the
+        DEBUG-ONLY best-val checkpoint after a resume, so the first resumed
+        epoch does not overwrite it merely because a fresh callback starts at
+        +inf. It has no effect on the FINAL_EPOCH estimand.
         """
 
         checkpoint = ModelCheckpoint(
+
+            initial_value_threshold=initial_best_val_loss,
 
             filepath=str(
                 self.checkpoint_dir / checkpoint_name
@@ -170,6 +178,10 @@ class GohrTrainer:
         *,
         seed: int = 0,
         checkpoint_name: str = "best_model.keras",
+        initial_epoch: int = 0,
+        terminal_epoch: int | None = None,
+        extra_callbacks: list | None = None,
+        initial_best_val_loss: float | None = None,
     ) -> tuple[Model, Any]:
         """
         Train the supplied model.
@@ -199,6 +211,20 @@ class GohrTrainer:
 
         self.set_seed(seed)
 
+        # RESUME SUPPORT. `initial_epoch` is the number of epochs ALREADY
+        # completed, so training continues at initial_epoch + 1 in 1-based
+        # terms and epochs 1..initial_epoch are never retrained. The
+        # terminal epoch is the frozen scientific endpoint (200), not a
+        # count of epochs executed in this process.
+        epochs = self.epochs if terminal_epoch is None else terminal_epoch
+        if initial_epoch < 0:
+            raise ValueError("initial_epoch must be >= 0")
+        if initial_epoch >= epochs:
+            raise ValueError(
+                f"initial_epoch={initial_epoch} is already at or beyond the terminal "
+                f"epoch {epochs}; nothing to train. The caller must skip or evaluate "
+                "this arm rather than re-entering training.")
+
         X_train, Y_train = train_dataset
 
         X_val, Y_val = validation_dataset
@@ -214,13 +240,14 @@ class GohrTrainer:
                 Y_val,
             ),
 
-            epochs=self.epochs,
+            epochs=epochs,
+
+            initial_epoch=initial_epoch,
 
             batch_size=self.batch_size,
 
-            callbacks=self.callbacks(
-                checkpoint_name,
-            ),
+            callbacks=self.callbacks(checkpoint_name, initial_best_val_loss)
+            + list(extra_callbacks or []),
 
             verbose=1,
         )

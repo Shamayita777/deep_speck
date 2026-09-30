@@ -44,8 +44,9 @@ L2 **1e-5** — declared once in `audit_config.py`. Nothing relies on a
 constructor default: the historical depth-5 result arose because a default
 was never overridden.
 
-Production loads only the verified checkpoint `Archive/best5depth10.h5`
-(`sha256 256eb4a5…`). Depth is read from the file's structure and
+Production loads only the verified checkpoint `audit/cryptography/Archive/best5depth10.h5`
+(resolved from the source tree via `audit_config.REFERENCE_CHECKPOINT_PATH`, never the working directory;
+`sha256 256eb4a5…`). Depth is read from the file's structure and
 cross-checked (`Conv1D == 1 + 2·depth` and residual-merge count). The
 historical artifact named `best5depth10 (10).h5` actually contains a
 depth-5 network and is **rejected by hash**.
@@ -70,23 +71,34 @@ python -m audit.cryptography.experiments.ce2.gohr_theory_consistency --preflight
 python -m audit.cryptography.experiments.ce1.gohr_signal_destruction --dry-run
 ```
 
-## Before the GPU experiment
+## Working directory
 
-Three parameters must be **frozen first** — the drivers refuse production
-without them rather than defaulting:
+Launch every production command from the **repository root** (the directory
+that contains `audit/cryptography/`). With any other working directory the
+output guard raises `WrongWorkingDirectoryError` before anything is written:
+outputs are never redirected elsewhere. An explicit `--repo-root` is a
+visible override (used by the tests for scratch directories).
 
-- **CE1** `--n-blocks` (from a power rationale) and `--equivalence-margin`
-- **CE3** `--corrected-alpha` (multiplicity-corrected threshold)
+## Frozen design and CE1 production
 
-```bash
-python -m audit.cryptography.experiments.ce1.gohr_signal_destruction \
-    --preflight --n-blocks <N> --equivalence-margin <EPS>
-```
+All scientific parameters are frozen in `frozen_design.py`
+(`CE-frozen-design-2026-03`) and are validated, never chosen, at run time:
+
+- **CE1** 8 blocks, >= 6 valid, 2 tolerated, exact paired sign-flip,
+  FINAL_EPOCH 200, sealed set `33df1f95…`; equivalence-to-chance is
+  DISABLED (no margin exists at this test-set size).
+- **CE3** alpha 0.05 under the frozen fixed-sequence procedure.
+
+CE1 production runs ONLY through the resumable controller
+(`experiments/ce1/controller.py`); see `docs/ce1_controller_status.md` for
+claims, block-resolution rules, legacy block0 recovery and the operating
+sequence. Nothing trains without `--execute`.
 
 ## Reproducibility
 
 Dataset generation draws from `os.urandom` and is **not seed-replayable**;
-byte-for-byte replay requires persisting the generated data. The probe/CV
+byte-for-byte replay requires persisting the generated data, which the CE1
+controller does (content-hashed, committed per block, verified on every load). The probe/CV
 seed is separate and *is* reproducible. Provenance records both separately
 and claims no replayability it does not have. Design version is recorded in
 metadata (`EXPERIMENT_DESIGN_VERSION`), not in filenames.

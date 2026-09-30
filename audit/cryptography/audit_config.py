@@ -11,6 +11,7 @@ deliberate choice once the run is over.
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -30,7 +31,16 @@ class ReferenceConfig:
 #: The single declared reference configuration for all current CE experiments.
 REFERENCE = ReferenceConfig()
 
-#: Independently verified depth-10 checkpoint (Archive/best5depth10.h5).
+#: Root of the cryptography audit source tree, derived from THIS file - never
+#: from the current working directory.
+CRYPTOGRAPHY_ROOT = Path(__file__).resolve().parent
+
+#: The verified depth-10 reference checkpoint, located inside the source tree
+#: (audit/cryptography/Archive/best5depth10.h5). Every CE runtime resolves it
+#: through this constant; its hash is still gated by verify_reference_checkpoint.
+REFERENCE_CHECKPOINT_PATH = CRYPTOGRAPHY_ROOT / "Archive" / "best5depth10.h5"
+
+#: Independently verified depth-10 checkpoint (REFERENCE_CHECKPOINT_PATH).
 #: Verified by h5py inspection, NOT by filename: 10 residual merges,
 #: 21 Conv1D layers, L2 = 1e-5.
 REFERENCE_CHECKPOINT_SHA256 = (

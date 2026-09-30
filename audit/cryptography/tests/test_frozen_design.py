@@ -126,7 +126,7 @@ def test_ce1_interpretation_is_scoped():
 
 def test_production_refuses_non_frozen_block_counts(tmp_path):
     with pytest.raises(ValueError, match="frozen scientific parameters were overridden"):
-        ce1_driver.run(n_blocks=10, output_path=tmp_path / "evidence_current/ce1/c.json",
+        ce1_driver.run(n_blocks=10, output_path=tmp_path / "audit/cryptography/evidence_current/ce1/c.json",
                        train_eval_fn=lambda *a, **k: 0.5,
                        data_fn=lambda i: (np.zeros((4, 8), np.uint8), np.zeros(4, np.uint8),
                                           np.zeros((4, 8), np.uint8), np.zeros(4, np.uint8)),
@@ -145,7 +145,7 @@ def test_production_refuses_result_below_minimum_valid_blocks(tmp_path):
     # 3 blocks < min_valid 6 -> refuse (and n_blocks!=8 refuses first)
     with pytest.raises(ValueError):
         ce1_driver.run(n_blocks=3, min_valid_blocks=6,
-                       output_path=tmp_path / "evidence_current/ce1/c.json",
+                       output_path=tmp_path / "audit/cryptography/evidence_current/ce1/c.json",
                        train_eval_fn=flaky, data_fn=data_fn, repo_root=tmp_path,
                        production=True)
 
@@ -157,7 +157,7 @@ def test_min_valid_below_six_is_refused(tmp_path):
     """
     with pytest.raises(ValueError, match="min_valid_blocks") as exc:
         ce1_driver.run(n_blocks=8, min_valid_blocks=5,
-                       output_path=tmp_path / "evidence_current/ce1/c.json",
+                       output_path=tmp_path / "audit/cryptography/evidence_current/ce1/c.json",
                        train_eval_fn=lambda *a, **k: 0.5, data_fn=lambda i: None,
                        repo_root=tmp_path, production=True)
     assert "frozen scientific parameters were overridden" in str(exc.value)

@@ -16,11 +16,33 @@ PROTECTED_ROOTS = ("evidence", "audit/cryptography/evidence")
 #: Path components that always indicate historical/immutable material.
 PROTECTED_COMPONENTS = frozenset({"evidence", "frozen", "evidence_bundle"})
 #: Where current-audit output belongs.
-AUDIT_OUTPUT_ROOT = "evidence_current"
+AUDIT_OUTPUT_ROOT = "audit/cryptography/evidence_current"
 
 
 class HistoricalWriteError(RuntimeError):
     pass
+
+
+#: This package's own directory (audit/cryptography), derived from __file__.
+PACKAGE_DIR = Path(__file__).resolve().parent
+
+
+class WrongWorkingDirectoryError(RuntimeError):
+    """Launched from a directory that is not the repository root of this package."""
+
+
+def assert_launched_from_repo_root() -> Path:
+    """
+    Production entry points must be launched from <repo>/ (the directory that
+    contains audit/cryptography/). Any other working directory fails closed.
+    """
+    cwd = Path.cwd().resolve()
+    if (cwd / "audit" / "cryptography").resolve() != PACKAGE_DIR:
+        raise WrongWorkingDirectoryError(
+            f"working directory {cwd} is not the repository root of this package "
+            f"({PACKAGE_DIR.parents[1]}). Launch from the repository root; outputs are "
+            "never redirected elsewhere.")
+    return cwd
 
 
 def assert_audit_output_path(path, *, repo_root=None) -> Path:
@@ -37,6 +59,11 @@ def assert_audit_output_path(path, *, repo_root=None) -> Path:
     as given); the resolved form is used only for the safety decision.
     """
     p = Path(path)
+    if repo_root is None:
+        # Implicit base = working directory. It must be the repository root that
+        # contains THIS package; otherwise a relative output path would be silently
+        # redirected under an unrelated directory. Fail closed instead.
+        assert_launched_from_repo_root()
     base = Path(repo_root).resolve() if repo_root is not None else Path.cwd().resolve()
     target = p.resolve() if p.is_absolute() else (base / p).resolve()
 

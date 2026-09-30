@@ -77,8 +77,10 @@ def test_certificate_rejects_the_superseded_weak_null():
 
 def test_seed_is_set_before_model_construction_in_source():
     import inspect
-    src = inspect.getsource(ce1_driver.build_production_components)
-    assert src.index("GohrTrainer.set_seed(seed)") < src.index("model = GohrModel(")
+    from audit.cryptography.experiments.ce1 import controller as C
+    src = inspect.getsource(C.train_arm)
+    # fresh TRAIN/RERUN: the declared seed governs initialisation
+    assert src.index("GohrTrainer.set_seed(st.model_seed)") < src.index("model = build_model(config)")
 
 
 @pytest.mark.skipif(not (ROOT / "gohr" / "model.py").exists(), reason="needs gohr")
@@ -116,7 +118,7 @@ def test_seed_manifest_scopes_its_reproducibility_claim():
 
 def _preflight(tmp_path, extra):
     return ce1_driver.main(["--preflight", "--output",
-                            str(tmp_path / "evidence_current/ce1/c.json"),
+                            str(tmp_path / "audit/cryptography/evidence_current/ce1/c.json"),
                             "--repo-root", str(tmp_path), *extra])
 
 
@@ -251,7 +253,7 @@ def test_production_run_uses_the_randomized_assignment(tmp_path):
         return 0.9 if arm == "baseline" else 0.5
 
     ce1_driver.run(n_blocks=3, min_valid_blocks=2, production=False,
-                   output_path=tmp_path / "evidence_current/ce1/c.json",
+                   output_path=tmp_path / "audit/cryptography/evidence_current/ce1/c.json",
                    train_eval_fn=spy, data_fn=data_fn, repo_root=tmp_path)
     m = ce1_driver.seed_manifest(3)
     for bid, arm, seed in seen:

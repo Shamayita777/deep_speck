@@ -15,7 +15,7 @@ from audit.cryptography.experiments.ce2 import design as ce2
 from audit.cryptography.experiments.ce3 import design as ce3
 from audit.cryptography.experiments.ce4 import design as ce4
 
-ARCHIVE = Path(__file__).resolve().parents[1] / "Archive"
+ARCHIVE = ROOT / "Archive"            # audit/cryptography/Archive
 
 # ---------------------------------------------------------------------------
 # ENVIRONMENT DEPENDENCE
@@ -356,38 +356,39 @@ def test_historical_output_paths_are_refused(bad):
     with pytest.raises(paths.HistoricalWriteError):
         paths.assert_audit_output_path(bad)
 
-def test_v2_output_path_accepted(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    assert paths.assert_audit_output_path("evidence_current/ce3/certificate.json")
+def test_v2_output_path_accepted(tmp_path):
+    # mock repository at tmp_path, passed EXPLICITLY: an implicit (cwd) root must be
+    # the real repository root of this package (see test_wrong_cwd_fails_closed_*)
+    assert paths.assert_audit_output_path("audit/cryptography/evidence_current/ce3/certificate.json",
+                                          repo_root=tmp_path)
 
 
 @pytest.mark.parametrize("traversal", [
-    "evidence_current/../evidence/ce1/cert.json",
-    "evidence_current/../../escape.json",
-    "evidence_current/ce3/../../evidence/ce4/cert.json",
-    "evidence_current/./../evidence/cert.json",
+    "audit/cryptography/evidence_current/../evidence/ce1/cert.json",
+    "audit/cryptography/evidence_current/../../escape.json",
+    "audit/cryptography/evidence_current/ce3/../../evidence/ce4/cert.json",
+    "audit/cryptography/evidence_current/./../evidence/cert.json",
 ])
 def test_path_traversal_cannot_bypass_protection(traversal, tmp_path, monkeypatch):
     """`..` must not smuggle a write out of evidence_current/ despite the token."""
-    monkeypatch.chdir(tmp_path)
     with pytest.raises(paths.HistoricalWriteError):
-        paths.assert_audit_output_path(traversal)
+        paths.assert_audit_output_path(traversal, repo_root=tmp_path)
 
 
 def test_absolute_path_outside_v2_root_is_refused(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
     with pytest.raises(paths.HistoricalWriteError):
-        paths.assert_audit_output_path(tmp_path / "evidence" / "ce1" / "cert.json")
+        paths.assert_audit_output_path(tmp_path / "evidence" / "ce1" / "cert.json",
+                                       repo_root=tmp_path)
 
 
 def test_symlink_escape_is_refused(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    (tmp_path / "evidence_current").mkdir()
+    (tmp_path / "audit/cryptography/evidence_current").mkdir(parents=True)
     (tmp_path / "historical").mkdir()
-    link = tmp_path / "evidence_current" / "sneaky"
+    link = tmp_path / "audit/cryptography/evidence_current" / "sneaky"
     link.symlink_to(tmp_path / "historical", target_is_directory=True)
     with pytest.raises(paths.HistoricalWriteError):
-        paths.assert_audit_output_path("evidence_current/sneaky/cert.json")
+        paths.assert_audit_output_path("audit/cryptography/evidence_current/sneaky/cert.json",
+                                       repo_root=tmp_path)
 
 @requires_historical
 def test_historical_evidence_unchanged_after_v2_write(tmp_path):
@@ -395,7 +396,7 @@ def test_historical_evidence_unchanged_after_v2_write(tmp_path):
     before = {p: hashlib.sha256(p.read_bytes()).hexdigest()
               for p in hist.rglob("*") if p.is_file()}
     cert = _valid_cert()
-    certificate.write_certificate(cert, tmp_path / "evidence_current" / "ce3" / "c.json",
+    certificate.write_certificate(cert, tmp_path / "audit/cryptography/evidence_current" / "ce3" / "c.json",
                                   repo_root=tmp_path)
     after = {p: hashlib.sha256(p.read_bytes()).hexdigest()
              for p in hist.rglob("*") if p.is_file()}
@@ -413,7 +414,7 @@ def _valid_cert():
     }
 
 def test_certificate_roundtrips_and_validates(tmp_path):
-    p = certificate.write_certificate(_valid_cert(), tmp_path / "evidence_current" / "c.json", repo_root=tmp_path)
+    p = certificate.write_certificate(_valid_cert(), tmp_path / "audit/cryptography/evidence_current" / "c.json", repo_root=tmp_path)
     loaded = json.loads(p.read_text())
     certificate.validate_certificate(loaded)
     assert loaded["reference_configuration"]["depth"] == 10

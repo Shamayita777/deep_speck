@@ -20,7 +20,7 @@ from audit.cryptography.experiments.ce2 import design as ce2
 from audit.cryptography.experiments.ce3 import design as ce3
 from audit.cryptography.experiments.ce4 import design as ce4
 
-ARCHIVE = Path(__file__).resolve().parents[1] / "Archive"
+ARCHIVE = ROOT / "Archive"            # audit/cryptography/Archive
 
 
 def _cert(experiment_id, results, ckpt=None):
@@ -60,7 +60,7 @@ def test_chain_ce1_toy_end_to_end(tmp_path):
         base.append(0.90 + 0.01 * i); dest.append(0.50 + 0.001 * i)   # stand-in metrics
     res = ce1.paired_block_analysis(base, dest)
     c = _cert("CE1", res)
-    p = certificate.write_certificate(c, tmp_path / "evidence_current" / "ce1" / "cert.json", repo_root=tmp_path)
+    p = certificate.write_certificate(c, tmp_path / "audit/cryptography/evidence_current" / "ce1" / "cert.json", repo_root=tmp_path)
     loaded = json.loads(p.read_text())
     # UPSTREAM  ->  CERTIFICATE consistency
     assert loaded["results"]["n_blocks"] == len(blocks) == 4
@@ -80,7 +80,7 @@ def test_chain_ce2_toy_end_to_end(tmp_path):
             for i, r in enumerate([-0.21, -0.19, -0.20, -0.22, -0.18])]
     res = ce2.run_level_association(runs)
     c = _cert("CE2", res)
-    loaded = json.loads(certificate.write_certificate(c, tmp_path / "evidence_current" / "ce2" / "cert.json", repo_root=tmp_path).read_text())
+    loaded = json.loads(certificate.write_certificate(c, tmp_path / "audit/cryptography/evidence_current" / "ce2" / "cert.json", repo_root=tmp_path).read_text())
     assert loaded["results"]["n_runs"] == 5
     assert len(loaded["results"]["per_run"]) == 5
     assert np.isclose(loaded["results"]["run_level_inference"]["mean"],
@@ -93,7 +93,7 @@ def test_chain_ce3_toy_end_to_end(tmp_path):
     res = ce3.aggregate_replicates(sel, n_splits_per_replicate=5,
                                    calibration_validated=True, calibration_p_value=0.001)
     c = _cert("CE3", res)
-    loaded = json.loads(certificate.write_certificate(c, tmp_path / "evidence_current" / "ce3" / "cert.json", repo_root=tmp_path).read_text())
+    loaded = json.loads(certificate.write_certificate(c, tmp_path / "audit/cryptography/evidence_current" / "ce3" / "cert.json", repo_root=tmp_path).read_text())
     r = loaded["results"]
     assert r["n_replicates"] == 20 and r["n_splits_per_replicate"] == 5
     assert len(r["selectivity_replicates"]) == 20            # replicate unit preserved
@@ -120,7 +120,7 @@ def test_chain_ce4_toy_end_to_end(tmp_path):
     res = ce4.paired_contrast(s_delta, c_delta)
     res.update({"population": acct, "invariants": inv})
     c = _cert("CE4", res)
-    loaded = json.loads(certificate.write_certificate(c, tmp_path / "evidence_current" / "ce4" / "cert.json", repo_root=tmp_path).read_text())
+    loaded = json.loads(certificate.write_certificate(c, tmp_path / "audit/cryptography/evidence_current" / "ce4" / "cert.json", repo_root=tmp_path).read_text())
     r = loaded["results"]
     # population accounting flows through unchanged
     assert r["population"]["N_total"] == n

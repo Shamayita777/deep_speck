@@ -100,7 +100,7 @@ def test_all_blocks_reference_the_same_sealed_hash(tmp_path):
     data_fn.sealed_sha256 = sealed["sha256"]
 
     _, cert = ce1_driver.run(n_blocks=3, min_valid_blocks=2, production=False,
-                             output_path=tmp_path / "evidence_current/ce1/c.json",
+                             output_path=tmp_path / "audit/cryptography/evidence_current/ce1/c.json",
                              train_eval_fn=lambda *a, **k: 0.6, data_fn=data_fn,
                              repo_root=tmp_path)
     r = cert["results"]
@@ -129,7 +129,7 @@ def _run_with_failures(tmp_path, failing_blocks, n_blocks=8, min_valid=6):
         calls["n"] += 1
         return 0.9 if calls["n"] % 2 else 0.5
     return ce1_driver.run(n_blocks=n_blocks, min_valid_blocks=min_valid, production=False,
-                          output_path=tmp_path / "evidence_current/ce1/c.json",
+                          output_path=tmp_path / "audit/cryptography/evidence_current/ce1/c.json",
                           train_eval_fn=train, data_fn=data_fn, repo_root=tmp_path)
 
 
@@ -185,7 +185,7 @@ def test_frozen_parameters_accept_the_frozen_values():
 
 def test_cli_override_refused_end_to_end(tmp_path, capsys):
     rc = ce1_driver.main(["--n-blocks", "10", "--output",
-                          str(tmp_path / "evidence_current/ce1/c.json"),
+                          str(tmp_path / "audit/cryptography/evidence_current/ce1/c.json"),
                           "--repo-root", str(tmp_path)])
     assert rc == 1
     assert "frozen scientific parameters were overridden" in capsys.readouterr().out
@@ -195,11 +195,15 @@ def test_cli_override_refused_end_to_end(tmp_path, capsys):
 
 def test_production_persists_final_epoch_artifact_not_best_val():
     import inspect
-    src = inspect.getsource(ce1_driver.build_production_components)
-    assert "_FINAL_EPOCH.keras" in src
-    assert "terminal_model_sha256" in src
-    assert "bestval_DEBUG_ONLY" in src          # val-loss artifact clearly demoted
-    assert '"checkpoint_rule": "FINAL_EPOCH"' in src
+    from audit.cryptography.experiments.ce1 import controller as C
+    train_src = inspect.getsource(C.train_arm)
+    eval_src = inspect.getsource(C.evaluate_arm) + inspect.getsource(C.persist_evaluation)
+    assert "FINAL_EPOCH.keras" in train_src
+    assert "terminal_model_sha256" in train_src
+    assert "bestval_DEBUG_ONLY" in train_src     # val-loss artifact clearly demoted
+    assert '"checkpoint_rule": "FINAL_EPOCH"' in eval_src
+    # evaluation loads the TERMINAL artifact, never the best-val one
+    assert "terminal_model_artifact" in eval_src and "bestval" not in eval_src
 
 
 # ============ F7: orphaned CE3 threshold quarantined ============

@@ -29,11 +29,8 @@ from audit.cryptography.provenance import EXPERIMENT_DESIGN_VERSION, build_prove
 from audit.cryptography.experiments.ce2.design import ANALYTICAL_TARGET, run_level_association
 
 EXPERIMENT_ID = "CE2-THEORY-CONSISTENCY"
-REFERENCE_CHECKPOINT = (
-    Path(__file__).resolve().parents[2]
-    / "Archive"
-    / "best5depth10.h5"
-)
+#: Resolved from the source tree (audit_config), not the working directory.
+from audit.cryptography.audit_config import REFERENCE_CHECKPOINT_PATH as REFERENCE_CHECKPOINT  # noqa: E402
 
 
 def _certificate(results, pre, *, production, seed, scope):
@@ -75,7 +72,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="CE2 - analytical single-trail association")
     ap.add_argument("--preflight", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
-    ap.add_argument("--output", type=Path, default=Path("evidence_current/ce2/certificate.json"))
+    ap.add_argument("--output", type=Path, default=Path("audit/cryptography/evidence_current/ce2/certificate.json"))
     ap.add_argument("--repo-root", type=Path, default=None)
     args = ap.parse_args(argv)
     production = not args.dry_run

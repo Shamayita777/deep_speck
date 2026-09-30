@@ -16,10 +16,12 @@ DESIGN (see experiments/ce1/design.py)
     targets. That artifact is preserved under evidence/ce1/ as historical
     evidence; this file is the authoritative production path.
 
-FROZEN PARAMETERS REQUIRED FOR PRODUCTION
-    n_blocks           - predeclared from a power rationale
-    equivalence_margin - predeclared; without it the destroyed arm's
-                         comparison to chance can only be INCONCLUSIVE
+FROZEN PARAMETERS (frozen_design.CE1; validated, never chosen)
+    n_blocks = 8, min_valid_blocks = 6, failure_tolerance = 2
+    equivalence-to-chance DISABLED (no defensible margin at this test-set size)
+
+PRODUCTION PATH: experiments/ce1/controller.py only. run() here remains for
+non-evidentiary structural dry runs; run(production=True) is retired.
 """
 
 from __future__ import annotations
@@ -174,6 +176,7 @@ def run(*, n_blocks=None, output_path, train_eval_fn, data_fn, repo_root=None,
     min_valid_blocks = (CE1_SPEC.min_valid_blocks if min_valid_blocks is None
                         else min_valid_blocks)
     if production:
+        # Frozen-parameter guards fire FIRST (defence in depth, unchanged)...
         validate_frozen_parameters(n_blocks=n_blocks, min_valid_blocks=min_valid_blocks,
                                    seed_base=seed_base)
         if n_blocks != CE1_SPEC.n_blocks or min_valid_blocks != CE1_SPEC.min_valid_blocks:
@@ -186,6 +189,14 @@ def run(*, n_blocks=None, output_path, train_eval_fn, data_fn, repo_root=None,
             raise ValueError(
                 "min_valid_blocks must be >= 6: the exact sign-flip test cannot reach "
                 "alpha=0.05 with fewer blocks (min attainable p = 2/2^K).")
+        # ...then the closure path is refused outright. It held training data only
+        # in memory (os.urandom, not replayable) and passed validation through a
+        # mutable attribute, so no interrupted arm could be resumed. Production
+        # goes ONLY through the resumable controller (experiments/ce1/controller.py).
+        raise RuntimeError(
+            "run(production=True) is retired: use the CE1 controller "
+            "(python -m audit.cryptography.experiments.ce1.gohr_signal_destruction "
+            "--execute ...). run() remains only for non-evidentiary structural dry runs.")
     pre = preflight(experiment_id=EXPERIMENT_ID, rounds=REFERENCE.rounds,
                     differential=REFERENCE.differential, depth=REFERENCE.depth,
                     l2_reg=REFERENCE.l2_reg, checkpoint=None, output_path=output_path,
@@ -315,112 +326,9 @@ TRAINING_PROTOCOL_NOTE = (
 )
 
 
-def build_production_components(*, train_samples, validation_samples, evaluation_samples,
-                                checkpoint_dir, sealed_dir):
-    """
-    Construct the real Gohr dataset/model/trainer/evaluator with EVERY
-    scientifically important parameter passed explicitly.
-
-    Returns (data_fn, train_eval_fn) for `run()`.
-    """
-    from audit.cryptography.gohr.dataset import GohrDataset
-    from audit.cryptography.gohr.evaluate import GohrEvaluator
-    from audit.cryptography.gohr.model import GohrModel
-    from audit.cryptography.gohr.trainer import GohrTrainer
-    from audit.cryptography.sealed_dataset import prepare_sealed_evaluation_set
-
-    trainer = GohrTrainer(
-        batch_size=PRODUCTION_TRAINING["batch_size"],
-        epochs=PRODUCTION_TRAINING["epochs"],
-        checkpoint_dir=checkpoint_dir,
-        save_best_only=PRODUCTION_TRAINING["save_best_only"],
-        high_learning_rate=PRODUCTION_TRAINING["high_learning_rate"],
-        low_learning_rate=PRODUCTION_TRAINING["low_learning_rate"],
-    )
-    evaluator = GohrEvaluator(batch_size=PRODUCTION_TRAINING["batch_size"])
-
-    # ---- F1 FIX: ONE sealed evaluation set, generated once, shared by all
-    # blocks and both arms. Previously this was rebuilt inside data_fn, giving
-    # every block a DIFFERENT evaluation sample - a direct violation of the
-    # frozen design and of the "conditional on the fixed sealed test set"
-    # inference statement.
-    def _generate_eval(n):
-        gen = GohrDataset(rounds=REFERENCE.rounds, differential=REFERENCE.differential,
-                          train_samples=1, validation_samples=n)
-        return gen.generate_baseline_dataset().validation
-
-    sealed = prepare_sealed_evaluation_set(
-        sealed_dir, generate_fn=_generate_eval, rounds=REFERENCE.rounds,
-        differential=REFERENCE.differential, n_samples=evaluation_samples)
-
-    def data_fn(block_index: int):
-        """One independently generated training block + THE shared sealed set."""
-        generator = GohrDataset(
-            rounds=REFERENCE.rounds,                       # explicit: default is 7
-            differential=REFERENCE.differential,
-            train_samples=train_samples,
-            validation_samples=validation_samples,
-        )
-        bundle = generator.generate_baseline_dataset()
-        X_train, Y_train = bundle.train
-        data_fn.last_validation = bundle.validation        # training-time validation split
-        data_fn.sealed_sha256 = sealed["sha256"]
-        return X_train, Y_train, sealed["X"], sealed["Y"]
-
-    data_fn.sealed = sealed
-
-    data_fn.last_validation = None
-    train_eval_fn_artifact_holder = None
-
-    def train_eval_fn(X_train, Y_train, X_eval, Y_eval, *, seed: int = 0,
-                      arm: str = "arm", block_id: str = "block"):
-        """
-        Train ONE independent model on the supplied labels and score it.
-
-        Seeding order is deliberate and load-bearing: set_seed -> build ->
-        (trainer re-seeds) -> fit. See the F3 note below.
-        """
-        # F3 FIX: seed BEFORE the model is constructed. GohrModel(...).build()
-        # initialises the weights immediately, but GohrTrainer.set_seed() runs
-        # inside train() -- i.e. AFTER initialisation. The declared model seed
-        # therefore controlled only shuffling/dropout, never the initial
-        # weights, so the seed manifest overclaimed reproducibility. Seeding
-        # here makes the declared seed govern initialisation as intended; the
-        # trainer re-seeds identically before fit, which is harmless.
-        GohrTrainer.set_seed(seed)
-        model = GohrModel(
-            depth=REFERENCE.depth,                         # explicit: default is 5
-            regularization=REFERENCE.l2_reg,
-            optimizer=PRODUCTION_TRAINING["optimizer"],
-            loss=PRODUCTION_TRAINING["loss"],
-        ).build()
-        validation = data_fn.last_validation
-        if validation is None:
-            raise RuntimeError("no training-time validation split available for this block")
-        trained, history = trainer.train(
-            model, (X_train, Y_train), validation,
-            seed=seed, checkpoint_name=f"{block_id}_{arm}_bestval_DEBUG_ONLY.keras",
-        )
-        # F5 FIX: the trainer's ModelCheckpoint artifact is a BEST_VAL_LOSS
-        # model, but the frozen estimand is the TERMINAL-EPOCH model. Persist
-        # the terminal model explicitly so the reported metric and the saved
-        # artifact are the same object. The val_loss checkpoint is retained
-        # only for debugging and is named accordingly.
-        terminal_path = Path(checkpoint_dir) / f"{block_id}_{arm}_FINAL_EPOCH.keras"
-        terminal_path.parent.mkdir(parents=True, exist_ok=True)
-        trained.save(str(terminal_path))
-        epochs_ran = len(history.history.get("loss", [])) if hasattr(history, "history") else None
-        accuracy = float(evaluator.evaluate(trained, (X_eval, Y_eval)))
-        train_eval_fn.last_artifact = {
-            "checkpoint_rule": "FINAL_EPOCH",
-            "terminal_model_path": str(terminal_path),
-            "terminal_model_sha256": sha256_file(terminal_path),
-            "epochs_completed": epochs_ran,
-            "selection": "none - terminal epoch, no validation-based selection",
-        }
-        return accuracy
-
-    return data_fn, train_eval_fn
+# build_production_components() (data_fn / train_eval_fn closures with
+# data_fn.last_validation) was REMOVED: see controller.BlockContext, which
+# makes the seven block arrays explicit, persisted and hash-verified.
 
 
 def _toy(seed=0):
@@ -445,8 +353,38 @@ def main(argv=None) -> int:
     ap.add_argument("--min-valid-blocks", type=int, default=CE1_SPEC.min_valid_blocks,
                     help=f"FROZEN at {CE1_SPEC.min_valid_blocks}")
     ap.add_argument("--output", type=Path,
-                    default=Path("evidence_current/ce1/certificate.json"))
+                    default=Path("audit/cryptography/evidence_current/ce1/certificate.json"))
     ap.add_argument("--repo-root", type=Path, default=None)
+    ap.add_argument("--validate-resume", type=Path, default=None,
+                    help="read-only audit of an existing production run directory")
+    ap.add_argument("--resume-dry-run", type=Path, default=None,
+                    help="show the resume/GPU schedule for a run directory; trains nothing")
+    ap.add_argument("--gpus", type=int, default=2, help="(ignored: GPUs are detected)")
+    ap.add_argument("--run-dir", type=Path,
+                    default=Path("audit/cryptography/evidence_current/ce1/production_resumable"))
+    ap.add_argument("--legacy-run-dir", type=Path,
+                    default=Path("audit/cryptography/evidence_current/ce1/production_20260929"))
+    ap.add_argument("--sealed-source", type=Path,
+                    default=Path("audit/cryptography/evidence_current/ce1/"
+                                 "production_20260929/sealed"))
+    ap.add_argument("--legacy-block0", choices=("RECOVER", "RETRAIN"), default=None,
+                    help="recorded once in the run manifest; cannot be changed")
+    ap.add_argument("--verify-legacy-block0", action="store_true",
+                    help="read-only verification of the legacy terminal models (no accuracy)")
+    ap.add_argument("--recover-legacy-block0", action="store_true",
+                    help="seed block0 from the legacy FINAL_EPOCH models (no evaluation)")
+    ap.add_argument("--status", action="store_true", help="read-only status + plan")
+    ap.add_argument("--execute", action="store_true",
+                    help="REQUIRED to train/evaluate in production")
+    ap.add_argument("--operator-action", choices=("GRANT_RETRY", "REEVALUATE",
+                                                  "RESTART_BLOCK"), default=None,
+                    help="recorded engineering action on a NEEDS_OPERATOR block; cannot "
+                         "fail, exclude or select a block")
+    ap.add_argument("--block", type=int, default=None)
+    ap.add_argument("--arm", choices=("baseline", "destroyed"), default=None)
+    ap.add_argument("--reason", default=None)
+    ap.add_argument("--finalize", action="store_true",
+                    help="final validity gate + analysis of ALL valid blocks")
     ap.add_argument("--seed-base", type=int, default=CE1_SPEC.seed_base,
                     help=f"FROZEN at {CE1_SPEC.seed_base}")
     ap.add_argument("--train-samples", type=int, default=CE1_SPEC.train_samples, help=f"FROZEN at {CE1_SPEC.train_samples}")
@@ -459,13 +397,42 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     production = not args.dry_run
+    from audit.cryptography.experiments.ce1 import controller as C
+    from audit.cryptography.experiments.ce1.resume import ResumeRefused as R_err
+
+    run_dir = args.run_dir
+    legacy_dir = args.legacy_run_dir
+
+    if args.verify_legacy_block0:
+        from audit.cryptography.experiments.ce1.legacy_recovery import verify_legacy_block0
+        rep = verify_legacy_block0(legacy_dir, C.CE1RunConfig.production_config())
+        print(json.dumps(rep, indent=2, default=str))
+        return 0 if rep["verified"] else 1
+
+    if args.validate_resume or args.resume_dry_run or args.status:
+        target = args.validate_resume or args.resume_dry_run or run_dir
+        try:
+            cfg = C.load_run_config(target)
+            sealed = C.ensure_sealed(target, cfg)
+        except Exception as exc:                     # noqa: BLE001
+            print(f"RESUME REFUSED: {exc}")
+            return 1
+        print(json.dumps(C.run_status(target, cfg, sealed), indent=2))
+        for i in range(cfg.n_blocks):
+            plan = C.plan_block(target, cfg, i, sealed)
+            acts = {a: v["action"] + (f" [{v['code']}]" if v.get("code") else "")
+                    for a, v in plan["arms"].items()}
+            print(f"  {plan['block_id']}: {acts}")
+        if args.resume_dry_run:
+            from audit.cryptography.experiments.ce1.worker import detect_gpus
+            print(f"GPU detection: {detect_gpus()}")
+            print("(dry run - nothing was trained)")
+        return 0
+
     if args.preflight:
         try:
             # F4 FIX: preflight now runs the SAME frozen-parameter validator as
-            # the production gate. Previously it printed PREFLIGHT_OK for an
-            # overridden --seed-base or sample count and only the production
-            # branch refused, so the final gate before an expensive run could
-            # bless a design nobody preregistered.
+            # the production gate.
             if production:
                 validate_frozen_parameters(
                     n_blocks=args.n_blocks, min_valid_blocks=args.min_valid_blocks,
@@ -499,7 +466,7 @@ def main(argv=None) -> int:
         print(f"DRY RUN (non-evidentiary) wrote {path}")
         return 0
 
-    # ---- genuine production entry point ----
+    # ---- genuine production entry points (controller only) ----
     try:
         validate_frozen_parameters(
             n_blocks=args.n_blocks, min_valid_blocks=args.min_valid_blocks,
@@ -509,20 +476,50 @@ def main(argv=None) -> int:
     except ValueError as exc:
         print(exc)
         return 1
+    cfg = C.CE1RunConfig.production_config()
 
-    checkpoint_dir = Path(args.output).parent / "checkpoints"
-    sealed_dir = Path(args.output).parent / "sealed"
-    data_fn, train_eval_fn = build_production_components(
-        train_samples=args.train_samples, validation_samples=args.validation_samples,
-        evaluation_samples=args.evaluation_samples, checkpoint_dir=checkpoint_dir,
-        sealed_dir=sealed_dir,
-    )
-    path, cert = run(n_blocks=args.n_blocks, min_valid_blocks=args.min_valid_blocks,
-                     output_path=args.output, train_eval_fn=train_eval_fn, data_fn=data_fn,
-                     repo_root=args.repo_root, production=True, seed_base=args.seed_base)
-    print(f"CE1 production certificate written: {path}")
-    print(f"  baseline mean  {cert['results']['baseline_mean']:.6f}")
-    print(f"  destroyed mean {cert['results']['destroyed_mean']:.6f}")
+    if args.recover_legacy_block0:
+        from audit.cryptography.experiments.ce1.legacy_recovery import recover_legacy_block0
+        C.open_run(run_dir, cfg, repo_root=args.repo_root, legacy_block0_decision="RECOVER")
+        C.ensure_sealed(run_dir, cfg, sealed_source=args.sealed_source)
+        out = recover_legacy_block0(legacy_dir, run_dir, cfg)
+        print(f"block0 seeded from legacy terminal models: {out['status']} "
+              "(LEGACY_RECOVERED_PENDING_EVALUATION; evaluation happens in the next "
+              "--execute pass; counting is decided by the final validity gate)")
+        return 0
+
+    if args.operator_action:
+        if args.block is None or not args.reason:
+            print("--operator-action requires --block and --reason")
+            return 1
+        try:
+            out = C.operator_action(run_dir, C.load_run_config(run_dir), args.block,
+                                    args.operator_action, reason=args.reason, arm=args.arm)
+        except (C.ControllerError, R_err) as exc:
+            print(f"OPERATOR ACTION REFUSED: {exc}")
+            return 1
+        print(json.dumps(out, indent=2))
+        return 0
+
+    if args.finalize:
+        try:
+            path, cert = C.finalize(run_dir, C.load_run_config(run_dir),
+                                    repo_root=args.repo_root)
+        except C.ControllerError as exc:
+            print(f"NOT FINALIZED: {exc}")
+            return 1
+        print(f"CE1 certificate written: {path}")
+        return 0
+
+    if not args.execute:
+        print("Nothing executed. Production training requires --execute "
+              "(use --status / --resume-dry-run to inspect).")
+        return 1
+    C.open_run(run_dir, cfg, repo_root=args.repo_root,
+               legacy_block0_decision=args.legacy_block0)
+    from audit.cryptography.experiments.ce1.worker import run_auto
+    out = run_auto(run_dir, cfg, sealed_source=args.sealed_source, repo_root=args.repo_root)
+    print(json.dumps({"execution": out["execution"], "status": out["status"]}, indent=2))
     return 0
 
 

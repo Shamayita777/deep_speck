@@ -1,0 +1,13 @@
+{
+  "differential": [
+    64,
+    0
+  ],
+  "n_samples": 1000000,
+  "path": "/kaggle/working/deep_speck/evidence_current/ce1/production_20260929/sealed/sealed_evaluation_set.npz",
+  "policy": "generated exactly once; shared by every block and both arms; never used for model or epoch selection",
+  "reused": false,
+  "role": "sealed_evaluation_set",
+  "rounds": 5,
+  "sha256": "33df1f95a5df5eb38bfba82ede7aa7d8c260b52b246827d677c56a7876e2a3e5"
+}

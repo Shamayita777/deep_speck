@@ -31,11 +31,8 @@ from audit.cryptography.frozen_design import CE3 as CE3_SPEC
 from audit.cryptography.frozen_design import DESIGN_SPECIFICATION_VERSION
 
 EXPERIMENT_ID = "CE3-REPRESENTATION-INTERPRETATION"
-REFERENCE_CHECKPOINT = (
-    Path(__file__).resolve().parents[2]
-    / "Archive"
-    / "best5depth10.h5"
-)
+#: Resolved from the source tree (audit_config), not the working directory.
+from audit.cryptography.audit_config import REFERENCE_CHECKPOINT_PATH as REFERENCE_CHECKPOINT  # noqa: E402
 
 
 def _certificate(results, pre, *, production, seed, scope):
@@ -100,7 +97,7 @@ def main(argv=None) -> int:
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--alpha", type=float, default=CE3_SPEC.alpha,
                     help=f"FROZEN at {CE3_SPEC.alpha} (fixed-sequence, no adjustment)")
-    ap.add_argument("--output", type=Path, default=Path("evidence_current/ce3/certificate.json"))
+    ap.add_argument("--output", type=Path, default=Path("audit/cryptography/evidence_current/ce3/certificate.json"))
     ap.add_argument("--repo-root", type=Path, default=None)
     args = ap.parse_args(argv)
     production = not args.dry_run

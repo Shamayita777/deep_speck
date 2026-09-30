@@ -1,0 +1,375 @@
+{
+  "certificate_schema_version": "ce-certificate-1",
+  "claim_scope": "TOY DRY RUN - structural validation only, not scientific evidence",
+  "design_specification_version": "CE-frozen-design-2026-03",
+  "experiment_design_version": "CE-cryptographic-audit-2026",
+  "experiment_id": "CE1-SIGNAL-DESTRUCTION",
+  "non_evidentiary": true,
+  "preflight": {
+    "checkpoint": null,
+    "environment": {
+      "platform": "macOS-13.5-arm64-arm-64bit",
+      "python": "3.11.14"
+    },
+    "experiment_id": "CE1-SIGNAL-DESTRUCTION",
+    "frozen_parameters": {
+      "checkpoint_rule": "FINAL_EPOCH",
+      "min_valid_blocks": 2,
+      "n_blocks": 8
+    },
+    "output_path": "evidence_current/ce1/local_preflight/dry_run.json",
+    "production": false,
+    "reference_configuration": {
+      "cipher": "speck32_64",
+      "depth": 10,
+      "differential": [
+        64,
+        0
+      ],
+      "l2_reg": 1e-05,
+      "rounds": 5
+    },
+    "status": "PREFLIGHT_OK"
+  },
+  "provenance": {
+    "checkpoint": null,
+    "config_id": "CE1-SIGNAL-DESTRUCTION",
+    "environment": {
+      "platform": "macOS-13.5-arm64-arm-64bit",
+      "processor": "arm",
+      "python": "3.11.14"
+    },
+    "experiment_design_version": "CE-cryptographic-audit-2026",
+    "git_commit": "d085ddb142e032d7ef04d17f995faad806df2ffb",
+    "reference_configuration": {
+      "cipher": "speck32_64",
+      "depth": 10,
+      "differential": [
+        64,
+        0
+      ],
+      "l2_reg": 1e-05,
+      "rounds": 5
+    },
+    "seed_policy": {
+      "dataset_generation_randomness": "os.urandom",
+      "exact_dataset_replay_available": false,
+      "note": "dataset generation draws from os.urandom and is NOT seed-replayable; byte-for-byte replay requires the generated data to be persisted. The probe/CV seed is separate and IS reproducible.",
+      "probe_cv_seed": 1000
+    },
+    "timestamp_utc": "2026-09-29T10:39:00.006995+00:00"
+  },
+  "reference_configuration": {
+    "cipher": "speck32_64",
+    "depth": 10,
+    "differential": [
+      64,
+      0
+    ],
+    "l2_reg": 1e-05,
+    "rounds": 5
+  },
+  "results": {
+    "baseline_mean": 0.565625,
+    "blocks": [
+      {
+        "artifacts": {
+          "baseline": null,
+          "destroyed": null
+        },
+        "block_id": "block0",
+        "evaluation_labels_intact": true,
+        "evaluation_shared_between_arms": true,
+        "n_eval": 32,
+        "n_train": 64,
+        "permutation_seed": 1000,
+        "sealed_evaluation_sha256": null,
+        "status": "VALID",
+        "training_labels_permuted": true
+      },
+      {
+        "artifacts": {
+          "baseline": null,
+          "destroyed": null
+        },
+        "block_id": "block1",
+        "evaluation_labels_intact": true,
+        "evaluation_shared_between_arms": true,
+        "n_eval": 32,
+        "n_train": 64,
+        "permutation_seed": 1001,
+        "sealed_evaluation_sha256": null,
+        "status": "VALID",
+        "training_labels_permuted": true
+      },
+      {
+        "artifacts": {
+          "baseline": null,
+          "destroyed": null
+        },
+        "block_id": "block2",
+        "evaluation_labels_intact": true,
+        "evaluation_shared_between_arms": true,
+        "n_eval": 32,
+        "n_train": 64,
+        "permutation_seed": 1002,
+        "sealed_evaluation_sha256": null,
+        "status": "VALID",
+        "training_labels_permuted": true
+      },
+      {
+        "artifacts": {
+          "baseline": null,
+          "destroyed": null
+        },
+        "block_id": "block3",
+        "evaluation_labels_intact": true,
+        "evaluation_shared_between_arms": true,
+        "n_eval": 32,
+        "n_train": 64,
+        "permutation_seed": 1003,
+        "sealed_evaluation_sha256": null,
+        "status": "VALID",
+        "training_labels_permuted": true
+      },
+      {
+        "artifacts": {
+          "baseline": null,
+          "destroyed": null
+        },
+        "block_id": "block4",
+        "evaluation_labels_intact": true,
+        "evaluation_shared_between_arms": true,
+        "n_eval": 32,
+        "n_train": 64,
+        "permutation_seed": 1004,
+        "sealed_evaluation_sha256": null,
+        "status": "VALID",
+        "training_labels_permuted": true
+      },
+      {
+        "artifacts": {
+          "baseline": null,
+          "destroyed": null
+        },
+        "block_id": "block5",
+        "evaluation_labels_intact": true,
+        "evaluation_shared_between_arms": true,
+        "n_eval": 32,
+        "n_train": 64,
+        "permutation_seed": 1005,
+        "sealed_evaluation_sha256": null,
+        "status": "VALID",
+        "training_labels_permuted": true
+      },
+      {
+        "artifacts": {
+          "baseline": null,
+          "destroyed": null
+        },
+        "block_id": "block6",
+        "evaluation_labels_intact": true,
+        "evaluation_shared_between_arms": true,
+        "n_eval": 32,
+        "n_train": 64,
+        "permutation_seed": 1006,
+        "sealed_evaluation_sha256": null,
+        "status": "VALID",
+        "training_labels_permuted": true
+      },
+      {
+        "artifacts": {
+          "baseline": null,
+          "destroyed": null
+        },
+        "block_id": "block7",
+        "evaluation_labels_intact": true,
+        "evaluation_shared_between_arms": true,
+        "n_eval": 32,
+        "n_train": 64,
+        "permutation_seed": 1007,
+        "sealed_evaluation_sha256": null,
+        "status": "VALID",
+        "training_labels_permuted": true
+      }
+    ],
+    "design_specification": {
+      "alpha": 0.05,
+      "arm_assignment_randomized": true,
+      "assignment_seed": 20260101,
+      "checkpoint_rule": "FINAL_EPOCH",
+      "ci_method": "t_based_95",
+      "effect_size": "mean_delta_raw_accuracy_and_cohens_dz",
+      "equivalence_enabled": false,
+      "equivalence_margin": null,
+      "estimand": "E[Delta], Delta_k = acc_intact,k - acc_destroyed,k",
+      "evaluation_samples": 1000000,
+      "exactness_assumption": "Per block k the design draws two model seeds {s_A, s_B} and randomizes, by a prospectively recorded fair coin flip, which one is assigned to the intact arm. Under H0 the label condition has no effect, so each seed's accuracy f(s) is the same whichever arm it is assigned to; the realized PAIR {f(s_A), f(s_B)} is therefore fixed and only the assignment varies. Swapping the assignment maps Delta_k -> -Delta_k, and each of the two assignments had probability 1/2 by construction, independently across blocks. The randomization distribution of (sign(Delta_1), ..., sign(Delta_K)) is thus exactly uniform on {-1,+1}^K, which is precisely what enumerating all 2^K sign assignments computes: the test is EXACT by DESIGN, not by assumption.",
+      "failure_tolerance": 2,
+      "inference_conditioning": "conditional on the fixed sealed test set; its measurement error is COMMON across blocks and is NOT cancelled",
+      "min_valid_blocks": 6,
+      "multiplicity": "none (single primary hypothesis)",
+      "n_blocks": 8,
+      "primary_hypothesis": "H0 (sharp): within every block, permuting the training labels has no effect on evaluation accuracy - the two arms' accuracies are exchangeable given the block. This implies E[Delta] = 0.",
+      "primary_test": "exact_paired_sign_flip",
+      "rejection_interpretation": "Rejection licenses: 'the training-label permutation had SOME effect on evaluation accuracy in at least one block.' It does NOT by itself license the weak-null statement 'the mean difference is non-zero'; the mean Delta and its t-CI are reported as the estimand's point and interval estimate alongside.",
+      "seed_base": 1000,
+      "statistical_unit": "dataset block",
+      "terminal_epoch": 200,
+      "test_set_policy": "single_sealed_shared_across_blocks",
+      "train_samples": 10000000,
+      "validation_samples": 1000000
+    },
+    "destroyed_mean": 0.55,
+    "destroyed_vs_chance": {
+      "advantage_excluded_by_ci": 0.13870024865375807,
+      "chance": 0.5,
+      "ci95_t": [
+        0.530649875673121,
+        0.569350124326879
+      ],
+      "equivalence": {
+        "enabled": false,
+        "reason": "Equivalence-to-chance is DISABLED by the frozen design. No defensible margin exists: a cryptanalytically meaningful bound (advantage <= 2^-10, eps ~ 4.9e-4) lies at or below the 95% CI half-width of the sealed 10^6 test set (9.8e-4). A non-significant difference is NOT evidence of equivalence.",
+        "verdict": "NOT_ASSESSED"
+      },
+      "mean_accuracy": 0.55,
+      "mean_deviation": 0.05
+    },
+    "failure_tolerance": 2,
+    "failures": [],
+    "frozen_parameters_verified": {
+      "production": false
+    },
+    "interpretation_scope": "Evidence that destroying the differential training signal causes loss of distinguishing performance, for this architecture and training protocol, conditional on the fixed sealed test set. It does NOT establish that no non-cryptographic shortcut exists, and it makes no equivalence-to-chance claim.",
+    "min_valid_blocks": 2,
+    "n_blocks": 8,
+    "n_blocks_requested": 8,
+    "n_blocks_valid": 8,
+    "paired_difference": {
+      "ci95_t": [
+        -0.030352757622390467,
+        0.06160275762239047
+      ],
+      "effect_size_cohens_dz": 0.2841118744360608,
+      "mean": 0.015625,
+      "primary_test": {
+        "arm_assignment_randomized": true,
+        "can_reach_alpha_005": true,
+        "convention": "p-values are computed in double precision. A computed value at or below 1e-300 has underflowed; it is reported as p_value=null with p_underflow=true, p_upper_bound=1e-300 and p_representation='p < 1e-300'. It is NEVER reported as the number 0.0, which would assert an exact zero probability that was not computed. log10_p is reported where finite.",
+        "enumerated_assignments": 256,
+        "exactness_assumption": "Per block k the design draws two model seeds {s_A, s_B} and randomizes, by a prospectively recorded fair coin flip, which one is assigned to the intact arm. Under H0 the label condition has no effect, so each seed's accuracy f(s) is the same whichever arm it is assigned to; the realized PAIR {f(s_A), f(s_B)} is therefore fixed and only the assignment varies. Swapping the assignment maps Delta_k -> -Delta_k, and each of the two assignments had probability 1/2 by construction, independently across blocks. The randomization distribution of (sign(Delta_1), ..., sign(Delta_K)) is thus exactly uniform on {-1,+1}^K, which is precisely what enumerating all 2^K sign assignments computes: the test is EXACT by DESIGN, not by assumption.",
+        "log10_p": -0.28766603410599967,
+        "min_attainable_two_sided_p": 0.0078125,
+        "n_blocks": 8,
+        "null_hypothesis": "H0 (sharp): within every block, permuting the training labels has no effect on evaluation accuracy - the two arms' accuracies are exchangeable given the block. This implies E[Delta] = 0.",
+        "p_representation": "p = 0.515625",
+        "p_underflow": false,
+        "p_upper_bound": null,
+        "p_value": 0.515625,
+        "randomization_basis": "randomized arm assignment: per block a prospectively recorded fair coin flip assigns which of the block's two model seeds goes to the intact arm. The 2^K enumerated sign patterns ARE that randomization distribution.",
+        "rejection_interpretation": "Rejection licenses: 'the training-label permutation had SOME effect on evaluation accuracy in at least one block.' It does NOT by itself license the weak-null statement 'the mean difference is non-zero'; the mean Delta and its t-CI are reported as the estimand's point and interval estimate alongside.",
+        "test": "exact_paired_sign_flip"
+      },
+      "raw_block_differences": [
+        0.050000000000000044,
+        0.04999999999999993,
+        0.07499999999999996,
+        -0.07499999999999996,
+        -0.025000000000000022,
+        -0.025000000000000022,
+        0.07500000000000007,
+        0.0
+      ],
+      "sd": 0.05499594140869461,
+      "se": 0.019444001553913005
+    },
+    "reporting_rule": "CE1 reports mean Delta with its 95% t-CI, every individual Delta_k, and the exact sign-flip p-value. For the destroyed arm it reports mean accuracy with a 95% CI and the distinguishing advantage that interval EXCLUDES. It issues NO equivalence-to-chance verdict: a non-significant difference is not evidence of equivalence, and no defensible margin exists at this test-set size.",
+    "sealed_evaluation": {
+      "n_blocks_checked": 8,
+      "shared_evaluation_sha256": null
+    },
+    "seed_manifest": {
+      "assignment_seed": 20260101,
+      "dataset_generation_randomness": "os.urandom (NOT seed-replayable)",
+      "distinctness_claim": "model-training seeds are pairwise distinct; permutation seeds are a separate role and are not claimed distinct from them",
+      "model_training_seeds_pairwise_distinct": true,
+      "n_blocks": 8,
+      "n_model_training_seeds": 16,
+      "randomization": "Per block, a prospectively recorded fair coin flip assigns which of the two model seeds goes to the intact arm. This is the randomization the exact sign-flip test enumerates; it is drawn before production from a declared seed and is fixed thereafter.",
+      "reproducibility_scope": "The declared seed governs model initialisation and training-time randomness. It does NOT make the generated Speck datasets replayable: they are drawn from os.urandom. Exact dataset replay requires the persisted artifacts, which is why the evaluation set is sealed.",
+      "rule": "permutation = base + i; block seeds {s_A, s_B} = {base+2i, base+2i+1}; assignment of {s_A, s_B} to {intact, destroyed} is RANDOMIZED by a fair coin flip drawn from assignment_seed",
+      "seed_base": 1000,
+      "seeds": {
+        "block0": {
+          "assignment_flip": 0,
+          "baseline": 1000,
+          "destroyed": 1001,
+          "permutation": 1000,
+          "seed_A": 1000,
+          "seed_B": 1001
+        },
+        "block1": {
+          "assignment_flip": 0,
+          "baseline": 1002,
+          "destroyed": 1003,
+          "permutation": 1001,
+          "seed_A": 1002,
+          "seed_B": 1003
+        },
+        "block2": {
+          "assignment_flip": 1,
+          "baseline": 1005,
+          "destroyed": 1004,
+          "permutation": 1002,
+          "seed_A": 1004,
+          "seed_B": 1005
+        },
+        "block3": {
+          "assignment_flip": 1,
+          "baseline": 1007,
+          "destroyed": 1006,
+          "permutation": 1003,
+          "seed_A": 1006,
+          "seed_B": 1007
+        },
+        "block4": {
+          "assignment_flip": 0,
+          "baseline": 1008,
+          "destroyed": 1009,
+          "permutation": 1004,
+          "seed_A": 1008,
+          "seed_B": 1009
+        },
+        "block5": {
+          "assignment_flip": 1,
+          "baseline": 1011,
+          "destroyed": 1010,
+          "permutation": 1005,
+          "seed_A": 1010,
+          "seed_B": 1011
+        },
+        "block6": {
+          "assignment_flip": 0,
+          "baseline": 1012,
+          "destroyed": 1013,
+          "permutation": 1006,
+          "seed_A": 1012,
+          "seed_B": 1013
+        },
+        "block7": {
+          "assignment_flip": 1,
+          "baseline": 1015,
+          "destroyed": 1014,
+          "permutation": 1007,
+          "seed_A": 1014,
+          "seed_B": 1015
+        }
+      }
+    },
+    "statistical_unit": "independent training block (paired difference)",
+    "training_protocol": {
+      "note": "toy dry run - no real training performed"
+    }
+  }
+}
