@@ -168,6 +168,17 @@ def verify(run_dir) -> dict:
             chk("raw-input control is informational only",
                 R["C3_RAW_INPUT"]["role"].startswith("SECONDARY INFORMATIONAL"))
             chk("twin-decodability audit present", "twin_decodability_audit" in R)
+            if "resume" in R:
+                b = R["resume"]["binding"]
+                chk("resume binding matches the frozen design",
+                    b["design_hash"] == P.plan_hash()
+                    and b["model_sha256"] == P.REFERENCE_CHECKPOINT_SHA256
+                    and b["rounds"] == P.ROUNDS
+                    and list(b["differential"]) == list(P.DIFFERENTIAL))
+                chk("resume checkpoint granularity is the replicate",
+                    R["resume"]["checkpoint_granularity"] == "one replicate")
+                chk("every replicate in the certificate is accounted for",
+                    b["n_replicates"] == len(R["replicates"]))
             chk("mean selectivity recomputed",
                 abs(float(sel.mean()) - R["primary"]["mean"]) < 1e-9)
             w = stats.wilcoxon(sel, alternative="greater")

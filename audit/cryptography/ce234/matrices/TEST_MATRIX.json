@@ -1,8 +1,8 @@
 {
   "schema": "ce234-test-matrix-1",
-  "n_tests": 58,
+  "n_tests": 65,
   "counts": {
-    "PASSED": 55,
+    "PASSED": 62,
     "SKIPPED": 3
   },
   "tests": [
@@ -759,6 +759,97 @@
       "replayable": true,
       "evidence_path": "audit/cryptography/ce234/matrices/junit.xml",
       "detail": "CE3 smoke stops before the primary statistic by design"
+    },
+    {
+      "test_id": "test_ce3_resume_never_recomputes_a_completed_replicate",
+      "description": "test ce3 resume never recomputes a completed replicate",
+      "ce": "CE3",
+      "test_class": "unit",
+      "expected": "PASS",
+      "actual": "PASSED",
+      "status": "PASSED",
+      "deterministic": true,
+      "replayable": true,
+      "evidence_path": "audit/cryptography/ce234/matrices/junit.xml",
+      "detail": ""
+    },
+    {
+      "test_id": "test_ce3_resume_refuses_a_changed_binding[override0]",
+      "description": "test ce3 resume refuses a changed binding[override0]",
+      "ce": "CE3",
+      "test_class": "fail-closed",
+      "expected": "PASS",
+      "actual": "PASSED",
+      "status": "PASSED",
+      "deterministic": true,
+      "replayable": true,
+      "evidence_path": "audit/cryptography/ce234/matrices/junit.xml",
+      "detail": ""
+    },
+    {
+      "test_id": "test_ce3_resume_refuses_a_changed_binding[override1]",
+      "description": "test ce3 resume refuses a changed binding[override1]",
+      "ce": "CE3",
+      "test_class": "fail-closed",
+      "expected": "PASS",
+      "actual": "PASSED",
+      "status": "PASSED",
+      "deterministic": true,
+      "replayable": true,
+      "evidence_path": "audit/cryptography/ce234/matrices/junit.xml",
+      "detail": ""
+    },
+    {
+      "test_id": "test_ce3_resume_refuses_a_changed_binding[override2]",
+      "description": "test ce3 resume refuses a changed binding[override2]",
+      "ce": "CE3",
+      "test_class": "fail-closed",
+      "expected": "PASS",
+      "actual": "PASSED",
+      "status": "PASSED",
+      "deterministic": true,
+      "replayable": true,
+      "evidence_path": "audit/cryptography/ce234/matrices/junit.xml",
+      "detail": ""
+    },
+    {
+      "test_id": "test_ce3_resume_refuses_a_changed_binding[override3]",
+      "description": "test ce3 resume refuses a changed binding[override3]",
+      "ce": "CE3",
+      "test_class": "fail-closed",
+      "expected": "PASS",
+      "actual": "PASSED",
+      "status": "PASSED",
+      "deterministic": true,
+      "replayable": true,
+      "evidence_path": "audit/cryptography/ce234/matrices/junit.xml",
+      "detail": ""
+    },
+    {
+      "test_id": "test_ce3_resume_refuses_a_tampered_or_missing_replicate_record",
+      "description": "test ce3 resume refuses a tampered or missing replicate record",
+      "ce": "CE3",
+      "test_class": "tamper",
+      "expected": "PASS",
+      "actual": "PASSED",
+      "status": "PASSED",
+      "deterministic": true,
+      "replayable": true,
+      "evidence_path": "audit/cryptography/ce234/matrices/junit.xml",
+      "detail": ""
+    },
+    {
+      "test_id": "test_execute_allows_ce3_resume_but_never_overwrites_a_certificate",
+      "description": "test execute allows ce3 resume but never overwrites a certificate",
+      "ce": "CE3",
+      "test_class": "unit",
+      "expected": "PASS",
+      "actual": "PASSED",
+      "status": "PASSED",
+      "deterministic": true,
+      "replayable": true,
+      "evidence_path": "audit/cryptography/ce234/matrices/junit.xml",
+      "detail": ""
     }
   ],
   "determinism_note": "every validation test draws from an explicit RNG or a fixed seed corpus; production keeps the frozen os.urandom convention"

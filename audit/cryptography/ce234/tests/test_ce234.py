@@ -547,3 +547,95 @@ def test_ce3_verifier_rejects_selectivity_tampering(tmp_path):
                   "certificate field mutation", "VERIFICATION FAILED", rep["verdict"],
                   "REJECTED" if rep["verdict"] == "VERIFICATION FAILED" else "NOT_REJECTED")
     assert rep["verdict"] == "VERIFICATION FAILED"
+
+
+# ---------------- CE3 checkpoint / resume ----------------
+
+def _ce3_interrupted(out, stop_after, **kw):
+    """Run CE3 and abort immediately after replicate `stop_after` is checkpointed."""
+    class _Stop(Exception):
+        pass
+
+    orig = PR._ce3_log
+
+    def spy(d, ev, **detail):
+        orig(d, ev, **detail)
+        if ev == "REPLICATE_COMPLETE" and detail.get("replicate") == stop_after:
+            raise _Stop()
+    PR._ce3_log = spy
+    try:
+        PR.run_ce3(out, log=lambda *a: None, **kw)
+    except _Stop:
+        pass
+    finally:
+        PR._ce3_log = orig
+
+
+CE3_RESUME_KW = dict(n_replicates=3, n_samples=800, n_splits=3, seed=5)
+
+
+@pytest.mark.slow
+def test_ce3_resume_never_recomputes_a_completed_replicate(tmp_path):
+    out = tmp_path / "run"
+    _ce3_interrupted(out, 1, **CE3_RESUME_KW)
+    state = json.loads((out / "resume_state.json").read_text())
+    assert state["completed"] == [0, 1]
+    before = {i: json.loads((out / "replicates" / f"rep_{i:02d}.json").read_text())
+              for i in state["completed"]}
+    res = PR.run_ce3(out, log=lambda *a: None, **CE3_RESUME_KW)
+    # byte-identical records: resuming changes WHEN a replicate runs, never WHAT it is
+    after = {i: json.loads((out / "replicates" / f"rep_{i:02d}.json").read_text())
+             for i in state["completed"]}
+    assert before == after
+    assert len(res["replicates"]) == 3
+    assert [r["replicate_id"] for r in res["replicates"]] == \
+        ["ce3_rep00", "ce3_rep01", "ce3_rep02"]
+    events = [json.loads(l)["event"]
+              for l in (out / "resume_log.jsonl").read_text().splitlines()]
+    assert events.count("REPLICATE_COMPLETE") == 3      # each replicate computed once
+    assert "RESUME" in events and events[-1] == "ALL_REPLICATES_COMPLETE"
+    assert res["resume"]["checkpoint_granularity"] == "one replicate"
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("override", [{"seed": 6}, {"n_samples": 900},
+                                      {"n_splits": 4}, {"n_replicates": 4}])
+def test_ce3_resume_refuses_a_changed_binding(tmp_path, override):
+    out = tmp_path / "run"
+    _ce3_interrupted(out, 0, **CE3_RESUME_KW)
+    with pytest.raises(PR.PreflightError, match="different binding"):
+        PR.run_ce3(out, log=lambda *a: None, **{**CE3_RESUME_KW, **override})
+
+
+@pytest.mark.slow
+def test_ce3_resume_refuses_a_tampered_or_missing_replicate_record(tmp_path):
+    out = tmp_path / "run"
+    _ce3_interrupted(out, 0, **CE3_RESUME_KW)
+    f = out / "replicates" / "rep_00.json"
+    rec = json.loads(f.read_text())
+    rec["selectivity"] = 0.99
+    f.write_text(json.dumps(rec))
+    with pytest.raises(PR.PreflightError, match="content hash"):
+        PR.run_ce3(out, log=lambda *a: None, **CE3_RESUME_KW)
+    f.unlink()
+    with pytest.raises(PR.PreflightError, match="marked complete"):
+        PR.run_ce3(out, log=lambda *a: None, **CE3_RESUME_KW)
+
+
+@pytest.mark.slow
+def test_execute_allows_ce3_resume_but_never_overwrites_a_certificate(tmp_path):
+    out = tmp_path / "run"
+    _ce3_interrupted(out, 0, **CE3_RESUME_KW)
+    # a part-finished CE3 directory is resumable through the production entry point
+    path = PR.execute("CE3", out, production=False, n1=3, n2=800, seed=5, n_splits=3,
+                      behavioural=False)
+    assert Path(path).exists()
+    # once the certificate exists the directory is closed, resumable or not
+    with pytest.raises(PR.PreflightError, match="completed certificate"):
+        PR.execute("CE3", out, production=False, n1=3, n2=800, seed=5, n_splits=3,
+                   behavioural=False)
+    # and CE2/CE4 are never resumable
+    (tmp_path / "ce2").mkdir(); (tmp_path / "ce2" / "x").write_text("1")
+    with pytest.raises(PR.PreflightError, match="never overwritten"):
+        PR.execute("CE2", tmp_path / "ce2", production=False, n1=1, n2=100, seed=1,
+                   behavioural=False)

@@ -6,6 +6,19 @@
     "seed": 0
   },
   "ce1_isolation": "verified: CE2-CE4 source references no CE1 run directory, no CE1 checkpoint and no CE1 sealed set",
+  "ce3_resumability": {
+    "applies_to": "CE3 only; CE2 and CE4 complete in minutes and are not resumable",
+    "equivalence": "each replicate has its own seed (seed+i) and freshly drawn data, so a replicate computed in a later session is statistically identical to one computed in the first; resuming changes WHEN a replicate runs, never WHAT it is",
+    "fail_closed": [
+      "binding mismatch (design hash, model hash, rounds, differential, seed, n_replicates, n_samples, n_splits)",
+      "replicate record failing its own content hash",
+      "replicate marked complete but missing",
+      "directory already holding a certificate"
+    ],
+    "granularity": "one replicate",
+    "partial_replicate": "an interrupted replicate is recomputed in full; its drawn data are not replayable under the frozen os.urandom convention",
+    "scientific_change": "none - same replicates, same seeds, same statistics"
+  },
   "commands": {
     "preflight": "python -m audit.cryptography.ce234.production CE2|CE3|CE4 --preflight",
     "production_NOT_AUTHORIZED": "python -m audit.cryptography.ce234.production CE2|CE3|CE4 --production",
@@ -34,10 +47,11 @@
     "CE2 rho ~ +0.80 (smoke)",
     "CE4 gap ~ +0.53 (smoke)",
     "CE2 5-vs-7-round diagnostic",
-    "CE4 model-free XOR-weight pilot"
+    "CE4 model-free XOR-weight pilot",
+    "CE3 smoke selectivity ~ +0.33, raw-input ~ 0.19 (non-evidentiary)"
   ],
-  "freeze_version": "CE234-FREEZE-7",
-  "frozen_utc": "2026-10-03T03:22:33.145836+00:00",
+  "freeze_version": "CE234-FREEZE-8",
+  "frozen_utc": "2026-10-03T10:21:44.032625+00:00",
   "generator": {
     "deterministic_path": "test-only, asserted unused in production",
     "exact_replay": "UNAVAILABLE - raw observations persisted instead",
@@ -59,6 +73,9 @@
   ],
   "historical_2k8_failure": "original failing input was never persisted and cannot be replayed; validation path is now deterministic and a 600-case sweep found no counterexample. NOT claimed to be explained.",
   "historical_evidence": "audit/cryptography/evidence/ unmodified; separate provenance record",
+  "known_limitations": [
+    "CE3 probe (lbfgs) reaches its frozen iteration limit without converging; the identical budget, folds and seeds are applied to all arms, so the comparison stays matched, but absolute decodability is under-estimated. The budget was frozen before production and was NOT raised after seeing smoke results."
+  ],
   "model": {
     "behavioural_binding": {
       "accuracy_by_rounds": {
@@ -326,9 +343,9 @@
     "audit/cryptography/adapters/gohr.py": "44489a843bd3aac270142674a8a04aae131ca4b662a223862f1ee470e3fe3924",
     "audit/cryptography/ce234/build_matrices.py": "21936342c7dfd7877e584fec39d984329529e97d87cc48509dd1d7a72dcbd594",
     "audit/cryptography/ce234/frozen_plan.py": "4280d8eddb9881421787116fc3564930083e2903db188c6446cdd7d98bbeb585",
-    "audit/cryptography/ce234/production.py": "c1e66c13aa8f98a76f337348c7dfe3c74d0948a9638277bb1af9eaa43505c3cb",
-    "audit/cryptography/ce234/tests/test_ce234.py": "b76c765a786762f9d94f8d7b97881f8605feb75b5df15bbbb28ad84a9fe59cbb",
-    "audit/cryptography/ce234/verify.py": "b6cb454973ffc2e1e4d60acfbb37d11bcad5e6fbaf7c70028a315b3c8dcfe5b7",
+    "audit/cryptography/ce234/production.py": "46d269cfd5ccfea7ad59443aee49c87384b0cb4266fed78082808ef066e661c9",
+    "audit/cryptography/ce234/tests/test_ce234.py": "67c4652a10693d02c19302212b83801b4dea79400fd716f4dc5efc6e278bb8a0",
+    "audit/cryptography/ce234/verify.py": "312b4880e0bbb9cbe93e21907b9442ad8eecd564bcac448d225f203944acc589",
     "audit/cryptography/experiments/ce4/design.py": "e165f304f2547c3f401f386804942d60b18c60c1177993561bb88286edef214d",
     "audit/cryptography/gohr/dataset.py": "288c1155d9eabf510bd4653103409dddedf03a7aa4d54f5bb8051ff6cb5b42a9",
     "audit/cryptography/gohr/evaluate.py": "9344cb6abc09d398c5d2a0e806311a6e515ecbfb4a9932ed3c96917a2636b2a4",
@@ -344,12 +361,11 @@
   },
   "test_matrix": {
     "counts": {
-      "PASSED": 55,
+      "PASSED": 62,
       "SKIPPED": 3
     },
-    "n": 58,
+    "n": 65,
     "path": "audit/cryptography/ce234/matrices/TEST_MATRIX.json",
-    "skip_reason": "evidence/ is not shipped in this package, so the two historical-artifact tests skip; the CE3 tamper case skips because smoke stops before the primary statistic by design",
     "skips": [
       "test_historical_lookalike_checkpoint_is_refused",
       "test_historical_control_model_is_degenerate",

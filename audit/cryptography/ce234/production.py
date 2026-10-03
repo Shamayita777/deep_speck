@@ -24,6 +24,7 @@ import os
 import platform
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -53,6 +54,24 @@ def sha256_file(p) -> str:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def _atomic_write_json(path: Path, obj) -> Path:
+    """Durable, atomic JSON write: temp file in the same directory, fsync, rename.
+    Local to this package so CE2-CE4 never import CE1 code."""
+    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent), suffix=".json.tmp")
+    with os.fdopen(fd, "w") as fh:
+        json.dump(obj, fh, indent=2, sort_keys=True, default=str)
+        fh.flush(); os.fsync(fh.fileno())
+    os.replace(tmp, path)
+    return path
+
+
+def canonical_sha256(obj) -> str:
+    """Hash of a JSON object in canonical form (sorted keys, no NaN/Inf)."""
+    return hashlib.sha256(json.dumps(obj, sort_keys=True, separators=(",", ":"),
+                                     allow_nan=False, default=str).encode()).hexdigest()
 
 
 def sha256_array(*arrays) -> str:
@@ -375,17 +394,126 @@ def _degenerate(R: np.ndarray) -> bool:
     return int((R.std(axis=0) > 0).sum()) < 2
 
 
+CE3_RESUME_SCHEMA = "ce3-resume-state-1"
+
+
+def _ce3_binding(*, n_replicates: int, n_samples: int, n_splits: int, seed: int,
+                 model_sha256: str) -> dict:
+    """
+    Everything that defines WHAT a CE3 replicate is. A resumed session must
+    match this exactly, or the run is refused: resuming under a different
+    binding would silently mix two experiments.
+    """
+    return {"schema": CE3_RESUME_SCHEMA, "plan_version": P.PLAN_VERSION,
+            "design_hash": P.plan_hash(), "model_sha256": model_sha256,
+            "rounds": P.ROUNDS, "differential": list(P.DIFFERENTIAL),
+            "seed": int(seed), "n_replicates": int(n_replicates),
+            "n_samples": int(n_samples), "n_splits": int(n_splits),
+            "statistical_unit": P.CE3.statistical_unit,
+            "primary_control": P.CE3.primary_control}
+
+
+def _ce3_log(out_dir: Path, event: str, **detail) -> None:
+    line = json.dumps({"event": event, "utc": utc(), "pid": os.getpid(), **detail},
+                      sort_keys=True) + "\n"
+    fd = os.open(str(out_dir / "resume_log.jsonl"),
+                 os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
+    try:
+        os.write(fd, line.encode()); os.fsync(fd)
+    finally:
+        os.close(fd)
+
+
+def _ce3_load_completed(out_dir: Path, binding: dict) -> dict:
+    """
+    Reload previously completed replicates. Fail closed on: a different
+    binding, an unreadable record, a record whose content hash does not match,
+    or a record that does not belong to this run.
+    """
+    state_path = out_dir / "resume_state.json"
+    if not state_path.exists():
+        return {}
+    try:
+        state = json.loads(state_path.read_text())
+    except json.JSONDecodeError as exc:
+        raise PreflightError(f"CE3 resume state unreadable: {exc}")
+    diffs = {k: (state.get("binding", {}).get(k), v) for k, v in binding.items()
+             if state.get("binding", {}).get(k) != v}
+    if diffs:
+        raise PreflightError(
+            f"CE3 resume refused: this run was started under a different binding "
+            f"{diffs}. Resuming would mix two experiments.")
+    done = {}
+    for i in state.get("completed", []):
+        f = out_dir / "replicates" / f"rep_{i:02d}.json"
+        if not f.exists():
+            raise PreflightError(f"CE3 resume refused: replicate {i} is marked complete "
+                                 f"but {rel(f)} is missing.")
+        rec = json.loads(f.read_text())
+        recorded = rec.pop("record_sha256", None)
+        if canonical_sha256(rec) != recorded:
+            raise PreflightError(f"CE3 resume refused: {rel(f)} fails its own content "
+                                 "hash; the record has been altered or truncated.")
+        if rec.get("replicate_index") != i:
+            raise PreflightError(f"CE3 resume refused: {rel(f)} is replicate "
+                                 f"{rec.get('replicate_index')}, not {i}.")
+        done[i] = rec
+    return done
+
+
+def _ce3_save_replicate(out_dir: Path, i: int, rec: dict, binding: dict,
+                        completed: list) -> None:
+    """
+    Durable per-replicate checkpoint. Order: write the replicate record (hashed,
+    atomic), then update the resume state. A crash between the two leaves an
+    orphan record that is simply recomputed - never a state that claims work
+    which does not exist.
+    """
+    d = out_dir / "replicates"; d.mkdir(parents=True, exist_ok=True)
+    rec = {**rec, "replicate_index": int(i)}
+    rec["record_sha256"] = canonical_sha256(rec)
+    _atomic_write_json(d / f"rep_{i:02d}.json", rec)
+    _atomic_write_json(out_dir / "resume_state.json",
+                         {"binding": binding, "completed": sorted(completed),
+                          "updated_utc": utc()})
+
+
 def run_ce3(out_dir: Path, *, n_replicates: int, n_samples: int, n_splits: int,
             seed: int, model=None, log=print) -> dict:
+    """
+    RESUMABLE. Each replicate is an independent unit with its own seed
+    (seed + i) and its own freshly drawn data, so a replicate computed in a
+    later session is statistically identical to one computed in the first:
+    resuming changes WHEN a replicate runs, never WHAT it is. Completed
+    replicates are never recomputed, and a replicate interrupted part-way is
+    recomputed in full (its partial folds are discarded), because the drawn
+    data are not replayable under the frozen os.urandom convention.
+    """
     from audit.cryptography.gohr import speck as sp
     from audit.cryptography.probe.evaluation import evaluate_selectivity
     from audit.cryptography.test.ce3.types import TargetSpecification, TargetType
 
     model = model or load_reference_model()
+    binding = _ce3_binding(n_replicates=n_replicates, n_samples=n_samples,
+                           n_splits=n_splits, seed=seed,
+                           model_sha256=sha256_file(REFERENCE_CHECKPOINT))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    done = _ce3_load_completed(out_dir, binding)
+    if done:
+        log(f"  CE3 resuming: {len(done)}/{n_replicates} replicates already complete "
+            f"({sorted(done)}); they will NOT be recomputed")
+        _ce3_log(out_dir, "RESUME", completed=sorted(done), remaining=[
+            i for i in range(n_replicates) if i not in done])
+    else:
+        _ce3_log(out_dir, "SESSION_START", n_replicates=n_replicates,
+                 n_samples=n_samples, design_hash=P.plan_hash())
+
     control_model = untrained_twin(seed + 4242)
     raw_dir = out_dir / "raw"; raw_dir.mkdir(parents=True, exist_ok=True)
-    reps, cal = [], []
+    completed = sorted(done)
     for i in range(n_replicates):
+        if i in done:
+            continue
         t0 = time.time()
         X, target = generate_theory_data(n_samples)
         q = np.quantile(target, [0.2, 0.4, 0.6, 0.8])
@@ -407,6 +535,15 @@ def run_ce3(out_dir: Path, *, n_replicates: int, n_samples: int, n_splits: int,
         raw_ev = evaluate_selectivity(X.astype(np.float32), Rc, spec,
                                       n_splits=n_splits, n_repeats=1, seed=seed + i)
         n_classes = int(len(np.unique(labels)))
+        # calibration gate replicate (differential-class target, same pipeline)
+        Xc, Yc = sp.make_train_data(n_samples, P.ROUNDS, diff=P.DIFFERENTIAL)
+        cspec = TargetSpecification(
+            name="Differential Class", description="Calibration positive control.",
+            target_type=TargetType.BINARY, labels=Yc.astype(np.int64),
+            theoretical_interpretation="methodological gate; not cryptographic evidence")
+        cev = evaluate_selectivity(_representation(model, Xc),
+                                   _representation(control_model, Xc), cspec,
+                                   n_splits=n_splits, n_repeats=1, seed=seed + 10_000 + i)
         rec = {"replicate_id": f"ce3_rep{i:02d}", "seed": seed + i, "n": int(n_samples),
                "rounds": P.ROUNDS, "differential": list(P.DIFFERENTIAL),
                "n_classes": n_classes, "chance_level": 1.0 / n_classes,
@@ -417,31 +554,36 @@ def run_ce3(out_dir: Path, *, n_replicates: int, n_samples: int, n_splits: int,
                "control_score": float(ev.control_score_mean),
                "selectivity": float(ev.selectivity_mean),
                "raw_input_score": float(raw_ev.real_score_mean),
+               "calibration_selectivity": float(cev.selectivity_mean),
                "class_counts": np.bincount(labels, minlength=5).tolist(),
                "dataset_sha256": sha256_array(X), "status": "OK",
                "seconds": round(time.time() - t0, 2)}
-        reps.append(rec)
-        # calibration gate replicate (differential-class target, same pipeline)
-        Xc, Yc = sp.make_train_data(n_samples, P.ROUNDS, diff=P.DIFFERENTIAL)
-        cspec = TargetSpecification(
-            name="Differential Class", description="Calibration positive control.",
-            target_type=TargetType.BINARY, labels=Yc.astype(np.int64),
-            theoretical_interpretation="methodological gate; not cryptographic evidence")
-        cev = evaluate_selectivity(_representation(model, Xc),
-                                   _representation(control_model, Xc), cspec,
-                                   n_splits=n_splits, n_repeats=1, seed=seed + 10_000 + i)
-        cal.append(float(cev.selectivity_mean))
+        completed.append(i)
+        _ce3_save_replicate(out_dir, i, rec, binding, completed)
+        done[i] = {**rec, "replicate_index": i}
+        _ce3_log(out_dir, "REPLICATE_COMPLETE", replicate=i,
+                 selectivity=rec["selectivity"], seconds=rec["seconds"])
         log(f"  CE3 replicate {i+1}/{n_replicates}: selectivity={rec['selectivity']:+.4f} "
-            f"raw-input={rec['raw_input_score']:.4f} ({rec['seconds']}s)")
+            f"raw-input={rec['raw_input_score']:.4f} ({rec['seconds']}s) [checkpointed]")
+
+    reps = [done[i] for i in range(n_replicates)]
+    cal = [r["calibration_selectivity"] for r in reps]
     np.savez_compressed(raw_dir / "ce3_replicates.npz",
                         selectivity=np.array([r["selectivity"] for r in reps]),
                         real_score=np.array([r["real_score"] for r in reps]),
                         control_score=np.array([r["control_score"] for r in reps]),
                         raw_input_score=np.array([r["raw_input_score"] for r in reps]),
                         calibration_selectivity=np.array(cal))
+    _ce3_log(out_dir, "ALL_REPLICATES_COMPLETE", n=len(reps))
     return {"replicates": reps, "calibration_selectivity": cal,
             "raw_file": "raw/ce3_replicates.npz",
             "raw_sha256": sha256_file(raw_dir / "ce3_replicates.npz"),
+            "resume": {"binding": binding,
+                       "checkpoint_granularity": "one replicate",
+                       "note": ("completed replicates are never recomputed; an "
+                                "interrupted replicate is recomputed in full because "
+                                "its data are drawn under the frozen os.urandom "
+                                "convention and are not replayable")},
             **analyse_ce3(reps, cal)}
 
 
@@ -802,8 +944,13 @@ def execute(ce: str, out_dir: Path, *, production: bool, n1: int, n2: int,
             seed: int, n_splits: int = 5, behavioural: bool = True) -> Path:
     out_dir = Path(out_dir)
     if out_dir.exists() and any(out_dir.iterdir()):
-        raise PreflightError(f"{rel(out_dir)} already exists and is not empty; "
-                             "production evidence is never overwritten")
+        resumable = ce == "CE3" and (out_dir / "resume_state.json").exists()
+        if (out_dir / "certificate.json").exists():
+            raise PreflightError(f"{rel(out_dir)} already holds a completed certificate; "
+                                 "evidence is never overwritten")
+        if not resumable:
+            raise PreflightError(f"{rel(out_dir)} already exists and is not empty; "
+                                 "production evidence is never overwritten")
     out_dir.mkdir(parents=True, exist_ok=True)
     started = utc()
     pre = preflight(behavioural=behavioural)
