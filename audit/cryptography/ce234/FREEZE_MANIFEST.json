@@ -1,0 +1,359 @@
+{
+  "bootstrap_policy": {
+    "level": 0.95,
+    "method": "percentile over replicate means",
+    "n_boot": 10000,
+    "seed": 0
+  },
+  "ce1_isolation": "verified: CE2-CE4 source references no CE1 run directory, no CE1 checkpoint and no CE1 sealed set",
+  "commands": {
+    "preflight": "python -m audit.cryptography.ce234.production CE2|CE3|CE4 --preflight",
+    "production_NOT_AUTHORIZED": "python -m audit.cryptography.ce234.production CE2|CE3|CE4 --production",
+    "smoke": "python -m audit.cryptography.ce234.production CE2|CE3|CE4 --smoke",
+    "tests": "python -m pytest audit/cryptography/ce234/tests -q",
+    "verify": "python -m audit.cryptography.ce234.verify <run_dir>"
+  },
+  "confirmatory_status": "FROZEN; no decision rule may depend on the observations above",
+  "design_hash": "277ed767ddceae7e1c73fccae2c097ae139ad1284ab63bf04c6dc1626343b4b8",
+  "environment": {
+    "command_line": "-",
+    "cwd_is_repo_root": true,
+    "git_commit": "UNAVAILABLE",
+    "git_working_tree": "UNAVAILABLE",
+    "gpus_visible": 0,
+    "keras": "3.15.1",
+    "numpy": "2.4.4",
+    "platform": "Linux-6.18.44-fc-v64-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.12.3",
+    "scikit_learn": "1.8.0",
+    "scipy": "1.17.1",
+    "tensorflow": "2.21.0"
+  },
+  "exploratory_already_seen": [
+    "CE2 rho ~ +0.80 (smoke)",
+    "CE4 gap ~ +0.53 (smoke)",
+    "CE2 5-vs-7-round diagnostic",
+    "CE4 model-free XOR-weight pilot"
+  ],
+  "freeze_version": "CE234-FREEZE-7",
+  "frozen_utc": "2026-10-03T03:22:33.145836+00:00",
+  "generator": {
+    "deterministic_path": "test-only, asserted unused in production",
+    "exact_replay": "UNAVAILABLE - raw observations persisted instead",
+    "production_source": "os.urandom (Gohr convention)",
+    "version": "ce234-theory-generator-1"
+  },
+  "gohr_sources": [
+    {
+      "cite": "Aron Gohr, Improving Attacks on Round-Reduced Speck32/64 Using Deep Learning, CRYPTO 2019, LNCS 11693, pp.150-179; Cryptology ePrint Archive Paper 2019/037",
+      "id": "GOHR2019",
+      "reported_five_round_accuracy": "approximately 0.929",
+      "url": "https://eprint.iacr.org/2019/037"
+    },
+    {
+      "cite": "agohr/deep_speck supplementary code and data; train_5_rounds.py trains a 10-block deep residual network to distinguish 5-round Speck from random data",
+      "id": "DEEPSPECK",
+      "url": "https://github.com/agohr/deep_speck"
+    }
+  ],
+  "historical_2k8_failure": "original failing input was never persisted and cannot be replayed; validation path is now deterministic and a 600-case sweep found no counterexample. NOT claimed to be explained.",
+  "historical_evidence": "audit/cryptography/evidence/ unmodified; separate provenance record",
+  "model": {
+    "behavioural_binding": {
+      "accuracy_by_rounds": {
+        "5": 0.92998,
+        "6": 0.4989,
+        "7": 0.49377
+      },
+      "declared_rounds": 5,
+      "differential": [
+        64,
+        0
+      ],
+      "gohr_reported_accuracy": 0.9291,
+      "verdict": "PASS"
+    },
+    "path": "audit/cryptography/Archive/best5depth10.h5",
+    "properties": {
+      "conv1d_layers": 21,
+      "input_shape": [
+        null,
+        64
+      ],
+      "l2_values": [
+        1e-05
+      ],
+      "output_shape": [
+        null,
+        1
+      ],
+      "residual_merges": 10
+    },
+    "realized_depth": 10,
+    "sha256": "256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737"
+  },
+  "packaging": {
+    "ce1_files": "copied verbatim from the uploaded archive; byte-identical, none modified",
+    "layout": "drop these contents into <repo>/audit/cryptography/",
+    "note": "the pre-existing PACKAGE_MANIFEST.sha256 was left untouched and therefore does not cover ce234/; CE234_MANIFEST.sha256 covers ce234/ only"
+  },
+  "plan": {
+    "alpha": 0.05,
+    "ce2": {
+      "construct_class": "single-trail quantity; lower bound; proxy",
+      "controls": [
+        [
+          "C2-PERMUTED-TARGET",
+          "the same model outputs paired against an independently permuted copy of the target vector. Breaks the per-sample pairing while preserving both marginal distributions exactly. Expected |rho| ~ 0 if the association is real.",
+          "RECOMMENDATION"
+        ],
+        [
+          "C2-UNTRAINED-MODEL",
+          "an untrained, randomly initialised network of the IDENTICAL architecture, same inputs. Separates association attributable to training from association attributable to architecture/input encoding alone.",
+          "RECOMMENDATION"
+        ]
+      ],
+      "decision_rule": "SUPPORTED iff the Holm-adjusted primary p < alpha AND both controls behave as preregistered (|median control rho| < |median primary rho| / 2). NOT_SUPPORTED iff the primary is significant with the opposite sign to the controls' separation requirement or the controls reproduce the effect. INCONCLUSIVE if fewer than minimum_valid_runs valid runs, or the primary is non-significant - which is NOT evidence that rho = 0.",
+      "direction": "two-sided (no direction is justified by the sources)",
+      "effect_size": "median run-level rho; 95% percentile-bootstrap CI over runs",
+      "exclusion_rule": "a run is excluded only if the target or output vector is constant (rho undefined) or non-finite. Exclusions are reported, never silently dropped.",
+      "experiment_id": "CE2-THEORY-CONSISTENCY",
+      "failure_rule": "a run that raises is recorded as FAILED and retained; it is not replaced.",
+      "h0": "H0: the run-level population median Spearman rho is 0.",
+      "h1": "H1: it is not 0.",
+      "historical_status": "the historical CE2 rho ~ -0.18 is evidence from a MISMATCHED historical configuration (depth-10 checkpoint evaluated on 7-round data) and is NOT a result for the current five-round question. The 5-round vs 7-round decomposition is a PRE-PRODUCTION DIAGNOSTIC, already seen, therefore exploratory and non-evidentiary; it may never be promoted to a confirmatory result.",
+      "limitations": [
+        "association only; no causal interpretation is licensed",
+        "one model instance; the unit of replication is the evaluation run, so the claim does not generalise over independently trained models",
+        "the target is a single-trail LOWER BOUND, not the exact differential probability",
+        "evaluated on real difference-bearing pairs only, not on the mixed real/random population the distinguisher is trained to separate"
+      ],
+      "minimum_valid_runs": 20,
+      "n_runs": 20,
+      "primary_endpoint": "replicate-level Spearman rho between target and model output",
+      "primary_test": "exact two-sided sign test over run-level rho signs",
+      "question": "Does the frozen depth-10 distinguisher's output vary monotonically with an independently computed analytical single-trail probability, on real difference-bearing ciphertext pairs of the same 5-round Speck32/64 problem?",
+      "reporting_requirements": [
+        "all 20 replicate-level rho values",
+        "per-replicate n",
+        "median rho",
+        "95% percentile-bootstrap CI over replicates",
+        "primary replicate-level directional inference (exact sign test)",
+        "secondary sensitivity analyses (last-round / prefix decomposition)"
+      ],
+      "samples_per_run": 1000000,
+      "sampling_unit": "ciphertext pair. The 10^6 pairs inside a replicate are SAMPLING units used to estimate that replicate's rho; they are NEVER represented as 10^6 independent scientific replicates and never enter the primary inference.",
+      "secondary_endpoints": [
+        [
+          "S2-LAST-ROUND-ONLY",
+          "rho(model output, final-round xdp+ factor alone)"
+        ],
+        [
+          "S2-PREFIX-ONLY",
+          "rho(model output, product of rounds 1..n-1), the part NOT determined by the ciphertext pair"
+        ]
+      ],
+      "statistical_unit": "independent evaluation replicate (fresh dataset, fresh seed)",
+      "stopping_rule": "exactly n_runs runs are executed. No interim analysis, no early stop, no extension on an inconvenient p-value.",
+      "target_quantity": "product over rounds of xdp+(alpha_r, beta_r -> gamma_r), the Lipmaa-Moriai (FSE 2001) closed-form XOR-differential probability of modular addition, evaluated on each sample's REALIZED round-by-round differences under the Markov/independence assumption. This is a SINGLE-TRAIL quantity and a LOWER BOUND on the true differential propagation probability (trail clustering: Benamira et al., EUROCRYPT 2021). It is NOT the exact differential probability of the cipher and NOT 'what the network learned'.",
+      "within_run_inference_role": "descriptive only, never primary"
+    },
+    "ce3": {
+      "control_admissibility": "every control representation must be non-degenerate: at least 2 features with non-zero variance, else the run FAILS CLOSED.",
+      "controls": [
+        [
+          "C3-UNTRAINED-ARCH",
+          "untrained randomly-initialised network of the identical architecture. Controls for architecture, dimensionality and input encoding; does NOT control for training. Standard random-network baseline in the probing literature (Zhang & Bowman, BlackboxNLP 2018; Hewitt & Liang, EMNLP 2019).",
+          "RECOMMENDATION"
+        ],
+        [
+          "C3-RAW-INPUT",
+          "the same probe applied to the raw 64-bit ciphertext-pair encoding. If the target is equally decodable from the raw input, the REPRESENTATION adds nothing and no statement about the representation is licensed.",
+          "RECOMMENDATION"
+        ],
+        [
+          "C3-CALIBRATION-GATE",
+          "differential-class probing as a methodological positive control for the probing pipeline; a gate, never cryptographic evidence.",
+          "SOURCE-FROZEN"
+        ]
+      ],
+      "decision_rule": "fixed sequence at alpha. Step 1: the calibration gate must validate the probing pipeline, else INCONCLUSIVE and stop. Step 2: SUPPORTED iff mean replicate-level selectivity against the PRIMARY control > 0 and p < alpha; NOT_SUPPORTED if the mean is not positive; otherwise INCONCLUSIVE. C3-RAW-INPUT and the twin-decodability audit are reported alongside and cap the permissible wording; neither can change the decision.",
+      "effect_size": "mean selectivity, Cohen's dz, 95% t-CI and percentile-bootstrap CI",
+      "exclusion_rule": "a replicate is excluded only on probe failure or non-finite score",
+      "experiment_id": "CE3-REPRESENTATION-INTERPRETATION",
+      "historical_control_defect": "signal_destroyed.h5 has an all-zero penultimate representation (verified); its probe score is exactly 1/n_classes. The same collapse is present in the CE1 destroyed arm, so a trained-destroyed control cannot be assumed non-degenerate and must be checked before use.",
+      "limitations": [
+        "decodability is NOT use: a probe can recover information the model does not rely on (Hewitt & Liang 2019; Belinkov, Computational Linguistics 2022)",
+        "the target is CE2's construct coarsened, so CE3 is not independent confirmation of CE2",
+        "one model instance; replicates vary the evaluation data, not the training"
+      ],
+      "metric": "balanced accuracy (class-imbalance robust)",
+      "minimum_valid_replicates": 20,
+      "multiplicity": "fixed_sequence_calibration_then_primary",
+      "n_replicates": 20,
+      "n_splits_per_replicate": 5,
+      "primary_control": "C3-UNTRAINED-ARCH",
+      "primary_endpoint": "replicate-level selectivity = real score - C3-UNTRAINED-ARCH score",
+      "primary_test": "one-sided Wilcoxon signed-rank over the 20 replicate-level selectivities (SOURCE-FROZEN), nested CV folds are a variance-reduction device and are NEVER treated as independent observations",
+      "probe": "multinomial logistic regression, library defaults fixed in probe/evaluation.LogisticRegressionProbe, seeded per fold, identical seed and identical fold partition for every arm. No hyperparameter search is performed at any stage.",
+      "question": "Is the analytical single-trail quantity decodable from the frozen model's penultimate representation beyond matched controls?",
+      "representation": "model.layers[-2] output: the 64-unit post-activation penultimate layer immediately before the output classifier, inference mode, no pooling, no normalisation, sample order preserved.",
+      "samples_per_replicate": 100000,
+      "secondary_control_role": "C3-RAW-INPUT is informational; it never changes the decision, it caps the defensible wording",
+      "shared_examples_within_replicate": true,
+      "statistical_unit": "independent evaluation replicate",
+      "target_quantity": "CE2's analytical single-trail probability, discretised into 5 classes at the empirical quintiles of that run's own target vector (MULTICLASS). Identical construct to CE2, coarsened; NOT an independent quantity.",
+      "twin_decodability_audit": "report the twin's absolute probe score against the 1/n_classes chance level for every replicate; a non-trivial twin score is reported, never hidden"
+    },
+    "ce4": {
+      "analysis_1": "WITHIN-REPLICATE PAIRED EFFECT: per-sample paired gap |f(x)-f(structural)| - |f(x)-f(control)|, Wilcoxon signed-rank over eligible samples. Inferential target: the paired effect WITHIN that replicate's sample. Does NOT generalise across replicates.",
+      "analysis_2": "ACROSS-REPLICATE REPRODUCIBILITY: the 10 replicate-level mean gaps, exact sign test + bootstrap CI. Inferential target: stability of the effect over independent evaluation data. This is the PRIMARY inference.",
+      "construction": "side-balanced, same-word-paired position draw",
+      "controls": [
+        [
+          "C4-XOR-PRESERVING",
+          "mirrored flips at difference-bearing positions",
+          "SOURCE-FROZEN (construction corrected here)"
+        ],
+        [
+          "C4-NULL",
+          "zero bits flipped; the measured gap must be exactly 0",
+          "RECOMMENDATION"
+        ]
+      ],
+      "decision_rule": "SUPPORTED iff all manipulation checks pass in every replicate, C4-NULL is exactly 0, and at the PRIMARY magnitude the across-replicate exact sign test is significant with a positive mean of replicate means. NOT_SUPPORTED if that mean is not positive. INCONCLUSIVE otherwise or on any failed check. The dose-response family is reported but cannot change the primary decision.",
+      "effect_size": "per-replicate mean gap and Cohen's dz; across replicates the mean of means with a 95% percentile-bootstrap CI",
+      "eligibility": "sample admits k disjoint same-word pairs of difference-bearing positions (hence 2k eligible positions). BOTH arms draw from this same pool, so eligibility cannot induce a between-arm selection difference. The restriction defines the population the claim is about and is reported.",
+      "estimand": "mean within-replicate paired difference in output-change magnitude between the structural policy and the matched control policy at the PRIMARY intervention magnitude, within the prespecified eligible population, for this frozen model instance; and the reproducibility of that quantity across independent evaluation replicates.",
+      "exclusion_rule": "ineligible samples are excluded by the predeclared rule and counted",
+      "experiment_id": "CE4-INTERVENTION-SENSITIVITY",
+      "historical_magnitude_status": "the historical 8 was an inherited adapter default with no source justification; it is retained only as a ladder point, never as the primary.",
+      "limitations": [
+        "intervention sensitivity is NOT causal necessity of the analytical quantity: the intervention never manipulates that quantity",
+        "both arms move the input off the cipher's output manifold; the contrast is between two off-manifold policies",
+        "the arms cannot be matched on the number of distinct positions touched; this is a mathematical consequence of XOR preservation",
+        "one model instance; no claim about models in general",
+        "the control is inert with respect to the DECLARED XOR target only"
+      ],
+      "magnitude_coverage_rule": "admit 2k only if eligibility coverage >= 95%",
+      "magnitude_justification": "ADDITIONAL SCIENTIFIC RECOMMENDATION (option C)",
+      "magnitude_ladder_bits": [
+        2,
+        4,
+        8
+      ],
+      "manipulation_checks": [
+        "both arms change exactly 2k input bits per sample",
+        "both arms change exactly k bits of c0 and k bits of c1",
+        "both arms have identical per-word perturbation counts",
+        "the c0-side flips are identical between arms",
+        "the control leaves the pair XOR exactly invariant",
+        "the structural arm changes the pair XOR at exactly 2k positions",
+        "no ineligible position is touched by either arm",
+        "marginal per-column bit frequencies are reported for both arms"
+      ],
+      "matching_criterion": "matched: total input Hamming displacement (2k), per-ciphertext displacement (k in c0 and k in c1), per-word composition, eligible-position pool, and the identical c0-side flips. NOT matched (mathematically impossible under XOR preservation): the number of distinct positions touched, 2k vs k. NOT matched and reported as a limitation: displacement in the model's representation space and distance to the cipher's output manifold.",
+      "minimum_valid_runs": 10,
+      "multiplicity": "Holm within the CE4 secondary family; the primary is a single test",
+      "n_intervention_bits_historical": 8,
+      "n_runs": 10,
+      "primary_magnitude_bits": 2,
+      "question": "Is the frozen model's output more sensitive to perturbation of the difference-bearing ciphertext structure than to a magnitude-matched, XOR-preserving perturbation?",
+      "retain_per_sample_gaps": true,
+      "samples_per_run": 100000,
+      "secondary_family": "dose-response across the non-primary ladder magnitudes",
+      "statistical_unit": "independent evaluation replicate (primary); eligible sample (within-replicate)",
+      "threshold_policy": "NO magnitude threshold is applied. The historical 0.10 x 'ceiling' rule is superseded: the historical ceiling (0.00719) was SMALLER than the observed gap (0.0723), so it bounded nothing."
+    },
+    "cross_ce_multiplicity": "none (intersection-union for any conjunctive claim)",
+    "plan_version": "CE234-frozen-plan-2026-10-01-r2",
+    "reference": {
+      "behavioural_binding": {
+        "max_accuracy_at_other_rounds": 0.6,
+        "min_accuracy_at_declared_rounds": 0.85,
+        "n_samples": 100000,
+        "other_rounds": [
+          6,
+          7
+        ],
+        "reference_accuracy_reported_by_gohr": 0.9291
+      },
+      "checkpoint_sha256": "256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737",
+      "depth": 10,
+      "differential": [
+        64,
+        0
+      ],
+      "l2_reg": 1e-05,
+      "required_model_properties": {
+        "conv1d_layers": 21,
+        "input_shape": [
+          null,
+          64
+        ],
+        "l2_values": [
+          1e-05
+        ],
+        "output_shape": [
+          null,
+          1
+        ],
+        "residual_merges": 10
+      },
+      "rounds": 5
+    },
+    "unspecified_in_source": {
+      "CE2.n_replicates": "no source fixes it; OPERATOR-FROZEN at 20 on 2026-10-01",
+      "CE3.control_model": "no source fixes a non-degenerate CE3 control; the untrained twin is OPERATOR-FROZEN as primary on 2026-10-01",
+      "CE4.intervention_magnitude": "no source fixes it; derived model-free from the encoding and the coverage rule, primary 2k=2, ladder (2,4,8); ADDITIONAL SCIENTIFIC RECOMMENDATION",
+      "CE4.n_replicates": "no source fixes it; OPERATOR-FROZEN at 10 on 2026-10-01"
+    },
+    "within_ce_multiplicity": "holm"
+  },
+  "plan_version": "CE234-frozen-plan-2026-10-01-r2",
+  "rng_policy": {
+    "production": "os.urandom (frozen Gohr convention); exact replay unavailable; raw observations persisted",
+    "validation": "explicit numpy Generator; preflight refuses the test path in production"
+  },
+  "seed_policy": {
+    "CE2": "seed+i",
+    "CE3": "seed+i / seed+10000+i",
+    "CE4": "seed+i",
+    "tests": "fixed corpus range(40); explicit numpy Generator at every call site, AST-enforced"
+  },
+  "source_hashes": {
+    "audit/cryptography/adapters/gohr.py": "44489a843bd3aac270142674a8a04aae131ca4b662a223862f1ee470e3fe3924",
+    "audit/cryptography/ce234/build_matrices.py": "21936342c7dfd7877e584fec39d984329529e97d87cc48509dd1d7a72dcbd594",
+    "audit/cryptography/ce234/frozen_plan.py": "4280d8eddb9881421787116fc3564930083e2903db188c6446cdd7d98bbeb585",
+    "audit/cryptography/ce234/production.py": "c1e66c13aa8f98a76f337348c7dfe3c74d0948a9638277bb1af9eaa43505c3cb",
+    "audit/cryptography/ce234/tests/test_ce234.py": "b76c765a786762f9d94f8d7b97881f8605feb75b5df15bbbb28ad84a9fe59cbb",
+    "audit/cryptography/ce234/verify.py": "b6cb454973ffc2e1e4d60acfbb37d11bcad5e6fbaf7c70028a315b3c8dcfe5b7",
+    "audit/cryptography/experiments/ce4/design.py": "e165f304f2547c3f401f386804942d60b18c60c1177993561bb88286edef214d",
+    "audit/cryptography/gohr/dataset.py": "288c1155d9eabf510bd4653103409dddedf03a7aa4d54f5bb8051ff6cb5b42a9",
+    "audit/cryptography/gohr/evaluate.py": "9344cb6abc09d398c5d2a0e806311a6e515ecbfb4a9932ed3c96917a2636b2a4",
+    "audit/cryptography/gohr/model.py": "134fb45d1474f302220f74d86bfb037c0657162bb9ebcb82941d84d5cebdb899",
+    "audit/cryptography/gohr/speck.py": "e4f2324f7900d7d13dcb28f98188b5c045d4f6b723147a26ac2d39211d7a8805",
+    "audit/cryptography/probe/evaluation.py": "31ff760900704088f714beb7c3534924c61c28611f4ae14188897b9c2a63c799"
+  },
+  "status": "PRE-PRODUCTION - NOT AUTHORIZED; no production command executed",
+  "tamper_matrix": {
+    "n": 22,
+    "path": "audit/cryptography/ce234/matrices/TAMPER_MATRIX.json",
+    "rejected": 22
+  },
+  "test_matrix": {
+    "counts": {
+      "PASSED": 55,
+      "SKIPPED": 3
+    },
+    "n": 58,
+    "path": "audit/cryptography/ce234/matrices/TEST_MATRIX.json",
+    "skip_reason": "evidence/ is not shipped in this package, so the two historical-artifact tests skip; the CE3 tamper case skips because smoke stops before the primary statistic by design",
+    "skips": [
+      "test_historical_lookalike_checkpoint_is_refused",
+      "test_historical_control_model_is_degenerate",
+      "test_ce3_verifier_rejects_selectivity_tampering"
+    ]
+  }
+}
