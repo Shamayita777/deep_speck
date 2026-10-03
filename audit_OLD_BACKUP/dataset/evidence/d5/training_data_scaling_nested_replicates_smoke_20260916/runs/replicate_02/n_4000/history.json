@@ -1,6 +1,0 @@
-{
-  "replicate": 2,
-  "test_accuracy": 0.5950000286102295,
-  "test_loss": 0.2469225525856018,
-  "training_samples": 4000
-}
