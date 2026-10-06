@@ -43,7 +43,7 @@ from audit.cryptography.ce234 import frozen_plan as P
 from audit.cryptography.ce234 import production as PR
 
 HERE = Path(__file__).resolve().parent
-REPO_ROOT = HERE.parents[2]
+REPO_ROOT = HERE.parents[1]        # <repo>/audit/adversarial -> <repo>
 EVIDENCE_ROOT = HERE / "evidence"
 A4_MAP_KEY = b"ciphermind-A4-xor-response-v1"      # registered constant
 
@@ -440,6 +440,14 @@ def write_freeze_manifest(out: Path, model_path: Path, train_record: dict) -> di
                 "every source file to the values recorded here; no rebuild, no "
                 "selection among candidates, no manifest refresh",
     }
+    g = man["git"]
+    if g.get("working_tree") != "clean" or man["freeze_git_commit"] == "UNAVAILABLE":
+        man["provenance_warning"] = (
+            f"frozen with git working_tree={g.get('working_tree')!r} and "
+            f"freeze_git_commit={man['freeze_git_commit']!r}. A confirmatory run "
+            "REFUSES a manifest without a recorded commit, and refuses a dirty tree "
+            "at run time. Rebuild from a clean, committed state.")
+        print("WARNING: " + man["provenance_warning"])
     (out / A3_FREEZE_NAME).write_text(json.dumps(man, indent=2, sort_keys=True,
                                                  default=str))
     return man
@@ -479,15 +487,28 @@ def load_frozen_a3(out: Path, model_path: Path, *,
 
 
 def _git() -> dict:
+    """
+    Git state of THIS repository. A failed invocation must never be read as a
+    clean tree: `git status --porcelain` prints nothing both when the tree is
+    clean and when the command fails, so the return code is checked explicitly.
+    """
     try:
-        commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT,
-                                capture_output=True, text=True, timeout=20).stdout.strip()
-        dirty = subprocess.run(["git", "status", "--porcelain"], cwd=REPO_ROOT,
-                               capture_output=True, text=True, timeout=20).stdout.strip()
+        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT,
+                              capture_output=True, text=True, timeout=20)
+        status = subprocess.run(["git", "status", "--porcelain"], cwd=REPO_ROOT,
+                                capture_output=True, text=True, timeout=20)
+        if head.returncode != 0 or status.returncode != 0:
+            return {"commit": "UNAVAILABLE", "working_tree": "UNAVAILABLE",
+                    "error": (head.stderr or status.stderr or "").strip()[:200],
+                    "repo_root": str(REPO_ROOT)}
+        commit = head.stdout.strip()
         return {"commit": commit or "UNAVAILABLE",
-                "working_tree": "dirty" if dirty else "clean"}
-    except Exception:                                           # noqa: BLE001
-        return {"commit": "UNAVAILABLE", "working_tree": "UNAVAILABLE"}
+                "working_tree": "dirty" if status.stdout.strip() else "clean",
+                "repo_root": str(REPO_ROOT)}
+    except Exception as exc:                                    # noqa: BLE001
+        return {"commit": "UNAVAILABLE", "working_tree": "UNAVAILABLE",
+                "error": f"{type(exc).__name__}: {exc}"[:200],
+                "repo_root": str(REPO_ROOT)}
 
 
 def source_hashes() -> dict:

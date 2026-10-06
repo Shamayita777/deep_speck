@@ -559,3 +559,48 @@ def test_a1_historical_record_remains_untouched():
     assert (Path(P1.__file__).parent / "a1_theory_mimic.py").exists()
     assert "CONSTRUCTION_FAILED" in P2.HISTORICAL["A1"].status
     assert "A1" not in P2.ADVERSARIES                   # not merged into v2
+
+
+# ---- patch set 5: repository-root and git-state reporting ----
+
+def test_repo_root_is_the_directory_containing_audit():
+    assert (B.REPO_ROOT / "audit" / "adversarial" / "battery.py").exists(), B.REPO_ROOT
+    assert B.HERE.parents[1] == B.REPO_ROOT
+    # rel() must not carry a spurious leading directory
+    assert B.rel(B.HERE / "battery.py") == "audit/adversarial/battery.py"
+
+
+def test_failed_git_is_never_reported_as_clean(monkeypatch):
+    class _R:
+        def __init__(self, rc, out="", err="fatal: not a git repository"):
+            self.returncode, self.stdout, self.stderr = rc, out, err
+    monkeypatch.setattr(B.subprocess, "run", lambda *a, **k: _R(128))
+    g = B._git()
+    assert g["commit"] == "UNAVAILABLE" and g["working_tree"] == "UNAVAILABLE"
+    assert "repo_root" in g
+    # success: rev-parse returns a SHA, status --porcelain returns nothing
+    def _ok(cmd, *a, **k):
+        return _R(0, "db42d91fdf384a58f028e3a20e3108b7dbe8c37e\n"
+                  if "rev-parse" in cmd else "")
+    monkeypatch.setattr(B.subprocess, "run", _ok)
+    g = B._git()
+    assert g["working_tree"] == "clean"
+    assert g["commit"] == "db42d91fdf384a58f028e3a20e3108b7dbe8c37e"
+
+    # a modified file makes status non-empty -> dirty, not clean
+    def _dirty(cmd, *a, **k):
+        return _R(0, "db42d91fdf384a58f028e3a20e3108b7dbe8c37e\n"
+                  if "rev-parse" in cmd else " M audit/adversarial/battery.py")
+    monkeypatch.setattr(B.subprocess, "run", _dirty)
+    assert B._git()["working_tree"] == "dirty"
+
+
+def test_build_warns_when_provenance_is_incomplete(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(B, "_git",
+                        lambda: {"commit": "UNAVAILABLE", "working_tree": "UNAVAILABLE"})
+    mp = tmp_path / "a3_representation.keras"; mp.write_bytes(b"x")
+    man = B.write_freeze_manifest(tmp_path, mp, {"adversary": "A3"})
+    assert "provenance_warning" in man
+    assert "WARNING:" in capsys.readouterr().out
+    with pytest.raises(SystemExit, match="records no git commit"):
+        B.verify_freeze_commit_recorded(man)
