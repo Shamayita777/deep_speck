@@ -1,0 +1,99 @@
+{
+  "audited_algorithm": "Lipmaa-Moriai closed form (FSE 2001)",
+  "checks": [
+    {
+      "check": "T1 exhaustive word_size=4 vs exact enumeration",
+      "exact_match": true,
+      "max_abs_diff": 0.0,
+      "n_nonzero": 1372,
+      "n_triples": 4096,
+      "ok": true
+    },
+    {
+      "check": "T2 sampled word_size=8 vs exact enumeration",
+      "exact_match": true,
+      "max_abs_diff": 0.0,
+      "n_nonzero": 116,
+      "n_triples": 400,
+      "ok": true
+    },
+    {
+      "check": "T3 sampled word_size=16 vs audited Lipmaa-Moriai closed form",
+      "exact_match": true,
+      "max_abs_diff": 0.0,
+      "n_disagreeing": 0,
+      "n_feasible_independent": 106771,
+      "n_feasible_reference": 106771,
+      "n_triples": 200000,
+      "ok": true,
+      "zero_pattern_identical": true
+    },
+    {
+      "check": "T4 probabilities over all gamma sum to 1 (word_size=8)",
+      "max_abs_deviation_from_1": 0.0,
+      "n_pairs": 60,
+      "ok": true
+    },
+    {
+      "cases": [
+        {
+          "case": "alpha=beta=gamma=0",
+          "expected": 1.0,
+          "got": 1.0
+        },
+        {
+          "case": "delta_0 != 0 (gamma=1, alpha=beta=0)",
+          "expected": 0.0,
+          "got": 0.0
+        },
+        {
+          "case": "difference in the most significant bit only",
+          "expected": 1.0,
+          "got": 1.0
+        }
+      ],
+      "check": "T5 boundary cases",
+      "ok": true
+    },
+    {
+      "audited_target_sha256": "0206cc90dec25ab2f450af61992c7e30257eaa1f620c779518d70bcae45db6a7",
+      "check": "T6 end-to-end CE2 target by two independent paths",
+      "ciphertext_encoding_identical": true,
+      "differential": [
+        64,
+        0
+      ],
+      "encoding_sha256": "f43241fe33b3790a70076c9462b87c3e481650c9f6868e1d26c8dc75b10f2dc9",
+      "independent_target_sha256": "0206cc90dec25ab2f450af61992c7e30257eaa1f620c779518d70bcae45db6a7",
+      "n_samples": 20000,
+      "ok": true,
+      "per_round_factors_identical": true,
+      "rounds": 5,
+      "target_max_abs_diff": 0.0
+    }
+  ],
+  "environment": {
+    "numpy": "2.4.6",
+    "platform": "macOS-13.5-arm64-arm-64bit",
+    "python": "3.11.14"
+  },
+  "failed_checks": [],
+  "git_commit": "UNAVAILABLE",
+  "ground_truth_for_small_words": "exhaustive enumeration over all (x, y)",
+  "independent_algorithm": "carry-difference automaton (dynamic programming over bit positions)",
+  "independent_implementation_id": "m7-carry-automaton-1",
+  "limitations": [
+    "establishes agreement between two implementations of the same quantity; it does not establish that the quantity is the right target for CE2, which is a separate, documented scope question",
+    "word_size 16 is verified by sampling, not exhaustively: the full triple space is 2^48"
+  ],
+  "milestone": "M7",
+  "quick_mode": false,
+  "source_hashes": {
+    "audit/cryptography/gohr/speck.py": "e4f2324f7900d7d13dcb28f98188b5c045d4f6b723147a26ac2d39211d7a8805",
+    "audit/implementation/ii2_independent/theory_independent.py": "e1aaba221f7a6bbc7567ded0c97a9bea112cadcf88f226ad9bb3d54662638b9f",
+    "audit/implementation/ii2_independent/verify_m7.py": "29f849fdf29b17a1fdb1548e3c15d99dd36fada9dff338c181cd4e4d51daae3b"
+  },
+  "title": "Independent implementation of the differential theory",
+  "utc": "2026-10-06T05:01:48.949588+00:00",
+  "verdict": "VERIFIED"
+}

@@ -1,0 +1,333 @@
+{
+  "adjusted_p_value": null,
+  "artifact_hashes": {
+    "best5depth10 (10).h5": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea",
+    "ii2/m1_deterministic_verification.json": "f1c0a7a05e8a3a7c73aac577daef28dab7ce35bbd2023fe9d1d50c288b67cc7e",
+    "ii2/m1_independent_best.zip": "29ade89e56b9bd5d38d19f1abde5cffe78f204a6221b1a62fd423c82c61d72be",
+    "ii2/m1_independent_training_report.json": "72c26cefc35917ab71c731f111187a30a7cf71838bf26822ca860c49af5e807f",
+    "ii4_bound/7893611dffa86656/ii4_analysis.json": "1e37a048710a325dee08a329cd03e89e27d1058f586eabd4a8f3f8994998387e",
+    "ii4_bound/7893611dffa86656/ii4_firewall.json": "c6354c743b8d757910bd73512072031f0d1bf5675ec26eb2ea1d8e41cf040272",
+    "ii4_bound/7893611dffa86656/ii4_preregistration.json": "77b757809f0d525b3ac40a273bd729cd53fbb13c70037d1c69ed90310ab1c5a4",
+    "ii4_bound/7893611dffa86656/ii4_state.json": "b224f10642bdd4972fbd3f9f90358f896f947260995e34cc6fa0e3f2212b9702",
+    "ii4_bound/7893611dffa86656/run_manifest_II-4-GOHR-DEPTH-V1-run.json": "521786596589f5178648b6af10c3a1cac2854471c162b201bee63153c74d55d0",
+    "reference/train_5_rounds.py": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+    "reference/train_nets.py": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669",
+    "signal_destroyed.h5": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308",
+    "source:audit/common/outcomes.py": "edd70f8e38f7b2c4d53d992115bcd3e35ab0ea337c0586ad129fbdb9bc1b005e",
+    "source:audit/common/provenance.py": "7cf33f8ed32f999cb58345f20e01b442f8b0c4e12c732e2bb95a08ce4c6b0eb2",
+    "source:audit/common/run_manifest.py": "3c40f96987de7edae337ff199ac918f0bbb9635c1d60503949bfbbeac99e1ab9",
+    "source:audit/common/strict_json.py": "cb02f0113caf88cd86b2a3f6624d866afaf74b358ea443ebaf111f7311a2bbcf",
+    "source:audit/experimental_validity/framework/firewall.py": "6e40ad7c8f6119a6c50eb12155db980a76e6afb0a73a9ee2b93b97b2b17a6b62",
+    "source:audit/experimental_validity/gohr/dataset.py": "67f82200b7aa02dc305cce52602fe52a6ddc36c85690692a49d6e1d5c389f612",
+    "source:audit/experimental_validity/gohr/evaluate.py": "ab40cd1ad619cf455a3a64a7e2e70e76fb2dafb9b1acd10131952eb5a17a3405",
+    "source:audit/experimental_validity/gohr/model.py": "7ed6a37d15305400258da90eba7d36be32657a56ddcd398e9c3c827521a4ffaf",
+    "source:audit/experimental_validity/gohr/speck.py": "ccde78d1aacba1b498de1617bb50c56f241656f8baae7b8dd9b7afb1474fc13d",
+    "source:audit/experimental_validity/gohr/train.py": "ba7b6ea437352cd99127003267def20ee9621a396ae8b61dab9c950ffb025a87",
+    "source:audit/implementation/adapters/gohr_ii4.py": "68c84b777cadf20bd0f702b2510118735518cedbe1bb9a396e5ae7883e21f7ed",
+    "source:audit/implementation/conformance.py": "bc7afe84853ad9ae76c7cf4c93302a4f96351f4937b0fb3dab179c13182ebfff",
+    "source:audit/implementation/ii2_independent/dataset_independent.py": "814618e8db1f90e60abd3cae7c17938903711b5255a7f942a4119920bf962834",
+    "source:audit/implementation/ii2_independent/model_independent.py": "c57708823b811f18c0718b20772b8f85d85a587bf884758e8ce6e65313516b8c",
+    "source:audit/implementation/ii2_independent/speck_independent.py": "16c89236a03fcbdeab3d6fa2b956a4b9aeabf3e742a27ae4e2250bb02136d912",
+    "source:audit/implementation/ii2_independent/train_independent.py": "bc61346196d01e127f42eff293591f8fe011838c7cafa1329cf9dde9ec15946d",
+    "source:audit/implementation/ii4_analysis.py": "46068721044e9e01b4c8e7241e4aadaf299c933de2d08eb057b6e4f04a05912a",
+    "source:audit/implementation/ii4_certificate.py": "e8405aff8dbb12a694e3900d30d443ec4ed2a16af64fe55a39589d15ca29afef",
+    "source:audit/implementation/ii4_design.py": "58ecd2baeceb7bd6bac982bdf580caca5c180badc59e8386b65497c86e220863",
+    "source:audit/implementation/ii4_experiment.py": "74099c6065a9be4ce7902d5add81e5b83e15666425e821ce162d549f8f15e8db",
+    "source:audit/implementation/ii4_runner.py": "a2eb572ccfde67290091b1678de5794d964814a31d38cc9ff6bd4960fdf44931",
+    "source:audit/implementation/reference/speck.py": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce",
+    "source:audit/implementation/reference/train_5_rounds.py": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+    "source:audit/implementation/reference/train_nets.py": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669",
+    "source:audit/implementation/run_ii4.py": "e6c9cb1b375842f89421121e46ca5d20cbfe0d2a742c8b65a411f6000e2b455f",
+    "source:speck.py": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce",
+    "source:train_5_rounds.py": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+    "source:train_nets.py": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669"
+  },
+  "claim_id": "C1",
+  "confidence_interval": null,
+  "decision": "CONDITIONAL_PASS",
+  "dimension": "IMPLEMENTATION_INTEGRITY",
+  "effect_size": null,
+  "evidence_id": "EV-II-DEPTH-002",
+  "experiment_id": "II-4-GOHR-DEPTH-V1",
+  "input_artifacts": [
+    "best5depth10 (10).h5",
+    "ii2/m1_deterministic_verification.json",
+    "ii2/m1_independent_best.zip",
+    "ii2/m1_independent_training_report.json",
+    "ii4_bound/7893611dffa86656/ii4_analysis.json",
+    "ii4_bound/7893611dffa86656/ii4_firewall.json",
+    "ii4_bound/7893611dffa86656/ii4_preregistration.json",
+    "ii4_bound/7893611dffa86656/ii4_state.json",
+    "ii4_bound/7893611dffa86656/run_manifest_II-4-GOHR-DEPTH-V1-run.json",
+    "reference/train_5_rounds.py",
+    "reference/train_nets.py",
+    "signal_destroyed.h5",
+    "source:audit/common/outcomes.py",
+    "source:audit/common/provenance.py",
+    "source:audit/common/run_manifest.py",
+    "source:audit/common/strict_json.py",
+    "source:audit/experimental_validity/framework/firewall.py",
+    "source:audit/experimental_validity/gohr/dataset.py",
+    "source:audit/experimental_validity/gohr/evaluate.py",
+    "source:audit/experimental_validity/gohr/model.py",
+    "source:audit/experimental_validity/gohr/speck.py",
+    "source:audit/experimental_validity/gohr/train.py",
+    "source:audit/implementation/adapters/gohr_ii4.py",
+    "source:audit/implementation/conformance.py",
+    "source:audit/implementation/ii2_independent/dataset_independent.py",
+    "source:audit/implementation/ii2_independent/model_independent.py",
+    "source:audit/implementation/ii2_independent/speck_independent.py",
+    "source:audit/implementation/ii2_independent/train_independent.py",
+    "source:audit/implementation/ii4_analysis.py",
+    "source:audit/implementation/ii4_certificate.py",
+    "source:audit/implementation/ii4_design.py",
+    "source:audit/implementation/ii4_experiment.py",
+    "source:audit/implementation/ii4_runner.py",
+    "source:audit/implementation/reference/speck.py",
+    "source:audit/implementation/reference/train_5_rounds.py",
+    "source:audit/implementation/reference/train_nets.py",
+    "source:audit/implementation/run_ii4.py",
+    "source:speck.py",
+    "source:train_5_rounds.py",
+    "source:train_nets.py"
+  ],
+  "limitations": [
+    "Independent reimplementation (ENHANCED stage II-2) is ASSESSED. Independent reimplementation was performed, supplying one independent implementation path whose agreement (or disagreement) with the reference implementation is available to the integration engine as convergence evidence.",
+    "EQUIVALENT_WITHIN_MARGIN establishes ACCURACY conformance only; it does NOT validate transferability of Cryptographic Evidence obtained on the depth-5 model."
+  ],
+  "non_evidentiary": false,
+  "observation": {
+    "convergence_contribution": {
+      "contributes": true,
+      "rationale": "Independent reimplementation was performed, supplying one independent implementation path whose agreement (or disagreement) with the reference implementation is available to the integration engine as convergence evidence.",
+      "source_kind": "independent_implementation"
+    },
+    "core_stages_satisfied": true,
+    "core_stages_unsatisfied": [],
+    "discrepancy_confirmed": true,
+    "downstream_requires_reevaluation": [
+      "evidence/ce1/ce1_certificate.json",
+      "evidence/ce2/ce2_certificate_{1..5}.json",
+      "evidence/ce3/ce3_certificate.json",
+      "evidence/ce4/ce4_certificate.json"
+    ],
+    "findings": [
+      {
+        "actual": {
+          "depth": 5,
+          "derivation": "depth = (n_conv1d_layers - 1) / 2 = (11 - 1) / 2 = 5",
+          "ii4_ci95": {
+            "high": 6.924124526299746e-05,
+            "low": -0.00038384124526298456
+          },
+          "ii4_equivalence": "EQUIVALENT_WITHIN_MARGIN",
+          "ii4_experiment_id": "II-4-GOHR-DEPTH-V1",
+          "ii4_materiality": "NO_DIRECTIONAL_CLAIM",
+          "ii4_mean_signed_difference_depth10_minus_depth5": -0.00015729999999999355,
+          "ii4_valid_blocks": 10,
+          "interpretation_clause": "CONDITIONAL_PASS for ACCURACY CONFORMANCE ONLY. This does NOT validate transferability of Cryptographic Evidence obtained on the depth-5 model: II-4 measures accuracy, not internal representation or intervention sensitivity.",
+          "mechanism": "The CE GohrModel constructor defaults to depth=5 and no CE driver script passes an explicit depth override, so the reference protocol's depth=10 is never applied.",
+          "n_conv1d_layers": 11,
+          "observed_ce1_baseline_score": 0.6108
+        },
+        "declared": {
+          "depth": 10,
+          "reference_reported_best_val_accuracy": 0.9291,
+          "source": "reference/train_5_rounds.py: train_speck_distinguisher(200, num_rounds=5, depth=10)"
+        },
+        "downstream": [
+          {
+            "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+            "evidence_reference": "evidence/ce1/ce1_certificate.json",
+            "historical_artifact_preserved": true,
+            "rationale": "CE1 trains its own models via adapter.train() with no depth override, so its baseline and signal-destroyed models are both depth-5. Its INCONCLUSIVE verdict was produced at an architecture that does not match the reference protocol.",
+            "status": "REQUIRES_REEVALUATION"
+          },
+          {
+            "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+            "evidence_reference": "evidence/ce2/ce2_certificate_{1..5}.json",
+            "historical_artifact_preserved": true,
+            "rationale": "CE2 loads the depth-5 checkpoint. Its NOT_SUPPORTED verdict is a property of that model instance and is not established for a reference-conformant depth-10 model.",
+            "status": "REQUIRES_REEVALUATION"
+          },
+          {
+            "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+            "evidence_reference": "evidence/ce3/ce3_certificate.json",
+            "historical_artifact_preserved": true,
+            "rationale": "CE3 loads the same depth-5 checkpoint. Its statistical design is sound (replicate-level unit, calibration-gated, Bonferroni-corrected), so this is a scope/applicability issue rather than a methodological defect: the SUPPORTED verdict holds for the depth-5 model, not necessarily for the declared baseline.",
+            "status": "REQUIRES_REEVALUATION"
+          },
+          {
+            "dimension": "CRYPTOGRAPHIC_EVIDENCE",
+            "evidence_reference": "evidence/ce4/ce4_certificate.json",
+            "historical_artifact_preserved": true,
+            "rationale": "CE4 loads the same depth-5 checkpoint and reuses CE3's task object. Its per-example causal finding is scoped to that one model instance.",
+            "status": "REQUIRES_REEVALUATION"
+          },
+          {
+            "dimension": "DATASET_INTEGRITY",
+            "evidence_reference": "dataset/evidence/d1..d5",
+            "historical_artifact_preserved": true,
+            "rationale": "The finding is downstream of the dataset: it concerns model construction, not dataset generation, serialization, preprocessing, or storage. Per the project's dependency rule, Dataset Integrity is therefore NOT reopened and D1-D5 are neither rerun nor modified.",
+            "status": "UNAFFECTED"
+          },
+          {
+            "dimension": "EXPERIMENTAL_VALIDITY",
+            "evidence_reference": "experimental_validity (EV-BASELINE, EV-NOISE, H-EV-SHUFFLE, H-EV-REPRESENTATION)",
+            "historical_artifact_preserved": true,
+            "rationale": "EV constructs its own models through its own independent adapter with depth supplied explicitly from its frozen baseline, and does not load the CE checkpoint. No EV evidence depends on this artifact. (EV production evidence does not yet exist in any case.)",
+            "status": "UNAFFECTED"
+          }
+        ],
+        "finding_id": "II-FINDING-DEPTH-V2",
+        "open_questions": [
+          "EQUIVALENT_WITHIN_MARGIN establishes ACCURACY conformance only; it does NOT validate transferability of Cryptographic Evidence obtained on the depth-5 model."
+        ],
+        "recorded_at_utc": "2026-10-01T08:25:11.676293+00:00",
+        "scientific_impact": "REFUTED",
+        "severity": "MATERIAL",
+        "stage_id": "II-3_CONTROLLED_VERIFICATION",
+        "supporting_artifacts": {
+          "best5depth10 (10).h5": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea",
+          "ii4_bound/7893611dffa86656/ii4_analysis.json": "1e37a048710a325dee08a329cd03e89e27d1058f586eabd4a8f3f8994998387e",
+          "ii4_bound/7893611dffa86656/ii4_firewall.json": "c6354c743b8d757910bd73512072031f0d1bf5675ec26eb2ea1d8e41cf040272",
+          "ii4_bound/7893611dffa86656/ii4_preregistration.json": "77b757809f0d525b3ac40a273bd729cd53fbb13c70037d1c69ed90310ab1c5a4",
+          "ii4_bound/7893611dffa86656/ii4_state.json": "b224f10642bdd4972fbd3f9f90358f896f947260995e34cc6fa0e3f2212b9702",
+          "reference/train_5_rounds.py": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+          "reference/train_nets.py": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669",
+          "signal_destroyed.h5": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308",
+          "source:audit/common/outcomes.py": "edd70f8e38f7b2c4d53d992115bcd3e35ab0ea337c0586ad129fbdb9bc1b005e",
+          "source:audit/common/provenance.py": "7cf33f8ed32f999cb58345f20e01b442f8b0c4e12c732e2bb95a08ce4c6b0eb2",
+          "source:audit/common/run_manifest.py": "3c40f96987de7edae337ff199ac918f0bbb9635c1d60503949bfbbeac99e1ab9",
+          "source:audit/common/strict_json.py": "cb02f0113caf88cd86b2a3f6624d866afaf74b358ea443ebaf111f7311a2bbcf",
+          "source:audit/experimental_validity/framework/firewall.py": "6e40ad7c8f6119a6c50eb12155db980a76e6afb0a73a9ee2b93b97b2b17a6b62",
+          "source:audit/experimental_validity/gohr/dataset.py": "67f82200b7aa02dc305cce52602fe52a6ddc36c85690692a49d6e1d5c389f612",
+          "source:audit/experimental_validity/gohr/evaluate.py": "ab40cd1ad619cf455a3a64a7e2e70e76fb2dafb9b1acd10131952eb5a17a3405",
+          "source:audit/experimental_validity/gohr/model.py": "7ed6a37d15305400258da90eba7d36be32657a56ddcd398e9c3c827521a4ffaf",
+          "source:audit/experimental_validity/gohr/speck.py": "ccde78d1aacba1b498de1617bb50c56f241656f8baae7b8dd9b7afb1474fc13d",
+          "source:audit/experimental_validity/gohr/train.py": "ba7b6ea437352cd99127003267def20ee9621a396ae8b61dab9c950ffb025a87",
+          "source:audit/implementation/adapters/gohr_ii4.py": "68c84b777cadf20bd0f702b2510118735518cedbe1bb9a396e5ae7883e21f7ed",
+          "source:audit/implementation/conformance.py": "bc7afe84853ad9ae76c7cf4c93302a4f96351f4937b0fb3dab179c13182ebfff",
+          "source:audit/implementation/ii4_analysis.py": "46068721044e9e01b4c8e7241e4aadaf299c933de2d08eb057b6e4f04a05912a",
+          "source:audit/implementation/ii4_certificate.py": "e8405aff8dbb12a694e3900d30d443ec4ed2a16af64fe55a39589d15ca29afef",
+          "source:audit/implementation/ii4_design.py": "58ecd2baeceb7bd6bac982bdf580caca5c180badc59e8386b65497c86e220863",
+          "source:audit/implementation/ii4_experiment.py": "74099c6065a9be4ce7902d5add81e5b83e15666425e821ce162d549f8f15e8db",
+          "source:audit/implementation/ii4_runner.py": "a2eb572ccfde67290091b1678de5794d964814a31d38cc9ff6bd4960fdf44931",
+          "source:audit/implementation/reference/speck.py": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce",
+          "source:audit/implementation/reference/train_5_rounds.py": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+          "source:audit/implementation/reference/train_nets.py": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669",
+          "source:audit/implementation/run_ii4.py": "e6c9cb1b375842f89421121e46ca5d20cbfe0d2a742c8b65a411f6000e2b455f",
+          "source:speck.py": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce",
+          "source:train_5_rounds.py": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24",
+          "source:train_nets.py": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669"
+        },
+        "title": "Realized residual depth of the audited checkpoint is 5, while the reference protocol (train_5_rounds.py) declares depth=10",
+        "verification_method": "h5py layer-group census on the actual .h5 weight files (no TensorFlow, no model deserialization), cross-checked against the reference architecture's implied Conv1D count of 1 + 2*depth. Architecture read from the artifact itself, not inferred from its filename."
+      }
+    ],
+    "independent_reimplementation_status": "ASSESSED",
+    "preregistration_reference": {
+      "artifact_path": "ii4_bound/7893611dffa86656/ii4_preregistration.json",
+      "content_hash": "77b757809f0d525b3ac40a273bd729cd53fbb13c70037d1c69ed90310ab1c5a4"
+    },
+    "rationale": "Rule II: implementation differences were observed (II-FINDING-DEPTH-V2) but are established as practically negligible or scope-limiting rather than conclusion-altering.",
+    "run_manifest_references": [
+      {
+        "artifact_path": "ii4_bound/7893611dffa86656/run_manifest_II-4-GOHR-DEPTH-V1-run.json",
+        "content_hash": "521786596589f5178648b6af10c3a1cac2854471c162b201bee63153c74d55d0",
+        "run_id": "II-4-GOHR-DEPTH-V1-run"
+      }
+    ],
+    "scientific_impact_demonstrated": false,
+    "stages": [
+      {
+        "findings": [],
+        "stage_id": "II-1_BASELINE_RECONSTRUCTION",
+        "status": "CONFORMANCE_VERIFIED",
+        "summary": "Reference protocol hash-verified (unchanged from V3).",
+        "tier": "CORE"
+      },
+      {
+        "findings": [],
+        "stage_id": "II-2_INDEPENDENT_REIMPLEMENTATION",
+        "status": "COMPLETED",
+        "summary": "Independent Gohr reimplementation completed and independently trained; deterministic verification and independent-training evidence are bound to this certificate.",
+        "tier": "ENHANCED"
+      },
+      {
+        "findings": [],
+        "stage_id": "II-3_CONTROLLED_VERIFICATION",
+        "status": "CONFORMANCE_VERIFIED",
+        "summary": "Realized depth 5 vs declared 10 (unchanged from V3).",
+        "tier": "CORE"
+      },
+      {
+        "findings": [],
+        "stage_id": "II-4_COMPARATIVE_EVALUATION",
+        "status": "COMPLETED",
+        "summary": "Dataset-blocked paired comparison, 10/10 valid blocks.",
+        "tier": "CORE"
+      },
+      {
+        "findings": [],
+        "stage_id": "II-5_STATISTICAL_ASSESSMENT",
+        "status": "COMPLETED",
+        "summary": "Signed 95% CI materiality = NO_DIRECTIONAL_CLAIM; TOST equivalence = EQUIVALENT_WITHIN_MARGIN.",
+        "tier": "CORE"
+      }
+    ]
+  },
+  "p_value": null,
+  "practical_threshold": null,
+  "provenance": {
+    "bound_artifacts": [
+      "ii4_bound/7893611dffa86656/ii4_analysis.json",
+      "ii4_bound/7893611dffa86656/ii4_firewall.json",
+      "ii4_bound/7893611dffa86656/ii4_preregistration.json",
+      "ii4_bound/7893611dffa86656/ii4_state.json",
+      "source:audit/common/outcomes.py",
+      "source:audit/common/provenance.py",
+      "source:audit/common/run_manifest.py",
+      "source:audit/common/strict_json.py",
+      "source:audit/experimental_validity/framework/firewall.py",
+      "source:audit/experimental_validity/gohr/dataset.py",
+      "source:audit/experimental_validity/gohr/evaluate.py",
+      "source:audit/experimental_validity/gohr/model.py",
+      "source:audit/experimental_validity/gohr/speck.py",
+      "source:audit/experimental_validity/gohr/train.py",
+      "source:audit/implementation/adapters/gohr_ii4.py",
+      "source:audit/implementation/conformance.py",
+      "source:audit/implementation/ii4_analysis.py",
+      "source:audit/implementation/ii4_certificate.py",
+      "source:audit/implementation/ii4_design.py",
+      "source:audit/implementation/ii4_experiment.py",
+      "source:audit/implementation/ii4_runner.py",
+      "source:audit/implementation/reference/speck.py",
+      "source:audit/implementation/reference/train_5_rounds.py",
+      "source:audit/implementation/reference/train_nets.py",
+      "source:audit/implementation/run_ii4.py",
+      "source:speck.py",
+      "source:train_5_rounds.py",
+      "source:train_nets.py"
+    ],
+    "converter_version": "ii4-certificate-v2",
+    "ii2_evidence": [
+      "ii2/m1_deterministic_verification.json",
+      "ii2/m1_independent_best.zip",
+      "ii2/m1_independent_training_report.json",
+      "source:audit/implementation/ii2_independent/dataset_independent.py",
+      "source:audit/implementation/ii2_independent/model_independent.py",
+      "source:audit/implementation/ii2_independent/speck_independent.py",
+      "source:audit/implementation/ii2_independent/train_independent.py"
+    ],
+    "ii4_experiment_fingerprint": "7893611dffa866561a78c5482471fa03c63fe32f0096b7779a73376fc956b35c"
+  },
+  "recorded_at_utc": "2026-10-01T08:25:11.695753+00:00",
+  "run_ids": [
+    "II-4-GOHR-DEPTH-V1-run"
+  ],
+  "statistics": {
+    "note": "II-5 Statistical Assessment was completed from the II-4 confirmatory paired comparison: 10/10 valid blocks; signed 95% CI materiality = NO_DIRECTIONAL_CLAIM; TOST equivalence = EQUIVALENT_WITHIN_MARGIN."
+  },
+  "tag": "CONFIRMATORY"
+}
