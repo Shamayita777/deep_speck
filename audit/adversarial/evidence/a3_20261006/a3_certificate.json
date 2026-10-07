@@ -1,0 +1,296 @@
+{
+  "certificate_schema_version": "adversarial-certificate-2",
+  "construction": {
+    "adversary": "A3",
+    "analytic_guarantee": true,
+    "constant_value": 0.5,
+    "construction_status": "VALID",
+    "differential": [
+      64,
+      0
+    ],
+    "entropy_source": "os.urandom via the Gohr generator; exact replay unavailable",
+    "epochs": 10,
+    "fidelity": {
+      "delivered": true,
+      "note": "verified during construction",
+      "statistic": "output constant"
+    },
+    "final_head_val_accuracy": 0.747759997844696,
+    "freeze_git_commit": "dbf02c964d8acdb6fff0ecdd341bfb6e11e216e5",
+    "frozen_manifest_verified": true,
+    "frozen_model_sha256": "14cb1c8a760af9fa992057fe2100e4fbc20a4376745d2e31f52ca9bc911b1824",
+    "n_train": 1000000,
+    "non_distinguisher_argument": "ANALYTIC. The output is a constant function of the input, so the induced ranking of samples is empty and ROC AUC is exactly 0.5 by construction, for every dataset, with no sampling uncertainty. No empirical argument is needed; the empirical check exists only to confirm the implementation matches the specification.",
+    "objective": "5-class CE3 target via a temporary head, then output layer zeroed",
+    "output_is_constant": true,
+    "rounds": 5,
+    "seed": 20261006,
+    "source_integrity_verified": true,
+    "temporary_head_discarded": true,
+    "train_seconds": 106.0,
+    "trained_utc": "2026-10-06T14:12:51.212809+00:00"
+  },
+  "dimensions": {
+    "CE2": {
+      "adversarial_outcome": "NOT_APPLICABLE",
+      "executed": false,
+      "in_registered_targets": false,
+      "reason": "NOT_APPLICABLE by construction: a constant output makes Spearman rho undefined, so CE2 cannot be evaluated on A3 and no claim about CE2 is made from it. The certificate must record 'undefined', not 0.",
+      "scientific_decision": null
+    },
+    "CE3": {
+      "adversarial_outcome": "NOT_CAUGHT",
+      "executed": true,
+      "primary_endpoint": {
+        "ci95": null,
+        "mean": 0.5031464321167436,
+        "n_valid": 20,
+        "p_value": 9.5367431640625e-07,
+        "replicate_selectivity": [
+          0.5019077313133312,
+          0.5034337613798775,
+          0.5005102014923181,
+          0.50107639132641,
+          0.5036601690607544,
+          0.5061195153829118,
+          0.5011586967254467,
+          0.5040130333829829,
+          0.5064409511969132,
+          0.5020656821225576,
+          0.5044269639501683,
+          0.5029638354226612,
+          0.5035054589021234,
+          0.5049822133627834,
+          0.5026631952574473,
+          0.5019118729122016,
+          0.5009708930292107,
+          0.5037107336081451,
+          0.5046719430093527,
+          0.5027353994972745
+        ]
+      },
+      "replication": {
+        "observed": 20,
+        "registered": 20
+      },
+      "scale_label": "adversarial protocol replication (registered); NOT a production CE certificate",
+      "scientific_decision": "SUPPORTED",
+      "scientific_decision_reason": "fixed-sequence step 1 passed; mean replicate-level selectivity positive and p < alpha=0.05"
+    },
+    "CE4": {
+      "adversarial_outcome": "NOT_APPLICABLE",
+      "executed": false,
+      "in_registered_targets": false,
+      "reason": "NOT_APPLICABLE: a constant output gives an identically zero intervention effect in both arms.",
+      "scientific_decision": null
+    }
+  },
+  "distinguisher_assessment": {
+    "auc": 0.5,
+    "auc_ci95_bootstrap": [
+      0.5,
+      0.5
+    ],
+    "auc_symmetrised": 0.5,
+    "balanced_accuracy_at_calibrated_threshold": 1.0,
+    "bootstrap_unit": "sample (a property of a fixed model on a fixed dataset; NOT an independent scientific replicate)",
+    "calibrated_threshold": 0.5,
+    "calibration_accuracy_at_threshold": 0.500915,
+    "calibration_dataset": {
+      "composition": "mixed real/random as emitted by speck.make_train_data",
+      "content_sha256": "d69e88563436b62065661dfed1eb80328f33874230eede008763ff760e7a0afc",
+      "created_utc": "2026-10-07T03:51:32.867316+00:00",
+      "differential": [
+        64,
+        0
+      ],
+      "entropy_source": "os.urandom via speck.make_train_data",
+      "exact_replay_available": false,
+      "file": "calibration.npz",
+      "file_sha256": "7769d79eaadc1c7003b8635ec12b8211fdd81f9fc40bf5c017d0525c9b422528",
+      "generator": "audit.cryptography.gohr.speck.make_train_data",
+      "label_counts": {
+        "random": 99817,
+        "real": 100183
+      },
+      "loaded_from_disk": false,
+      "n": 200000,
+      "name": "calibration",
+      "replay_note": "the generator is not seed-replayable; reproducibility is provided by persisting and hashing the arrays",
+      "rounds": 5
+    },
+    "construction_status": "VALID",
+    "equivalence_region": [
+      0.49,
+      0.51
+    ],
+    "equivalence_rule": "CONSERVATIVE 95% CONFIDENCE-INTERVAL EQUIVALENCE CRITERION: the two-sided 95% bootstrap confidence interval for AUC must lie ENTIRELY inside [0.49, 0.51]. This is NOT a conventional alpha = 0.05 TOST, which corresponds to containment of the 90% interval; requiring the 95% interval is strictly more conservative, so a construction admitted under this rule would also be admitted by a 0.05 TOST, while the converse does not hold. It remains an equivalence-style criterion and NOT a non-significance test: a wide interval straddling 0.5 FAILS, because absence of evidence of separation is not evidence of absence.",
+    "equivalence_satisfied": true,
+    "n_bootstrap": 2000,
+    "orientation_flipped": true,
+    "primary_metric": "ROC AUC on the sealed set",
+    "scores_sha256": "71b6dd15ddcdbab1614dfcdeaf8fa2073c6ee42c7a37d31aa5efc7174b043dc6",
+    "sealed_accuracy_at_0.5": 0.499717,
+    "sealed_accuracy_at_calibrated_threshold": 0.499717,
+    "sealed_dataset": {
+      "composition": "mixed real/random as emitted by speck.make_train_data",
+      "content_sha256": "10eafa1caa0d76db03b488c2b020720952471923c4c0945692f2e5f66cd9899c",
+      "created_utc": "2026-10-07T03:51:40.116024+00:00",
+      "differential": [
+        64,
+        0
+      ],
+      "entropy_source": "os.urandom via speck.make_train_data",
+      "exact_replay_available": false,
+      "file": "sealed.npz",
+      "file_sha256": "d2f34124b8f573ac1d4bbb0e7a2c0e371eca9f44d97a3535fd69cf77bd496261",
+      "generator": "audit.cryptography.gohr.speck.make_train_data",
+      "label_counts": {
+        "random": 500283,
+        "real": 499717
+      },
+      "loaded_from_disk": false,
+      "n": 1000000,
+      "name": "sealed",
+      "replay_note": "the generator is not seed-replayable; reproducibility is provided by persisting and hashing the arrays",
+      "rounds": 5
+    },
+    "threshold_provenance": "selected on the calibration split only; the sealed set was never used to select anything"
+  },
+  "global_conclusion_unchanged": "Claim C1 remains INCONCLUSIVE / LEVEL_1_PREDICTIVE. This battery cannot change it: it evidences properties of the audit dimensions, not of the audited model.",
+  "hypotheses": {
+    "H-ADV-2": "CE3's criterion can be satisfied by a model whose output is constant, i.e. one that performs no cryptanalytic task at all. If so, CE3 evidences DECODABILITY of its target from a representation and nothing further, and CE3 verdicts must always be reported together with the model binding that establishes the model is a distinguisher.",
+    "H-ADV-3": "CE4's criterion can be satisfied by a closed-form response function of the ciphertext-pair XOR. If so, CE4 evidences SENSITIVITY TO THE INTERVENTION CONTRAST and not causal dependence on cryptographic structure, and its wording must be bounded accordingly.",
+    "not_tested_here": "H-ADV-1 as stated in v1 - about CE2, CE3 and CE4 jointly - is NOT tested by this battery. A1 failed, and no adversary in v2 is designed to defeat CE2. The screening observation that association with CE2's target and distinguishing power moved together in the screened family is a development observation that motivates leaving CE2 untested, not a result about CE2."
+  },
+  "identity": {
+    "adversary_id": "A3",
+    "adversary_version": "1.0",
+    "command_line": "/content/deep_speck/audit/adversarial/battery.py --adversary A3 --run --out-dir audit/adversarial/evidence/a3_20261006",
+    "confirmatory_preconditions": {
+      "gated": true,
+      "ok": true,
+      "registration_hash_verified": true
+    },
+    "environment": {
+      "command_line": "/content/deep_speck/audit/adversarial/battery.py --adversary A3 --run --out-dir audit/adversarial/evidence/a3_20261006",
+      "cwd_is_repo_root": true,
+      "git_commit": "ea310225bfb50e516d159a8dcd374d7739358871",
+      "git_working_tree": "dirty",
+      "gpus_visible": 1,
+      "keras": "3.13.2",
+      "numpy": "2.1.3",
+      "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+      "processor": "x86_64",
+      "python": "3.13.15",
+      "scikit_learn": "1.6.1",
+      "scipy": "1.16.3",
+      "tensorflow": "2.21.0"
+    },
+    "finished_utc": "2026-10-07T08:50:01.527542+00:00",
+    "git": {
+      "commit": "ea310225bfb50e516d159a8dcd374d7739358871",
+      "repo_root": "/content/deep_speck",
+      "working_tree": "clean"
+    },
+    "model_artifact": "audit/adversarial/evidence/a3_20261006/a3_representation.keras",
+    "model_sha256": "14cb1c8a760af9fa992057fe2100e4fbc20a4376745d2e31f52ca9bc911b1824",
+    "prereg_hash": "ed079688bc7e84e73e550ea28c9f44ea838feb46bdbfa4e05cc0a033f8cbc4df",
+    "prereg_version": "ciphermind-adversarial-prereg-v2-2026-10-06",
+    "source_hashes": {
+      "audit/adversarial/a1_theory_mimic.py": "46371678eaed8a2a95d4a36ae99dc05cbf0e53d27c9a5b180058d2abd7ab1117",
+      "audit/adversarial/battery.py": "a3eac877f7fd257e76ad162a85cedc4465ebcddc0c061c5113a9f2d4231b47d7",
+      "audit/adversarial/preregistration.py": "41063dd36265e1b01527e031d669c68ea3fcf94ea443c1634ab2ec5d9c214cd3",
+      "audit/adversarial/preregistration_v2.py": "f7477090b2dde54ba045b5bbfe2a0ca164760048f1dfa68657fc038748a47ada",
+      "audit/adversarial/screening.py": "bd442dacbd8f67a37eed950107d97697489f87f74e071afc47399bbee6f69bc5",
+      "audit/adversarial/sealed_sets.py": "efe0d5356db94de1029d86f8a3860515a306d2a5a8378c74421dec5a107bcac8",
+      "audit/cryptography/ce234/frozen_plan.py": "4280d8eddb9881421787116fc3564930083e2903db188c6446cdd7d98bbeb585",
+      "audit/cryptography/ce234/production.py": "46d269cfd5ccfea7ad59443aee49c87384b0cb4266fed78082808ef066e661c9",
+      "audit/cryptography/ce234/verify.py": "312b4880e0bbb9cbe93e21907b9442ad8eecd564bcac448d225f203944acc589",
+      "audit/cryptography/experiments/ce4/design.py": "e165f304f2547c3f401f386804942d60b18c60c1177993561bb88286edef214d",
+      "audit/cryptography/gohr/dataset.py": "288c1155d9eabf510bd4653103409dddedf03a7aa4d54f5bb8051ff6cb5b42a9",
+      "audit/cryptography/gohr/evaluate.py": "9344cb6abc09d398c5d2a0e806311a6e515ecbfb4a9932ed3c96917a2636b2a4",
+      "audit/cryptography/gohr/model.py": "134fb45d1474f302220f74d86bfb037c0657162bb9ebcb82941d84d5cebdb899",
+      "audit/cryptography/gohr/speck.py": "e4f2324f7900d7d13dcb28f98188b5c045d4f6b723147a26ac2d39211d7a8805",
+      "audit/cryptography/gohr/trainer.py": "ddd91388c3e02702c391e366c972aac4fc2cc7c2836206b081dd332b499ae046",
+      "audit/cryptography/probe/evaluation.py": "31ff760900704088f714beb7c3534924c61c28611f4ae14188897b9c2a63c799",
+      "audit/cryptography/statistics.py": "7a530ea43ec225f1ea92c5161148db1116e1e7076cb9d848c80b3ec8602be729"
+    },
+    "started_utc": "2026-10-07T03:51:23.317380+00:00",
+    "supersedes": "ciphermind-adversarial-prereg-2026-10-06"
+  },
+  "interpretation_rules": {
+    "binding gate does not refuse": "framework defect; report and fix in the open",
+    "construction FAILED": "all adversarial outcomes NOT_APPLICABLE; raw scientific decisions still recorded; no hypothesis is tested",
+    "dimension returns INCONCLUSIVE": "UNDETERMINED; record the dimension's own stated reason; never read as the dimension working",
+    "dimension returns NOT_SUPPORTED with construction VALID": "CAUGHT; that dimension discriminates against this adversary, which strengthens it",
+    "dimension returns SUPPORTED with construction VALID": "NOT_CAUGHT; the corresponding hypothesis is supported for that dimension",
+    "scope": "every result here concerns the DIMENSIONS, never the audited model. Nothing in this battery may be cited as evidence about what the audited Gohr model does or does not use."
+  },
+  "limitations": [
+    "evidence about the audit dimensions only; nothing here is evidence about the audited Gohr model or about Speck",
+    "one adversary instance per registered adversary",
+    "the sealed set is not seed-replayable (os.urandom); reproducibility rests on the persisted, hashed arrays"
+  ],
+  "model_binding": {
+    "executed": true,
+    "outcome": "CAUGHT",
+    "reason": "checkpoint sha256 14cb1c8a760af9fa992057fe2100e4fbc20a4376745d2e31f52ca9bc911b1824 != frozen 256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737. Refusing to substitute a different model.",
+    "refused": true
+  },
+  "prediction_comparison": [
+    {
+      "agrees": true,
+      "item": "distinguisher_auc",
+      "observed": "AUC 0.5000 CI [0.5, 0.5]",
+      "predicted": "exactly 0.5 (analytic)"
+    },
+    {
+      "agrees": true,
+      "item": "model_binding_gate",
+      "observed": "CAUGHT",
+      "predicted": "CAUGHT"
+    },
+    {
+      "agrees": true,
+      "item": "CE3_representation_decodability",
+      "observed": "NOT_CAUGHT",
+      "predicted": "NOT_CAUGHT",
+      "scientific_decision": "SUPPORTED"
+    },
+    {
+      "agrees": true,
+      "item": "CE2_theory_consistency",
+      "observed": "NOT_APPLICABLE",
+      "predicted": "NOT_APPLICABLE",
+      "scientific_decision": null
+    },
+    {
+      "agrees": true,
+      "item": "CE4_intervention_sensitivity",
+      "observed": "NOT_APPLICABLE",
+      "predicted": "NOT_APPLICABLE",
+      "scientific_decision": null
+    }
+  ],
+  "protocol": {
+    "decision_rule": "Adversarial acceptance is read from the dimension's own primary endpoint and its own preregistered criterion, evaluated by this protocol: CE2, the exact two-sided sign test over replicate-level rho with the preregistered control-separation requirement; CE3, the fixed-sequence calibration gate then the one-sided Wilcoxon over replicate-level selectivity; CE4, the across-replicate sign test at the primary magnitude with all manipulation checks passing. A dimension that cannot evaluate its criterion returns INCONCLUSIVE and maps to UNDETERMINED.",
+    "estimand": "For a model M lacking the scientific property a dimension is meant to evidence, does that dimension's PRIMARY ENDPOINT fall on the accepting side of its own preregistered criterion? This is a question about the dimension's discriminative power, not about the audited model, and it is not the production estimand.",
+    "exclusions": "a failed replicate is recorded and retained; it is never replaced",
+    "replication": {
+      "CE2": 20,
+      "CE3": 20,
+      "CE4": 10
+    },
+    "replication_justification": "Matched to the production counts. A reduced count was considered and rejected: the adversarial claim is that a dimension ACCEPTS a model it should not, and accepting is exactly the regime where the production decision rule's replication minimum binds. Running fewer replicates than production would make the dimension return INCONCLUSIVE for reasons that have nothing to do with the adversary, which is the defect v1 contained. The cost is modest because the adversaries here are analytic or cheap to construct; CE3 dominates at roughly 20 x the per-replicate probe cost.",
+    "sample_counts": {
+      "CE2": 1000000,
+      "CE3": 100000,
+      "CE4": 100000
+    },
+    "stopping_rule": "exactly the registered replicate count; no interim looks",
+    "unit_of_replication": "independent evaluation replicate, as in production"
+  },
+  "status": "ADVERSARIAL - EVIDENCE ABOUT THE AUDIT DIMENSIONS ONLY, NOT ABOUT THE AUDITED MODEL"
+}

@@ -1,0 +1,22 @@
+{"design_hash": "277ed767ddceae7e1c73fccae2c097ae139ad1284ab63bf04c6dc1626343b4b8", "event": "SESSION_START", "n_replicates": 20, "n_samples": 100000, "pid": 2622, "utc": "2026-10-07T03:52:09.706186+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 0, "seconds": 851.69, "selectivity": 0.5019077313133312, "utc": "2026-10-07T04:06:21.817227+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 1, "seconds": 997.3, "selectivity": 0.5034337613798775, "utc": "2026-10-07T04:22:59.129841+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 2, "seconds": 983.89, "selectivity": 0.5005102014923181, "utc": "2026-10-07T04:39:23.034456+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 3, "seconds": 962.58, "selectivity": 0.50107639132641, "utc": "2026-10-07T04:55:25.637523+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 4, "seconds": 980.55, "selectivity": 0.5036601690607544, "utc": "2026-10-07T05:11:46.216465+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 5, "seconds": 787.45, "selectivity": 0.5061195153829118, "utc": "2026-10-07T05:24:53.688077+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 6, "seconds": 866.8, "selectivity": 0.5011586967254467, "utc": "2026-10-07T05:39:20.505475+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 7, "seconds": 970.82, "selectivity": 0.5040130333829829, "utc": "2026-10-07T05:55:31.333643+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 8, "seconds": 914.99, "selectivity": 0.5064409511969132, "utc": "2026-10-07T06:10:46.330872+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 9, "seconds": 993.15, "selectivity": 0.5020656821225576, "utc": "2026-10-07T06:27:19.495977+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 10, "seconds": 952.79, "selectivity": 0.5044269639501683, "utc": "2026-10-07T06:43:12.298868+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 11, "seconds": 857.99, "selectivity": 0.5029638354226612, "utc": "2026-10-07T06:57:30.301614+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 12, "seconds": 798.83, "selectivity": 0.5035054589021234, "utc": "2026-10-07T07:10:49.150558+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 13, "seconds": 779.97, "selectivity": 0.5049822133627834, "utc": "2026-10-07T07:23:49.138451+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 14, "seconds": 807.55, "selectivity": 0.5026631952574473, "utc": "2026-10-07T07:37:16.697525+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 15, "seconds": 858.21, "selectivity": 0.5019118729122016, "utc": "2026-10-07T07:51:34.926459+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 16, "seconds": 915.48, "selectivity": 0.5009708930292107, "utc": "2026-10-07T08:06:50.428625+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 17, "seconds": 828.19, "selectivity": 0.5037107336081451, "utc": "2026-10-07T08:20:38.633652+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 18, "seconds": 898.98, "selectivity": 0.5046719430093527, "utc": "2026-10-07T08:35:37.628389+00:00"}
+{"event": "REPLICATE_COMPLETE", "pid": 2622, "replicate": 19, "seconds": 863.85, "selectivity": 0.5027353994972745, "utc": "2026-10-07T08:50:01.490511+00:00"}
+{"event": "ALL_REPLICATES_COMPLETE", "n": 20, "pid": 2622, "utc": "2026-10-07T08:50:01.495640+00:00"}

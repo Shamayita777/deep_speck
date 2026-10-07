@@ -1,0 +1,23 @@
+{
+  "composition": "mixed real/random as emitted by speck.make_train_data",
+  "content_sha256": "10eafa1caa0d76db03b488c2b020720952471923c4c0945692f2e5f66cd9899c",
+  "created_utc": "2026-10-07T03:51:40.116024+00:00",
+  "differential": [
+    64,
+    0
+  ],
+  "entropy_source": "os.urandom via speck.make_train_data",
+  "exact_replay_available": false,
+  "file": "sealed.npz",
+  "file_sha256": "d2f34124b8f573ac1d4bbb0e7a2c0e371eca9f44d97a3535fd69cf77bd496261",
+  "generator": "audit.cryptography.gohr.speck.make_train_data",
+  "label_counts": {
+    "random": 500283,
+    "real": 499717
+  },
+  "loaded_from_disk": false,
+  "n": 1000000,
+  "name": "sealed",
+  "replay_note": "the generator is not seed-replayable; reproducibility is provided by persisting and hashing the arrays",
+  "rounds": 5
+}

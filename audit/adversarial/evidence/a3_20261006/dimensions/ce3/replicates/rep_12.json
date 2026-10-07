@@ -1,0 +1,31 @@
+{
+  "calibration_selectivity": 0.3271976320300819,
+  "chance_level": 0.2,
+  "class_counts": [
+    18961,
+    16380,
+    21317,
+    19257,
+    24085
+  ],
+  "control_score": 0.23264112535240122,
+  "dataset_sha256": "b2b724b1e8280e2615f00f5e31e63171d9d7a0e6fb430c61e231e7339c25511d",
+  "differential": [
+    64,
+    0
+  ],
+  "n": 100000,
+  "n_classes": 5,
+  "raw_input_score": 0.20126988385895164,
+  "real_score": 0.7361465842545247,
+  "record_sha256": "065eb9a1c88b0399706e571bdcc9e9c2b1fd4929d9453890fe0e61b2869650b2",
+  "replicate_id": "ce3_rep12",
+  "replicate_index": 12,
+  "rounds": 5,
+  "seconds": 798.83,
+  "seed": 20261118,
+  "selectivity": 0.5035054589021234,
+  "shared_examples_across_arms": true,
+  "status": "OK",
+  "twin_decodability_above_chance": 0.03264112535240121
+}
