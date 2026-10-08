@@ -50,8 +50,20 @@ def _atomic_savez(path: Path, **arrays) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=str(path.parent), suffix=".npz.tmp")
     os.close(fd)
-    np.savez_compressed(tmp, **arrays)
-    os.replace(tmp + ".npz" if os.path.exists(tmp + ".npz") else tmp, path)
+    written = tmp
+    try:
+        np.savez_compressed(tmp, **arrays)
+        # numpy appends ".npz" when the given path lacks it, which left the
+        # mkstemp stub behind as litter in the evidence directory.
+        if os.path.exists(tmp + ".npz"):
+            written = tmp + ".npz"
+            os.unlink(tmp)
+        os.replace(written, path)
+    except BaseException:
+        for leftover in (tmp, tmp + ".npz"):
+            if os.path.exists(leftover):
+                os.unlink(leftover)
+        raise
 
 
 def build_or_load(directory, name: str, n: int, *, rounds: int, differential) -> dict:

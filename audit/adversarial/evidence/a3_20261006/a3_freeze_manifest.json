@@ -1,0 +1,70 @@
+{
+  "adversary_id": "A3",
+  "environment": {
+    "command_line": "/content/deep_speck/audit/adversarial/battery.py --adversary A3 --build",
+    "cwd_is_repo_root": true,
+    "git_commit": "dbf02c964d8acdb6fff0ecdd341bfb6e11e216e5",
+    "git_working_tree": "dirty",
+    "gpus_visible": 1,
+    "keras": "3.13.2",
+    "numpy": "2.1.3",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "python": "3.13.15",
+    "scikit_learn": "1.6.1",
+    "scipy": "1.16.3",
+    "tensorflow": "2.21.0"
+  },
+  "freeze_git_commit": "dbf02c964d8acdb6fff0ecdd341bfb6e11e216e5",
+  "frozen_utc": "2026-10-06T14:12:51.896467+00:00",
+  "git": {
+    "commit": "dbf02c964d8acdb6fff0ecdd341bfb6e11e216e5",
+    "repo_root": "/content/deep_speck",
+    "working_tree": "dirty"
+  },
+  "model_artifact": "audit/adversarial/evidence/a3_20261006/a3_representation.keras",
+  "model_sha256": "14cb1c8a760af9fa992057fe2100e4fbc20a4376745d2e31f52ca9bc911b1824",
+  "prereg_hash": "ed079688bc7e84e73e550ea28c9f44ea838feb46bdbfa4e05cc0a033f8cbc4df",
+  "prereg_version": "ciphermind-adversarial-prereg-v2-2026-10-06",
+  "provenance_warning": "frozen with git working_tree='dirty' and freeze_git_commit='dbf02c964d8acdb6fff0ecdd341bfb6e11e216e5'. A confirmatory run REFUSES a manifest without a recorded commit, and refuses a dirty tree at run time. Rebuild from a clean, committed state.",
+  "rule": "a confirmatory run must load exactly this artifact and must hash every source file to the values recorded here; no rebuild, no selection among candidates, no manifest refresh",
+  "schema": "adversary-freeze-manifest-1",
+  "source_hashes": {
+    "audit/adversarial/a1_theory_mimic.py": "46371678eaed8a2a95d4a36ae99dc05cbf0e53d27c9a5b180058d2abd7ab1117",
+    "audit/adversarial/battery.py": "a3eac877f7fd257e76ad162a85cedc4465ebcddc0c061c5113a9f2d4231b47d7",
+    "audit/adversarial/preregistration.py": "41063dd36265e1b01527e031d669c68ea3fcf94ea443c1634ab2ec5d9c214cd3",
+    "audit/adversarial/preregistration_v2.py": "f7477090b2dde54ba045b5bbfe2a0ca164760048f1dfa68657fc038748a47ada",
+    "audit/adversarial/screening.py": "bd442dacbd8f67a37eed950107d97697489f87f74e071afc47399bbee6f69bc5",
+    "audit/adversarial/sealed_sets.py": "efe0d5356db94de1029d86f8a3860515a306d2a5a8378c74421dec5a107bcac8",
+    "audit/cryptography/ce234/frozen_plan.py": "4280d8eddb9881421787116fc3564930083e2903db188c6446cdd7d98bbeb585",
+    "audit/cryptography/ce234/production.py": "46d269cfd5ccfea7ad59443aee49c87384b0cb4266fed78082808ef066e661c9",
+    "audit/cryptography/ce234/verify.py": "312b4880e0bbb9cbe93e21907b9442ad8eecd564bcac448d225f203944acc589",
+    "audit/cryptography/experiments/ce4/design.py": "e165f304f2547c3f401f386804942d60b18c60c1177993561bb88286edef214d",
+    "audit/cryptography/gohr/dataset.py": "288c1155d9eabf510bd4653103409dddedf03a7aa4d54f5bb8051ff6cb5b42a9",
+    "audit/cryptography/gohr/evaluate.py": "9344cb6abc09d398c5d2a0e806311a6e515ecbfb4a9932ed3c96917a2636b2a4",
+    "audit/cryptography/gohr/model.py": "134fb45d1474f302220f74d86bfb037c0657162bb9ebcb82941d84d5cebdb899",
+    "audit/cryptography/gohr/speck.py": "e4f2324f7900d7d13dcb28f98188b5c045d4f6b723147a26ac2d39211d7a8805",
+    "audit/cryptography/gohr/trainer.py": "ddd91388c3e02702c391e366c972aac4fc2cc7c2836206b081dd332b499ae046",
+    "audit/cryptography/probe/evaluation.py": "31ff760900704088f714beb7c3534924c61c28611f4ae14188897b9c2a63c799",
+    "audit/cryptography/statistics.py": "7a530ea43ec225f1ea92c5161148db1116e1e7076cb9d848c80b3ec8602be729"
+  },
+  "training_record": {
+    "adversary": "A3",
+    "constant_value": 0.5,
+    "differential": [
+      64,
+      0
+    ],
+    "entropy_source": "os.urandom via the Gohr generator; exact replay unavailable",
+    "epochs": 10,
+    "final_head_val_accuracy": 0.747759997844696,
+    "n_train": 1000000,
+    "objective": "5-class CE3 target via a temporary head, then output layer zeroed",
+    "output_is_constant": true,
+    "rounds": 5,
+    "seed": 20261006,
+    "temporary_head_discarded": true,
+    "train_seconds": 106.0,
+    "trained_utc": "2026-10-06T14:12:51.212809+00:00"
+  }
+}

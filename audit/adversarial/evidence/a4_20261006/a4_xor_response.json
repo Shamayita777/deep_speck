@@ -1,0 +1,8 @@
+{
+  "adversary": "A4",
+  "kind": "closed-form",
+  "map": "keyed BLAKE2b, digest/2**64",
+  "key": "ciphermind-A4-xor-response-v1",
+  "domain": "pair XOR over 32 mirrored positions",
+  "note": "no learned parameters; the file is the specification"
+}

@@ -1,0 +1,23 @@
+{
+  "composition": "mixed real/random as emitted by speck.make_train_data",
+  "content_sha256": "d69e88563436b62065661dfed1eb80328f33874230eede008763ff760e7a0afc",
+  "created_utc": "2026-10-07T03:51:32.867316+00:00",
+  "differential": [
+    64,
+    0
+  ],
+  "entropy_source": "os.urandom via speck.make_train_data",
+  "exact_replay_available": false,
+  "file": "calibration.npz",
+  "file_sha256": "7769d79eaadc1c7003b8635ec12b8211fdd81f9fc40bf5c017d0525c9b422528",
+  "generator": "audit.cryptography.gohr.speck.make_train_data",
+  "label_counts": {
+    "random": 99817,
+    "real": 100183
+  },
+  "loaded_from_disk": false,
+  "n": 200000,
+  "name": "calibration",
+  "replay_note": "the generator is not seed-replayable; reproducibility is provided by persisting and hashing the arrays",
+  "rounds": 5
+}

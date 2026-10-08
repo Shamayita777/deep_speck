@@ -236,8 +236,17 @@ def assess_distinguisher(model, run_dir: Path, *, n_sealed: int, n_calib: int,
     inside = bool(lo >= region[0] and hi <= region[1])
 
     acc_thr = acc_at(s_seal, y, thr)
-    tpr = float(np.mean(((s_seal > thr) == (not orient_flip))[y == 1]))
-    tnr = float(np.mean(((s_seal > thr) == (not orient_flip))[y == 0]))
+    pred = (s_seal > thr).astype(np.int64)
+    if orient_flip:
+        pred = 1 - pred
+    # true/false rates computed from the confusion matrix explicitly: the
+    # previous form took the POSITIVE-prediction rate among y == 0, which is
+    # the false positive rate, and reported (TPR + FPR) / 2 as balanced
+    # accuracy. See ERRATUM 1.
+    tp = int(((pred == 1) & (y == 1)).sum()); fn = int(((pred == 0) & (y == 1)).sum())
+    tn = int(((pred == 0) & (y == 0)).sum()); fp = int(((pred == 1) & (y == 0)).sum())
+    tpr = tp / (tp + fn) if (tp + fn) else 0.0
+    tnr = tn / (tn + fp) if (tn + fp) else 0.0
     return {
         "primary_metric": "ROC AUC on the sealed set",
         "auc": auc, "auc_symmetrised": auc_sym,
@@ -256,6 +265,8 @@ def assess_distinguisher(model, run_dir: Path, *, n_sealed: int, n_calib: int,
         "sealed_accuracy_at_calibrated_threshold": acc_thr,
         "sealed_accuracy_at_0.5": acc_at(s_seal, y, 0.5),
         "balanced_accuracy_at_calibrated_threshold": (tpr + tnr) / 2.0,
+        "confusion_at_calibrated_threshold": {"tp": tp, "fn": fn, "tn": tn,
+                                              "fp": fp, "tpr": tpr, "tnr": tnr},
         "sealed_dataset": {k: v for k, v in sealed.items() if k not in ("X", "Y")},
         "calibration_dataset": {k: v for k, v in calib.items() if k not in ("X", "Y")},
         "scores_sha256": SS.sha256_array(s_seal),

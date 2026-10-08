@@ -1,0 +1,42 @@
+{
+  "binding": {
+    "design_hash": "277ed767ddceae7e1c73fccae2c097ae139ad1284ab63bf04c6dc1626343b4b8",
+    "differential": [
+      64,
+      0
+    ],
+    "model_sha256": "256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737",
+    "n_replicates": 20,
+    "n_samples": 100000,
+    "n_splits": 5,
+    "plan_version": "CE234-frozen-plan-2026-10-01-r2",
+    "primary_control": "C3-UNTRAINED-ARCH",
+    "rounds": 5,
+    "schema": "ce3-resume-state-1",
+    "seed": 20261106,
+    "statistical_unit": "independent evaluation replicate"
+  },
+  "completed": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "updated_utc": "2026-10-07T08:50:01.484825+00:00"
+}
