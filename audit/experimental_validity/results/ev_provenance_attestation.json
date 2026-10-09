@@ -1,0 +1,33 @@
+{
+  "attestation_version": 1,
+  "reason": "The two EV calibration certificates were written by run_ev.py at commits 20e5d7ec (H-EV-SHUFFLE) and 2349c047 (H-EV-REPRESENTATION). Neither commit emitted a top-level `provenance` block: `config_hash` is listed in OPTIONAL_MANIFEST_FIELDS in framework/manifest.py, so the writer was never required to record it, while analyze_ev_calibration.py treats it as mandatory. Both runs did establish their config binding - run_ev.py prints `config_hash=` at line 552 - and both printed values are reproduced exactly by hashing the configs committed in the repository today. The code identity for each run is recorded by the certificate itself at manifest.software_versions.git_commit. This file supplies those two bindings from that external evidence so that the variance artifact can be produced; it does not supply, and cannot supply, any value that the reader does not independently check against the frozen configuration.",
+  "attested_by": "Author 1 (experimenter of record); to be de-anonymized at camera-ready",
+  "attested_at_utc": "2026-10-09T00:00:00Z",
+  "experiments": {
+    "H-EV-SHUFFLE": {
+      "config_hash": {
+        "value": "a41808ae234d8037f78f2f84ae15b066aa63140b3ff0b1a4fbcafabb894fd507",
+        "source": "run_ev.py stdout, shuffle calibration notebook: 'Loaded config for H-EV-SHUFFLE from configs/gohr_ev_shuffle_calibration.yaml' followed by 'config_hash=a41808ae234d8037f78f2f84ae15b066aa63140b3ff0b1a4fbcafabb894fd507'. Independently reproduced on 2026-10-09 by framework.provenance.config_hash over configs/gohr_ev_shuffle_calibration.yaml as committed, giving the identical value."
+      },
+      "source_identity": {
+        "value": "20e5d7ec2ac44d87cf440d417f9ce30992e139cc",
+        "source": "manifest.software_versions.git_commit recorded in H-EV-SHUFFLE_certificate.json by the run itself."
+      }
+    },
+    "H-EV-REPRESENTATION": {
+      "config_hash": {
+        "value": "11ee26f9e2d928e28bcd78f7f8d1a93efaa23670cbc35d973545dccba2a5f7fc",
+        "source": "run_ev.py stdout, representation calibration notebook: 'Loaded config for H-EV-REPRESENTATION from configs/gohr_ev_representation_calibration.yaml' followed by 'config_hash=11ee26f9e2d928e28bcd78f7f8d1a93efaa23670cbc35d973545dccba2a5f7fc'. Independently reproduced on 2026-10-09 by framework.provenance.config_hash over configs/gohr_ev_representation_calibration.yaml as committed, giving the identical value."
+      },
+      "source_identity": {
+        "value": "2349c047e4e229b2f20b86218963b904fb8b9c5e",
+        "source": "manifest.software_versions.git_commit recorded in H-EV-REPRESENTATION_certificate.json by the run itself."
+      }
+    }
+  },
+  "known_limitations": [
+    "Both config_hash printouts quoted above come from the VALIDATION ONLY pre-flight cell of each notebook, not from the --confirm-execute cell. config_hash is a pure function of the config file and both values are reproduced from the committed configs, but the binding is reconstructed rather than certificate-recorded.",
+    "source_identity is a git commit, not a source manifest hash. It identifies the tree but does not establish that the working tree was clean when the run started.",
+    "Neither certificate records statistical_plan_sha256. docs/statistical_plan.md was revised between the two runs (the alpha/2 Bonferroni approximation for prospective planning was replaced by exact joint Holm simulation), so the two pilots were run under different revisions of the plan. The revision affects prospective power planning only - not the analysis rule - and it raised the required replicate count rather than lowering it."
+  ]
+}
