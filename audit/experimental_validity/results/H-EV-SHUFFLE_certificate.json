@@ -1,0 +1,1955 @@
+{
+  "calibration": true,
+  "certificate_schema_version": "1.1",
+  "conservative_conclusion": "Under the frozen 5-round Gohr configuration and the tested training protocol, we found evidence of practical equivalence: any effect of minibatch shuffling on confirmatory distinguishing accuracy is smaller than the predeclared threshold.",
+  "conservative_wording": {
+    "equivalent": "Under the frozen 5-round Gohr configuration and the tested training protocol, we found evidence of practical equivalence: any effect of minibatch shuffling on confirmatory distinguishing accuracy is smaller than the predeclared threshold.",
+    "inconclusive": "Under the frozen 5-round Gohr configuration and the tested training protocol, we found no evidence for a material effect of minibatch shuffling on confirmatory distinguishing accuracy; this does not establish that no such effect exists.",
+    "supported": "Under the frozen 5-round Gohr configuration and the tested training protocol, we found evidence for a material effect of minibatch shuffling on confirmatory distinguishing accuracy."
+  },
+  "decision": "NOT_SUPPORTED",
+  "generated_at_utc": "2026-10-07T19:08:09.664809+00:00",
+  "initial_weight_hashes": [
+    {
+      "condition_a": "bcc44abc278329b3f9a6b7a837855bf593178f681bdc3ff09a49315d345c9add",
+      "condition_b": "bcc44abc278329b3f9a6b7a837855bf593178f681bdc3ff09a49315d345c9add",
+      "identical": true,
+      "replicate_id": "pair0"
+    },
+    {
+      "condition_a": "80aa98666f551d6c2dfcb78b3ebf259f70b0af20d9ac9e6d1b1ba3150a88cc2a",
+      "condition_b": "80aa98666f551d6c2dfcb78b3ebf259f70b0af20d9ac9e6d1b1ba3150a88cc2a",
+      "identical": true,
+      "replicate_id": "pair1"
+    },
+    {
+      "condition_a": "e2f82c59f6b7e793478eeb4b9d551852dc4fd496ec99903d6449290966324543",
+      "condition_b": "e2f82c59f6b7e793478eeb4b9d551852dc4fd496ec99903d6449290966324543",
+      "identical": true,
+      "replicate_id": "pair2"
+    },
+    {
+      "condition_a": "d3d36e18d3c0e1cccd22e10310a26e64d551b61bf3b84c1526708ba5672ac4d2",
+      "condition_b": "d3d36e18d3c0e1cccd22e10310a26e64d551b61bf3b84c1526708ba5672ac4d2",
+      "identical": true,
+      "replicate_id": "pair3"
+    },
+    {
+      "condition_a": "2a625f1e7e0b5170d15938c75210aa4b3a2dff9e480cebef6dd11fc95d6e3deb",
+      "condition_b": "2a625f1e7e0b5170d15938c75210aa4b3a2dff9e480cebef6dd11fc95d6e3deb",
+      "identical": true,
+      "replicate_id": "pair4"
+    },
+    {
+      "condition_a": "6ff35916439affb75810dcfe742505931ebbf86a8f219b8b8fbb1f78b73abfe3",
+      "condition_b": "6ff35916439affb75810dcfe742505931ebbf86a8f219b8b8fbb1f78b73abfe3",
+      "identical": true,
+      "replicate_id": "pair5"
+    },
+    {
+      "condition_a": "ddc5e0324b292e9c936a6f97a68c76647cf970c2cd5a1188a8f82e69c91bd3a8",
+      "condition_b": "ddc5e0324b292e9c936a6f97a68c76647cf970c2cd5a1188a8f82e69c91bd3a8",
+      "identical": true,
+      "replicate_id": "pair6"
+    },
+    {
+      "condition_a": "c1c5fa5c260db8dac9928a8272bdd4d4649b1125418dd131bda2ba1cc49ec736",
+      "condition_b": "c1c5fa5c260db8dac9928a8272bdd4d4649b1125418dd131bda2ba1cc49ec736",
+      "identical": true,
+      "replicate_id": "pair7"
+    },
+    {
+      "condition_a": "e4705f2b857aef0c4e7d0822c7ba7ae479c2e8152b11bbaea6729a6c94c9eac7",
+      "condition_b": "e4705f2b857aef0c4e7d0822c7ba7ae479c2e8152b11bbaea6729a6c94c9eac7",
+      "identical": true,
+      "replicate_id": "pair8"
+    },
+    {
+      "condition_a": "906307fff72b6022f73dcf1f64c83cedb4e01ec7960035d27d292ed44066f345",
+      "condition_b": "906307fff72b6022f73dcf1f64c83cedb4e01ec7960035d27d292ed44066f345",
+      "identical": true,
+      "replicate_id": "pair9"
+    }
+  ],
+  "is_evidentiary": false,
+  "limitations": [
+    "Effect estimate and confidence interval are reported regardless of statistical significance; a non-significant result without formal equivalence is INCONCLUSIVE, never evidence of no effect."
+  ],
+  "manifest": {
+    "alpha": null,
+    "architecture": "gohr_resnet",
+    "cipher": "speck3264",
+    "condition": "condition_a",
+    "controls": [],
+    "dataset_generation_method": "os.urandom",
+    "dataset_hash": {
+      "confirmatory_test": "5a299d334e89034c5a37990204a4aa27d2e149fe678384e21dfb7e34d9328594",
+      "train": "ea50ea2bb143363d74ed24209997591e548ec000998f4733be95ab57972c51e8",
+      "validation": "a39c72d86218f2c21c08ca7e50663e1f71de05d3e56be64795ba58ff6583f3fd"
+    },
+    "dataset_id": {
+      "confirmatory_test": "a0f45e9e-f8e6-4be9-851f-fc211314fb56",
+      "train": "21240e31-a50f-40ae-be24-7e0f3b19ff17",
+      "validation": "142764f1-f7de-48de-87f1-0f5a9c38cc97"
+    },
+    "dataset_role": "matched",
+    "dataset_seed": null,
+    "dataset_size": {
+      "confirmatory_test": 1000000,
+      "train": 10000000,
+      "validation": 1000000
+    },
+    "decision": "NOT_SUPPORTED",
+    "dependent_variable": "confirmatory_test_accuracy",
+    "depth": 10,
+    "differential": [
+      64,
+      0
+    ],
+    "evaluation_seed_if_available": null,
+    "exact_replay_available": false,
+    "experiment_id": "H-EV-SHUFFLE",
+    "experiment_version": "1.0",
+    "failure_status": "valid",
+    "hypothesis_id": "H-EV-SHUFFLE",
+    "independent_variable": null,
+    "limitations": [
+      "Effect estimate and confidence interval are reported regardless of statistical significance; a non-significant result without formal equivalence is INCONCLUSIVE, never evidence of no effect."
+    ],
+    "methodology_version": "ciphermind-methodology-v1",
+    "model_seed": 92000,
+    "practical_threshold": null,
+    "practical_threshold_status": "NOT_AVAILABLE",
+    "raw_metrics": {
+      "condition_a": [
+        0.929083,
+        0.928465,
+        0.928445,
+        0.929214,
+        0.928968,
+        0.929974,
+        0.929062,
+        0.929096,
+        0.92859,
+        0.928611
+      ],
+      "condition_b": [
+        0.929844,
+        0.929218,
+        0.92934,
+        0.92889,
+        0.928812,
+        0.929655,
+        0.928949,
+        0.929585,
+        0.929135,
+        0.928812
+      ]
+    },
+    "replicate_id": "aggregate",
+    "rounds": 5,
+    "run_id": "5363d8fb-56a0-49a7-a688-c447bb15e915",
+    "shuffle_seed_if_available": null,
+    "software_versions": {
+      "git_commit": "20e5d7ec2ac44d87cf440d417f9ce30992e139cc",
+      "hardware": "x86_64",
+      "keras_version": "3.13.2",
+      "numpy_version": "2.0.2",
+      "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+      "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+      "tensorflow_version": "2.20.0"
+    },
+    "statistics_seed": null,
+    "task": "neural_ciphertext_distinguisher",
+    "timestamps": {
+      "finished": "2026-09-27T18:49:30.915712+00:00",
+      "started": "2026-09-27T14:47:04.194266+00:00"
+    },
+    "warnings": []
+  },
+  "narrative": {
+    "controls": [
+      "dataset",
+      "model_seed",
+      "rounds",
+      "depth",
+      "architecture",
+      "optimizer",
+      "lr_schedule",
+      "batch_size",
+      "software_environment"
+    ],
+    "dataset": {
+      "role": "matched_per_pair"
+    },
+    "exact_replay_available": false,
+    "hypothesis": "Fixed-order training dynamics (shuffle=False, as used by this project's D-dimension GohrAdapter) could let the model exploit training-loop artifacts tied to a fixed batch order, rather than genuine ciphertext structure.",
+    "unit_of_replication": "matched pair of independently trained models (shared dataset, model initialization, evaluation data; independent training shuffle stream)",
+    "what_changed": "shuffle: True (condition_a) -> False (condition_b)",
+    "what_was_tested": "Under the frozen 5-round Gohr configuration and the tested training protocol, we assess whether minibatch shuffling has a material effect on confirmatory distinguishing accuracy."
+  },
+  "non_evidentiary": true,
+  "practical_significance": {
+    "assessment": {
+      "formal_practical_equivalence": "EQUIVALENT_WITHIN_THRESHOLD",
+      "justification": "epsilon = 0.01 absolute accuracy on the confirmatory test set. This is the audit-wide smallest effect treated as practically meaningful for this metric, and the SAME margin frozen for II-4, so the audit uses one predeclared practical-significance scale. It is a methodological judgment, NOT a literature-derived universal threshold, and it was NOT selected from or validated against pilot noise: pilot data estimate nuisance variance only.\n",
+      "threshold": 0.01,
+      "tost": {
+        "alpha": 0.05,
+        "degrees_of_freedom": 9,
+        "epsilon": 0.01,
+        "equivalent": true,
+        "mean_diff": 0.00027320000000000675,
+        "method": "TOST (Schuirmann 1987; Lakens 2017)",
+        "n_pairs": 10,
+        "p_lower": 7.560618797697316e-14,
+        "p_tost": 1.234334495514655e-13,
+        "p_upper": 1.234334495514655e-13,
+        "se_diff": 0.00014985776960542435
+      }
+    },
+    "predeclared": true
+  },
+  "raw_paired_values": {
+    "condition_a": [
+      0.929083,
+      0.928465,
+      0.928445,
+      0.929214,
+      0.928968,
+      0.929974,
+      0.929062,
+      0.929096,
+      0.92859,
+      0.928611
+    ],
+    "condition_b": [
+      0.929844,
+      0.929218,
+      0.92934,
+      0.92889,
+      0.928812,
+      0.929655,
+      0.928949,
+      0.929585,
+      0.929135,
+      0.928812
+    ]
+  },
+  "replication": {
+    "raw_replicate_results": [
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "beb6385588f8b256cba1a7f9ccb7ab38c23e7cab3a2bbca5a80e440a267efa7a",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "5a299d334e89034c5a37990204a4aa27d2e149fe678384e21dfb7e34d9328594",
+          "train": "ea50ea2bb143363d74ed24209997591e548ec000998f4733be95ab57972c51e8",
+          "validation": "a39c72d86218f2c21c08ca7e50663e1f71de05d3e56be64795ba58ff6583f3fd"
+        },
+        "dataset_id": {
+          "confirmatory_test": "a0f45e9e-f8e6-4be9-851f-fc211314fb56",
+          "train": "21240e31-a50f-40ae-be24-7e0f3b19ff17",
+          "validation": "142764f1-f7de-48de-87f1-0f5a9c38cc97"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9289839863777161,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "bcc44abc278329b3f9a6b7a837855bf593178f681bdc3ff09a49315d345c9add",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92000,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929083,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9289669990539551,
+          "max_val_acc_over_history": 0.9289839863777161
+        },
+        "replicate_id": "pair0",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "0b06fe6f-df30-404a-825c-2da0e3c4d26e",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "20e5d7ec2ac44d87cf440d417f9ce30992e139cc",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-27T18:49:30.915712+00:00",
+          "started": "2026-09-27T14:47:04.194266+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "eb1d41cda7e0b50686b011facf40c880cb366ae92f889f866177907f27923b27",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "997297791acee68acabbb6aabfb6fbdf5553feb7c346e9cea82480666ba15d97",
+          "train": "9dc23bb3b26cb84377a8cce4a894eb64adb5b7d364cc3592173a1e6e92f28b39",
+          "validation": "ce1131f93ea999937ef4d0b1fb6493a6eaf05c8c24778ae04f656b89566da606"
+        },
+        "dataset_id": {
+          "confirmatory_test": "721ba300-ff4c-4198-852e-343c560a0674",
+          "train": "ea914473-057f-43b8-98a0-974fb7b6ab58",
+          "validation": "97206a04-31bf-4331-b42a-067f8316289b"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9290509819984436,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "80aa98666f551d6c2dfcb78b3ebf259f70b0af20d9ac9e6d1b1ba3150a88cc2a",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92001,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.928465,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9289559721946716,
+          "max_val_acc_over_history": 0.9290509819984436
+        },
+        "replicate_id": "pair1",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "eaacdf62-4df7-48c8-9499-02eefa2c4ee6",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "2349c047e4e229b2f20b86218963b904fb8b9c5e",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-28T11:51:10.604961+00:00",
+          "started": "2026-09-28T07:57:53.336591+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "13bec4562032d42345d71e45365d934d75fe2173ac3195543f94df8794b73ab1",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "1e897981f53a1a7ec9f1bf342bb61b106f912ede20a62c12a41b386b456fb779",
+          "train": "ecdffed060160a472951355ebd229d84adba42fa43683801ef544ecc3dd98baa",
+          "validation": "cf18731233fab34b7a35ca314c09e0b88b5dbc2d4ce9e252ac2bf51aca993abf"
+        },
+        "dataset_id": {
+          "confirmatory_test": "2573964f-c109-4d8d-8476-50c46dad803f",
+          "train": "ed06b4b5-52cf-4da6-9b62-342d42d40b23",
+          "validation": "f160794e-d28d-4217-9c2f-19375ffc0d6c"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9284089803695679,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "e2f82c59f6b7e793478eeb4b9d551852dc4fd496ec99903d6449290966324543",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92002,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.928445,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9284089803695679,
+          "max_val_acc_over_history": 0.9284089803695679
+        },
+        "replicate_id": "pair2",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "a00333cd-01f3-4a32-af6f-082fd1a2e181",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "2349c047e4e229b2f20b86218963b904fb8b9c5e",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-29T09:20:17.532416+00:00",
+          "started": "2026-09-29T05:16:30.707052+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "dfa2f7a456f3a3bd8e221f9529df5e54c11b70ff92eb3c039d70cf2f9a405f7e",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "59f0ba95ef9ccf0ddc3f2f3bd12dda01c8878590cb8a5a5134e8c8310e1b9f87",
+          "train": "390c94486209ad33415faf496f8bbadc700bc16fdc4839e4134aaf92b3b6284d",
+          "validation": "81f743d7332e68ad9bc43c9eee62a6e0978a717e59b38956d3b30f95f4b9c36b"
+        },
+        "dataset_id": {
+          "confirmatory_test": "a043b6a0-56cd-4fb5-af9e-110098e43169",
+          "train": "e7c6fda3-be5f-404c-8495-cebd1715221d",
+          "validation": "f12edc8c-64e1-4a98-8069-d5ba21b53c4a"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9288010001182556,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "d3d36e18d3c0e1cccd22e10310a26e64d551b61bf3b84c1526708ba5672ac4d2",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92003,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929214,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9288010001182556,
+          "max_val_acc_over_history": 0.9288010001182556
+        },
+        "replicate_id": "pair3",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "9c73274a-1c03-4191-a985-8203b092649a",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "0ad361f9eaacf504f398349523a3bd75020e0beb",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-29T23:04:00.264393+00:00",
+          "started": "2026-09-29T18:56:17.352598+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "895734cb4e5be044f06e5c16e3ec3367544f71cde932bfd045573f246b19b038",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "ac68725816d89b90e8ca61a4f0afd733676e35812d5411fc7dc75217fa238c9a",
+          "train": "9c6869e78f74a2843b7cdb05f3dbd17d918760b53c3c27a4f09b23d5025b01dd",
+          "validation": "cda1a14411f5134b546aa64665238022d3b871c4298a0dfb6fa4ac68e819d8cd"
+        },
+        "dataset_id": {
+          "confirmatory_test": "94d59e9b-470a-48ba-8d20-0b36a633daea",
+          "train": "5effce5c-a3d1-4dff-8252-62001df1a205",
+          "validation": "43e0cb26-7de1-4cb8-9939-38df71bbd224"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9294090270996094,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "2a625f1e7e0b5170d15938c75210aa4b3a2dff9e480cebef6dd11fc95d6e3deb",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92004,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.928968,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9294090270996094,
+          "max_val_acc_over_history": 0.9294090270996094
+        },
+        "replicate_id": "pair4",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "92c9b3fd-ca71-458f-a60f-994b2cc0fa24",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "0ad361f9eaacf504f398349523a3bd75020e0beb",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-30T13:18:35.847484+00:00",
+          "started": "2026-09-30T09:06:49.785354+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "70f817c588d18fb77fff276f7431a233859c15e8f8b5cab23a3c9693ef9a108e",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "d9416aa1b8f2266a42e08cabc1c5646f7ff359399cd4ca8b93b216374bb50d6c",
+          "train": "888eb20b357390a1812f9b271173212cbbade6e699c8855500bc5c2e498e7d75",
+          "validation": "c215344be427a236bf845ab3a14d31e2643d0004441f222249c2c6af4dcdd694"
+        },
+        "dataset_id": {
+          "confirmatory_test": "d193da25-f064-43ef-a826-2226faf8c94e",
+          "train": "e971b403-d3ff-4474-9ff5-d0ebb5b89ba7",
+          "validation": "79321814-380b-4969-b3cd-dff8658f42b6"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9299119710922241,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "6ff35916439affb75810dcfe742505931ebbf86a8f219b8b8fbb1f78b73abfe3",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92005,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929974,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9299119710922241,
+          "max_val_acc_over_history": 0.9299119710922241
+        },
+        "replicate_id": "pair5",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "805ba1b1-2694-4db6-97aa-2544a33bd461",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "20b96dad5777f4d83ea4723b15fb76eb589f806f",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-01T09:31:42.681351+00:00",
+          "started": "2026-10-01T05:37:48.587593+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "e84e9f0237461c361d903650bd315e96521cb42e7ae967b0ea976ff93bdfbfac",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "552b5bb26976e380f22c006b941c76a0749e97a4242caacc456c816ac05e59e8",
+          "train": "c575a52e2e3b6f8d886823a06e7f5522b2031ffc99b36d01fa45a338420c0ea7",
+          "validation": "d9849f500f0a17b4e36e3a5bc8062f45e7d1465fe764afa22081d643164c9890"
+        },
+        "dataset_id": {
+          "confirmatory_test": "7304b259-67c2-4606-9949-16b607789646",
+          "train": "396677f5-c9d6-48e8-a8a7-98426094ea6a",
+          "validation": "1fb265aa-df06-47f7-b055-672589f43764"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9290480017662048,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "ddc5e0324b292e9c936a6f97a68c76647cf970c2cd5a1188a8f82e69c91bd3a8",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92006,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929062,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9290480017662048,
+          "max_val_acc_over_history": 0.9290480017662048
+        },
+        "replicate_id": "pair6",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "daa16d1e-0a95-4484-bb4d-ab21b1da7347",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "20b96dad5777f4d83ea4723b15fb76eb589f806f",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.18.48+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-02T09:13:10.021578+00:00",
+          "started": "2026-10-02T05:10:22.945187+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "53ff29fc2594e5a6e977c8b308547233bcd0db8b94538405cdd90fd606107294",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "d0b603221f24f50e11ce84d2fedbe470b66c8287741ded5808d1fc81582d2f86",
+          "train": "f9803df673978d992147600b95398762552aa1c1ebcd4098a6bd67ea4e0c1baa",
+          "validation": "930da349539ac53db50f8d35f8a97b5189791c8d9318697cd5341d93fa752dc9"
+        },
+        "dataset_id": {
+          "confirmatory_test": "c1cff8c1-5983-4825-be61-1988746dbeb4",
+          "train": "ba612e80-8b10-4870-81c4-65932817bb9e",
+          "validation": "8ad998cd-8e6d-4382-a79f-59f80195385f"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9294139742851257,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "c1c5fa5c260db8dac9928a8272bdd4d4649b1125418dd131bda2ba1cc49ec736",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92007,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929096,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9293450117111206,
+          "max_val_acc_over_history": 0.9294139742851257
+        },
+        "replicate_id": "pair7",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "7c083ef2-8717-498b-a1d0-ecc034514dba",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "6d692ba5efeac774015f38330b7f50f34eca543a",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.1.3",
+          "os": "Linux-6.18.48+-x86_64-with-glibc2.39",
+          "python_version": "3.13.15 (main, Aug  6 2026, 11:06:22) [GCC 13.3.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-03T14:35:59.476168+00:00",
+          "started": "2026-10-03T09:53:09.311550+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "05fcf645105a620334ede16ac6b060a3ede0e529700e70f95792b18abcfb3521",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "6c7845eab275fff8d06a6b16fb532ace5c0518e6341e89557266401dba0947a4",
+          "train": "a6b4f1a3ae45fd086d4e2630c1a46d942f002c0eb4ee3bf1c39e08db675dcf0a",
+          "validation": "d0a869287a9e4afe6f7e8b9424ce7bf116f654ae625c527c3552bceaf53cda4c"
+        },
+        "dataset_id": {
+          "confirmatory_test": "aaeff1cd-78a2-4106-8e15-ac91f292a73d",
+          "train": "2cd2d438-389f-40fc-b65a-7e2ed339abe5",
+          "validation": "9a947a09-ed8c-40d8-9c3f-e19ef44b9a88"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9289630055427551,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "e4705f2b857aef0c4e7d0822c7ba7ae479c2e8152b11bbaea6729a6c94c9eac7",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92008,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.92859,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9288870096206665,
+          "max_val_acc_over_history": 0.9289630055427551
+        },
+        "replicate_id": "pair8",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "cda53e87-7fcf-4422-b1cc-b58d164600bd",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "9cec3996fd172b2ab8d9f1b887f1b539ec2068c3",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.1.3",
+          "os": "Linux-6.18.48+-x86_64-with-glibc2.39",
+          "python_version": "3.13.15 (main, Aug  6 2026, 11:06:22) [GCC 13.3.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-06T10:15:03.348991+00:00",
+          "started": "2026-10-06T05:58:23.973776+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "78390f9584272cf352d22d7076987b408ebcb18a576b8d763656a210e403213b",
+        "cipher": "speck3264",
+        "condition": "condition_a",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "82065ec2998c1864ab76ceef522fbe578133e886a119d73eb0789df9834924d0",
+          "train": "0858ddddbc97a6e721769ff4df7f9ed0c0a1bc105af85b207b5c75fc4112081e",
+          "validation": "4224384e9b112fa9d970cd385960784fd62646890410fd3cf96241c9f954b541"
+        },
+        "dataset_id": {
+          "confirmatory_test": "a97fb3ba-0320-419f-94a7-b51273e6d2b5",
+          "train": "0a2bd921-cacf-4ee4-977a-5e9fc43741d9",
+          "validation": "97e8c2d7-9289-41fd-80e5-6db1bb956be0"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.928613007068634,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "906307fff72b6022f73dcf1f64c83cedb4e01ec7960035d27d292ed44066f345",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92009,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.928611,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9285650253295898,
+          "max_val_acc_over_history": 0.928613007068634
+        },
+        "replicate_id": "pair9",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "c4d977e5-d62a-458b-a194-9f5dff1cdad5",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "05147fc706cd8720575a72dc0fb7aaadc0378fb5",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.1.3",
+          "os": "Linux-6.18.48+-x86_64-with-glibc2.39",
+          "python_version": "3.13.15 (main, Aug  6 2026, 11:06:22) [GCC 13.3.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-07T14:53:53.686556+00:00",
+          "started": "2026-10-07T10:38:47.110516+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "7f2ea364c7c9af3243cb09673bc121a8ac9496f1f23997ca97e6d31b40f21f30",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "5a299d334e89034c5a37990204a4aa27d2e149fe678384e21dfb7e34d9328594",
+          "train": "ea50ea2bb143363d74ed24209997591e548ec000998f4733be95ab57972c51e8",
+          "validation": "a39c72d86218f2c21c08ca7e50663e1f71de05d3e56be64795ba58ff6583f3fd"
+        },
+        "dataset_id": {
+          "confirmatory_test": "a0f45e9e-f8e6-4be9-851f-fc211314fb56",
+          "train": "21240e31-a50f-40ae-be24-7e0f3b19ff17",
+          "validation": "142764f1-f7de-48de-87f1-0f5a9c38cc97"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9293450117111206,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "bcc44abc278329b3f9a6b7a837855bf593178f681bdc3ff09a49315d345c9add",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92000,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929844,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9293450117111206,
+          "max_val_acc_over_history": 0.9293450117111206
+        },
+        "replicate_id": "pair0",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "4e66d16d-8bae-4677-b067-b83156e10b5f",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "20e5d7ec2ac44d87cf440d417f9ce30992e139cc",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-27T22:50:49.730271+00:00",
+          "started": "2026-09-27T18:49:34.348734+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "6a1178a7dcc869825d1725dc7d650f67f1534bcc8df99b0138b3b7a5ae3300c6",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "997297791acee68acabbb6aabfb6fbdf5553feb7c346e9cea82480666ba15d97",
+          "train": "9dc23bb3b26cb84377a8cce4a894eb64adb5b7d364cc3592173a1e6e92f28b39",
+          "validation": "ce1131f93ea999937ef4d0b1fb6493a6eaf05c8c24778ae04f656b89566da606"
+        },
+        "dataset_id": {
+          "confirmatory_test": "721ba300-ff4c-4198-852e-343c560a0674",
+          "train": "ea914473-057f-43b8-98a0-974fb7b6ab58",
+          "validation": "97206a04-31bf-4331-b42a-067f8316289b"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9296219944953918,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "80aa98666f551d6c2dfcb78b3ebf259f70b0af20d9ac9e6d1b1ba3150a88cc2a",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92001,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929218,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9295819997787476,
+          "max_val_acc_over_history": 0.9296219944953918
+        },
+        "replicate_id": "pair1",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "24f1e131-4db8-4267-93e6-d72fea1dae2e",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "2349c047e4e229b2f20b86218963b904fb8b9c5e",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-28T15:46:54.356629+00:00",
+          "started": "2026-09-28T11:51:14.280825+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "52ab75a611262247a64f208c673ebebe8fd200386f68a64de18eceb49b8f2d28",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "1e897981f53a1a7ec9f1bf342bb61b106f912ede20a62c12a41b386b456fb779",
+          "train": "ecdffed060160a472951355ebd229d84adba42fa43683801ef544ecc3dd98baa",
+          "validation": "cf18731233fab34b7a35ca314c09e0b88b5dbc2d4ce9e252ac2bf51aca993abf"
+        },
+        "dataset_id": {
+          "confirmatory_test": "2573964f-c109-4d8d-8476-50c46dad803f",
+          "train": "ed06b4b5-52cf-4da6-9b62-342d42d40b23",
+          "validation": "f160794e-d28d-4217-9c2f-19375ffc0d6c"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9292979836463928,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "e2f82c59f6b7e793478eeb4b9d551852dc4fd496ec99903d6449290966324543",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92002,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.92934,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9292979836463928,
+          "max_val_acc_over_history": 0.9292979836463928
+        },
+        "replicate_id": "pair2",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "b9023eee-eb06-481d-86c3-a6a6b390d055",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "2349c047e4e229b2f20b86218963b904fb8b9c5e",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-29T13:24:27.298934+00:00",
+          "started": "2026-09-29T09:20:21.273300+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "754c5021380a8dd39fec0c786554c7fbe77133734b67114b1c9ea66ef0c451da",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "59f0ba95ef9ccf0ddc3f2f3bd12dda01c8878590cb8a5a5134e8c8310e1b9f87",
+          "train": "390c94486209ad33415faf496f8bbadc700bc16fdc4839e4134aaf92b3b6284d",
+          "validation": "81f743d7332e68ad9bc43c9eee62a6e0978a717e59b38956d3b30f95f4b9c36b"
+        },
+        "dataset_id": {
+          "confirmatory_test": "a043b6a0-56cd-4fb5-af9e-110098e43169",
+          "train": "e7c6fda3-be5f-404c-8495-cebd1715221d",
+          "validation": "f12edc8c-64e1-4a98-8069-d5ba21b53c4a"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9284449815750122,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "d3d36e18d3c0e1cccd22e10310a26e64d551b61bf3b84c1526708ba5672ac4d2",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92003,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.92889,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9284449815750122,
+          "max_val_acc_over_history": 0.9284449815750122
+        },
+        "replicate_id": "pair3",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "2bd30589-ca16-4ea5-b36c-8ce44442d28d",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "0ad361f9eaacf504f398349523a3bd75020e0beb",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-30T03:13:04.055562+00:00",
+          "started": "2026-09-29T23:04:04.291052+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "75840ee499422bfe12eee5ba19b0ed69e29d10b4e3c3c6617488ba8b100874dc",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "ac68725816d89b90e8ca61a4f0afd733676e35812d5411fc7dc75217fa238c9a",
+          "train": "9c6869e78f74a2843b7cdb05f3dbd17d918760b53c3c27a4f09b23d5025b01dd",
+          "validation": "cda1a14411f5134b546aa64665238022d3b871c4298a0dfb6fa4ac68e819d8cd"
+        },
+        "dataset_id": {
+          "confirmatory_test": "94d59e9b-470a-48ba-8d20-0b36a633daea",
+          "train": "5effce5c-a3d1-4dff-8252-62001df1a205",
+          "validation": "43e0cb26-7de1-4cb8-9939-38df71bbd224"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9292060136795044,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "2a625f1e7e0b5170d15938c75210aa4b3a2dff9e480cebef6dd11fc95d6e3deb",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92004,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.928812,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9292060136795044,
+          "max_val_acc_over_history": 0.9292060136795044
+        },
+        "replicate_id": "pair4",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "93b20494-512d-41ce-be46-fc9614ebcc29",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "0ad361f9eaacf504f398349523a3bd75020e0beb",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-09-30T17:33:49.590362+00:00",
+          "started": "2026-09-30T13:18:39.589349+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "d0adfa839e6669031480764159d13ff0cdadc989f14b05d7fb22dd720765d13e",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "d9416aa1b8f2266a42e08cabc1c5646f7ff359399cd4ca8b93b216374bb50d6c",
+          "train": "888eb20b357390a1812f9b271173212cbbade6e699c8855500bc5c2e498e7d75",
+          "validation": "c215344be427a236bf845ab3a14d31e2643d0004441f222249c2c6af4dcdd694"
+        },
+        "dataset_id": {
+          "confirmatory_test": "d193da25-f064-43ef-a826-2226faf8c94e",
+          "train": "e971b403-d3ff-4474-9ff5-d0ebb5b89ba7",
+          "validation": "79321814-380b-4969-b3cd-dff8658f42b6"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9293649792671204,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "6ff35916439affb75810dcfe742505931ebbf86a8f219b8b8fbb1f78b73abfe3",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92005,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929655,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9292929768562317,
+          "max_val_acc_over_history": 0.9293649792671204
+        },
+        "replicate_id": "pair5",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "ad663bf6-69b3-4394-9625-77fc20ce6ac7",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "20b96dad5777f4d83ea4723b15fb76eb589f806f",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-01T13:26:03.181135+00:00",
+          "started": "2026-10-01T09:31:46.345448+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "ca7dc822356fca76df6e2aed3fc08b8ca0c820698679a0940894ad5bc408fbae",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "552b5bb26976e380f22c006b941c76a0749e97a4242caacc456c816ac05e59e8",
+          "train": "c575a52e2e3b6f8d886823a06e7f5522b2031ffc99b36d01fa45a338420c0ea7",
+          "validation": "d9849f500f0a17b4e36e3a5bc8062f45e7d1465fe764afa22081d643164c9890"
+        },
+        "dataset_id": {
+          "confirmatory_test": "7304b259-67c2-4606-9949-16b607789646",
+          "train": "396677f5-c9d6-48e8-a8a7-98426094ea6a",
+          "validation": "1fb265aa-df06-47f7-b055-672589f43764"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9290260076522827,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "ddc5e0324b292e9c936a6f97a68c76647cf970c2cd5a1188a8f82e69c91bd3a8",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92006,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.928949,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9290260076522827,
+          "max_val_acc_over_history": 0.9290260076522827
+        },
+        "replicate_id": "pair6",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "c36bee8b-b03e-40bc-ba16-a40d3e14bb77",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "20b96dad5777f4d83ea4723b15fb76eb589f806f",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.0.2",
+          "os": "Linux-6.18.48+-x86_64-with-glibc2.35",
+          "python_version": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-02T13:23:05.253704+00:00",
+          "started": "2026-10-02T09:13:13.867358+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "688eb53157d5434b8e5e5f29ddff3db2df7e702a16cd39fc042c567ee4507f2b",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "d0b603221f24f50e11ce84d2fedbe470b66c8287741ded5808d1fc81582d2f86",
+          "train": "f9803df673978d992147600b95398762552aa1c1ebcd4098a6bd67ea4e0c1baa",
+          "validation": "930da349539ac53db50f8d35f8a97b5189791c8d9318697cd5341d93fa752dc9"
+        },
+        "dataset_id": {
+          "confirmatory_test": "c1cff8c1-5983-4825-be61-1988746dbeb4",
+          "train": "ba612e80-8b10-4870-81c4-65932817bb9e",
+          "validation": "8ad998cd-8e6d-4382-a79f-59f80195385f"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9296050071716309,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "c1c5fa5c260db8dac9928a8272bdd4d4649b1125418dd131bda2ba1cc49ec736",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92007,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929585,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9295690059661865,
+          "max_val_acc_over_history": 0.9296050071716309
+        },
+        "replicate_id": "pair7",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "76cf768d-2b1f-44fc-9c64-9185f5ee1f28",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "6d692ba5efeac774015f38330b7f50f34eca543a",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.1.3",
+          "os": "Linux-6.18.48+-x86_64-with-glibc2.39",
+          "python_version": "3.13.15 (main, Aug  6 2026, 11:06:22) [GCC 13.3.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-03T19:17:02.454042+00:00",
+          "started": "2026-10-03T14:36:03.576399+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "313dfd2cd8798de0c22fdf36374aac2c37960c64b970974ca76c1af0d63425e2",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "6c7845eab275fff8d06a6b16fb532ace5c0518e6341e89557266401dba0947a4",
+          "train": "a6b4f1a3ae45fd086d4e2630c1a46d942f002c0eb4ee3bf1c39e08db675dcf0a",
+          "validation": "d0a869287a9e4afe6f7e8b9424ce7bf116f654ae625c527c3552bceaf53cda4c"
+        },
+        "dataset_id": {
+          "confirmatory_test": "aaeff1cd-78a2-4106-8e15-ac91f292a73d",
+          "train": "2cd2d438-389f-40fc-b65a-7e2ed339abe5",
+          "validation": "9a947a09-ed8c-40d8-9c3f-e19ef44b9a88"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9294019937515259,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "e4705f2b857aef0c4e7d0822c7ba7ae479c2e8152b11bbaea6729a6c94c9eac7",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92008,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.929135,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9293450117111206,
+          "max_val_acc_over_history": 0.9294019937515259
+        },
+        "replicate_id": "pair8",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "b50785e2-9aae-4c7e-9428-83166d8fb1f3",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "9cec3996fd172b2ab8d9f1b887f1b539ec2068c3",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.1.3",
+          "os": "Linux-6.18.48+-x86_64-with-glibc2.39",
+          "python_version": "3.13.15 (main, Aug  6 2026, 11:06:22) [GCC 13.3.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-06T14:27:20.742428+00:00",
+          "started": "2026-10-06T10:15:06.889903+00:00"
+        },
+        "warnings": []
+      },
+      {
+        "alpha": null,
+        "architecture": "gohr_resnet",
+        "checkpoint_hash": "055111f378e296d30f21d1a14533091a38eb14dbdb4d7913ac0973f97b79935f",
+        "cipher": "speck3264",
+        "condition": "condition_b",
+        "confirmatory_evaluation_protocol": "final_epoch_weights",
+        "controls": [],
+        "dataset_generation_method": "os.urandom",
+        "dataset_hash": {
+          "confirmatory_test": "82065ec2998c1864ab76ceef522fbe578133e886a119d73eb0789df9834924d0",
+          "train": "0858ddddbc97a6e721769ff4df7f9ed0c0a1bc105af85b207b5c75fc4112081e",
+          "validation": "4224384e9b112fa9d970cd385960784fd62646890410fd3cf96241c9f954b541"
+        },
+        "dataset_id": {
+          "confirmatory_test": "a97fb3ba-0320-419f-94a7-b51273e6d2b5",
+          "train": "0a2bd921-cacf-4ee4-977a-5e9fc43741d9",
+          "validation": "97e8c2d7-9289-41fd-80e5-6db1bb956be0"
+        },
+        "dataset_role": "matched",
+        "dataset_seed": null,
+        "dataset_size": {
+          "confirmatory_test": 1000000,
+          "train": 10000000,
+          "validation": 1000000
+        },
+        "decision": "NOT_RUN",
+        "dependent_variable": "confirmatory_test_accuracy",
+        "depth": 10,
+        "differential": [
+          64,
+          0
+        ],
+        "evaluation_seed_if_available": null,
+        "exact_replay_available": false,
+        "experiment_id": "H-EV-SHUFFLE",
+        "experiment_version": "1.0",
+        "failure_status": "valid",
+        "historical_reporting_convention_value": 0.9287989735603333,
+        "hypothesis_id": "H-EV-SHUFFLE",
+        "independent_variable": null,
+        "initial_weight_hash": "906307fff72b6022f73dcf1f64c83cedb4e01ec7960035d27d292ed44066f345",
+        "limitations": [
+          "confirmatory_test_accuracy is computed on a dedicated sealed test set, distinct from the training-time validation set used for checkpoint/LR selection; historical_reporting_convention_value is preserved separately for comparability with the documented baseline and is not the EV outcome metric."
+        ],
+        "methodology_version": "ciphermind-methodology-v1",
+        "model_config_hash": "87953e3423280a4d81f1dae0c85d3cf4f2f2fb6e7599c683765f2f4a74a98a93",
+        "model_seed": 92009,
+        "pairing": {
+          "same_dataset": true,
+          "same_evaluation_data": true,
+          "same_model_initialization": true,
+          "same_training_shuffle_stream": false
+        },
+        "practical_threshold": null,
+        "practical_threshold_status": "NOT_AVAILABLE",
+        "raw_metrics": {
+          "confirmatory_test_accuracy": 0.928812,
+          "confirmatory_test_n": 1000000,
+          "final_val_acc": 0.9287229776382446,
+          "max_val_acc_over_history": 0.9287989735603333
+        },
+        "replicate_id": "pair9",
+        "representation_permutation_hash": "94a9b879dd209fdcf48fb6028ae71527df83f4193393b8b40672dab82280cf4b",
+        "rounds": 5,
+        "run_id": "11d382fd-6693-4c79-a759-290a320b1184",
+        "run_mode": "calibration",
+        "shuffle_seed_if_available": null,
+        "software_versions": {
+          "git_commit": "05147fc706cd8720575a72dc0fb7aaadc0378fb5",
+          "hardware": "x86_64",
+          "keras_version": "3.13.2",
+          "numpy_version": "2.1.3",
+          "os": "Linux-6.18.48+-x86_64-with-glibc2.39",
+          "python_version": "3.13.15 (main, Aug  6 2026, 11:06:22) [GCC 13.3.0]",
+          "tensorflow_version": "2.20.0"
+        },
+        "statistics_seed": null,
+        "task": "neural_ciphertext_distinguisher",
+        "timestamps": {
+          "finished": "2026-10-07T19:08:05.277012+00:00",
+          "started": "2026-10-07T14:53:57.265641+00:00"
+        },
+        "warnings": []
+      }
+    ],
+    "requested_replicates": 10,
+    "valid_replicates": 10
+  },
+  "run_mode": "calibration",
+  "statistics": {
+    "adjusted_p_value": null,
+    "confidence_interval": {
+      "high": 0.0006122018269222567,
+      "low": -6.580182692224329e-05
+    },
+    "effect_size": 0.5765028126554681,
+    "raw_p_value": 0.10160847292878501
+  }
+}
