@@ -59,7 +59,8 @@ FROZEN = {
     "simulations": 50_000,
     "sigma_source": "upper95",
     "calibration_pairs_per_hypothesis": 10,
-    "calibration_artifact": "ev-calibration-variance-v2",
+    "calibration_artifact": ["ev-calibration-variance-v2",
+                             "ev-calibration-variance-v3"],
 }
 DEFAULT_SIMULATIONS = FROZEN["simulations"]
 DEFAULT_MAX_N = 200
@@ -84,9 +85,9 @@ def _require_frozen(args, art) -> None:
     if args.use_sigma != FROZEN["sigma_source"]:
         bad.append(f"sigma_source={args.use_sigma!r} (frozen {FROZEN['sigma_source']!r})")
 
-    if art.get("artifact") != FROZEN["calibration_artifact"]:
+    if art.get("artifact") not in FROZEN["calibration_artifact"]:
         bad.append(f"calibration artifact schema={art.get('artifact')!r} "
-                   f"(required {FROZEN['calibration_artifact']!r})")
+                   f"(required one of {FROZEN['calibration_artifact']!r})")
     if art.get("non_evidentiary") is not True:
         bad.append("calibration artifact is not marked non_evidentiary=true")
 
@@ -285,6 +286,10 @@ def build_power_plan(
             "alpha": alpha, "target_power": target_power,
             "n_simulations": simulations, "max_n_searched": max_n,
             "calibration_artifact_sha256": sha256_file(variance_artifact),
+            "calibration_artifact_schema": art.get("artifact"),
+            "calibration_binding_degraded": bool(art.get("binding_degraded")),
+            "calibration_provenance_warnings": list(art.get("provenance_warnings") or []),
+            "calibration_source_commits": list(art.get("source_commits") or []),
             "frozen_design": dict(FROZEN),
         },
         "procedure_simulated": ("COMPLETE final decision rule: paired t-test -> difference "
@@ -324,6 +329,12 @@ def build_power_plan(
              "distributed with mean = target effect (0 for the equivalence scenario) and "
              "sigma = sigma_Delta_upper_95; departures from normality or independence change "
              "the required n"),
+            ("the calibration variance artifact may carry RECOVERED rather than "
+             "certificate-recorded provenance bindings; see inputs."
+             "calibration_binding_degraded and inputs."
+             "calibration_provenance_warnings. A degraded binding does not change the "
+             "computed K, but it weakens the chain from this plan back to the pilot "
+             "runs that supplied sigma, and must be reported as such"),
         ],
     }
     return plan
