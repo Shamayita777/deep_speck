@@ -107,14 +107,13 @@ class AssessmentTier(str, Enum):
     justified and practically feasible, but whose absence does not
     block a core finding).
 
-    Introduced for Implementation Integrity per explicit methodology
-    revision: independent reimplementation is an ENHANCED component,
-    not a prerequisite for CORE Implementation Integrity (baseline
-    reconstruction, controlled verification, comparative evaluation,
-    statistical assessment). An ENHANCED component that was not
-    performed is recorded as NOT_ASSESSED (see
-    audit.implementation.stages), never silently omitted and never
-    described as having been performed at reduced rigor.
+    Implementation Integrity certificates V1-V5 recorded independent
+    reimplementation (II-2) as ENHANCED. Under the five-stage
+    methodology (Section 3.5.4) all five II stages, including II-2, are
+    CORE (see audit.implementation.stages); ENHANCED is retained so
+    historical certificates remain readable. A stage that was not
+    performed is recorded as NOT_ASSESSED, never silently omitted and
+    never described as having been performed at reduced rigor.
     """
     CORE = "CORE"
     ENHANCED = "ENHANCED"

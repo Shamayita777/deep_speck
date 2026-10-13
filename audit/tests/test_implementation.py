@@ -37,27 +37,30 @@ from audit.implementation.stages import (
     STAGE_TIERS,
     StageId,
     StageOutcome,
+    ComponentKind,
+    StageComponent,
     StageStatus,
     convergence_contribution,
     not_assessed_stage,
 )
 
 
-# --- CORE vs ENHANCED tiering (methodology revision) ---
+# --- five CORE stages (methodology Section 3.5.4) ---
 
-def test_independent_reimplementation_is_enhanced_not_core():
-    assert STAGE_TIERS[StageId.II_2_INDEPENDENT_REIMPLEMENTATION] is AssessmentTier.ENHANCED
-    assert StageId.II_2_INDEPENDENT_REIMPLEMENTATION not in CORE_STAGES
-    assert StageId.II_2_INDEPENDENT_REIMPLEMENTATION in ENHANCED_STAGES
+def test_independent_reimplementation_is_core():
+    assert STAGE_TIERS[StageId.II_2_INDEPENDENT_REIMPLEMENTATION] is AssessmentTier.CORE
+    assert StageId.II_2_INDEPENDENT_REIMPLEMENTATION in CORE_STAGES
+    assert ENHANCED_STAGES == []
 
 
-def test_four_core_stages_are_exactly_the_revised_set():
-    assert set(CORE_STAGES) == {
+def test_core_stages_are_the_five_sequential_stages():
+    assert CORE_STAGES == [
         StageId.II_1_BASELINE_RECONSTRUCTION,
+        StageId.II_2_INDEPENDENT_REIMPLEMENTATION,
         StageId.II_3_CONTROLLED_VERIFICATION,
         StageId.II_4_COMPARATIVE_EVALUATION,
         StageId.II_5_STATISTICAL_ASSESSMENT,
-    }
+    ]
 
 
 def test_not_assessed_ii2_contributes_no_convergence_but_imposes_no_cap():
@@ -93,7 +96,8 @@ def test_no_evidence_level_cap_api_remains():
 def test_not_assessed_stage_is_explicit_never_silent():
     stage = not_assessed_stage(StageId.II_2_INDEPENDENT_REIMPLEMENTATION, reason="not performed")
     assert stage.status is StageOutcome.NOT_ASSESSED
-    assert stage.tier is AssessmentTier.ENHANCED
+    assert stage.tier is AssessmentTier.CORE
+    assert stage.is_satisfied is False
 
 
 # --- equivalence primitives ---
@@ -280,17 +284,27 @@ def test_depth_finding_records_open_questions_rather_than_asserting_causation():
 # --- evidence assembly ---
 
 def _satisfied_core_stages():
+    """Every CORE stage COMPLETED, carrying the components that legitimately complete it."""
+    def components(stage_id):
+        if stage_id is StageId.II_2_INDEPENDENT_REIMPLEMENTATION:
+            return (StageComponent("c-ii2", ComponentKind.INDEPENDENT_IMPLEMENTATION,
+                                   StageOutcome.COMPLETED, "q", "s", evidence={"m.json": "a" * 64}),)
+        if stage_id in (StageId.II_4_COMPARATIVE_EVALUATION, StageId.II_5_STATISTICAL_ASSESSMENT):
+            return (StageComponent("c-formal", ComponentKind.FORMAL_IMPLEMENTATION_COMPARISON,
+                                   StageOutcome.COMPLETED, "q", "s"),)
+        return ()
     return [
         StageStatus(stage_id=s, tier=AssessmentTier.CORE,
-                    status=StageOutcome.COMPLETED, summary="ok")
+                    status=StageOutcome.COMPLETED, summary="ok", components=components(s))
         for s in CORE_STAGES
     ]
 
 
 def _as_run_in_production():
-    """Mirrors the real runner: conformance verified, II-4 not performed, II-5 N/A."""
+    """Mirrors the V1-V3 runner: conformance verified, II-4 not performed, II-5 N/A."""
     mapping = {
         StageId.II_1_BASELINE_RECONSTRUCTION: StageOutcome.CONFORMANCE_VERIFIED,
+        StageId.II_2_INDEPENDENT_REIMPLEMENTATION: StageOutcome.NOT_ASSESSED,
         StageId.II_3_CONTROLLED_VERIFICATION: StageOutcome.CONFORMANCE_VERIFIED,
         StageId.II_4_COMPARATIVE_EVALUATION: StageOutcome.NOT_PERFORMED,
         StageId.II_5_STATISTICAL_ASSESSMENT: StageOutcome.NOT_APPLICABLE,

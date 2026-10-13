@@ -18,6 +18,7 @@ re-evaluation - never silently altering upstream historical evidence.
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Optional
@@ -79,7 +80,14 @@ class ScientificImpactStatus(str, Enum):
 
 
 class DownstreamStatus(str, Enum):
+    """
+    REEVALUATED means the re-evaluation has been PERFORMED by successor
+    evidence that was verified (hash and realized configuration) against
+    its artifacts. The historical evidence is not edited and remains
+    scoped to the configuration it was produced with.
+    """
     REQUIRES_REEVALUATION = "REQUIRES_REEVALUATION"
+    REEVALUATED = "REEVALUATED"
     UNAFFECTED = "UNAFFECTED"
     OPEN_PENDING_EVIDENCE = "OPEN_PENDING_EVIDENCE"
 
@@ -92,15 +100,25 @@ class DownstreamDependency:
     status: DownstreamStatus
     rationale: str
     historical_artifact_preserved: bool = True
+    # Verification record of the successor evidence; required for REEVALUATED.
+    successor: Optional[dict[str, Any]] = None
+
+    def __post_init__(self) -> None:
+        if self.status is DownstreamStatus.REEVALUATED and not self.successor:
+            raise ValueError(
+                f"{self.evidence_reference}: REEVALUATED requires a verified successor record.")
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        out = {
             "evidence_reference": self.evidence_reference,
             "dimension": self.dimension.value,
             "status": self.status.value,
             "rationale": self.rationale,
             "historical_artifact_preserved": self.historical_artifact_preserved,
         }
+        if self.successor is not None:
+            out["successor"] = dict(self.successor)
+        return out
 
 
 @dataclass(frozen=True)
@@ -310,6 +328,34 @@ CE3_CLARITY_FINDING_V1 = ImplementationFinding(
 ALL_FINDINGS = [DEPTH_FINDING_V1, CE3_CLARITY_FINDING_V1]
 
 
+def reconcile_downstream(
+    downstream: list[DownstreamDependency], successors: dict[str, dict[str, Any]],
+) -> list[DownstreamDependency]:
+    """
+    Mark REQUIRES_REEVALUATION dependencies as REEVALUATED, one by one,
+    ONLY where `successors` holds a record for that exact reference whose
+    `verified` flag is True. Anything else is returned unchanged, so an
+    unverified or missing successor leaves the warning in place.
+    """
+    out: list[DownstreamDependency] = []
+    for dep in downstream:
+        record = successors.get(dep.evidence_reference)
+        if (dep.status is DownstreamStatus.REQUIRES_REEVALUATION
+                and record is not None and record.get("verified") is True):
+            out.append(dataclasses.replace(
+                dep, status=DownstreamStatus.REEVALUATED, successor=dict(record),
+                rationale=(
+                    f"{dep.rationale} RE-EVALUATED: successor evidence "
+                    f"{record.get('certificate')} was verified against its checkpoint(s); the "
+                    "historical evidence is preserved unchanged and remains scoped to the "
+                    "configuration it was produced with."
+                ),
+            ))
+        else:
+            out.append(dep)
+    return out
+
+
 class FindingObservationMismatch(RuntimeError):
     """
     Raised when a stored finding's recorded artifact hashes or observed
@@ -346,6 +392,11 @@ def verify_finding_against_observations(
     for name, recorded_hash in finding.supporting_artifacts.items():
         if name.startswith("reference/"):
             continue  # reference sources are verified separately by II-1
+        if name.startswith("source:"):
+            # Execution-time source hashes recorded in a preregistration's
+            # source manifest; bound through that preregistration, not
+            # re-inspected (the files may legitimately have changed since).
+            continue
         if name not in observed_artifact_hashes:
             problems.append(
                 f"{finding.finding_id}: records artifact {name!r} that was not inspected in "

@@ -170,10 +170,16 @@ def test_unmatched_verdict_combination_is_an_error():
 
 # --- certificate converter ----------------------------------------------------------
 
+# A conformance-impact run answers "does the discrepancy matter?". Its preregistered
+# interpretation is reported as conformance_impact_outcome; the pillar decision stays
+# INCONCLUSIVE because such a run cannot complete II-4 (no formal implementation comparison).
+
 def test_converter_material_difference_gives_fail(tmp_path):
     run = _complete_run(tmp_path, FakeAdapter(2))
     out = convert_ii4_run(run, tmp_path / "certs", allow_non_evidentiary=True)
-    assert out["decision"] == "FAIL" and out["clause"]["scientific_impact"] == "DEMONSTRATED"
+    assert out["conformance_impact_outcome"] == "FAIL"
+    assert out["clause"]["scientific_impact"] == "DEMONSTRATED"
+    assert out["decision"] == "INCONCLUSIVE"
     assert out["identifier"] == "implementation-certificate-V1"      # fresh temp registry
     assert out["tag"] == "CONFIRMATORY"                               # genuine pre-execution prereg
 
@@ -181,7 +187,8 @@ def test_converter_material_difference_gives_fail(tmp_path):
 def test_converter_equivalence_gives_conditional_pass(tmp_path):
     run = _complete_run(tmp_path, FakeAdapter(2, base=(0.90, 0.90), noise=1e-4))
     out = convert_ii4_run(run, tmp_path / "certs", allow_non_evidentiary=True)
-    assert out["decision"] == "CONDITIONAL_PASS"
+    assert out["conformance_impact_outcome"] == "CONDITIONAL_PASS"
+    assert out["decision"] == "INCONCLUSIVE"
     cert = json.loads(Path(out["path"]).read_text())
     assert any("does NOT validate transferability" in l for l in cert["limitations"])
 
@@ -189,6 +196,7 @@ def test_converter_equivalence_gives_conditional_pass(tmp_path):
 def test_converter_wide_noise_gives_inconclusive(tmp_path):
     run = _complete_run(tmp_path, FakeAdapter(2, base=(0.90, 0.888), noise=0.02))
     out = convert_ii4_run(run, tmp_path / "certs", allow_non_evidentiary=True)
+    assert out["conformance_impact_outcome"] == "INCONCLUSIVE"
     assert out["decision"] == "INCONCLUSIVE"
 
 
@@ -196,7 +204,18 @@ def test_converter_insufficient_blocks_gives_inconclusive(tmp_path):
     adapter = FakeAdapter(2, short_epochs=True)          # every arm fails -> 0 valid blocks
     run = _complete_run(tmp_path, adapter)
     out = convert_ii4_run(run, tmp_path / "certs", allow_non_evidentiary=True)
+    assert out["conformance_impact_outcome"] == "INCONCLUSIVE"
     assert out["decision"] == "INCONCLUSIVE"
+
+
+def test_converter_records_depth_run_as_conformance_impact_not_formal_comparison(tmp_path):
+    run = _complete_run(tmp_path, FakeAdapter(2, base=(0.90, 0.90), noise=1e-4))
+    out = convert_ii4_run(run, tmp_path / "certs", allow_non_evidentiary=True)
+    stages = {s["stage_id"]: s for s in json.loads(Path(out["path"]).read_text())["observation"]["stages"]}
+    for sid in ("II-4_COMPARATIVE_EVALUATION", "II-5_STATISTICAL_ASSESSMENT"):
+        assert stages[sid]["status"] == "PARTIAL"
+        assert [c["kind"] for c in stages[sid]["components"]] == ["CONFORMANCE_IMPACT_EXPERIMENT"]
+    assert stages["II-2_INDEPENDENT_REIMPLEMENTATION"]["status"] == "NOT_ASSESSED"
 
 
 def test_converter_refuses_smoke_without_flag(tmp_path):

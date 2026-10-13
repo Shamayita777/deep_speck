@@ -55,9 +55,12 @@ from audit.implementation.findings import (
     ScientificImpactStatus,
 )
 from audit.implementation.stages import (
+    STAGE_TIERS,
     StageId,
     StageStatus,
     convergence_contribution,
+    formal_comparison_completed,
+    validate_stage_record,
 )
 
 
@@ -234,6 +237,8 @@ def build_implementation_evidence(
     additional_artifact_hashes: Optional[dict[str, str]] = None,
     verify_preregistration_artifact: bool = True,
     unavailable_essential_information: Optional[list[str]] = None,
+    statistics_note: Optional[str] = None,
+    additional_observation: Optional[dict] = None,
 ) -> Evidence:
     """
     Assemble the Implementation Integrity Evidence object.
@@ -253,7 +258,21 @@ def build_implementation_evidence(
     evidence itself, the path and content hash of every RunManifest
     cited by run_ids - so a reviewer can walk Evidence -> RunManifest
     from the artifact alone, without access to an in-memory mapping.
+
+    STAGE SEMANTICS (fail closed): every stage record is checked by
+    validate_stage_record; a record that overclaims (e.g. II-4 COMPLETED
+    on the strength of a conformance-impact experiment rather than the
+    formal reference-vs-independent comparison) raises ValueError
+    instead of producing a certificate.
+
+    `additional_observation` adds case-specific observation blocks; it
+    may not overwrite any key the builder itself computes.
     """
+    stage_problems = [p for s in stages for p in validate_stage_record(s)]
+    if stage_problems:
+        raise ValueError(f"stage records overclaim; refusing to build evidence: {stage_problems}")
+    ii4 = next((s for s in stages if s.stage_id is StageId.II_4_COMPARATIVE_EVALUATION), None)
+    comparison_completed = None if ii4 is None or not ii4.components else formal_comparison_completed(ii4)
     manifest_refs = list(run_manifest_references or [])
     has_real_preregistration, preregistration_problems = _verify_preregistration_reference(
         preregistration_reference, verify_artifact=verify_preregistration_artifact,
@@ -270,10 +289,12 @@ def build_implementation_evidence(
 
     convergence = convergence_contribution(
         independent_reimplementation_status=independent_reimplementation_status,
+        implementation_comparison_completed=comparison_completed,
     )
 
+    ii2_tier = STAGE_TIERS[StageId.II_2_INDEPENDENT_REIMPLEMENTATION].value
     limitations = [
-        f"Independent reimplementation (ENHANCED stage II-2) is "
+        f"Independent reimplementation ({ii2_tier} stage II-2) is "
         f"{independent_reimplementation_status.value}. {convergence.rationale}",
     ]
     if unsatisfied:
@@ -293,14 +314,22 @@ def build_implementation_evidence(
         limitations.append(
             f"Essential information unavailable: {unavailable_essential_information}."
         )
+    # Component-level limitations are surfaced, attributed, at the top level.
+    for stage in stages:
+        for component in stage.components:
+            limitations.extend(
+                f"{stage.stage_id.value}/{component.component_id}: {lim}"
+                for lim in component.limitations
+            )
     for problem in preregistration_problems:
         limitations.append(f"Preregistration reference rejected: {problem}")
     if not has_real_preregistration:
         limitations.append(
-            "No pre-execution preregistration artifact exists for this execution, so the "
-            "evidence is tagged EXPLORATORY. It records a confirmed, reproducible "
-            "artifact-vs-declared-protocol conformance check, but it is not preregistered "
-            "confirmatory evidence and must not be presented as such."
+            "No pre-execution preregistration artifact exists for this execution as a whole, "
+            "so the evidence is tagged EXPLORATORY. Any component that was itself "
+            "preregistered carries its own preregistration in its bound evidence; this "
+            "evidence as a whole is not preregistered confirmatory evidence and must not be "
+            "presented as such."
         )
 
     artifact_hashes: dict[str, str] = {}
@@ -321,6 +350,29 @@ def build_implementation_evidence(
     for finding in findings:
         requires_reevaluation.extend(finding.requires_reevaluation())
 
+    observation = {
+        "stages": [s.to_dict() for s in stages],
+        "findings": [f.to_dict() for f in findings],
+        "independent_reimplementation_status": independent_reimplementation_status.value,
+        "convergence_contribution": convergence.to_dict(),
+        "run_manifest_references": manifest_refs,
+        "preregistration_reference": preregistration_reference,
+        "core_stages_satisfied": core_satisfied,
+        "core_stages_unsatisfied": unsatisfied,
+        "discrepancy_confirmed": any(
+            f.severity is FindingSeverity.MATERIAL for f in findings
+        ),
+        "scientific_impact_demonstrated": any(
+            f.scientific_impact is ScientificImpactStatus.DEMONSTRATED for f in findings
+        ),
+        "downstream_requires_reevaluation": sorted(set(requires_reevaluation)),
+        "rationale": rationale,
+    }
+    clashes = sorted(set(additional_observation or {}) & set(observation))
+    if clashes:
+        raise ValueError(f"additional_observation may not overwrite computed keys: {clashes}")
+    observation.update(additional_observation or {})
+
     return Evidence(
         evidence_id=evidence_id,
         claim_id=claim_id,
@@ -329,31 +381,12 @@ def build_implementation_evidence(
         run_ids=run_ids,
         input_artifacts=sorted(artifact_hashes.keys()),
         artifact_hashes=artifact_hashes,
-        observation={
-            "stages": [s.to_dict() for s in stages],
-            "findings": [f.to_dict() for f in findings],
-            "independent_reimplementation_status": independent_reimplementation_status.value,
-            "convergence_contribution": convergence.to_dict(),
-            "run_manifest_references": manifest_refs,
-            "preregistration_reference": preregistration_reference,
-            "core_stages_satisfied": core_satisfied,
-            "core_stages_unsatisfied": unsatisfied,
-            "discrepancy_confirmed": any(
-                f.severity is FindingSeverity.MATERIAL for f in findings
-            ),
-            "scientific_impact_demonstrated": any(
-                f.scientific_impact is ScientificImpactStatus.DEMONSTRATED for f in findings
-            ),
-            "downstream_requires_reevaluation": sorted(set(requires_reevaluation)),
-            "rationale": rationale,
-        },
+        observation=observation,
         statistics={
             "note": (
-                "II-5 Statistical Assessment is NOT_APPLICABLE in this execution: the only "
-                "completed verification was a deterministic declared-vs-realized configuration "
-                "check, for which inferential statistics are not the appropriate instrument "
-                "(there is no sampling variability to reason about). II-5 becomes applicable "
-                "once II-4 supplies comparable populations of training runs."
+                statistics_note
+                or
+                "II-5 Statistical Assessment status is reported in the stage table above."
             ),
         },
         decision=outcome.value,
