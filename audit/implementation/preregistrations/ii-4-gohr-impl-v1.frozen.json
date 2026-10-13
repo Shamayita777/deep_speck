@@ -1,0 +1,258 @@
+{
+  "artifact": "ii4-frozen-record-v1",
+  "binding_note": "Production is bound to the configuration AND the source code recorded here. The runner refuses to execute if the configuration, the preregistration, the declared architecture, or ANY source file below has changed since this record was written. The software stack is RECORDED but not frozen: it legitimately varies between machines and is captured in each run's provenance.",
+  "config_fingerprint": "62273336a6fbad76505663c763863a76456ed8d1e817ddf707243235230abead",
+  "declared_architecture_digest": "0c36a749b16625a9ba57554d58dc82897ec5a8a925e189c0f0be9d3f7fe301d5",
+  "experiment_id": "II-4-GOHR-IMPL-V1",
+  "frozen_environment": {
+    "keras": "3.13.2",
+    "numpy": "2.1.3",
+    "python": "3.13.15",
+    "scipy": "1.16.3",
+    "tensorflow": "2.20.0"
+  },
+  "preregistration_sha256": "87475062e834e0b4943b07d1edc9e719643ba6ba0d79b56f6607ef1093f7a36d",
+  "source_manifest": {
+    "adapter_gohr_impl": {
+      "bytes": 34898,
+      "path": "audit/implementation/adapters/gohr_impl_comparison.py",
+      "sha256": "fb6b629e8ac62c1790bb7abaee0a58faecb04e085b1e5089f484eac85492e2ee"
+    },
+    "architecture_signature": {
+      "bytes": 14724,
+      "path": "audit/implementation/architecture_signature.py",
+      "sha256": "8feec132754106aa4361b9df6447402868ef3ca70f693e4b8c00de2f0f8e449f"
+    },
+    "arm_recovery": {
+      "bytes": 35063,
+      "path": "audit/implementation/arm_recovery.py",
+      "sha256": "bad7f6aea04c5d01d8e84798356c43be404578c74cae65821f6e20b362daabf1"
+    },
+    "common_ids": {
+      "bytes": 3110,
+      "path": "audit/common/ids.py",
+      "sha256": "f975b4a9c61a2e2afa503d0a58a129e8cb9d437276bf8fed25d5324fba2fe387"
+    },
+    "common_outcomes": {
+      "bytes": 4469,
+      "path": "audit/common/outcomes.py",
+      "sha256": "3e860ae76d8965f6282c1ff9ea19206943b772623d636cf2c66611763e4a0979"
+    },
+    "common_provenance": {
+      "bytes": 12755,
+      "path": "audit/common/provenance.py",
+      "sha256": "7cf33f8ed32f999cb58345f20e01b442f8b0c4e12c732e2bb95a08ce4c6b0eb2"
+    },
+    "common_run_manifest": {
+      "bytes": 5425,
+      "path": "audit/common/run_manifest.py",
+      "sha256": "3c40f96987de7edae337ff199ac918f0bbb9635c1d60503949bfbbeac99e1ab9"
+    },
+    "common_strict_json": {
+      "bytes": 2347,
+      "path": "audit/common/strict_json.py",
+      "sha256": "cb02f0113caf88cd86b2a3f6624d866afaf74b358ea443ebaf111f7311a2bbcf"
+    },
+    "comparison": {
+      "bytes": 20019,
+      "path": "audit/implementation/comparison.py",
+      "sha256": "1a45b1007b65a91c8c996b75ecbeaec7663c3bb730f1c5a3ad8cf0e2d8c00c63"
+    },
+    "conformance": {
+      "bytes": 8493,
+      "path": "audit/implementation/conformance.py",
+      "sha256": "bc7afe84853ad9ae76c7cf4c93302a4f96351f4937b0fb3dab179c13182ebfff"
+    },
+    "declared_architecture": {
+      "bytes": 70553,
+      "path": "audit/implementation/adapters/gohr_declared_architecture.json",
+      "sha256": "525152f1d77b53a9ee91a68fa613162f162a5ea1c950541d6160719bd5ff9347"
+    },
+    "durable_state": {
+      "bytes": 55046,
+      "path": "audit/implementation/durable_state.py",
+      "sha256": "beb6c74e544fde6f585a6e7f75c07a56c3cfac83d187cab84d1d69b7e427a2b0"
+    },
+    "framework_firewall": {
+      "bytes": 9253,
+      "path": "audit/experimental_validity/framework/firewall.py",
+      "sha256": "6e40ad7c8f6119a6c50eb12155db980a76e6afb0a73a9ee2b93b97b2b17a6b62"
+    },
+    "ii4_analysis": {
+      "bytes": 11038,
+      "path": "audit/implementation/ii4_analysis.py",
+      "sha256": "46068721044e9e01b4c8e7241e4aadaf299c933de2d08eb057b6e4f04a05912a"
+    },
+    "ii4_comparison_certificate": {
+      "bytes": 13792,
+      "path": "audit/implementation/ii4_comparison_certificate.py",
+      "sha256": "5eaa8bf5f12328666936b4a3da612d0c4e34746a9cc1515ddf152224390d557c"
+    },
+    "ii4_comparison_design": {
+      "bytes": 21087,
+      "path": "audit/implementation/ii4_comparison_design.py",
+      "sha256": "b8c543b841bab9968babb5bcd6440bbb1a688bebdba5a69631b0f56a95be505c"
+    },
+    "ii4_comparison_power": {
+      "bytes": 17890,
+      "path": "audit/implementation/ii4_comparison_power.py",
+      "sha256": "c4a80d53b560dfd02495dc657c929b29122b683a2232b1c0c67574ae06585400"
+    },
+    "ii4_comparison_runner": {
+      "bytes": 70486,
+      "path": "audit/implementation/ii4_comparison_runner.py",
+      "sha256": "bd184ada0efdcdfc0fc4a9025e8270d79648c5d070599b75671464bf41137856"
+    },
+    "ii4_design": {
+      "bytes": 13731,
+      "path": "audit/implementation/ii4_design.py",
+      "sha256": "58ecd2baeceb7bd6bac982bdf580caca5c180badc59e8386b65497c86e220863"
+    },
+    "ii4_experiment": {
+      "bytes": 10756,
+      "path": "audit/implementation/ii4_experiment.py",
+      "sha256": "74099c6065a9be4ce7902d5add81e5b83e15666425e821ce162d549f8f15e8db"
+    },
+    "ii4_runner": {
+      "bytes": 25786,
+      "path": "audit/implementation/ii4_runner.py",
+      "sha256": "a2eb572ccfde67290091b1678de5794d964814a31d38cc9ff6bd4960fdf44931"
+    },
+    "independent_dataset": {
+      "bytes": 7222,
+      "path": "audit/implementation/ii2_independent/dataset_independent.py",
+      "sha256": "814618e8db1f90e60abd3cae7c17938903711b5255a7f942a4119920bf962834"
+    },
+    "independent_model": {
+      "bytes": 8731,
+      "path": "audit/implementation/ii2_independent/model_independent.py",
+      "sha256": "c57708823b811f18c0718b20772b8f85d85a587bf884758e8ce6e65313516b8c"
+    },
+    "independent_speck": {
+      "bytes": 9102,
+      "path": "audit/implementation/ii2_independent/speck_independent.py",
+      "sha256": "16c89236a03fcbdeab3d6fa2b956a4b9aeabf3e742a27ae4e2250bb02136d912"
+    },
+    "independent_train": {
+      "bytes": 12251,
+      "path": "audit/implementation/ii2_independent/train_independent.py",
+      "sha256": "bc61346196d01e127f42eff293591f8fe011838c7cafa1329cf9dde9ec15946d"
+    },
+    "kill_worker": {
+      "bytes": 8702,
+      "path": "audit/tests/kill_worker.py",
+      "sha256": "c10b2b6d332c15688ffa5e8bc05b03746d575e21622ce58bb66b51960985bd88"
+    },
+    "launcher": {
+      "bytes": 30070,
+      "path": "audit/implementation/run_ii4_impl.py",
+      "sha256": "05eff1b5d69c77b025c45808e0d8dd1ffc13b12bcf990fef1b57b5d52690095b"
+    },
+    "package_init": {
+      "bytes": 680,
+      "path": "audit/__init__.py",
+      "sha256": "cc747356c0411c375a46974fe4c5d92835538acdf4af0ceaf7447d9c76fdefbb"
+    },
+    "preflight": {
+      "bytes": 39147,
+      "path": "audit/implementation/preflight.py",
+      "sha256": "78f33185dd78fdfe5395dee9be13e90e69d85a5dbe1e096b00d66decdcf2b118"
+    },
+    "preregistration": {
+      "bytes": 20806,
+      "path": "audit/implementation/preregistrations/ii4_impl_gohr_v1.py",
+      "sha256": "09d8a105d4ca8f64cfcdb39a97ab8f8be0273901e1c947e4c8009afafef7bd2c"
+    },
+    "reference_speck": {
+      "bytes": 5340,
+      "path": "audit/implementation/reference/speck.py",
+      "sha256": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce"
+    },
+    "reference_train_5_rounds": {
+      "bytes": 82,
+      "path": "audit/implementation/reference/train_5_rounds.py",
+      "sha256": "63b8bec9779a6b9a95cda4abdbd763b2b8aef384df45a40109c926ff8864ff24"
+    },
+    "reference_train_nets": {
+      "bytes": 3611,
+      "path": "audit/implementation/reference/train_nets.py",
+      "sha256": "b0585971da829f8cd89e2d1e3f85eed600048fcd04bc7d0d32f33ee1cd03c669"
+    },
+    "stages": {
+      "bytes": 14064,
+      "path": "audit/implementation/stages.py",
+      "sha256": "4a57419cd218f2b407701827bd0a5c16d2658395174142e956a3e956149ee093"
+    },
+    "test_arm_recovery": {
+      "bytes": 17901,
+      "path": "audit/tests/test_arm_recovery.py",
+      "sha256": "43fc4271b70524291fedbbcb812d1ddbaa47acb0029dadcd3fc4cd9bec2ee499"
+    },
+    "test_arm_recovery_keras": {
+      "bytes": 30759,
+      "path": "audit/tests/test_arm_recovery_keras.py",
+      "sha256": "a7e84318ab6d76b5b1f144bddeb63d786433dd20cab5379452283928418d694d"
+    },
+    "test_durable_state": {
+      "bytes": 53253,
+      "path": "audit/tests/test_durable_state.py",
+      "sha256": "a3109c570c804fbddc606ce8cbfd8f00706faf95785dbbd6a15291d7e5f6b084"
+    },
+    "test_execute_gate": {
+      "bytes": 16438,
+      "path": "audit/tests/test_execute_gate.py",
+      "sha256": "05a2038c20853a43fae914a693edef11533257d0dd416452ecec45fd09a7e879"
+    },
+    "test_firewall_crash_recovery": {
+      "bytes": 21668,
+      "path": "audit/tests/test_firewall_crash_recovery.py",
+      "sha256": "545f6cb02f3d3ee65e3b4bcf04c45d7173fa5dd974ef9d8ac8db8f9512addd7b"
+    },
+    "test_firewall_real_integration": {
+      "bytes": 24273,
+      "path": "audit/tests/test_firewall_real_integration.py",
+      "sha256": "a4bf9f380f89b51eecc64ccc647c40d65a09cfa446051df1c69338fbce377c0e"
+    },
+    "test_freeze_manifest_coverage": {
+      "bytes": 21390,
+      "path": "audit/tests/test_freeze_manifest_coverage.py",
+      "sha256": "9b9942bcb23a931949ccc1dacfe479ad3b59abc22a3faf41ff96688e69b7a223"
+    },
+    "test_ii4_comparison": {
+      "bytes": 43086,
+      "path": "audit/tests/test_ii4_comparison.py",
+      "sha256": "330d828deacf4730529627fc7d6679f47f080e63867aa681b89e989e85b8eb71"
+    },
+    "test_ii4_interruption": {
+      "bytes": 13192,
+      "path": "audit/tests/test_ii4_interruption.py",
+      "sha256": "529d150dcf18849921b5e7a4c3f56fdbcf7139ae3f78a0e3a62c5358fc820620"
+    },
+    "test_journal_exactly_once": {
+      "bytes": 20000,
+      "path": "audit/tests/test_journal_exactly_once.py",
+      "sha256": "8a384db9bfec0987847efc1f81fb631d2df491e585ed3a41db435e13d9d67030"
+    },
+    "test_preflight_filesystem": {
+      "bytes": 41200,
+      "path": "audit/tests/test_preflight_filesystem.py",
+      "sha256": "5981d436b0e821e51808123f7a0b5ab012e5376c852f30cf3d16303bbd39f7fd"
+    },
+    "test_repeated_interruption": {
+      "bytes": 16589,
+      "path": "audit/tests/test_repeated_interruption.py",
+      "sha256": "7376498a30b16624e4f3834aece8920e6c18b4bbe4034915c28251f1228e2d88"
+    },
+    "test_suite_integrity": {
+      "bytes": 14575,
+      "path": "audit/tests/test_suite_integrity.py",
+      "sha256": "7f7cd11fbab45981169190624d49a9b5df784f18fbe98e16a954a945e21e76c1"
+    },
+    "test_unrecoverable_state": {
+      "bytes": 20806,
+      "path": "audit/tests/test_unrecoverable_state.py",
+      "sha256": "aa2558797476b4c41fc79b8a421385018f427a30bcddd823ccbdb612a03ac383"
+    }
+  },
+  "source_manifest_sha256": "c972a518d1bcd15e346abce8b7684f28ee92d99d5eb0ea1370cf1b82d610c06f"
+}

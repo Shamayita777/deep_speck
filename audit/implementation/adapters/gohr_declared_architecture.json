@@ -6,7 +6,7 @@
     "reference": "reference/train_nets.py make_resnet(depth=10, reg_param=1e-5)"
   },
   "captured_with": {
-    "keras": "3.15.1",
+    "keras": "3.13.2",
     "tensorflow": "2.20.0"
   },
   "coarse_counts_cross_check": {
@@ -655,7 +655,7 @@
         ]
       ]
     ],
-    "digest": "8fd9b43b7a49a8d20505b0922292bc6a90395f36ae54ae28e126f360759c33c4",
+    "digest": "0c36a749b16625a9ba57554d58dc82897ec5a8a925e189c0f0be9d3f7fe301d5",
     "input_shape": [
       null,
       64
@@ -712,8 +712,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -840,8 +838,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -968,273 +964,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
-            "seed": null
-          }
-        },
-        "kernel_regularizer": {
-          "class_name": "L2",
-          "config": {
-            "l2": 1e-05
-          }
-        },
-        "kernel_size": [
-          3
-        ],
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "padding": "same",
-        "strides": [
-          1
-        ],
-        "use_bias": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              3,
-              32,
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          }
-        ]
-      },
-      {
-        "axis": -1,
-        "beta_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "center": true,
-        "class_name": "BatchNormalization",
-        "epsilon": 0.001,
-        "gamma_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "momentum": 0.99,
-        "moving_mean_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "moving_variance_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "scale": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          }
-        ]
-      },
-      {
-        "activation": "relu",
-        "class_name": "Activation",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "class_name": "Add",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "activation": "linear",
-        "bias_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "class_name": "Conv1D",
-        "data_format": "channels_last",
-        "dilation_rate": [
-          1
-        ],
-        "filters": 32,
-        "groups": 1,
-        "kernel_initializer": {
-          "class_name": "GlorotUniform",
-          "config": {
-            "input_axes": null,
-            "output_axes": null,
-            "seed": null
-          }
-        },
-        "kernel_regularizer": {
-          "class_name": "L2",
-          "config": {
-            "l2": 1e-05
-          }
-        },
-        "kernel_size": [
-          3
-        ],
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "padding": "same",
-        "strides": [
-          1
-        ],
-        "use_bias": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              3,
-              32,
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          }
-        ]
-      },
-      {
-        "axis": -1,
-        "beta_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "center": true,
-        "class_name": "BatchNormalization",
-        "epsilon": 0.001,
-        "gamma_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "momentum": 0.99,
-        "moving_mean_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "moving_variance_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "scale": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          }
-        ]
-      },
-      {
-        "activation": "relu",
-        "class_name": "Activation",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "activation": "linear",
-        "bias_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "class_name": "Conv1D",
-        "data_format": "channels_last",
-        "dilation_rate": [
-          1
-        ],
-        "filters": 32,
-        "groups": 1,
-        "kernel_initializer": {
-          "class_name": "GlorotUniform",
-          "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -1370,8 +1099,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -1498,273 +1225,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
-            "seed": null
-          }
-        },
-        "kernel_regularizer": {
-          "class_name": "L2",
-          "config": {
-            "l2": 1e-05
-          }
-        },
-        "kernel_size": [
-          3
-        ],
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "padding": "same",
-        "strides": [
-          1
-        ],
-        "use_bias": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              3,
-              32,
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          }
-        ]
-      },
-      {
-        "axis": -1,
-        "beta_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "center": true,
-        "class_name": "BatchNormalization",
-        "epsilon": 0.001,
-        "gamma_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "momentum": 0.99,
-        "moving_mean_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "moving_variance_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "scale": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          }
-        ]
-      },
-      {
-        "activation": "relu",
-        "class_name": "Activation",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "class_name": "Add",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "activation": "linear",
-        "bias_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "class_name": "Conv1D",
-        "data_format": "channels_last",
-        "dilation_rate": [
-          1
-        ],
-        "filters": 32,
-        "groups": 1,
-        "kernel_initializer": {
-          "class_name": "GlorotUniform",
-          "config": {
-            "input_axes": null,
-            "output_axes": null,
-            "seed": null
-          }
-        },
-        "kernel_regularizer": {
-          "class_name": "L2",
-          "config": {
-            "l2": 1e-05
-          }
-        },
-        "kernel_size": [
-          3
-        ],
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "padding": "same",
-        "strides": [
-          1
-        ],
-        "use_bias": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              3,
-              32,
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          }
-        ]
-      },
-      {
-        "axis": -1,
-        "beta_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "center": true,
-        "class_name": "BatchNormalization",
-        "epsilon": 0.001,
-        "gamma_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "momentum": 0.99,
-        "moving_mean_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "moving_variance_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "scale": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          }
-        ]
-      },
-      {
-        "activation": "relu",
-        "class_name": "Activation",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "activation": "linear",
-        "bias_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "class_name": "Conv1D",
-        "data_format": "channels_last",
-        "dilation_rate": [
-          1
-        ],
-        "filters": 32,
-        "groups": 1,
-        "kernel_initializer": {
-          "class_name": "GlorotUniform",
-          "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -1900,8 +1360,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -2028,273 +1486,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
-            "seed": null
-          }
-        },
-        "kernel_regularizer": {
-          "class_name": "L2",
-          "config": {
-            "l2": 1e-05
-          }
-        },
-        "kernel_size": [
-          3
-        ],
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "padding": "same",
-        "strides": [
-          1
-        ],
-        "use_bias": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              3,
-              32,
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          }
-        ]
-      },
-      {
-        "axis": -1,
-        "beta_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "center": true,
-        "class_name": "BatchNormalization",
-        "epsilon": 0.001,
-        "gamma_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "momentum": 0.99,
-        "moving_mean_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "moving_variance_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "scale": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          }
-        ]
-      },
-      {
-        "activation": "relu",
-        "class_name": "Activation",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "class_name": "Add",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "activation": "linear",
-        "bias_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "class_name": "Conv1D",
-        "data_format": "channels_last",
-        "dilation_rate": [
-          1
-        ],
-        "filters": 32,
-        "groups": 1,
-        "kernel_initializer": {
-          "class_name": "GlorotUniform",
-          "config": {
-            "input_axes": null,
-            "output_axes": null,
-            "seed": null
-          }
-        },
-        "kernel_regularizer": {
-          "class_name": "L2",
-          "config": {
-            "l2": 1e-05
-          }
-        },
-        "kernel_size": [
-          3
-        ],
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "padding": "same",
-        "strides": [
-          1
-        ],
-        "use_bias": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              3,
-              32,
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          }
-        ]
-      },
-      {
-        "axis": -1,
-        "beta_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "center": true,
-        "class_name": "BatchNormalization",
-        "epsilon": 0.001,
-        "gamma_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "momentum": 0.99,
-        "moving_mean_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "moving_variance_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "scale": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          }
-        ]
-      },
-      {
-        "activation": "relu",
-        "class_name": "Activation",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "activation": "linear",
-        "bias_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "class_name": "Conv1D",
-        "data_format": "channels_last",
-        "dilation_rate": [
-          1
-        ],
-        "filters": 32,
-        "groups": 1,
-        "kernel_initializer": {
-          "class_name": "GlorotUniform",
-          "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -2430,8 +1621,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -2558,273 +1747,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
-            "seed": null
-          }
-        },
-        "kernel_regularizer": {
-          "class_name": "L2",
-          "config": {
-            "l2": 1e-05
-          }
-        },
-        "kernel_size": [
-          3
-        ],
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "padding": "same",
-        "strides": [
-          1
-        ],
-        "use_bias": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              3,
-              32,
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          }
-        ]
-      },
-      {
-        "axis": -1,
-        "beta_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "center": true,
-        "class_name": "BatchNormalization",
-        "epsilon": 0.001,
-        "gamma_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "momentum": 0.99,
-        "moving_mean_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "moving_variance_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "scale": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          }
-        ]
-      },
-      {
-        "activation": "relu",
-        "class_name": "Activation",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "class_name": "Add",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "activation": "linear",
-        "bias_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "class_name": "Conv1D",
-        "data_format": "channels_last",
-        "dilation_rate": [
-          1
-        ],
-        "filters": 32,
-        "groups": 1,
-        "kernel_initializer": {
-          "class_name": "GlorotUniform",
-          "config": {
-            "input_axes": null,
-            "output_axes": null,
-            "seed": null
-          }
-        },
-        "kernel_regularizer": {
-          "class_name": "L2",
-          "config": {
-            "l2": 1e-05
-          }
-        },
-        "kernel_size": [
-          3
-        ],
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "padding": "same",
-        "strides": [
-          1
-        ],
-        "use_bias": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              3,
-              32,
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          }
-        ]
-      },
-      {
-        "axis": -1,
-        "beta_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "center": true,
-        "class_name": "BatchNormalization",
-        "epsilon": 0.001,
-        "gamma_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "momentum": 0.99,
-        "moving_mean_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "moving_variance_initializer": {
-          "class_name": "Ones",
-          "config": {}
-        },
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "scale": true,
-        "weights": [
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": true
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          },
-          {
-            "dtype": "float32",
-            "shape": [
-              32
-            ],
-            "trainable": false
-          }
-        ]
-      },
-      {
-        "activation": "relu",
-        "class_name": "Activation",
-        "output_shape": [
-          null,
-          16,
-          32
-        ],
-        "weights": []
-      },
-      {
-        "activation": "linear",
-        "bias_initializer": {
-          "class_name": "Zeros",
-          "config": {}
-        },
-        "class_name": "Conv1D",
-        "data_format": "channels_last",
-        "dilation_rate": [
-          1
-        ],
-        "filters": 32,
-        "groups": 1,
-        "kernel_initializer": {
-          "class_name": "GlorotUniform",
-          "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -2960,8 +1882,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -3088,8 +2008,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -3225,8 +2143,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -3353,8 +2269,1050 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
+            "seed": null
+          }
+        },
+        "kernel_regularizer": {
+          "class_name": "L2",
+          "config": {
+            "l2": 1e-05
+          }
+        },
+        "kernel_size": [
+          3
+        ],
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "padding": "same",
+        "strides": [
+          1
+        ],
+        "use_bias": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              3,
+              32,
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          }
+        ]
+      },
+      {
+        "axis": -1,
+        "beta_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "center": true,
+        "class_name": "BatchNormalization",
+        "epsilon": 0.001,
+        "gamma_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "momentum": 0.99,
+        "moving_mean_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "moving_variance_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "scale": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          }
+        ]
+      },
+      {
+        "activation": "relu",
+        "class_name": "Activation",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "class_name": "Add",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "activation": "linear",
+        "bias_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "class_name": "Conv1D",
+        "data_format": "channels_last",
+        "dilation_rate": [
+          1
+        ],
+        "filters": 32,
+        "groups": 1,
+        "kernel_initializer": {
+          "class_name": "GlorotUniform",
+          "config": {
+            "seed": null
+          }
+        },
+        "kernel_regularizer": {
+          "class_name": "L2",
+          "config": {
+            "l2": 1e-05
+          }
+        },
+        "kernel_size": [
+          3
+        ],
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "padding": "same",
+        "strides": [
+          1
+        ],
+        "use_bias": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              3,
+              32,
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          }
+        ]
+      },
+      {
+        "axis": -1,
+        "beta_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "center": true,
+        "class_name": "BatchNormalization",
+        "epsilon": 0.001,
+        "gamma_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "momentum": 0.99,
+        "moving_mean_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "moving_variance_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "scale": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          }
+        ]
+      },
+      {
+        "activation": "relu",
+        "class_name": "Activation",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "activation": "linear",
+        "bias_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "class_name": "Conv1D",
+        "data_format": "channels_last",
+        "dilation_rate": [
+          1
+        ],
+        "filters": 32,
+        "groups": 1,
+        "kernel_initializer": {
+          "class_name": "GlorotUniform",
+          "config": {
+            "seed": null
+          }
+        },
+        "kernel_regularizer": {
+          "class_name": "L2",
+          "config": {
+            "l2": 1e-05
+          }
+        },
+        "kernel_size": [
+          3
+        ],
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "padding": "same",
+        "strides": [
+          1
+        ],
+        "use_bias": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              3,
+              32,
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          }
+        ]
+      },
+      {
+        "axis": -1,
+        "beta_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "center": true,
+        "class_name": "BatchNormalization",
+        "epsilon": 0.001,
+        "gamma_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "momentum": 0.99,
+        "moving_mean_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "moving_variance_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "scale": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          }
+        ]
+      },
+      {
+        "activation": "relu",
+        "class_name": "Activation",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "class_name": "Add",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "activation": "linear",
+        "bias_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "class_name": "Conv1D",
+        "data_format": "channels_last",
+        "dilation_rate": [
+          1
+        ],
+        "filters": 32,
+        "groups": 1,
+        "kernel_initializer": {
+          "class_name": "GlorotUniform",
+          "config": {
+            "seed": null
+          }
+        },
+        "kernel_regularizer": {
+          "class_name": "L2",
+          "config": {
+            "l2": 1e-05
+          }
+        },
+        "kernel_size": [
+          3
+        ],
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "padding": "same",
+        "strides": [
+          1
+        ],
+        "use_bias": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              3,
+              32,
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          }
+        ]
+      },
+      {
+        "axis": -1,
+        "beta_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "center": true,
+        "class_name": "BatchNormalization",
+        "epsilon": 0.001,
+        "gamma_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "momentum": 0.99,
+        "moving_mean_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "moving_variance_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "scale": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          }
+        ]
+      },
+      {
+        "activation": "relu",
+        "class_name": "Activation",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "activation": "linear",
+        "bias_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "class_name": "Conv1D",
+        "data_format": "channels_last",
+        "dilation_rate": [
+          1
+        ],
+        "filters": 32,
+        "groups": 1,
+        "kernel_initializer": {
+          "class_name": "GlorotUniform",
+          "config": {
+            "seed": null
+          }
+        },
+        "kernel_regularizer": {
+          "class_name": "L2",
+          "config": {
+            "l2": 1e-05
+          }
+        },
+        "kernel_size": [
+          3
+        ],
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "padding": "same",
+        "strides": [
+          1
+        ],
+        "use_bias": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              3,
+              32,
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          }
+        ]
+      },
+      {
+        "axis": -1,
+        "beta_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "center": true,
+        "class_name": "BatchNormalization",
+        "epsilon": 0.001,
+        "gamma_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "momentum": 0.99,
+        "moving_mean_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "moving_variance_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "scale": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          }
+        ]
+      },
+      {
+        "activation": "relu",
+        "class_name": "Activation",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "class_name": "Add",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "activation": "linear",
+        "bias_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "class_name": "Conv1D",
+        "data_format": "channels_last",
+        "dilation_rate": [
+          1
+        ],
+        "filters": 32,
+        "groups": 1,
+        "kernel_initializer": {
+          "class_name": "GlorotUniform",
+          "config": {
+            "seed": null
+          }
+        },
+        "kernel_regularizer": {
+          "class_name": "L2",
+          "config": {
+            "l2": 1e-05
+          }
+        },
+        "kernel_size": [
+          3
+        ],
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "padding": "same",
+        "strides": [
+          1
+        ],
+        "use_bias": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              3,
+              32,
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          }
+        ]
+      },
+      {
+        "axis": -1,
+        "beta_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "center": true,
+        "class_name": "BatchNormalization",
+        "epsilon": 0.001,
+        "gamma_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "momentum": 0.99,
+        "moving_mean_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "moving_variance_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "scale": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          }
+        ]
+      },
+      {
+        "activation": "relu",
+        "class_name": "Activation",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "activation": "linear",
+        "bias_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "class_name": "Conv1D",
+        "data_format": "channels_last",
+        "dilation_rate": [
+          1
+        ],
+        "filters": 32,
+        "groups": 1,
+        "kernel_initializer": {
+          "class_name": "GlorotUniform",
+          "config": {
+            "seed": null
+          }
+        },
+        "kernel_regularizer": {
+          "class_name": "L2",
+          "config": {
+            "l2": 1e-05
+          }
+        },
+        "kernel_size": [
+          3
+        ],
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "padding": "same",
+        "strides": [
+          1
+        ],
+        "use_bias": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              3,
+              32,
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          }
+        ]
+      },
+      {
+        "axis": -1,
+        "beta_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "center": true,
+        "class_name": "BatchNormalization",
+        "epsilon": 0.001,
+        "gamma_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "momentum": 0.99,
+        "moving_mean_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "moving_variance_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "scale": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          }
+        ]
+      },
+      {
+        "activation": "relu",
+        "class_name": "Activation",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "class_name": "Add",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "activation": "linear",
+        "bias_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "class_name": "Conv1D",
+        "data_format": "channels_last",
+        "dilation_rate": [
+          1
+        ],
+        "filters": 32,
+        "groups": 1,
+        "kernel_initializer": {
+          "class_name": "GlorotUniform",
+          "config": {
+            "seed": null
+          }
+        },
+        "kernel_regularizer": {
+          "class_name": "L2",
+          "config": {
+            "l2": 1e-05
+          }
+        },
+        "kernel_size": [
+          3
+        ],
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "padding": "same",
+        "strides": [
+          1
+        ],
+        "use_bias": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              3,
+              32,
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          }
+        ]
+      },
+      {
+        "axis": -1,
+        "beta_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "center": true,
+        "class_name": "BatchNormalization",
+        "epsilon": 0.001,
+        "gamma_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "momentum": 0.99,
+        "moving_mean_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "moving_variance_initializer": {
+          "class_name": "Ones",
+          "config": {}
+        },
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "scale": true,
+        "weights": [
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": true
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          },
+          {
+            "dtype": "float32",
+            "shape": [
+              32
+            ],
+            "trainable": false
+          }
+        ]
+      },
+      {
+        "activation": "relu",
+        "class_name": "Activation",
+        "output_shape": [
+          null,
+          16,
+          32
+        ],
+        "weights": []
+      },
+      {
+        "activation": "linear",
+        "bias_initializer": {
+          "class_name": "Zeros",
+          "config": {}
+        },
+        "class_name": "Conv1D",
+        "data_format": "channels_last",
+        "dilation_rate": [
+          1
+        ],
+        "filters": 32,
+        "groups": 1,
+        "kernel_initializer": {
+          "class_name": "GlorotUniform",
+          "config": {
             "seed": null
           }
         },
@@ -3493,8 +3451,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -3605,8 +3561,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
@@ -3717,8 +3671,6 @@
         "kernel_initializer": {
           "class_name": "GlorotUniform",
           "config": {
-            "input_axes": null,
-            "output_axes": null,
             "seed": null
           }
         },
