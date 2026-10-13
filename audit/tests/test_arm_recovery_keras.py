@@ -86,8 +86,24 @@ class _LRRecorder(keras.callbacks.Callback if HAVE_KERAS else object):
             keras.ops.convert_to_numpy(self.model.optimizer.learning_rate))
 
 
-@unittest.skipUnless(HAVE_KERAS, "Keras is not installed in this environment")
 class TestKerasRecoveryIsActuallyExact(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        FAIL, do not skip, when Keras is absent.
+
+        This suite IS the measurement behind the recovery-exactness
+        claim, and the launch gate counts a skip as a failure anyway. A
+        skip here produced nineteen confusing skipped results instead of
+        one clear statement that the stack under test is not installed.
+        """
+        if not HAVE_KERAS:
+            raise AssertionError(
+                "Keras is not installed, so the recovery exactness claim cannot be "
+                "measured on this machine. This suite is a launch-gate requirement, "
+                "not an optional extra: install the training stack or run the gate on "
+                "the host that will train.")
 
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

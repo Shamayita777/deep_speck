@@ -171,9 +171,35 @@ class TestInterruptionAndResume(unittest.TestCase):
             _, _, _, _, report = self._interrupt_then_resume(tmp)
             claim = report["recovery_exactness"]
             self.assertTrue(any("within-epoch" in x for x in claim["not_recovered"]))
-            self.assertTrue(claim["verified_on"]["keras"])
             self.assertTrue(any("reseeded" in c for c in claim["conditions"]))
             self.assertIn("RECORDED", claim["consequence"])
+
+            # The CLAIM states that it is re-measured and names no
+            # version: it feeds the preregistration hash, which must not
+            # depend on the machine.
+            self.assertIn("RE-MEASURED", claim["verified_on"]["basis"])
+            self.assertNotIn("keras", claim["verified_on"])
+            self.assertNotIn("tensorflow", claim["verified_on"])
+
+            # The STACK it was measured on is PROVENANCE, recorded per
+            # run - which is what lets a reader check the claim rather
+            # than take it on trust. It belongs here, where it may
+            # legitimately differ between machines, and not in the
+            # hashed claim, where it may not.
+            stack = report["software_stack"]
+            for component in ("tensorflow", "keras", "python", "numpy"):
+                self.assertTrue(stack.get(component),
+                                f"the run does not record the {component} it measured "
+                                f"on: {sorted(stack)}")
+            self.assertRegex(stack["keras"], r"^\d+\.\d+",
+                             "the recorded Keras version is not a version")
+
+            # And every session of a resumed run records its own stack,
+            # so a resume on a different machine is visible rather than
+            # averaged away.
+            self.assertTrue(report["session_environments"])
+            for session in report["session_environments"]:
+                self.assertTrue(session["software_stack"].get("keras"))
 
     def test_started_is_on_disk_before_the_arm_finishes(self):
         """A crash during epoch 0 must leave a STARTED record, not silence."""

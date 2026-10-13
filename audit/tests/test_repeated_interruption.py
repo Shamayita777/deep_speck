@@ -174,8 +174,12 @@ class TestManyInterruptionsOnOneArm(unittest.TestCase):
         self._drive()
         log = EpochLog(self.arm / "epochs.jsonl")
         markers = [r for r in self._rows() if r["status"] == EpochLog.METRICS_LOST]
-        if not markers:
-            self.skipTest("this kill schedule happened to lose no metrics row")
+        # Not conditional: the schedule kills at after_manifest_commit,
+        # which commits the epoch and dies before the log append, so a
+        # lost metrics row is guaranteed. Skipping here would have made
+        # the gate fail, since a skipped required test counts as failed.
+        self.assertTrue(markers, "the kill schedule did not lose a metrics row, so the "
+                                 "marker behaviour was never exercised")
         for marker in markers:
             self.assertNotIn("val_loss", marker)
             self.assertIn("were lost with the process", marker["note"])
@@ -184,8 +188,7 @@ class TestManyInterruptionsOnOneArm(unittest.TestCase):
     def test_the_marker_explains_itself_without_fabricating_metrics(self):
         self._drive()
         markers = [r for r in self._rows() if r["status"] == EpochLog.METRICS_LOST]
-        if not markers:
-            self.skipTest("this kill schedule happened to lose no metrics row")
+        self.assertTrue(markers, "the kill schedule did not lose a metrics row")
         for marker in markers:
             note = marker["note"]
             self.assertIn("was COMMITTED", note)

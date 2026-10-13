@@ -283,8 +283,28 @@ class TestExactnessClaim(unittest.TestCase):
                             f"{claim} is not listed among the exactness claims")
         self.assertTrue(any("within-epoch" in x for x in RECOVERY_EXACTNESS["not_recovered"]))
         self.assertEqual(RECOVERY_EXACTNESS["granularity"], "epoch")
+        # The record must say the claim is re-measured, and must NOT pin
+        # a framework version: it feeds the preregistration hash, so a
+        # pinned version would make that hash machine-dependent and a
+        # freeze taken on one host would never match another.
         verified = RECOVERY_EXACTNESS["verified_on"]
-        self.assertTrue(verified.get("tensorflow") and verified.get("keras"))
+        self.assertIsNone(verified.get("tensorflow"))
+        self.assertIsNone(verified.get("keras"))
+        self.assertIn("RE-MEASURED", verified["basis"])
+        self.assertIn("test_arm_recovery_keras", verified["enforced_by"])
+
+    def test_the_hashed_claim_names_no_framework_version(self):
+        """
+        A version string anywhere in this record would travel into the
+        preregistration hash. Checked by pattern so a future edit cannot
+        reintroduce one by hand.
+        """
+        import json
+        import re
+        blob = json.dumps(RECOVERY_EXACTNESS)
+        found = re.findall(r"\b\d+\.\d+\.\d+\b", blob)
+        self.assertEqual(found, [],
+                         f"a pinned version leaked into the hashed recovery claim: {found}")
         self.assertTrue(any("reseeded" in c for c in RECOVERY_EXACTNESS["conditions"]))
         self.assertIn("RECORDED", RECOVERY_EXACTNESS["consequence"])
 
@@ -346,7 +366,11 @@ class TestExactnessClaim(unittest.TestCase):
         self.assertIn("corrected upwards", doc)
         self.assertIn("WITHIN-EPOCH position is not recovered", doc)
         self.assertIn("PROMOTED", doc, "the repair path is not described")
-        self.assertIn("2.20.0", doc, "the measured stack is not named")
+        # No pinned version: the claim is re-measured on whatever stack
+        # runs the experiment, and naming one here would reintroduce the
+        # machine dependence that was removed from the preregistration.
+        self.assertIn("re-measured on the stack that runs the experiment", doc,
+                      "the docstring does not say the claim is re-measured")
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

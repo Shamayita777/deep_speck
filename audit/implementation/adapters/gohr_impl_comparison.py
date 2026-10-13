@@ -555,7 +555,7 @@ class GohrImplementationComparisonAdapter:
 
         WHAT IS RECOVERED is measured, not assumed: see
         arm_recovery.RECOVERY_EXACTNESS. On the stack that claim was
-        measured on (TensorFlow 2.20.0 / Keras 3.15.1) weights, Adam's
+        re-measured on the stack that runs the experiment: weights, Adam's
         step counter and both moment estimates, the epoch index, the
         learning-rate schedule, the best-checkpoint record AND the
         per-epoch shuffle permutation all survive, so a resumed arm is a

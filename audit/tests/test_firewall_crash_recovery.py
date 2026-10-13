@@ -298,16 +298,131 @@ class TestTheRealSharedModulesAreInstalled(unittest.TestCase):
             "6e40ad7c8f6119a6c50eb12155db980a76e6afb0a73a9ee2b93b97b2b17a6b62",
     }
 
+    #: Shared modules that have legitimately changed since V6, each with
+    #: the reason and the V6 SEMANTIC digest - the AST with every
+    #: docstring stripped.
+    #:
+    #: A certified hash that no longer matches is a real provenance
+    #: event and must not be silently re-baselined. But not every change
+    #: invalidates a result: a corrected docstring changes the bytes and
+    #: nothing the experiment computes. The distinction is made by
+    #: MEASUREMENT rather than by assertion - the divergence is accepted
+    #: only if the code, with prose removed, is bit-identical to what V6
+    #: certified. Anything else fails exactly as a stub would.
+    POST_V6_DOCUMENTATION_CORRECTIONS = {
+        "audit/common/outcomes.py": {
+            "v6_semantic_sha256":
+                "fa568ed7ea6ebc2f7e41213bbd9d6cc5d10059adb3f1d274d3af2ec7fd812d57",
+            "changed": "the AssessmentTier docstring, and nothing else",
+            "reason": (
+                "V6 was certified while that docstring stated that independent "
+                "reimplementation (II-2) is an ENHANCED component and 'not a "
+                "prerequisite for CORE Implementation Integrity'. Under the five-stage "
+                "methodology (Section 3.5.4) all five II stages including II-2 are CORE, "
+                "and the earlier wording is the claim that let the II-2 gap go unnoticed. "
+                "The text was corrected afterwards. Reverting it to restore the V6 byte "
+                "hash would reinstate the error, so the file is kept and the divergence "
+                "is recorded here."),
+            "effect_on_v6": (
+                "NONE. Every class and every enum member is unchanged, so no value V6 "
+                "computed or recorded could differ. V6 is not re-issued for a docstring."),
+        },
+    }
+
+    @staticmethod
+    def semantic_digest(path) -> str:
+        """
+        sha256 of the module's AST with all docstrings removed.
+
+        Two files with the same semantic digest define exactly the same
+        code and differ only in prose.
+        """
+        import ast
+        import hashlib
+
+        tree = ast.parse(Path(path).read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef,
+                                 ast.AsyncFunctionDef)):
+                body = node.body
+                if (body and isinstance(body[0], ast.Expr)
+                        and isinstance(body[0].value, ast.Constant)
+                        and isinstance(body[0].value.value, str)):
+                    node.body = body[1:] or [ast.Pass()]
+        return hashlib.sha256(
+            ast.dump(ast.fix_missing_locations(tree)).encode()).hexdigest()
+
     def test_every_shared_module_matches_its_V6_hash(self):
         from audit.common.provenance import sha256_file
         for rel, expected in self.V6_HASHES.items():
             path = REPO_ROOT / rel
             with self.subTest(module=rel):
                 self.assertTrue(path.is_file(), f"{rel} is missing")
+                actual = sha256_file(path)
+                if actual == expected:
+                    continue
+
+                correction = self.POST_V6_DOCUMENTATION_CORRECTIONS.get(rel)
+                self.assertIsNotNone(
+                    correction,
+                    f"{rel} is NOT the module certificate V6 records, and no documented "
+                    f"correction accounts for it. A stub or a modified copy is in place; "
+                    f"every hash and every claim derived from it is void.\n"
+                    f"  V6      {expected}\n  current {actual}")
                 self.assertEqual(
-                    sha256_file(path), expected,
-                    f"{rel} is NOT the module certificate V6 records. A stub or a modified "
-                    "copy is in place; every hash and every claim derived from it is void.")
+                    self.semantic_digest(path), correction["v6_semantic_sha256"],
+                    f"{rel} diverges from V6 by more than documentation. The code itself "
+                    f"has changed, so the recorded correction does not account for it and "
+                    f"results derived from the V6 hash are void.")
+
+    def test_each_documented_correction_states_its_effect_on_V6(self):
+        """
+        A recorded divergence is only acceptable if someone wrote down
+        why it is harmless. An entry with no reason is a silent
+        re-baseline wearing a comment.
+        """
+        for rel, rec in self.POST_V6_DOCUMENTATION_CORRECTIONS.items():
+            with self.subTest(module=rel):
+                self.assertIn(rel, self.V6_HASHES)
+                for field in ("v6_semantic_sha256", "changed", "reason", "effect_on_v6"):
+                    self.assertTrue(rec.get(field), f"{rel} has no {field}")
+                self.assertEqual(len(rec["v6_semantic_sha256"]), 64)
+                self.assertGreater(len(rec["reason"]), 120,
+                                   "the reason is too short to be an explanation")
+
+    def test_the_semantic_digest_is_not_a_rubber_stamp(self):
+        """
+        The whole exemption rests on the semantic digest noticing a real
+        code change. Proven, not assumed: an added enum member and a
+        changed enum VALUE must both move the digest, while a rewritten
+        docstring must not.
+        """
+        import tempfile
+
+        original = (REPO_ROOT / "audit/common/outcomes.py").read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp) / "base.py"
+            base.write_text(original)
+            baseline = self.semantic_digest(base)
+
+            prose = Path(tmp) / "prose.py"
+            prose.write_text(original.replace(
+                '"""\nShared outcome vocabularies for the audit framework.',
+                '"""\nCompletely rewritten prose that says something else entirely.'))
+            self.assertEqual(self.semantic_digest(prose), baseline,
+                             "a docstring change moved the semantic digest")
+
+            added = Path(tmp) / "added.py"
+            added.write_text(original.replace(
+                '    FAIL = "FAIL"', '    FAIL = "FAIL"\n    SMUGGLED = "SMUGGLED"', 1))
+            self.assertNotEqual(self.semantic_digest(added), baseline,
+                                "an ADDED enum member did not move the semantic digest")
+
+            changed = Path(tmp) / "changed.py"
+            changed.write_text(original.replace('    FAIL = "FAIL"',
+                                                '    FAIL = "PASS"', 1))
+            self.assertNotEqual(self.semantic_digest(changed), baseline,
+                                "a CHANGED enum value did not move the semantic digest")
 
 
 if __name__ == "__main__":

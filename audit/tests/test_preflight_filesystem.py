@@ -539,17 +539,53 @@ class TestDevicePlacementIsObservedNotAssumed(unittest.TestCase):
 
     def test_a_cpu_only_machine_is_blocked(self):
         """
-        CPU fallback must stay blocked. On this container there is no
-        GPU, so the blocker is observed directly rather than simulated.
+        CPU fallback must stay blocked.
+
+        SIMULATED, not observed. An earlier version read the real
+        `gpu_report()` and skipped when the machine had a GPU - which
+        meant it skipped on every healthy training host, and the launch
+        gate counts a skip as a failure. A check that can only run where
+        it does not matter is worse than no check: it blocked the gate
+        on exactly the machine it was supposed to clear.
         """
-        from audit.implementation.preflight import gpu_report
-        report = gpu_report()
-        if report["physical_gpus"]:
-            self.skipTest("this machine has a GPU; the CPU-fallback block is covered "
-                          "by the acknowledgement test below")
-        self.assertTrue(report["problems"],
-                        "a CPU-only machine produced no blocker")
+        from audit.implementation.preflight import preflight as _preflight
+
+        cpu_only = {
+            "tensorflow": "x", "keras": "y", "cuda_built": False,
+            "physical_gpus": [], "training_device": "/device:CPU:0",
+            "training_is_on_gpu": False,
+            "problems": ["no GPU is visible to TensorFlow. The compute estimate "
+                         "assumes GPU training."],
+            "warnings": [], "requires_acknowledgement": [],
+        }
+        with mock.patch("audit.implementation.preflight.gpu_report",
+                        return_value=cpu_only):
+            report = _preflight(output_path=".", mounts=[mount("/", "ext4")],
+                                probe=False)
+        self.assertFalse(report["clear_to_launch"],
+                         "a CPU-only machine was cleared for launch")
         self.assertTrue(any("GPU" in p for p in report["problems"]))
+
+    def test_a_gpu_that_is_visible_but_not_used_is_blocked(self):
+        """
+        The subtler case: the device exists and training still lands on
+        the CPU. Visibility is not placement.
+        """
+        from audit.implementation.preflight import preflight as _preflight
+
+        visible_but_unused = {
+            "tensorflow": "x", "keras": "y", "cuda_built": True,
+            "physical_gpus": ["/physical_device:GPU:0"],
+            "training_device": "/device:CPU:0", "training_is_on_gpu": False,
+            "problems": ["a GPU is visible but the gradient step ran on "
+                         "/device:CPU:0."],
+            "warnings": [], "requires_acknowledgement": [],
+        }
+        with mock.patch("audit.implementation.preflight.gpu_report",
+                        return_value=visible_but_unused):
+            report = _preflight(output_path=".", mounts=[mount("/", "ext4")],
+                                probe=False)
+        self.assertFalse(report["clear_to_launch"])
 
     def test_the_idle_gpu_acknowledgement_does_not_clear_a_placement_blocker(self):
         """
@@ -557,14 +593,59 @@ class TestDevicePlacementIsObservedNotAssumed(unittest.TestCase):
         --acknowledge-idle-gpus and the gate reading it as "placement
         verified". The acknowledgement list and the blocker list are
         separate, and only the second decides clearance.
+
+        Also simulated, for the same reason as above: on a healthy host
+        there are no blockers to acknowledge past, so observing this
+        required a broken machine.
         """
-        report = preflight(output_path=".", mounts=[mount("/", "ext4")],
-                           acknowledged=("idle_gpus",), probe=False)
-        if not report["problems"]:
-            self.skipTest("no blockers on this machine")
+        from audit.implementation.preflight import preflight as _preflight
+
+        two_gpus_one_idle_and_on_cpu = {
+            "tensorflow": "x", "keras": "y", "cuda_built": True,
+            "physical_gpus": ["/physical_device:GPU:0", "/physical_device:GPU:1"],
+            "training_device": "/device:CPU:0", "training_is_on_gpu": False,
+            "problems": ["a GPU is visible but the gradient step ran on "
+                         "/device:CPU:0."],
+            "warnings": ["the second GPU is idle"],
+            "requires_acknowledgement": ["idle_gpus"],
+        }
+        with mock.patch("audit.implementation.preflight.gpu_report",
+                        return_value=two_gpus_one_idle_and_on_cpu):
+            report = _preflight(output_path=".", mounts=[mount("/", "ext4")],
+                                acknowledged=("idle_gpus",), probe=False)
+        self.assertEqual(report["unacknowledged"], [],
+                         "the acknowledgement was not registered")
         self.assertFalse(report["clear_to_launch"],
-                         "an acknowledgement cleared a hard blocker")
-        self.assertNotIn("idle_gpus", report["unacknowledged"])
+                         "an acknowledgement cleared a hard placement blocker")
+
+    def test_the_acknowledgement_does_clear_a_warning_when_nothing_else_blocks(self):
+        """
+        The counterpart: if the flag could never clear anything, the
+        test above would pass for the wrong reason.
+        """
+        from audit.implementation.preflight import preflight as _preflight
+
+        healthy_two_gpus = {
+            "tensorflow": "x", "keras": "y", "cuda_built": True,
+            "physical_gpus": ["/physical_device:GPU:0", "/physical_device:GPU:1"],
+            "training_device": "/device:GPU:0", "training_is_on_gpu": True,
+            "problems": [], "warnings": ["the second GPU is idle"],
+            "requires_acknowledgement": ["idle_gpus"],
+        }
+        with mock.patch("audit.implementation.preflight.gpu_report",
+                        return_value=healthy_two_gpus), \
+             mock.patch("audit.implementation.preflight.memory_report",
+                        return_value={"problems": [], "warnings": []}), \
+             mock.patch("audit.implementation.preflight.disk_report",
+                        return_value={"path": ".", "problems": [], "free_gb": 999.0}):
+            without = _preflight(output_path=".", mounts=[mount("/", "ext4")],
+                                 probe=False)
+            with_ack = _preflight(output_path=".", mounts=[mount("/", "ext4")],
+                                  acknowledged=("idle_gpus",), probe=False)
+        self.assertFalse(without["clear_to_launch"], "the warning did not block")
+        self.assertEqual(without["unacknowledged"], ["idle_gpus"])
+        self.assertTrue(with_ack["clear_to_launch"],
+                        "the acknowledgement cleared nothing, so the test above is vacuous")
 
     def test_only_idle_gpus_is_acknowledgeable(self):
         """

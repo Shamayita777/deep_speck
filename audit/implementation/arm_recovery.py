@@ -24,7 +24,7 @@ WHAT IS RECOVERED, AND WHAT IS NOT
 Every claim below was MEASURED against real Keras, not inferred from
 documentation, by `audit/tests/test_arm_recovery_keras.py`.
 
-  RECOVERED EXACTLY (measured on TensorFlow 2.20.0 / Keras 3.15.1)
+  RECOVERED EXACTLY (re-measured on the stack that runs the experiment)
     model weights            element-wise equality across the reload
     optimizer state          Adam's step counter and BOTH moment
                              estimates, compared variable by variable
@@ -113,10 +113,19 @@ RECOVERY_EXACTNESS = {
         "authority over resumability, so a lagging or torn log is reconciled and noted rather "
         "than fatal."),
     "verified_on": {
-        "tensorflow": "2.20.0", "keras": "3.15.1",
-        "note": ("The shuffle property is an empirical property of this Keras version, not a "
-                 "documented guarantee. test_arm_recovery_keras.py re-measures it, so a Keras "
-                 "version that behaves differently fails the suite instead of silently "
+        "basis": (
+            "RE-MEASURED ON THE STACK THAT RUNS THE EXPERIMENT. No TensorFlow or Keras "
+            "version is named here on purpose: this record feeds the preregistration hash, "
+            "so pinning a version would make that hash depend on the machine and a freeze "
+            "taken on one host would never match execution on another. The versions "
+            "actually measured are recorded per run in the environment details of the run "
+            "manifest, which is where provenance belongs."),
+        "enforced_by": (
+            "test_arm_recovery_keras.py, which the launch gate runs on the training host "
+            "before execution is permitted and which treats a skip as a failure."),
+        "note": ("The shuffle property is an empirical property of the Keras version in use, "
+                 "not a documented guarantee. It is re-measured rather than assumed, so a "
+                 "Keras version that behaves differently fails the suite instead of silently "
                  "invalidating the claim."),
     },
     "recovered_exactly": [

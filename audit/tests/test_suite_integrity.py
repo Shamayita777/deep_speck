@@ -240,6 +240,49 @@ class TestEveryModuleIsGated(unittest.TestCase):
         self.assertEqual(durable & ephemeral, set())
         self.assertEqual(rejected & ephemeral, set())
 
+    def test_no_gated_suite_can_skip_itself(self):
+        """
+        The launch gate treats a SKIP as a failure, so a conditional skip
+        inside a required suite is a latent gate failure waiting for the
+        right machine.
+
+        This was not hypothetical. Two tests skipped themselves when the
+        host HAD a GPU - meaning they skipped on every healthy training
+        box and refused the gate on exactly the machine they were meant
+        to clear. A condition the suite cannot reproduce must be
+        SIMULATED, not skipped past.
+        """
+        import ast as _ast
+        offenders = []
+        for path in _modules():
+            if path.stem in PRE_EXISTING or path.stem in ("__init__", "kill_worker"):
+                continue
+            tree = _ast.parse(path.read_text(encoding="utf-8"))
+            for node in _ast.walk(tree):
+                if (isinstance(node, _ast.Call)
+                        and isinstance(node.func, _ast.Attribute)
+                        and node.func.attr == "skipTest"):
+                    offenders.append(f"{path.name}:{node.lineno}")
+        self.assertEqual(offenders, [],
+                         f"gated suite(s) call skipTest: {offenders}. The gate counts a "
+                         f"skip as a failure, so this blocks launch on whichever machine "
+                         f"happens to meet the condition. Simulate the case instead.")
+
+    def test_no_gated_suite_is_decorated_with_an_unconditional_skip(self):
+        import ast as _ast
+        offenders = []
+        for path in _modules():
+            if path.stem in PRE_EXISTING:
+                continue
+            tree = _ast.parse(path.read_text(encoding="utf-8"))
+            for node in _ast.walk(tree):
+                if isinstance(node, (_ast.FunctionDef, _ast.ClassDef)):
+                    for dec in node.decorator_list:
+                        text = _ast.dump(dec)
+                        if "skip" in text.lower():
+                            offenders.append(f"{path.name}:{node.lineno} {node.name}")
+        self.assertEqual(offenders, [], f"skip decorators in gated suites: {offenders}")
+
     def test_the_exclusion_list_only_names_modules_that_exist(self):
         """
         An exclusion for a module that is not present is dead policy. The
