@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "problems": [],
+  "summary": {
+    "modes": {
+      "r1_readme_demo": 1
+    },
+    "output_dir": "/Users/oishimoitra/Documents/autond_search_runs/r1_20261015T035553Z",
+    "runs": [
+      {
+        "behaviour_changing_patches": [],
+        "bit_reproducible": false,
+        "differences": [
+          "4227072",
+          "4194304"
+        ],
+        "elapsed_seconds": 3.7300022919999947,
+        "evo_rounds": 6,
+        "generations": null,
+        "highest_non_random_round": 5,
+        "log_rows": 53,
+        "mode": "r1_readme_demo",
+        "population_init": "previous",
+        "run": "run_000",
+        "samples": null,
+        "status": "COMPLETED"
+      }
+    ]
+  }
+}

@@ -1,0 +1,3063 @@
+{
+  "all_verified": true,
+  "artifact": "autond-census-load-verify-v1",
+  "models": [
+    {
+      "autond_root": "/Users/oishimoitra/Documents/AutoND-upstream",
+      "checkpoint": "speck3264_single-key_0x400000_round8_polished.h5",
+      "checkpoint_sha256": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+      "consumed_exactly": 68,
+      "does_not_establish": [
+        "that the checkpoint was PRODUCED by this source or by the published training procedure; file identity and loadability are not provenance",
+        "anything about the model's predictive behaviour, which is a separate inference measurement",
+        "that the computation graph matches the publication's prose description, which is a textual comparison this tool does not perform",
+        "that the layer NAMES correspond: Keras's auto-naming counter is global to the session, so names are recorded as an observation and the checked correspondence is the positional one Keras's own loader uses"
+      ],
+      "environment": {
+        "h5py": "3.10.0",
+        "keras": "2.15.0",
+        "numpy": "1.26.4",
+        "platform": "macOS-13.5-arm64-arm-64bit",
+        "python": "3.11.14",
+        "tensorflow": "2.15.1"
+      },
+      "establishes": [
+        "the pinned source constructs a model whose weighted-layer sequence and per-variable shapes match this file's own declared inventory",
+        "every model variable holds a value element-wise identical to the dataset in the file that should have populated it",
+        "no dataset in the file was left unconsumed and none is undeclared"
+      ],
+      "file_layer_names": [
+        "input_1",
+        "tf.math.subtract",
+        "tf.math.truediv",
+        "conv1d",
+        "batch_normalization",
+        "conv1d_1",
+        "add",
+        "batch_normalization_1",
+        "conv1d_2",
+        "batch_normalization_2",
+        "conv1d_3",
+        "add_1",
+        "batch_normalization_3",
+        "conv1d_4",
+        "batch_normalization_4",
+        "conv1d_5",
+        "add_2",
+        "batch_normalization_5",
+        "conv1d_6",
+        "batch_normalization_6",
+        "conv1d_7",
+        "add_3",
+        "batch_normalization_7",
+        "flatten",
+        "dense",
+        "batch_normalization_8",
+        "activation",
+        "dense_1",
+        "batch_normalization_9",
+        "activation_1",
+        "dense_2",
+        "batch_normalization_10",
+        "activation_2",
+        "dense_3"
+      ],
+      "file_undeclared_datasets": [],
+      "file_weighted_layers": [
+        "conv1d",
+        "batch_normalization",
+        "conv1d_1",
+        "batch_normalization_1",
+        "conv1d_2",
+        "batch_normalization_2",
+        "conv1d_3",
+        "batch_normalization_3",
+        "conv1d_4",
+        "batch_normalization_4",
+        "conv1d_5",
+        "batch_normalization_5",
+        "conv1d_6",
+        "batch_normalization_6",
+        "conv1d_7",
+        "batch_normalization_7",
+        "dense",
+        "batch_normalization_8",
+        "dense_1",
+        "batch_normalization_9",
+        "dense_2",
+        "batch_normalization_10",
+        "dense_3"
+      ],
+      "input_size": 64,
+      "layer_names_agree": true,
+      "layout": "weights_only",
+      "load_weights_raised": false,
+      "loaded_weight_fingerprint": "60afa443fc47eff15cf7d0fc3033f5aec3a5893bc140d26fcc4e3c4b04d71cf2",
+      "model_layer_count": 34,
+      "model_weighted_layers": [
+        "conv1d",
+        "batch_normalization",
+        "conv1d_1",
+        "batch_normalization_1",
+        "conv1d_2",
+        "batch_normalization_2",
+        "conv1d_3",
+        "batch_normalization_3",
+        "conv1d_4",
+        "batch_normalization_4",
+        "conv1d_5",
+        "batch_normalization_5",
+        "conv1d_6",
+        "batch_normalization_6",
+        "conv1d_7",
+        "batch_normalization_7",
+        "dense",
+        "batch_normalization_8",
+        "dense_1",
+        "batch_normalization_9",
+        "dense_2",
+        "batch_normalization_10",
+        "dense_3"
+      ],
+      "problems": [],
+      "tensor_count_file": 68,
+      "tensor_count_model": 68,
+      "tensors": [
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d",
+          "file_shape": [
+            2,
+            1,
+            32
+          ],
+          "file_weight": "conv1d/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d",
+          "model_shape": [
+            2,
+            1,
+            32
+          ],
+          "model_weight": "conv1d/kernel:0",
+          "position": [
+            0,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "conv1d/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "conv1d/bias:0",
+          "position": [
+            0,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization/gamma:0",
+          "position": [
+            1,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization/beta:0",
+          "position": [
+            1,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization/moving_mean:0",
+          "position": [
+            1,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization/moving_variance:0",
+          "position": [
+            1,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_1",
+          "file_shape": [
+            2,
+            32,
+            32
+          ],
+          "file_weight": "conv1d_1/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_1",
+          "model_shape": [
+            2,
+            32,
+            32
+          ],
+          "model_weight": "conv1d_1/kernel:0",
+          "position": [
+            2,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "conv1d_1/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "conv1d_1/bias:0",
+          "position": [
+            2,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization_1/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization_1/gamma:0",
+          "position": [
+            3,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization_1/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization_1/beta:0",
+          "position": [
+            3,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization_1/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization_1/moving_mean:0",
+          "position": [
+            3,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization_1/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization_1/moving_variance:0",
+          "position": [
+            3,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_2",
+          "file_shape": [
+            2,
+            32,
+            48
+          ],
+          "file_weight": "conv1d_2/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_2",
+          "model_shape": [
+            2,
+            32,
+            48
+          ],
+          "model_weight": "conv1d_2/kernel:0",
+          "position": [
+            4,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "conv1d_2/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "conv1d_2/bias:0",
+          "position": [
+            4,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_2/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_2/gamma:0",
+          "position": [
+            5,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_2/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_2/beta:0",
+          "position": [
+            5,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_2/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_2/moving_mean:0",
+          "position": [
+            5,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_2/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_2/moving_variance:0",
+          "position": [
+            5,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_3",
+          "file_shape": [
+            2,
+            48,
+            48
+          ],
+          "file_weight": "conv1d_3/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_3",
+          "model_shape": [
+            2,
+            48,
+            48
+          ],
+          "model_weight": "conv1d_3/kernel:0",
+          "position": [
+            6,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "conv1d_3/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "conv1d_3/bias:0",
+          "position": [
+            6,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_3/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_3/gamma:0",
+          "position": [
+            7,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_3/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_3/beta:0",
+          "position": [
+            7,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_3/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_3/moving_mean:0",
+          "position": [
+            7,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_3/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_3/moving_variance:0",
+          "position": [
+            7,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_4",
+          "file_shape": [
+            2,
+            48,
+            64
+          ],
+          "file_weight": "conv1d_4/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_4",
+          "model_shape": [
+            2,
+            48,
+            64
+          ],
+          "model_weight": "conv1d_4/kernel:0",
+          "position": [
+            8,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "conv1d_4/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "conv1d_4/bias:0",
+          "position": [
+            8,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_4/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_4/gamma:0",
+          "position": [
+            9,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_4/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_4/beta:0",
+          "position": [
+            9,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_4/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_4/moving_mean:0",
+          "position": [
+            9,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_4/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_4/moving_variance:0",
+          "position": [
+            9,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_5",
+          "file_shape": [
+            2,
+            64,
+            64
+          ],
+          "file_weight": "conv1d_5/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_5",
+          "model_shape": [
+            2,
+            64,
+            64
+          ],
+          "model_weight": "conv1d_5/kernel:0",
+          "position": [
+            10,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "conv1d_5/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "conv1d_5/bias:0",
+          "position": [
+            10,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_5/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_5/gamma:0",
+          "position": [
+            11,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_5/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_5/beta:0",
+          "position": [
+            11,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_5/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_5/moving_mean:0",
+          "position": [
+            11,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_5/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_5/moving_variance:0",
+          "position": [
+            11,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_6",
+          "file_shape": [
+            2,
+            64,
+            80
+          ],
+          "file_weight": "conv1d_6/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_6",
+          "model_shape": [
+            2,
+            64,
+            80
+          ],
+          "model_weight": "conv1d_6/kernel:0",
+          "position": [
+            12,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "conv1d_6/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "conv1d_6/bias:0",
+          "position": [
+            12,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_6/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_6/gamma:0",
+          "position": [
+            13,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_6/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_6/beta:0",
+          "position": [
+            13,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_6/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_6/moving_mean:0",
+          "position": [
+            13,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_6/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_6/moving_variance:0",
+          "position": [
+            13,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_7",
+          "file_shape": [
+            2,
+            80,
+            80
+          ],
+          "file_weight": "conv1d_7/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_7",
+          "model_shape": [
+            2,
+            80,
+            80
+          ],
+          "model_weight": "conv1d_7/kernel:0",
+          "position": [
+            14,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "conv1d_7/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "conv1d_7/bias:0",
+          "position": [
+            14,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_7/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_7/gamma:0",
+          "position": [
+            15,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_7/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_7/beta:0",
+          "position": [
+            15,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_7/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_7/moving_mean:0",
+          "position": [
+            15,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_7/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_7/moving_variance:0",
+          "position": [
+            15,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense",
+          "file_shape": [
+            640,
+            256
+          ],
+          "file_weight": "dense/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "dense",
+          "model_shape": [
+            640,
+            256
+          ],
+          "model_weight": "dense/kernel:0",
+          "position": [
+            16,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "dense/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "dense",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "dense/bias:0",
+          "position": [
+            16,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_8",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_8/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_8",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_8/gamma:0",
+          "position": [
+            17,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_8",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_8/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_8",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_8/beta:0",
+          "position": [
+            17,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_8",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_8/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_8",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_8/moving_mean:0",
+          "position": [
+            17,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_8",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_8/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_8",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_8/moving_variance:0",
+          "position": [
+            17,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_1",
+          "file_shape": [
+            256,
+            256
+          ],
+          "file_weight": "dense_1/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_1",
+          "model_shape": [
+            256,
+            256
+          ],
+          "model_weight": "dense_1/kernel:0",
+          "position": [
+            18,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_1",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "dense_1/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_1",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "dense_1/bias:0",
+          "position": [
+            18,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_9",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_9/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_9",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_9/gamma:0",
+          "position": [
+            19,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_9",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_9/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_9",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_9/beta:0",
+          "position": [
+            19,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_9",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_9/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_9",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_9/moving_mean:0",
+          "position": [
+            19,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_9",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_9/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_9",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_9/moving_variance:0",
+          "position": [
+            19,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_2",
+          "file_shape": [
+            256,
+            64
+          ],
+          "file_weight": "dense_2/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_2",
+          "model_shape": [
+            256,
+            64
+          ],
+          "model_weight": "dense_2/kernel:0",
+          "position": [
+            20,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_2",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "dense_2/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_2",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "dense_2/bias:0",
+          "position": [
+            20,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_10",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_10/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_10",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_10/gamma:0",
+          "position": [
+            21,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_10",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_10/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_10",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_10/beta:0",
+          "position": [
+            21,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_10",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_10/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_10",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_10/moving_mean:0",
+          "position": [
+            21,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_10",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_10/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_10",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_10/moving_variance:0",
+          "position": [
+            21,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_3",
+          "file_shape": [
+            64,
+            1
+          ],
+          "file_weight": "dense_3/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_3",
+          "model_shape": [
+            64,
+            1
+          ],
+          "model_weight": "dense_3/kernel:0",
+          "position": [
+            22,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_3",
+          "file_shape": [
+            1
+          ],
+          "file_weight": "dense_3/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_3",
+          "model_shape": [
+            1
+          ],
+          "model_weight": "dense_3/bias:0",
+          "position": [
+            22,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        }
+      ],
+      "total_parameters_loaded": 298113,
+      "unchanged_on_load": [],
+      "unconsumed_file_tensors": [],
+      "verified": true,
+      "verifier": "autond-census-load-verify-v1"
+    },
+    {
+      "autond_root": "/Users/oishimoitra/Documents/AutoND-upstream",
+      "checkpoint": "simon3264_single-key_0x400_round11_polished.h5",
+      "checkpoint_sha256": "769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af",
+      "consumed_exactly": 68,
+      "does_not_establish": [
+        "that the checkpoint was PRODUCED by this source or by the published training procedure; file identity and loadability are not provenance",
+        "anything about the model's predictive behaviour, which is a separate inference measurement",
+        "that the computation graph matches the publication's prose description, which is a textual comparison this tool does not perform",
+        "that the layer NAMES correspond: Keras's auto-naming counter is global to the session, so names are recorded as an observation and the checked correspondence is the positional one Keras's own loader uses"
+      ],
+      "environment": {
+        "h5py": "3.10.0",
+        "keras": "2.15.0",
+        "numpy": "1.26.4",
+        "platform": "macOS-13.5-arm64-arm-64bit",
+        "python": "3.11.14",
+        "tensorflow": "2.15.1"
+      },
+      "establishes": [
+        "the pinned source constructs a model whose weighted-layer sequence and per-variable shapes match this file's own declared inventory",
+        "every model variable holds a value element-wise identical to the dataset in the file that should have populated it",
+        "no dataset in the file was left unconsumed and none is undeclared"
+      ],
+      "file_layer_names": [
+        "input_1",
+        "tf.math.subtract",
+        "tf.math.truediv",
+        "conv1d",
+        "batch_normalization",
+        "conv1d_1",
+        "add",
+        "batch_normalization_1",
+        "conv1d_2",
+        "batch_normalization_2",
+        "conv1d_3",
+        "add_1",
+        "batch_normalization_3",
+        "conv1d_4",
+        "batch_normalization_4",
+        "conv1d_5",
+        "add_2",
+        "batch_normalization_5",
+        "conv1d_6",
+        "batch_normalization_6",
+        "conv1d_7",
+        "add_3",
+        "batch_normalization_7",
+        "flatten",
+        "dense",
+        "batch_normalization_8",
+        "activation",
+        "dense_1",
+        "batch_normalization_9",
+        "activation_1",
+        "dense_2",
+        "batch_normalization_10",
+        "activation_2",
+        "dense_3"
+      ],
+      "file_undeclared_datasets": [],
+      "file_weighted_layers": [
+        "conv1d",
+        "batch_normalization",
+        "conv1d_1",
+        "batch_normalization_1",
+        "conv1d_2",
+        "batch_normalization_2",
+        "conv1d_3",
+        "batch_normalization_3",
+        "conv1d_4",
+        "batch_normalization_4",
+        "conv1d_5",
+        "batch_normalization_5",
+        "conv1d_6",
+        "batch_normalization_6",
+        "conv1d_7",
+        "batch_normalization_7",
+        "dense",
+        "batch_normalization_8",
+        "dense_1",
+        "batch_normalization_9",
+        "dense_2",
+        "batch_normalization_10",
+        "dense_3"
+      ],
+      "input_size": 64,
+      "layer_names_agree": true,
+      "layout": "weights_only",
+      "load_weights_raised": false,
+      "loaded_weight_fingerprint": "8eae23b0abe1a91561647287e8032c30d8398a1c34c6d8e5a8e2b3a3bf7a1ea5",
+      "model_layer_count": 34,
+      "model_weighted_layers": [
+        "conv1d",
+        "batch_normalization",
+        "conv1d_1",
+        "batch_normalization_1",
+        "conv1d_2",
+        "batch_normalization_2",
+        "conv1d_3",
+        "batch_normalization_3",
+        "conv1d_4",
+        "batch_normalization_4",
+        "conv1d_5",
+        "batch_normalization_5",
+        "conv1d_6",
+        "batch_normalization_6",
+        "conv1d_7",
+        "batch_normalization_7",
+        "dense",
+        "batch_normalization_8",
+        "dense_1",
+        "batch_normalization_9",
+        "dense_2",
+        "batch_normalization_10",
+        "dense_3"
+      ],
+      "problems": [],
+      "tensor_count_file": 68,
+      "tensor_count_model": 68,
+      "tensors": [
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d",
+          "file_shape": [
+            2,
+            1,
+            32
+          ],
+          "file_weight": "conv1d/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d",
+          "model_shape": [
+            2,
+            1,
+            32
+          ],
+          "model_weight": "conv1d/kernel:0",
+          "position": [
+            0,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "conv1d/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "conv1d/bias:0",
+          "position": [
+            0,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization/gamma:0",
+          "position": [
+            1,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization/beta:0",
+          "position": [
+            1,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization/moving_mean:0",
+          "position": [
+            1,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization/moving_variance:0",
+          "position": [
+            1,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_1",
+          "file_shape": [
+            2,
+            32,
+            32
+          ],
+          "file_weight": "conv1d_1/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_1",
+          "model_shape": [
+            2,
+            32,
+            32
+          ],
+          "model_weight": "conv1d_1/kernel:0",
+          "position": [
+            2,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "conv1d_1/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "conv1d_1/bias:0",
+          "position": [
+            2,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization_1/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization_1/gamma:0",
+          "position": [
+            3,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization_1/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization_1/beta:0",
+          "position": [
+            3,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization_1/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization_1/moving_mean:0",
+          "position": [
+            3,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_1",
+          "file_shape": [
+            32
+          ],
+          "file_weight": "batch_normalization_1/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_1",
+          "model_shape": [
+            32
+          ],
+          "model_weight": "batch_normalization_1/moving_variance:0",
+          "position": [
+            3,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_2",
+          "file_shape": [
+            2,
+            32,
+            48
+          ],
+          "file_weight": "conv1d_2/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_2",
+          "model_shape": [
+            2,
+            32,
+            48
+          ],
+          "model_weight": "conv1d_2/kernel:0",
+          "position": [
+            4,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "conv1d_2/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "conv1d_2/bias:0",
+          "position": [
+            4,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_2/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_2/gamma:0",
+          "position": [
+            5,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_2/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_2/beta:0",
+          "position": [
+            5,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_2/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_2/moving_mean:0",
+          "position": [
+            5,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_2",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_2/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_2",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_2/moving_variance:0",
+          "position": [
+            5,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_3",
+          "file_shape": [
+            2,
+            48,
+            48
+          ],
+          "file_weight": "conv1d_3/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_3",
+          "model_shape": [
+            2,
+            48,
+            48
+          ],
+          "model_weight": "conv1d_3/kernel:0",
+          "position": [
+            6,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "conv1d_3/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "conv1d_3/bias:0",
+          "position": [
+            6,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_3/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_3/gamma:0",
+          "position": [
+            7,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_3/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_3/beta:0",
+          "position": [
+            7,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_3/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_3/moving_mean:0",
+          "position": [
+            7,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_3",
+          "file_shape": [
+            48
+          ],
+          "file_weight": "batch_normalization_3/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_3",
+          "model_shape": [
+            48
+          ],
+          "model_weight": "batch_normalization_3/moving_variance:0",
+          "position": [
+            7,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_4",
+          "file_shape": [
+            2,
+            48,
+            64
+          ],
+          "file_weight": "conv1d_4/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_4",
+          "model_shape": [
+            2,
+            48,
+            64
+          ],
+          "model_weight": "conv1d_4/kernel:0",
+          "position": [
+            8,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "conv1d_4/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "conv1d_4/bias:0",
+          "position": [
+            8,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_4/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_4/gamma:0",
+          "position": [
+            9,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_4/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_4/beta:0",
+          "position": [
+            9,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_4/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_4/moving_mean:0",
+          "position": [
+            9,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_4",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_4/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_4",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_4/moving_variance:0",
+          "position": [
+            9,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_5",
+          "file_shape": [
+            2,
+            64,
+            64
+          ],
+          "file_weight": "conv1d_5/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_5",
+          "model_shape": [
+            2,
+            64,
+            64
+          ],
+          "model_weight": "conv1d_5/kernel:0",
+          "position": [
+            10,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "conv1d_5/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "conv1d_5/bias:0",
+          "position": [
+            10,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_5/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_5/gamma:0",
+          "position": [
+            11,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_5/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_5/beta:0",
+          "position": [
+            11,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_5/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_5/moving_mean:0",
+          "position": [
+            11,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_5",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_5/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_5",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_5/moving_variance:0",
+          "position": [
+            11,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_6",
+          "file_shape": [
+            2,
+            64,
+            80
+          ],
+          "file_weight": "conv1d_6/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_6",
+          "model_shape": [
+            2,
+            64,
+            80
+          ],
+          "model_weight": "conv1d_6/kernel:0",
+          "position": [
+            12,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "conv1d_6/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "conv1d_6/bias:0",
+          "position": [
+            12,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_6/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_6/gamma:0",
+          "position": [
+            13,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_6/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_6/beta:0",
+          "position": [
+            13,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_6/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_6/moving_mean:0",
+          "position": [
+            13,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_6",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_6/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_6",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_6/moving_variance:0",
+          "position": [
+            13,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_7",
+          "file_shape": [
+            2,
+            80,
+            80
+          ],
+          "file_weight": "conv1d_7/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_7",
+          "model_shape": [
+            2,
+            80,
+            80
+          ],
+          "model_weight": "conv1d_7/kernel:0",
+          "position": [
+            14,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "conv1d_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "conv1d_7/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "conv1d_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "conv1d_7/bias:0",
+          "position": [
+            14,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_7/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_7/gamma:0",
+          "position": [
+            15,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_7/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_7/beta:0",
+          "position": [
+            15,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_7/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_7/moving_mean:0",
+          "position": [
+            15,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_7",
+          "file_shape": [
+            80
+          ],
+          "file_weight": "batch_normalization_7/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_7",
+          "model_shape": [
+            80
+          ],
+          "model_weight": "batch_normalization_7/moving_variance:0",
+          "position": [
+            15,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense",
+          "file_shape": [
+            640,
+            256
+          ],
+          "file_weight": "dense/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "dense",
+          "model_shape": [
+            640,
+            256
+          ],
+          "model_weight": "dense/kernel:0",
+          "position": [
+            16,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "dense/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "dense",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "dense/bias:0",
+          "position": [
+            16,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_8",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_8/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_8",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_8/gamma:0",
+          "position": [
+            17,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_8",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_8/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_8",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_8/beta:0",
+          "position": [
+            17,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_8",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_8/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_8",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_8/moving_mean:0",
+          "position": [
+            17,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_8",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_8/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_8",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_8/moving_variance:0",
+          "position": [
+            17,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_1",
+          "file_shape": [
+            256,
+            256
+          ],
+          "file_weight": "dense_1/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_1",
+          "model_shape": [
+            256,
+            256
+          ],
+          "model_weight": "dense_1/kernel:0",
+          "position": [
+            18,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_1",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "dense_1/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_1",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "dense_1/bias:0",
+          "position": [
+            18,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_9",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_9/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_9",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_9/gamma:0",
+          "position": [
+            19,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_9",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_9/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_9",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_9/beta:0",
+          "position": [
+            19,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_9",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_9/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_9",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_9/moving_mean:0",
+          "position": [
+            19,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_9",
+          "file_shape": [
+            256
+          ],
+          "file_weight": "batch_normalization_9/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_9",
+          "model_shape": [
+            256
+          ],
+          "model_weight": "batch_normalization_9/moving_variance:0",
+          "position": [
+            19,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_2",
+          "file_shape": [
+            256,
+            64
+          ],
+          "file_weight": "dense_2/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_2",
+          "model_shape": [
+            256,
+            64
+          ],
+          "model_weight": "dense_2/kernel:0",
+          "position": [
+            20,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_2",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "dense_2/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_2",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "dense_2/bias:0",
+          "position": [
+            20,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_10",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_10/gamma:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_10",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_10/gamma:0",
+          "position": [
+            21,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_10",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_10/beta:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_10",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_10/beta:0",
+          "position": [
+            21,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_10",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_10/moving_mean:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_10",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_10/moving_mean:0",
+          "position": [
+            21,
+            2
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "batch_normalization_10",
+          "file_shape": [
+            64
+          ],
+          "file_weight": "batch_normalization_10/moving_variance:0",
+          "model_dtype": "float32",
+          "model_layer": "batch_normalization_10",
+          "model_shape": [
+            64
+          ],
+          "model_weight": "batch_normalization_10/moving_variance:0",
+          "position": [
+            21,
+            3
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_3",
+          "file_shape": [
+            64,
+            1
+          ],
+          "file_weight": "dense_3/kernel:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_3",
+          "model_shape": [
+            64,
+            1
+          ],
+          "model_weight": "dense_3/kernel:0",
+          "position": [
+            22,
+            0
+          ],
+          "status": "CONSUMED_EXACTLY"
+        },
+        {
+          "changed_on_load": true,
+          "file_dtype": "float32",
+          "file_layer": "dense_3",
+          "file_shape": [
+            1
+          ],
+          "file_weight": "dense_3/bias:0",
+          "model_dtype": "float32",
+          "model_layer": "dense_3",
+          "model_shape": [
+            1
+          ],
+          "model_weight": "dense_3/bias:0",
+          "position": [
+            22,
+            1
+          ],
+          "status": "CONSUMED_EXACTLY"
+        }
+      ],
+      "total_parameters_loaded": 298113,
+      "unchanged_on_load": [],
+      "unconsumed_file_tensors": [],
+      "verified": true,
+      "verifier": "autond-census-load-verify-v1"
+    }
+  ],
+  "refusals": []
+}

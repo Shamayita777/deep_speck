@@ -1,0 +1,42 @@
+{
+  "checkpoint_id": "simon3264",
+  "command": [
+    "/Users/oishimoitra/.venvs/autond-tf215-audit-20261015T050853Z/bin/python",
+    "eval_nets.py",
+    "--model_path",
+    "/Users/oishimoitra/Documents/autond_eval_20261016T045109Z/checkpoints/simon3264_single-key_0x400_round11_polished.h5",
+    "--model_type",
+    "dbitnet",
+    "--cipher",
+    "simon3264",
+    "--scenario",
+    "single-key",
+    "--input_difference",
+    "0x400",
+    "--round_number",
+    "11",
+    "--add_str",
+    "_b"
+  ],
+  "cwd": "/Users/oishimoitra/Documents/AutoND-upstream",
+  "environment": {
+    "keras": "2.15.0",
+    "numpy": "1.26.4",
+    "python": "3.11.14",
+    "tensorflow": "2.15.1"
+  },
+  "finished_utc": "2026-10-16T04:55:59Z",
+  "gate": "autond-evaluation-gate-v2",
+  "invocation_id": "simon3264_b",
+  "invocation_index": 1,
+  "invocation_suffix": "_b",
+  "log": "logs/simon3264_b.log",
+  "model_copy": "checkpoints/simon3264_single-key_0x400_round11_polished.h5",
+  "model_copy_sha256": "769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af",
+  "npz": "checkpoints/simon3264_single-key_0x400_round11_polished_eval_b.npz",
+  "returncode": 0,
+  "sets_this_invocation": 5,
+  "started_utc": "2026-10-16T04:54:31Z",
+  "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+  "upstream_write_check": "tracked-clean;untracked-benign=3:.DS_Store,__pycache__/,ciphers/__pycache__/"
+}

@@ -1,0 +1,44 @@
+{
+  "source_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+  "cipher": "speck3264",
+  "scenario": "single-key",
+  "input_difference": "0x400000",
+  "model": "DBitNet",
+  "training_rounds": [
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "selected_checkpoint_round": 8,
+  "checkpoint_selection": "lowest val_loss",
+  "reported_round_validation_accuracy": 0.5103679895401001,
+  "evaluation_scores": [
+    0.510179,
+    0.509191,
+    0.509097,
+    0.510669,
+    0.509571
+  ],
+  "mean_test_accuracy": 0.5097414,
+  "population_sd": 0.0005998605171204628,
+  "sample_sd": 0.0006706644466497656,
+  "table6_comparison_target": 0.5096,
+  "difference_from_table6": 0.00014139999999995823,
+  "TPR": [
+    0.4711387301041246,
+    0.47041904111312854,
+    0.4691713428318042,
+    0.4713115492664447,
+    0.4707954581826329
+  ],
+  "TNR": [
+    0.5492158345032818,
+    0.5480628087720809,
+    0.5489459140307025,
+    0.5499347760511244,
+    0.5483291742649646
+  ],
+  "interpretation": "One fixed-difference training run, evaluated on five fresh test datasets; not a reproduction of the full evolutionary search."
+}

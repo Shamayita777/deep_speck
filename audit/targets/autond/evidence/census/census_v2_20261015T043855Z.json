@@ -1,0 +1,2121 @@
+{
+  "artifact": "autond-architecture-census-v2",
+  "method": "h5py read-only; TensorFlow deliberately not imported",
+  "models": [
+    {
+      "bytes": 1286200,
+      "derived": {
+        "layer_count": 34,
+        "non_trainable_parameters": 2048,
+        "structural_digest": "2576fdb5994f49d44586cea390d881c9fab24390b0d9f96b05b0ce3d2f05f2ae",
+        "tensor_count": 68,
+        "total_parameters": 298113,
+        "trainable_parameters": 296065
+      },
+      "layers": [
+        {
+          "declared_weight_names": [],
+          "layer": "input_1",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "tf.math.subtract",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "tf.math.truediv",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "conv1d/kernel:0",
+            "conv1d/bias:0"
+          ],
+          "layer": "conv1d",
+          "parameters": 96,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d/bias:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d/kernel:0",
+              "parameters": 64,
+              "shape": [
+                2,
+                1,
+                32
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 96
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization/gamma:0",
+            "batch_normalization/beta:0",
+            "batch_normalization/moving_mean:0",
+            "batch_normalization/moving_variance:0"
+          ],
+          "layer": "batch_normalization",
+          "parameters": 128,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization/beta:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization/gamma:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization/moving_mean:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization/moving_variance:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 64
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_1/kernel:0",
+            "conv1d_1/bias:0"
+          ],
+          "layer": "conv1d_1",
+          "parameters": 2080,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_1/bias:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_1/kernel:0",
+              "parameters": 2048,
+              "shape": [
+                2,
+                32,
+                32
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 2080
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "add",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_1/gamma:0",
+            "batch_normalization_1/beta:0",
+            "batch_normalization_1/moving_mean:0",
+            "batch_normalization_1/moving_variance:0"
+          ],
+          "layer": "batch_normalization_1",
+          "parameters": 128,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_1/beta:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_1/gamma:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_1/moving_mean:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_1/moving_variance:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 64
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_2/kernel:0",
+            "conv1d_2/bias:0"
+          ],
+          "layer": "conv1d_2",
+          "parameters": 3120,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_2/bias:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_2/kernel:0",
+              "parameters": 3072,
+              "shape": [
+                2,
+                32,
+                48
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 3120
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_2/gamma:0",
+            "batch_normalization_2/beta:0",
+            "batch_normalization_2/moving_mean:0",
+            "batch_normalization_2/moving_variance:0"
+          ],
+          "layer": "batch_normalization_2",
+          "parameters": 192,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_2/beta:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_2/gamma:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_2/moving_mean:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_2/moving_variance:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 96
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_3/kernel:0",
+            "conv1d_3/bias:0"
+          ],
+          "layer": "conv1d_3",
+          "parameters": 4656,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_3/bias:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_3/kernel:0",
+              "parameters": 4608,
+              "shape": [
+                2,
+                48,
+                48
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 4656
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "add_1",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_3/gamma:0",
+            "batch_normalization_3/beta:0",
+            "batch_normalization_3/moving_mean:0",
+            "batch_normalization_3/moving_variance:0"
+          ],
+          "layer": "batch_normalization_3",
+          "parameters": 192,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_3/beta:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_3/gamma:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_3/moving_mean:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_3/moving_variance:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 96
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_4/kernel:0",
+            "conv1d_4/bias:0"
+          ],
+          "layer": "conv1d_4",
+          "parameters": 6208,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_4/bias:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_4/kernel:0",
+              "parameters": 6144,
+              "shape": [
+                2,
+                48,
+                64
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 6208
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_4/gamma:0",
+            "batch_normalization_4/beta:0",
+            "batch_normalization_4/moving_mean:0",
+            "batch_normalization_4/moving_variance:0"
+          ],
+          "layer": "batch_normalization_4",
+          "parameters": 256,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_4/beta:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_4/gamma:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_4/moving_mean:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_4/moving_variance:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 128
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_5/kernel:0",
+            "conv1d_5/bias:0"
+          ],
+          "layer": "conv1d_5",
+          "parameters": 8256,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_5/bias:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_5/kernel:0",
+              "parameters": 8192,
+              "shape": [
+                2,
+                64,
+                64
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 8256
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "add_2",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_5/gamma:0",
+            "batch_normalization_5/beta:0",
+            "batch_normalization_5/moving_mean:0",
+            "batch_normalization_5/moving_variance:0"
+          ],
+          "layer": "batch_normalization_5",
+          "parameters": 256,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_5/beta:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_5/gamma:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_5/moving_mean:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_5/moving_variance:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 128
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_6/kernel:0",
+            "conv1d_6/bias:0"
+          ],
+          "layer": "conv1d_6",
+          "parameters": 10320,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_6/bias:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_6/kernel:0",
+              "parameters": 10240,
+              "shape": [
+                2,
+                64,
+                80
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 10320
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_6/gamma:0",
+            "batch_normalization_6/beta:0",
+            "batch_normalization_6/moving_mean:0",
+            "batch_normalization_6/moving_variance:0"
+          ],
+          "layer": "batch_normalization_6",
+          "parameters": 320,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_6/beta:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_6/gamma:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_6/moving_mean:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_6/moving_variance:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 160
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_7/kernel:0",
+            "conv1d_7/bias:0"
+          ],
+          "layer": "conv1d_7",
+          "parameters": 12880,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_7/bias:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_7/kernel:0",
+              "parameters": 12800,
+              "shape": [
+                2,
+                80,
+                80
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 12880
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "add_3",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_7/gamma:0",
+            "batch_normalization_7/beta:0",
+            "batch_normalization_7/moving_mean:0",
+            "batch_normalization_7/moving_variance:0"
+          ],
+          "layer": "batch_normalization_7",
+          "parameters": 320,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_7/beta:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_7/gamma:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_7/moving_mean:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_7/moving_variance:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 160
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "flatten",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "dense/kernel:0",
+            "dense/bias:0"
+          ],
+          "layer": "dense",
+          "parameters": 164096,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "dense/bias:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "dense/kernel:0",
+              "parameters": 163840,
+              "shape": [
+                640,
+                256
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 164096
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_8/gamma:0",
+            "batch_normalization_8/beta:0",
+            "batch_normalization_8/moving_mean:0",
+            "batch_normalization_8/moving_variance:0"
+          ],
+          "layer": "batch_normalization_8",
+          "parameters": 1024,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_8/beta:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_8/gamma:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_8/moving_mean:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_8/moving_variance:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 512
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "activation",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "dense_1/kernel:0",
+            "dense_1/bias:0"
+          ],
+          "layer": "dense_1",
+          "parameters": 65792,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "dense_1/bias:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "dense_1/kernel:0",
+              "parameters": 65536,
+              "shape": [
+                256,
+                256
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 65792
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_9/gamma:0",
+            "batch_normalization_9/beta:0",
+            "batch_normalization_9/moving_mean:0",
+            "batch_normalization_9/moving_variance:0"
+          ],
+          "layer": "batch_normalization_9",
+          "parameters": 1024,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_9/beta:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_9/gamma:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_9/moving_mean:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_9/moving_variance:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 512
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "activation_1",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "dense_2/kernel:0",
+            "dense_2/bias:0"
+          ],
+          "layer": "dense_2",
+          "parameters": 16448,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "dense_2/bias:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "dense_2/kernel:0",
+              "parameters": 16384,
+              "shape": [
+                256,
+                64
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 16448
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_10/gamma:0",
+            "batch_normalization_10/beta:0",
+            "batch_normalization_10/moving_mean:0",
+            "batch_normalization_10/moving_variance:0"
+          ],
+          "layer": "batch_normalization_10",
+          "parameters": 256,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_10/beta:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_10/gamma:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_10/moving_mean:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_10/moving_variance:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 128
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "activation_2",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "dense_3/kernel:0",
+            "dense_3/bias:0"
+          ],
+          "layer": "dense_3",
+          "parameters": 65,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "dense_3/bias:0",
+              "parameters": 1,
+              "shape": [
+                1
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "dense_3/kernel:0",
+              "parameters": 64,
+              "shape": [
+                64,
+                1
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 65
+        }
+      ],
+      "layout": "weights_only",
+      "not_in_file": {
+        "fields": [
+          "dilation_rate",
+          "padding",
+          "kernel_size_semantics",
+          "activation",
+          "residual_wiring",
+          "input_normalisation",
+          "layer_connectivity"
+        ],
+        "note": "A weights-only HDF5 serialises tensor names, shapes and values only. These graph properties cannot be established from this file and must come from the pinned source; this collector does not assert them."
+      },
+      "observed": {
+        "backend": "tensorflow",
+        "has_model_config": false,
+        "has_optimizer_state": false,
+        "has_training_config": false,
+        "keras_version": "2.7.0",
+        "root_groups": [
+          "activation",
+          "activation_1",
+          "activation_2",
+          "add",
+          "add_1",
+          "add_2",
+          "add_3",
+          "batch_normalization",
+          "batch_normalization_1",
+          "batch_normalization_10",
+          "batch_normalization_2",
+          "batch_normalization_3",
+          "batch_normalization_4",
+          "batch_normalization_5",
+          "batch_normalization_6",
+          "batch_normalization_7",
+          "batch_normalization_8",
+          "batch_normalization_9",
+          "conv1d",
+          "conv1d_1",
+          "conv1d_2",
+          "conv1d_3",
+          "conv1d_4",
+          "conv1d_5",
+          "conv1d_6",
+          "conv1d_7",
+          "dense",
+          "dense_1",
+          "dense_2",
+          "dense_3",
+          "flatten",
+          "input_1",
+          "tf.math.subtract",
+          "tf.math.truediv",
+          "top_level_model_weights"
+        ]
+      },
+      "path": "speck3264_single-key_0x400000_round8_polished.h5",
+      "sha256": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26"
+    },
+    {
+      "bytes": 1286200,
+      "derived": {
+        "layer_count": 34,
+        "non_trainable_parameters": 2048,
+        "structural_digest": "2576fdb5994f49d44586cea390d881c9fab24390b0d9f96b05b0ce3d2f05f2ae",
+        "tensor_count": 68,
+        "total_parameters": 298113,
+        "trainable_parameters": 296065
+      },
+      "layers": [
+        {
+          "declared_weight_names": [],
+          "layer": "input_1",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "tf.math.subtract",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "tf.math.truediv",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "conv1d/kernel:0",
+            "conv1d/bias:0"
+          ],
+          "layer": "conv1d",
+          "parameters": 96,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d/bias:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d/kernel:0",
+              "parameters": 64,
+              "shape": [
+                2,
+                1,
+                32
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 96
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization/gamma:0",
+            "batch_normalization/beta:0",
+            "batch_normalization/moving_mean:0",
+            "batch_normalization/moving_variance:0"
+          ],
+          "layer": "batch_normalization",
+          "parameters": 128,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization/beta:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization/gamma:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization/moving_mean:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization/moving_variance:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 64
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_1/kernel:0",
+            "conv1d_1/bias:0"
+          ],
+          "layer": "conv1d_1",
+          "parameters": 2080,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_1/bias:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_1/kernel:0",
+              "parameters": 2048,
+              "shape": [
+                2,
+                32,
+                32
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 2080
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "add",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_1/gamma:0",
+            "batch_normalization_1/beta:0",
+            "batch_normalization_1/moving_mean:0",
+            "batch_normalization_1/moving_variance:0"
+          ],
+          "layer": "batch_normalization_1",
+          "parameters": 128,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_1/beta:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_1/gamma:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_1/moving_mean:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_1/moving_variance:0",
+              "parameters": 32,
+              "shape": [
+                32
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 64
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_2/kernel:0",
+            "conv1d_2/bias:0"
+          ],
+          "layer": "conv1d_2",
+          "parameters": 3120,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_2/bias:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_2/kernel:0",
+              "parameters": 3072,
+              "shape": [
+                2,
+                32,
+                48
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 3120
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_2/gamma:0",
+            "batch_normalization_2/beta:0",
+            "batch_normalization_2/moving_mean:0",
+            "batch_normalization_2/moving_variance:0"
+          ],
+          "layer": "batch_normalization_2",
+          "parameters": 192,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_2/beta:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_2/gamma:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_2/moving_mean:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_2/moving_variance:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 96
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_3/kernel:0",
+            "conv1d_3/bias:0"
+          ],
+          "layer": "conv1d_3",
+          "parameters": 4656,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_3/bias:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_3/kernel:0",
+              "parameters": 4608,
+              "shape": [
+                2,
+                48,
+                48
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 4656
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "add_1",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_3/gamma:0",
+            "batch_normalization_3/beta:0",
+            "batch_normalization_3/moving_mean:0",
+            "batch_normalization_3/moving_variance:0"
+          ],
+          "layer": "batch_normalization_3",
+          "parameters": 192,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_3/beta:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_3/gamma:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_3/moving_mean:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_3/moving_variance:0",
+              "parameters": 48,
+              "shape": [
+                48
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 96
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_4/kernel:0",
+            "conv1d_4/bias:0"
+          ],
+          "layer": "conv1d_4",
+          "parameters": 6208,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_4/bias:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_4/kernel:0",
+              "parameters": 6144,
+              "shape": [
+                2,
+                48,
+                64
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 6208
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_4/gamma:0",
+            "batch_normalization_4/beta:0",
+            "batch_normalization_4/moving_mean:0",
+            "batch_normalization_4/moving_variance:0"
+          ],
+          "layer": "batch_normalization_4",
+          "parameters": 256,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_4/beta:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_4/gamma:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_4/moving_mean:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_4/moving_variance:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 128
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_5/kernel:0",
+            "conv1d_5/bias:0"
+          ],
+          "layer": "conv1d_5",
+          "parameters": 8256,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_5/bias:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_5/kernel:0",
+              "parameters": 8192,
+              "shape": [
+                2,
+                64,
+                64
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 8256
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "add_2",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_5/gamma:0",
+            "batch_normalization_5/beta:0",
+            "batch_normalization_5/moving_mean:0",
+            "batch_normalization_5/moving_variance:0"
+          ],
+          "layer": "batch_normalization_5",
+          "parameters": 256,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_5/beta:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_5/gamma:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_5/moving_mean:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_5/moving_variance:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 128
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_6/kernel:0",
+            "conv1d_6/bias:0"
+          ],
+          "layer": "conv1d_6",
+          "parameters": 10320,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_6/bias:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_6/kernel:0",
+              "parameters": 10240,
+              "shape": [
+                2,
+                64,
+                80
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 10320
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_6/gamma:0",
+            "batch_normalization_6/beta:0",
+            "batch_normalization_6/moving_mean:0",
+            "batch_normalization_6/moving_variance:0"
+          ],
+          "layer": "batch_normalization_6",
+          "parameters": 320,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_6/beta:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_6/gamma:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_6/moving_mean:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_6/moving_variance:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 160
+        },
+        {
+          "declared_weight_names": [
+            "conv1d_7/kernel:0",
+            "conv1d_7/bias:0"
+          ],
+          "layer": "conv1d_7",
+          "parameters": 12880,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "conv1d_7/bias:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "conv1d_7/kernel:0",
+              "parameters": 12800,
+              "shape": [
+                2,
+                80,
+                80
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 12880
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "add_3",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_7/gamma:0",
+            "batch_normalization_7/beta:0",
+            "batch_normalization_7/moving_mean:0",
+            "batch_normalization_7/moving_variance:0"
+          ],
+          "layer": "batch_normalization_7",
+          "parameters": 320,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_7/beta:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_7/gamma:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_7/moving_mean:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_7/moving_variance:0",
+              "parameters": 80,
+              "shape": [
+                80
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 160
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "flatten",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "dense/kernel:0",
+            "dense/bias:0"
+          ],
+          "layer": "dense",
+          "parameters": 164096,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "dense/bias:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "dense/kernel:0",
+              "parameters": 163840,
+              "shape": [
+                640,
+                256
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 164096
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_8/gamma:0",
+            "batch_normalization_8/beta:0",
+            "batch_normalization_8/moving_mean:0",
+            "batch_normalization_8/moving_variance:0"
+          ],
+          "layer": "batch_normalization_8",
+          "parameters": 1024,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_8/beta:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_8/gamma:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_8/moving_mean:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_8/moving_variance:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 512
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "activation",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "dense_1/kernel:0",
+            "dense_1/bias:0"
+          ],
+          "layer": "dense_1",
+          "parameters": 65792,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "dense_1/bias:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "dense_1/kernel:0",
+              "parameters": 65536,
+              "shape": [
+                256,
+                256
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 65792
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_9/gamma:0",
+            "batch_normalization_9/beta:0",
+            "batch_normalization_9/moving_mean:0",
+            "batch_normalization_9/moving_variance:0"
+          ],
+          "layer": "batch_normalization_9",
+          "parameters": 1024,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_9/beta:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_9/gamma:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_9/moving_mean:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_9/moving_variance:0",
+              "parameters": 256,
+              "shape": [
+                256
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 512
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "activation_1",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "dense_2/kernel:0",
+            "dense_2/bias:0"
+          ],
+          "layer": "dense_2",
+          "parameters": 16448,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "dense_2/bias:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "dense_2/kernel:0",
+              "parameters": 16384,
+              "shape": [
+                256,
+                64
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 16448
+        },
+        {
+          "declared_weight_names": [
+            "batch_normalization_10/gamma:0",
+            "batch_normalization_10/beta:0",
+            "batch_normalization_10/moving_mean:0",
+            "batch_normalization_10/moving_variance:0"
+          ],
+          "layer": "batch_normalization_10",
+          "parameters": 256,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_10/beta:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_10/gamma:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_10/moving_mean:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            },
+            {
+              "dtype": "float32",
+              "name": "batch_normalization_10/moving_variance:0",
+              "parameters": 64,
+              "shape": [
+                64
+              ],
+              "trainable": false
+            }
+          ],
+          "trainable_parameters": 128
+        },
+        {
+          "declared_weight_names": [],
+          "layer": "activation_2",
+          "parameters": 0,
+          "tensors": [],
+          "trainable_parameters": 0
+        },
+        {
+          "declared_weight_names": [
+            "dense_3/kernel:0",
+            "dense_3/bias:0"
+          ],
+          "layer": "dense_3",
+          "parameters": 65,
+          "tensors": [
+            {
+              "dtype": "float32",
+              "name": "dense_3/bias:0",
+              "parameters": 1,
+              "shape": [
+                1
+              ],
+              "trainable": true
+            },
+            {
+              "dtype": "float32",
+              "name": "dense_3/kernel:0",
+              "parameters": 64,
+              "shape": [
+                64,
+                1
+              ],
+              "trainable": true
+            }
+          ],
+          "trainable_parameters": 65
+        }
+      ],
+      "layout": "weights_only",
+      "not_in_file": {
+        "fields": [
+          "dilation_rate",
+          "padding",
+          "kernel_size_semantics",
+          "activation",
+          "residual_wiring",
+          "input_normalisation",
+          "layer_connectivity"
+        ],
+        "note": "A weights-only HDF5 serialises tensor names, shapes and values only. These graph properties cannot be established from this file and must come from the pinned source; this collector does not assert them."
+      },
+      "observed": {
+        "backend": "tensorflow",
+        "has_model_config": false,
+        "has_optimizer_state": false,
+        "has_training_config": false,
+        "keras_version": "2.7.0",
+        "root_groups": [
+          "activation",
+          "activation_1",
+          "activation_2",
+          "add",
+          "add_1",
+          "add_2",
+          "add_3",
+          "batch_normalization",
+          "batch_normalization_1",
+          "batch_normalization_10",
+          "batch_normalization_2",
+          "batch_normalization_3",
+          "batch_normalization_4",
+          "batch_normalization_5",
+          "batch_normalization_6",
+          "batch_normalization_7",
+          "batch_normalization_8",
+          "batch_normalization_9",
+          "conv1d",
+          "conv1d_1",
+          "conv1d_2",
+          "conv1d_3",
+          "conv1d_4",
+          "conv1d_5",
+          "conv1d_6",
+          "conv1d_7",
+          "dense",
+          "dense_1",
+          "dense_2",
+          "dense_3",
+          "flatten",
+          "input_1",
+          "tf.math.subtract",
+          "tf.math.truediv",
+          "top_level_model_weights"
+        ]
+      },
+      "path": "simon3264_single-key_0x400_round11_polished.h5",
+      "sha256": "769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af"
+    }
+  ],
+  "refusals": [],
+  "structural_digests_distinct": 1,
+  "supersedes": "architecture_census.py (v1), which returned an empty census with a constant digest on the weights-only layout; v1 and its outputs are retained as evidence of the instrumentation failure and are not usable as hypothesis evidence"
+}

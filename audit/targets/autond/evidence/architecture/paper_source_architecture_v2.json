@@ -1,0 +1,365 @@
+{
+  "artifact": "autond-paper-source-architecture-v2",
+  "claims": [
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-01",
+      "evidence_basis": "BOTH",
+      "note": "",
+      "paper_locator": "Section 6.2 ('Rationale for DBitNet'); Tables 3, 4 and 6",
+      "paper_says": "DBitNet, a cipher-agnostic dilated-convolutional network, is the architecture introduced and used for the reported distinguishers alongside Gohr's network as a baseline.",
+      "property_name": "Model family used for the reported distinguishers",
+      "source_does": "dbitnet.make_model builds the dilated-convolutional network; train_nets/eval_nets select it by model_type 'dbitnet'.",
+      "source_locator": "dbitnet.py:10 make_model; train_nets.py, eval_nets.py",
+      "verdict": "AGREES"
+    },
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-02",
+      "evidence_basis": "BOTH",
+      "note": "",
+      "paper_locator": "Section 6.2 ('Neural Network Settings'); Table 3, input-size column",
+      "paper_says": "The architecture is sized from the cipher's input size; Table 3 lists input size 64 for SIMON32 and SPECK32.",
+      "property_name": "Cipher-agnostic sizing by block width",
+      "source_does": "make_model(input_size) derives everything from input_size; for a 32-bit block cipher the callers pass 2 * plain_bits = 64.",
+      "source_locator": "dbitnet.py:10 make_model(input_size=64); dbitnet.py:23",
+      "verdict": "AGREES"
+    },
+    {
+      "census_corroborates": "the census records dilations [31, 15, 7, 3] as derived from the source, not read from the weights file, which cannot carry dilation semantics",
+      "claim_id": "ARCH-03",
+      "evidence_basis": "BOTH",
+      "note": "Both the rule and the realised values match. The source's loop guard (n >= 8) is what produces the paper's stated minimum of 3, since the last admitted n is 8 and 8/2 - 1 = 3. The dilation rates are in Table 3, not Table 4; see CORRECTIONS.",
+      "paper_locator": "Section 6.2 ('Neural Network Settings') for the rule; Table 3, DBitNet dilation-rates column, SIMON32 and SPECK32 rows, for the values",
+      "paper_says": "Rule: 'for DBitNet the dilation rates are given by dividing the input size by two and subtracting one', continuing 'until a minimum value of 3 is reached'. Realised values for SIMON32 and SPECK32: [31, 15, 7, 3].",
+      "property_name": "Dilation schedule",
+      "source_does": "get_dilation_rates appends int(n/2 - 1) while n >= 8, halving n each step, giving [31, 15, 7, 3] for input_size=64.",
+      "source_locator": "dbitnet.py:1-8 get_dilation_rates; applied at dbitnet.py:23",
+      "verdict": "AGREES"
+    },
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-04",
+      "evidence_basis": "SOURCE_CODE",
+      "note": "The illustrative k = 2 coincides with the source's kernel size, but an example is not a specification, so this is recorded as unlocated rather than as agreement. Reading the example as normative would be the same error that produced the retracted head-width claim.",
+      "paper_locator": "Section 6.2, illustrative example; no normative statement located",
+      "paper_says": "No kernel size is stated for DBitNet's actual layers. The only kernel size in the DBitNet discussion is illustrative: 'If we apply such a dilated convolutional layer with dilation d = 8 and kernel size k = 2', presented as an example of how dilation works rather than as the configuration used.",
+      "property_name": "Convolution kernel size",
+      "source_does": "Both convolutions in every block use kernel_size=2.",
+      "source_locator": "dbitnet.py:41 (dilated conv), dbitnet.py:50 (d=1 conv)",
+      "verdict": "UNDERSPECIFIED"
+    },
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-05",
+      "evidence_basis": "SOURCE_CODE",
+      "note": "The two padding modes differ between the two convolutions in a block, which is the mechanism behind the realised width sequence in ARCH-16. A weights-only HDF5 cannot carry padding, so the census cannot corroborate either side.",
+      "paper_locator": "Section 6.2 - no padding statement located; Figure 4c internal text not machine-extractable",
+      "paper_says": "Not stated for DBitNet in the text.",
+      "property_name": "Padding mode",
+      "source_does": "The dilated convolution uses padding='valid'; the following d=1 convolution uses padding='causal'.",
+      "source_locator": "dbitnet.py:42 padding='valid'; dbitnet.py:50 padding='causal'",
+      "verdict": "UNDERSPECIFIED"
+    },
+    {
+      "census_corroborates": "the census's per-layer filter counts across the shipped checkpoints follow 32, 48, 64, 80",
+      "claim_id": "ARCH-06",
+      "evidence_basis": "BOTH",
+      "note": "32 + i*16 is reproduced exactly. Note the paper attaches the increment to the neuronal width halving while the source attaches it to the block iteration; for this architecture the two coincide because each block contains exactly one dilated convolution.",
+      "paper_locator": "Section 6.2 ('Rationale for DBitNet')",
+      "paper_says": "'We start with 32 filters, identical to Gohr, in the first convolutional layer.' and 'Whenever the neuronal width is halved, we add 16 filters, resulting in 32 + i x 16 filters in the ith dilated convolution.'",
+      "property_name": "Filter progression across blocks",
+      "source_does": "make_model defaults n_filters=32, n_add_filters=16 and executes n_filters += n_add_filters at the end of each block, giving [32, 48, 64, 80] across the 4 blocks.",
+      "source_locator": "dbitnet.py:10 defaults n_filters=32, n_add_filters=16; dbitnet.py:56 n_filters += n_add_filters",
+      "verdict": "AGREES"
+    },
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-07",
+      "evidence_basis": "SOURCE_CODE",
+      "note": "The source comments the pair as 'wide-narrow blocks'. The paper describes the wide-narrow idea in prose ('The next layer is a d = 1 layer to investigate the dependencies between neighboring bits') without stating that the pair is wired residually.",
+      "paper_locator": "Section 6.2 - no residual/skip statement located for DBitNet; Figure 4c internal text not machine-extractable. Residual connections are described for Gohr's network in Section 3.2",
+      "paper_says": "Not stated for DBitNet in the text.",
+      "property_name": "Residual connection inside each block",
+      "source_does": "Each block captures x_skip after the dilated convolution's batch normalisation and adds it back after the d=1 convolution: Add()([x, x_skip]).",
+      "source_locator": "dbitnet.py:47 x_skip = x; dbitnet.py:53 Add()([x, x_skip])",
+      "verdict": "UNDERSPECIFIED"
+    },
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-08",
+      "evidence_basis": "SOURCE_CODE",
+      "note": "These two ops are why the model cannot be built under Keras 3, which rejects tf.subtract/tf.divide applied to a KerasTensor. That is a reproducibility constraint rather than an architecture disagreement.",
+      "paper_locator": "Section 6.2 - no input-normalisation statement located",
+      "paper_says": "Not stated for DBitNet in the text.",
+      "property_name": "Input normalisation",
+      "source_does": "The input is mapped to [-1, 1] by tf.subtract(x, 0.5) followed by tf.divide(x, 0.5), before the first convolution.",
+      "source_locator": "dbitnet.py:35-36",
+      "verdict": "UNDERSPECIFIED"
+    },
+    {
+      "census_corroborates": "the census's dense-layer tensor shapes are consistent with 640 -> 256 -> 256 -> 64 -> 1",
+      "claim_id": "ARCH-09",
+      "evidence_basis": "SOURCE_CODE",
+      "note": "The source side is exact and verified: 256, 256, 64, then a single sigmoid unit. The paper side is absent, so there is nothing to agree or disagree with. Two further observations. First, the source's own comment calls these 'prediction head parameters (similar to Gohr)' and carries a TODO saying d1 'can likely be reduced to 64' - so the similarity-to-Gohr claim lives in the code comment, not in the publication. Second, a review brief given to this module asserted these sizes are specified in Section 6.2; see CORRECTIONS for why that assertion is not adopted.",
+      "paper_locator": "Section 3.2 and Section 4.2 describe GOHR's head only. No DBitNet head statement located in Sections 6.1-6.3, Tables 3-6, or the text of Figure 4's caption. Figure 4c internal text is not machine-extractable and is the one place the paper might state it.",
+      "paper_says": "Nothing located. The phrase 'prediction head' appears once, in Section 3.2, describing GOHR's network ('a densely connected prediction head with ReLU activations'). The only dense-layer size the paper states is Gohr's 64 neurons in Section 4.2. No DBitNet dense-layer size was located in the text or in any table.",
+      "property_name": "Prediction head widths",
+      "source_does": "d1 = 256 and d2 = 64 drive Dense(256) -> Dense(256) -> Dense(64) -> Dense(1, sigmoid), each of the first three followed by BatchNormalization and a ReLU Activation.",
+      "source_locator": "dbitnet.py:26-27 d1 = 256, d2 = 64; dbitnet.py:61-70 the four Dense layers",
+      "verdict": "UNDERSPECIFIED"
+    },
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-10",
+      "evidence_basis": "BOTH",
+      "note": "Scoped deliberately: what agrees is the OUTPUT INTERPRETATION - a single probability thresholded at 0.5, which the reported accuracy and TPR/TNR presuppose. The paper does not restate the output layer for DBitNet specifically; it states it for Gohr. This row therefore does not claim the paper specifies DBitNet's final layer.",
+      "paper_locator": "Section 3.2 for Gohr's single sigmoid output; Section 4.1 and Table 6 for the accuracy/TPR/TNR definition applied to both networks",
+      "paper_says": "The distinguisher's output is a probability thresholded at 0.5: accuracy is computed against Zbin = (Z > 0.5), with TPR and TNR reported alongside. Gohr's network is stated to end in 'an output layer with a single sigmoid neuron'.",
+      "property_name": "Output interpretation",
+      "source_does": "Final layer is Dense(1, activation='sigmoid').",
+      "source_locator": "dbitnet.py:70; threshold applied in eval_nets.py:33 Zbin = (Z > 0.5)",
+      "verdict": "AGREES"
+    },
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-11",
+      "evidence_basis": "SOURCE_CODE",
+      "note": "The asymmetry is worth recording: regularisation is applied to the head only, not to the convolutional trunk. A weights file cannot carry regulariser settings.",
+      "paper_locator": "Section 6.2 - no regularisation statement located for DBitNet",
+      "paper_says": "Not stated for DBitNet in the text.",
+      "property_name": "Kernel regularisation",
+      "source_does": "Every Dense layer carries kernel_regularizer=l2(1e-5); the convolutions carry none.",
+      "source_locator": "dbitnet.py:28 reg_param = 1e-5; dbitnet.py:61-70",
+      "verdict": "UNDERSPECIFIED"
+    },
+    {
+      "census_corroborates": "both shipped checkpoints census to 34 layers, 68 tensors and 298,113 parameters",
+      "claim_id": "ARCH-12",
+      "evidence_basis": "BOTH",
+      "note": "298,113 printed to the precision Table 4 uses is 298.11k, so the realised count matches the published count exactly at the table's stated resolution. This is the strongest quantitative agreement in this comparison, because it is a single number that depends on every architectural choice at once: a wrong kernel size, filter schedule, head width or block count would change it.",
+      "paper_locator": "Table 4 ('FLOPs, parameters and runtime per epoch'), DBitNet parameters column, SIMON32 and SPECK32 rows",
+      "paper_says": "Table 4 reports DBitNet parameters for SIMON32 and SPECK32 as 298.11k.",
+      "property_name": "Total parameter count",
+      "source_does": "The model the pinned source builds for input_size=64 realises 298,113 parameters (296,065 trainable + 2,048 non-trainable), as the census records for both shipped checkpoints.",
+      "source_locator": "dbitnet.py make_model(64) in full; corroborated by the architecture census over both shipped checkpoints",
+      "verdict": "AGREES"
+    },
+    {
+      "census_corroborates": "2,048 non-trainable parameters = the moving_mean and moving_variance tensors of the batch-norm layers",
+      "claim_id": "ARCH-13",
+      "evidence_basis": "SOURCE_CODE",
+      "note": "The census CAN see batch-normalisation layers, because they carry four tensors each (gamma, beta, moving_mean, moving_variance); the 2,048 non-trainable parameters are exactly the moving statistics. So the SOURCE side is corroborated by the weights file even though the paper side is unlocated.",
+      "paper_locator": "Section 6.2 - no batch-normalisation statement located for DBitNet. Batch normalisation is described for Gohr's network in Section 3.2",
+      "paper_says": "Not stated for DBitNet in the text.",
+      "property_name": "Batch normalisation placement",
+      "source_does": "Batch normalisation appears after the dilated convolution, after the residual Add, and after each of the three wide Dense layers - six placements in total for input_size=64 plus per-block repetition.",
+      "source_locator": "dbitnet.py:46, 54, 62, 65, 68",
+      "verdict": "UNDERSPECIFIED"
+    },
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-14",
+      "evidence_basis": "BOTH",
+      "note": "Recorded as its own row because the block count is what makes the filter schedule in ARCH-06 and the parameter count in ARCH-12 determinate. Table 3's 'blocks' and 'word size' columns describe the CIPHER's word structure (2 blocks of 16 bits for SPECK32/64), not the network's block count; conflating the two would be an error.",
+      "paper_locator": "Section 6.2 (rule) with Table 3 (the four realised rates)",
+      "paper_says": "Implied by the dilation rule and Table 3: four dilation rates [31, 15, 7, 3] for a 64-bit input, hence four dilated convolutions.",
+      "property_name": "Number of dilated blocks",
+      "source_does": "The block loop iterates over get_dilation_rates(64), which returns 4 rates, so the model has 4 wide-narrow blocks.",
+      "source_locator": "dbitnet.py:38 for dilation_rate in dilation_rates",
+      "verdict": "AGREES"
+    },
+    {
+      "census_corroborates": null,
+      "claim_id": "ARCH-15",
+      "evidence_basis": "BOTH",
+      "note": "The paper's stated purpose for this layer (neighbouring-bit dependencies) is consistent with dilation 1, and the source places it exactly where the paper describes.",
+      "paper_locator": "Section 6.2 ('Rationale for DBitNet')",
+      "paper_says": "'The next layer is a d = 1 layer to investigate the dependencies between neighboring bits.'",
+      "property_name": "The d=1 convolution following each dilated convolution",
+      "source_does": "Each block's second convolution uses dilation_rate=1, immediately after the dilated convolution and its batch normalisation.",
+      "source_locator": "dbitnet.py:48-52 Conv1D(..., dilation_rate=1)",
+      "verdict": "AGREES"
+    },
+    {
+      "census_corroborates": "the census records the width sequence 64 -> 33 -> 18 -> 11 -> 8 and flatten width 640",
+      "claim_id": "ARCH-16",
+      "evidence_basis": "SOURCE_CODE",
+      "note": "This is the most interesting reporting gap in the comparison and the reason it is not scored as agreement. 'A factor of two' is not what the source realises: 64 -> 33 is not a halving, and the drift compounds because the dilation rates are precomputed from the ORIGINAL input size while 'valid' padding subtracts d from the CURRENT length. Exact halving would give 64 -> 32 -> 16 -> 8 -> 4. The claim is recorded UNDERSPECIFIED rather than DIFFERS because the paper's statement is a qualitative description attached to a schematic figure, not a quantitative specification that could be falsified; a reviewer who reads it as quantitative should read this row as DIFFERS and the realised sequence is given above so they can.",
+      "paper_locator": "Section 6.2, discussion of Figure 4b",
+      "paper_says": "Qualitative only: 'the neuronal width is shrinking with each dilated convolution by a factor of two' (described with reference to Figure 4b). No per-layer widths are tabulated.",
+      "property_name": "Neuronal width progression across blocks",
+      "source_does": "A kernel-2 'valid' convolution at dilation d maps length L to L - d, and the intervening 'causal' d=1 convolution preserves length, so the realised sequence for input_size=64 is 64 -> 33 -> 18 -> 11 -> 8.",
+      "source_locator": "dbitnet.py:40-45 with padding='valid'; dbitnet.py:48-52 with padding='causal'",
+      "verdict": "UNDERSPECIFIED"
+    }
+  ],
+  "corrections_from_previous_revision": [
+    {
+      "claim_id": "ARCH-03",
+      "locator_correction": "The dilation rates are in TABLE 3 ('Settings for Gohr's neural network and DBitNet'), NOT Table 4. Table 4 is 'FLOPs, parameters and runtime per epoch'. A review brief given to this module cited Table 4; that citation is wrong and is corrected here rather than propagated.",
+      "now": "AGREES",
+      "was": "UNDERSPECIFIED",
+      "why": "The dilation schedule IS specified. Section 6.2 gives the rule ('dividing the input size by two and subtracting one', 'until a minimum value of 3 is reached') and Table 3 gives the realised values [31, 15, 7, 3] for SIMON32 and SPECK32. Revision 1 did not locate either."
+    },
+    {
+      "claim_id": "ARCH-06",
+      "now": "AGREES",
+      "was": "UNDERSPECIFIED",
+      "why": "Section 6.2 states the filter progression explicitly: 'We start with 32 filters, identical to Gohr, in the first convolutional layer' and 'Whenever the neuronal width is halved, we add 16 filters, resulting in 32 + i x 16 filters in the ith dilated convolution.' Revision 1 did not locate this."
+    },
+    {
+      "claim_id": "ARCH-12",
+      "now": "AGREES",
+      "was": "UNDERSPECIFIED",
+      "why": "Table 4 reports DBitNet parameters for SIMON32 and SPECK32 as 298.11k, which the census's 298,113 matches to the precision the table prints. Revision 1 treated the parameter count as unlocated."
+    },
+    {
+      "claim_id": "ARCH-09",
+      "contested_claim": "A review brief given to this module asserted that Section 6.2 specifies DBitNet prediction-head sizes 256, 256, 64. Three independent extractions of the 2024-01-24 revision do not support that: the phrase 'prediction head' occurs once, in Section 3.2, describing GOHR's network; the only dense-layer size the paper states is Gohr's 64 neurons in Section 4.2; and the number 256 occurs in the paper only as SPECK's largest key size, as Gohr's 256 filters / 256 neurons in Section 4.2, as the input size of LEA/SIMON128/SPECK128 in Table 3, and in HIGHT's C.256 data requirement in Section 7. The values 256, 256, 64 are therefore NOT asserted here to be the paper's. They may appear inside Figure 4c, whose internal text is not machine-extractable; if the rendered figure shows them, this row flips to AGREES with a figure locator. Given that an earlier review in this project retracted paper-derived head widths after reading a stale revision, this row is left unresolved rather than asserted in either direction.",
+      "now": "UNDERSPECIFIED",
+      "was": "NOT_CHECKABLE_HERE",
+      "why": "The SOURCE side is fully checkable and is now recorded exactly: dbitnet.py sets d1 = 256, d2 = 64 and builds Dense(256), Dense(256), Dense(64), Dense(1, sigmoid). It is the PAPER side that is absent, which makes this UNDERSPECIFIED rather than uncheckable."
+    }
+  ],
+  "derived_from_source": {
+    "dilation_rates": [
+      31,
+      15,
+      7,
+      3
+    ],
+    "filter_schedule": [
+      32,
+      48,
+      64,
+      80
+    ],
+    "flatten_width": 640,
+    "width_sequence": [
+      64,
+      33,
+      18,
+      11,
+      8
+    ]
+  },
+  "does_not_establish": [
+    "That the shipped checkpoints were produced by this source. File identity and loadability are not provenance.",
+    "Agreement on the 8 properties recorded UNDERSPECIFIED: the paper side could not be located, so those comparisons were not made rather than passed.",
+    "ARCH-09 in either direction. The source head is exactly 256, 256, 64, but no paper statement of it was located; Figure 4c's internal text is not machine-extractable, and a prior review in this project retracted paper-derived head widths after reading a stale revision.",
+    "ARCH-16 as agreement. The paper's 'factor of two' does not describe the realised sequence 64 -> 33 -> 18 -> 11 -> 8.",
+    "Anything about trained weight values or predictive behaviour.",
+    "That the census could have established the source-only properties: padding, dilation semantics, residual wiring, input normalisation and regularisation are absent from a weights-only HDF5 by construction.",
+    "That the paper PDF compared against is the one the operator holds: its sha256 was never bound, because the build environment cannot fetch it."
+  ],
+  "effective_summary": {
+    "agrees": [
+      "ARCH-01",
+      "ARCH-02",
+      "ARCH-03",
+      "ARCH-06",
+      "ARCH-10",
+      "ARCH-12",
+      "ARCH-14",
+      "ARCH-15"
+    ],
+    "by_verdict": {
+      "AGREES": 8,
+      "UNDERSPECIFIED": 8
+    },
+    "differs": [],
+    "downgraded_from_agrees": [],
+    "not_checkable_here": [],
+    "source_verified": true,
+    "total_claims": 16,
+    "underspecified": [
+      "ARCH-04",
+      "ARCH-05",
+      "ARCH-07",
+      "ARCH-08",
+      "ARCH-09",
+      "ARCH-11",
+      "ARCH-13",
+      "ARCH-16"
+    ]
+  },
+  "establishes": [
+    "For every property the paper DOES pin down (ARCH-01, ARCH-02, ARCH-03, ARCH-06, ARCH-10, ARCH-12, ARCH-14, ARCH-15), the pinned source builds what the publication describes.",
+    "No property examined was found to DIFFER between the paper and the source.",
+    "The realised parameter count matches Table 4's published 298.11k at the precision the table prints (ARCH-12), which constrains every architectural choice simultaneously.",
+    "The dilation rule, its realised values, the filter progression, the block count and the d=1 companion layer are all specified by the paper and all reproduced exactly by the source."
+  ],
+  "input_size": 64,
+  "paper": {
+    "authors": "Emanuele Bellini, David Gerault, Anna Hambitzer, Matteo Rossi",
+    "eprint_id": "2022/1467",
+    "last_revision": "2024-01-24",
+    "n_revisions": 4,
+    "pdf_sha256": null,
+    "pdf_sha256_status": "UNVERIFIED. The environment that built this comparison cannot reach eprint.iacr.org, so the PDF was never hashed locally. The comparison was made against the document's extracted text. Run verify_paper_pdf(path) on a machine holding the PDF to bind the digest.",
+    "received": "2022-10-26",
+    "revision_compared": "last of 4 revisions, 2024-01-24 - the version served at the canonical ePrint URL",
+    "text_extraction_limits": "Figure 4c, captioned 'The actual design of DBitNet', carries no machine-extractable internal text. Any property that the paper states ONLY inside Figure 4c is therefore recorded UNDERSPECIFIED here and may resolve against the rendered figure.",
+    "title": "A Cipher-Agnostic Neural Training Pipeline with Automated Finding of Good Input Differences",
+    "url": "https://eprint.iacr.org/2022/1467.pdf",
+    "venue": "IACR Transactions on Symmetric Cryptology (ToSC) 2024"
+  },
+  "pinned_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+  "record_digest": "717ae590c0d3f0dc74f37ae7f65b557b3403cca5f6b2b7d1b44e8211ca061be4",
+  "source_verification": {
+    "commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+    "files": {
+      "dbitnet.py": {
+        "expected_sha256": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+        "observed_sha256": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+        "present": true,
+        "verified": true
+      },
+      "eval_nets.py": {
+        "expected_sha256": "838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048",
+        "observed_sha256": "838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048",
+        "present": true,
+        "verified": true
+      },
+      "train_nets.py": {
+        "expected_sha256": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e",
+        "observed_sha256": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e",
+        "present": true,
+        "verified": true
+      }
+    },
+    "problems": [],
+    "upstream": "/Users/oishimoitra/Documents/AutoND-upstream",
+    "verified": true
+  },
+  "summary": {
+    "agrees": [
+      "ARCH-01",
+      "ARCH-02",
+      "ARCH-03",
+      "ARCH-06",
+      "ARCH-10",
+      "ARCH-12",
+      "ARCH-14",
+      "ARCH-15"
+    ],
+    "by_verdict": {
+      "AGREES": 8,
+      "UNDERSPECIFIED": 8
+    },
+    "differs": [],
+    "not_checkable_here": [],
+    "total_claims": 16,
+    "underspecified": [
+      "ARCH-04",
+      "ARCH-05",
+      "ARCH-07",
+      "ARCH-08",
+      "ARCH-09",
+      "ARCH-11",
+      "ARCH-13",
+      "ARCH-16"
+    ]
+  }
+}

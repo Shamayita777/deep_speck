@@ -1,0 +1,792 @@
+{
+  "artifact": "autond-dbitnet-source-derivation-v1",
+  "reconciliation": {
+    "all_models_reconcile": true,
+    "census_artifact": "autond-architecture-census-v2",
+    "census_file": "census_v2_20261015T043855Z.json",
+    "models": [
+      {
+        "all_checks_pass": true,
+        "checks": {
+          "layer_count": true,
+          "layer_names_and_order": true,
+          "non_trainable_parameters": true,
+          "tensor_count": true,
+          "tensor_names_and_shapes": true,
+          "total_parameters": true,
+          "trainable_parameters": true
+        },
+        "keras_version": "2.7.0",
+        "layout": "weights_only",
+        "path": "speck3264_single-key_0x400000_round8_polished.h5",
+        "sha256": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+        "structural_digest": "2576fdb5994f49d44586cea390d881c9fab24390b0d9f96b05b0ce3d2f05f2ae",
+        "tensor_mismatch": {}
+      },
+      {
+        "all_checks_pass": true,
+        "checks": {
+          "layer_count": true,
+          "layer_names_and_order": true,
+          "non_trainable_parameters": true,
+          "tensor_count": true,
+          "tensor_names_and_shapes": true,
+          "total_parameters": true,
+          "trainable_parameters": true
+        },
+        "keras_version": "2.7.0",
+        "layout": "weights_only",
+        "path": "simon3264_single-key_0x400_round11_polished.h5",
+        "sha256": "769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af",
+        "structural_digest": "2576fdb5994f49d44586cea390d881c9fab24390b0d9f96b05b0ce3d2f05f2ae",
+        "tensor_mismatch": {}
+      }
+    ]
+  },
+  "source_derivation": {
+    "dense_layers": {
+      "hidden": [
+        256,
+        256,
+        64
+      ],
+      "note": "FOUR Dense layers are constructed: three hidden (256, 256, 64) each followed by BatchNormalization and ReLU, then a single-unit sigmoid output. A description reading 'three dense layers 256/256/64' omits the output unit and should be stated as three HIDDEN dense layers.",
+      "output": "1 unit, sigmoid activation"
+    },
+    "derivation": "autond-dbitnet-source-derivation-v1",
+    "dilation_rates": [
+      31,
+      15,
+      7,
+      3
+    ],
+    "flatten_width": 640,
+    "hyperparameters": {
+      "d1": 256,
+      "d2": 64,
+      "input_size": 64,
+      "n_add_filters": 16,
+      "n_filters": 32
+    },
+    "layer_count": 34,
+    "layers": [
+      {
+        "class": "InputLayer",
+        "layer": "input_1",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "TFOpLambda",
+        "layer": "tf.math.subtract",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "TFOpLambda",
+        "layer": "tf.math.truediv",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "Conv1D",
+        "layer": "conv1d",
+        "parameters": 96,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              2,
+              1,
+              32
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              32
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 128,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              32
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              32
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              32
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              32
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Conv1D",
+        "layer": "conv1d_1",
+        "parameters": 2080,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              2,
+              32,
+              32
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              32
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Add",
+        "layer": "add",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_1",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 128,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              32
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              32
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              32
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              32
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Conv1D",
+        "layer": "conv1d_2",
+        "parameters": 3120,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              2,
+              32,
+              48
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              48
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_2",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 192,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              48
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              48
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              48
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              48
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Conv1D",
+        "layer": "conv1d_3",
+        "parameters": 4656,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              2,
+              48,
+              48
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              48
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Add",
+        "layer": "add_1",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_3",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 192,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              48
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              48
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              48
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              48
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Conv1D",
+        "layer": "conv1d_4",
+        "parameters": 6208,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              2,
+              48,
+              64
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              64
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_4",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 256,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              64
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              64
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              64
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              64
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Conv1D",
+        "layer": "conv1d_5",
+        "parameters": 8256,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              2,
+              64,
+              64
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              64
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Add",
+        "layer": "add_2",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_5",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 256,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              64
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              64
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              64
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              64
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Conv1D",
+        "layer": "conv1d_6",
+        "parameters": 10320,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              2,
+              64,
+              80
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              80
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_6",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 320,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              80
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              80
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              80
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              80
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Conv1D",
+        "layer": "conv1d_7",
+        "parameters": 12880,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              2,
+              80,
+              80
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              80
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Add",
+        "layer": "add_3",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_7",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 320,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              80
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              80
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              80
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              80
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Flatten",
+        "layer": "flatten",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "Dense",
+        "layer": "dense",
+        "parameters": 164096,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              640,
+              256
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              256
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_8",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 1024,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              256
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              256
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              256
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              256
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Activation",
+        "layer": "activation",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "Dense",
+        "layer": "dense_1",
+        "parameters": 65792,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              256,
+              256
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              256
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_9",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 1024,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              256
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              256
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              256
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              256
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Activation",
+        "layer": "activation_1",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "Dense",
+        "layer": "dense_2",
+        "parameters": 16448,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              256,
+              64
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              64
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "BatchNormalization",
+        "layer": "batch_normalization_10",
+        "non_trainable": [
+          "moving_mean:0",
+          "moving_variance:0"
+        ],
+        "parameters": 256,
+        "tensors": [
+          [
+            "gamma:0",
+            [
+              64
+            ]
+          ],
+          [
+            "beta:0",
+            [
+              64
+            ]
+          ],
+          [
+            "moving_mean:0",
+            [
+              64
+            ]
+          ],
+          [
+            "moving_variance:0",
+            [
+              64
+            ]
+          ]
+        ]
+      },
+      {
+        "class": "Activation",
+        "layer": "activation_2",
+        "parameters": 0,
+        "tensors": []
+      },
+      {
+        "class": "Dense",
+        "layer": "dense_3",
+        "parameters": 65,
+        "tensors": [
+          [
+            "kernel:0",
+            [
+              64,
+              1
+            ]
+          ],
+          [
+            "bias:0",
+            [
+              1
+            ]
+          ]
+        ]
+      }
+    ],
+    "method": "shape algebra transcribed from dbitnet.py and evaluated in pure Python; TensorFlow and Keras are not imported",
+    "non_trainable_parameters": 2048,
+    "not_established_here": [
+      "whether the PAPER's stated architecture matches this derivation (a textual comparison against the publication, outstanding)",
+      "the numerical weight VALUES, which this derivation says nothing about",
+      "that the shipped file was produced by this code rather than by any other code emitting the same tensor inventory"
+    ],
+    "pinned_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+    "sequence_length_chain": [
+      64,
+      33,
+      18,
+      11,
+      8
+    ],
+    "tensor_count": 68,
+    "total_parameters": 298113,
+    "trainable_parameters": 296065
+  }
+}

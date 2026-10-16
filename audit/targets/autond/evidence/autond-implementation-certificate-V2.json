@@ -1,0 +1,615 @@
+{
+  "adjusted_p_value": null,
+  "artifact_hashes": {
+    "architecture_census": "8e1e085f97d86f0d78f39a1ac7237342e9169d6c6bf55c1d400d9ace3ebb7ca2",
+    "architecture_reconciliation": "49881b1c2f5540ebeccbe5f3968bba78eabd484244d89a871f392200255cae4a",
+    "checkpoint_load_verification": "51b58e11fe346dd02664663e7dd236527349f829184ac8699a3e36ea4f34b4f0",
+    "run_manifest_ii-autond-assembly-001.json": "d50dbf5204f7d8658fae4d6f15e976f778fa309f162a62927d6a50d1142bec7a",
+    "simon_polished_checkpoint": "769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af",
+    "speck_polished_checkpoint": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+    "training_checkpoint_h5": "815062f11d9a0631477405fd206ef5b351e469775a9283c0e66fa76f3a0081d0",
+    "training_environment": "5d32680bad8ae7268848280abb393b1291d52cab0ba4a6f9149ee9c95443601f",
+    "training_epoch_diagnostic": "76719077033e3a7d650a49f1a15673b358761fc3fa732969975318b729621a39",
+    "training_evidence_npz": "303d3eb3ff48d67bcaf44a5ffa3de7b98f94d64ff00a9712f697258311b73561",
+    "training_history_round5": "986b6de1f811092e0bfebd7999181adb0028de706bdfff41b8052b3e553d2d01",
+    "training_history_round6": "4a023bc96525a133fef54817017db4f45f1e130db4a9bc2e7d99c82ac09f07c5",
+    "training_history_round7": "5a33dd3175e74813e5686716ea3a0a9fed993c2547ac498a43b932dcc0953e5a",
+    "training_history_round8": "b4c8f456fb6b1acb5f2b93c166c26db40a62fc5b6a2eb063b20e44615970bd79",
+    "training_history_round9": "8588470c5828c5e9814a67561fc1d8fdf1044ccda97bff054725c6d9d028b958",
+    "training_results_summary": "3e0c2e563c61bcde79136fb3b95abd71f0b8811a79d4f040601ca94241475499",
+    "training_source_snapshot": "bd72609c19a1d5741033a4c67cff45041f68fd1af4a41318632cacb3604672d2"
+  },
+  "claim_id": "C1-AUTOND",
+  "confidence_interval": null,
+  "decision": "INCONCLUSIVE",
+  "dimension": "IMPLEMENTATION_INTEGRITY",
+  "effect_size": null,
+  "evidence_id": "EV-II-AUTOND-001",
+  "experiment_id": "II-AUTOND-FIVE-STAGE-V1",
+  "input_artifacts": [
+    "architecture_census",
+    "architecture_reconciliation",
+    "checkpoint_load_verification",
+    "run_manifest_ii-autond-assembly-001.json",
+    "simon_polished_checkpoint",
+    "speck_polished_checkpoint",
+    "training_checkpoint_h5",
+    "training_environment",
+    "training_epoch_diagnostic",
+    "training_evidence_npz",
+    "training_history_round5",
+    "training_history_round6",
+    "training_history_round7",
+    "training_history_round8",
+    "training_history_round9",
+    "training_results_summary",
+    "training_source_snapshot"
+  ],
+  "limitations": [
+    "Independent reimplementation (CORE stage II-2) is NOT_ASSESSED. Independent reimplementation was NOT assessed, so Implementation Integrity contributes no independent-implementation convergence source. This says nothing about convergence sources from independent datasets or architectures elsewhere in the audit; LEVEL_4 remains determinable by the integration engine from whatever qualifying convergence evidence actually exists.",
+    "CORE stages not satisfied in this execution: ['II-1_BASELINE_RECONSTRUCTION', 'II-2_INDEPENDENT_REIMPLEMENTATION', 'II-3_CONTROLLED_VERIFICATION', 'II-4_COMPARATIVE_EVALUATION', 'II-5_STATISTICAL_ASSESSMENT']. No implementation-integrity verdict is issued on their behalf.",
+    "Essential information unavailable: ['r1_search_manifest: recorded by the author but not hash-verified on this machine; not inspected here', 'r1_search_result: recorded by the author but not hash-verified on this machine; not inspected here', 'r1_generation_log: recorded by the author but not hash-verified on this machine; not inspected here', 'paper_source_architecture_record: recorded by the author but not hash-verified on this machine; not inspected here', 'training_bundle_manifest: recorded by the author but not hash-verified on this machine; not inspected here'].",
+    "II-1_BASELINE_RECONSTRUCTION/II1-SEARCH-R1: one execution of an unseeded search; establishes nothing about run-to-run reliability",
+    "II-1_BASELINE_RECONSTRUCTION/II1-SEARCH-R1: the released code hardcodes T_b=0.05 where the paper states 0.01; R1 used the released value because this is repository reproduction, and the difference is a finding, not a defect here",
+    "II-1_BASELINE_RECONSTRUCTION/II1-SEARCH-R1: the result record's returned_differences_hex field holds decimal strings, inheriting upstream's mislabelling of an integer return as hex; parsed defensively",
+    "II-1_BASELINE_RECONSTRUCTION/II1-SEARCH-R1: 1 operating-system/interpreter file(s) present and not named in the manifest: ['.DS_Store']. These are RECORDED and LEFT IN PLACE. They are not evidence, were not present when the manifest was written, and cannot affect a result, so they do not invalidate the bundle.",
+    "II-1_BASELINE_RECONSTRUCTION/II1-STAGED-TRAINING: ONE staged-training execution; no evidence of training-to-training robustness",
+    "II-1_BASELINE_RECONSTRUCTION/II1-STAGED-TRAINING: the evolutionary search was deliberately bypassed and the difference supplied directly",
+    "II-1_BASELINE_RECONSTRUCTION/II1-STAGED-TRAINING: checkpoint selection used minimum validation loss at epoch 5 while the round's best validation accuracy occurred at epoch 2; see checkpoint_epoch_diagnostic.csv",
+    "II-1_BASELINE_RECONSTRUCTION/II1-STAGED-TRAINING: this is the UNPOLISHED round-8 checkpoint against the 0.5096 figure. It is a DIFFERENT artifact from the shipped polished checkpoint (a7be788d...) whose published value is 0.5144, and the two must not be compared with each other",
+    "II-1_BASELINE_RECONSTRUCTION/II1-STAGED-TRAINING: the source snapshot establishes which source the run used; it does not establish that the shipped checkpoints came from it",
+    "II-1_BASELINE_RECONSTRUCTION/II1-SHIPPED-CHECKPOINT-EVAL: the decision rule in the preregistration, not this component, decides whether the result supports a hypothesis",
+    "II-1_BASELINE_RECONSTRUCTION/II1-SHIPPED-CHECKPOINT-EVAL: inference only on shipped weights; says nothing about the training pipeline or the search",
+    "II-3_CONTROLLED_VERIFICATION/II3-ARCHITECTURE-CENSUS: a weights-only HDF5 cannot establish padding, dilation semantics, activations, residual wiring or input normalisation; the census records these under not_in_file",
+    "II-3_CONTROLLED_VERIFICATION/II3-ARCHITECTURE-CENSUS: the two shipped models share one structural digest because DBitNet is sized by block width and both ciphers are 32-bit. This is the expected result and says nothing about their trained weights",
+    "II-3_CONTROLLED_VERIFICATION/II3-CHECKPOINT-LOAD: loadability is not provenance: it does not show the checkpoint was produced by this source or by the published training procedure",
+    "II-3_CONTROLLED_VERIFICATION/II3-CHECKPOINT-LOAD: matching is positional because Keras's layer-name counter is session-global; an earlier name-keyed verifier produced a spurious mismatch on the second model and was corrected",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: That the shipped checkpoints were produced by this source. File identity and loadability are not provenance.",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: Agreement on the 8 properties recorded UNDERSPECIFIED: the paper side could not be located, so those comparisons were not made rather than passed.",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: ARCH-09 in either direction. The source head is exactly 256, 256, 64, but no paper statement of it was located; Figure 4c's internal text is not machine-extractable, and a prior review in this project retracted paper-derived head widths after reading a stale revision.",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: ARCH-16 as agreement. The paper's 'factor of two' does not describe the realised sequence 64 -> 33 -> 18 -> 11 -> 8.",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: Anything about trained weight values or predictive behaviour.",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: That the census could have established the source-only properties: padding, dilation semantics, residual wiring, input normalisation and regularisation are absent from a weights-only HDF5 by construction.",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: That the paper PDF compared against is the one the operator holds: its sha256 was never bound, because the build environment cannot fetch it.",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: the serialised record at /Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/architecture/paper_source_architecture_v2.json carries record_digest 717ae590c0d3f0dc... but the live comparison computes a13a6b5885b4af1a.... The file is stale; regenerate it with --write-architecture-record.",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: the paper PDF's own sha256 is NOT bound: the environment that built this comparison could not fetch it. UNVERIFIED. The environment that built this comparison cannot reach eprint.iacr.org, so the PDF was never hashed locally. The comparison was made against the document's extracted text. Run verify_paper_pdf(path) on a machine holding the PDF to bind the digest.",
+    "II-3_CONTROLLED_VERIFICATION/II3-PAPER-SOURCE-ARCHITECTURE: UNDERSPECIFIED verdicts mean the claim was not located in the authoritative revision's text. Figure 4c, which may state several of them, carries no machine-extractable text",
+    "No pre-execution preregistration artifact exists for this execution as a whole, so the evidence is tagged EXPLORATORY. Any component that was itself preregistered carries its own preregistration in its bound evidence; this evidence as a whole is not preregistered confirmatory evidence and must not be presented as such."
+  ],
+  "observation": {
+    "artifact_verification": [
+      {
+        "detail": "no expected digest declared; the observed value is recorded so a later run can detect drift",
+        "label": "r1_search_manifest",
+        "observed_sha256": "4970edf1e4cc4ad898a2f33b3993f28c8a7514ff302af58f8165c71b936f2f2f",
+        "provenance": "OPEN",
+        "required": true,
+        "verdict": "RECORDED_ONLY"
+      },
+      {
+        "detail": "no expected digest declared; the observed value is recorded so a later run can detect drift",
+        "label": "r1_search_result",
+        "observed_sha256": "ef6e261109263a8343de093d38c94acd4a744bbd6a5da84d934594ce147aee9c",
+        "provenance": "OPEN",
+        "required": true,
+        "verdict": "RECORDED_ONLY"
+      },
+      {
+        "detail": "no expected digest declared; the observed value is recorded so a later run can detect drift",
+        "label": "r1_generation_log",
+        "observed_sha256": "b15f929eca701050ce3f20ca838b76333d5d52bfbe18cd22df9f0a4eed86a9e6",
+        "provenance": "OPEN",
+        "required": true,
+        "verdict": "RECORDED_ONLY"
+      },
+      {
+        "detail": "",
+        "label": "training_evidence_npz",
+        "observed_sha256": "303d3eb3ff48d67bcaf44a5ffa3de7b98f94d64ff00a9712f697258311b73561",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "speck_polished_checkpoint",
+        "observed_sha256": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": true,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "simon_polished_checkpoint",
+        "observed_sha256": "769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": true,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "architecture_census",
+        "observed_sha256": "8e1e085f97d86f0d78f39a1ac7237342e9169d6c6bf55c1d400d9ace3ebb7ca2",
+        "provenance": "RECORDED",
+        "required": true,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "architecture_reconciliation",
+        "observed_sha256": "49881b1c2f5540ebeccbe5f3968bba78eabd484244d89a871f392200255cae4a",
+        "provenance": "RECORDED",
+        "required": true,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "checkpoint_load_verification",
+        "observed_sha256": "51b58e11fe346dd02664663e7dd236527349f829184ac8699a3e36ea4f34b4f0",
+        "provenance": "RECORDED",
+        "required": true,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "no expected digest declared; the observed value is recorded so a later run can detect drift",
+        "label": "paper_source_architecture_record",
+        "observed_sha256": "f9bbea680e3e0aa9c366330daf00f6c5e9e6a9929f562ff419261bd18910ee89",
+        "provenance": "OPEN",
+        "required": false,
+        "verdict": "RECORDED_ONLY"
+      },
+      {
+        "detail": "no expected digest declared; the observed value is recorded so a later run can detect drift",
+        "label": "training_bundle_manifest",
+        "observed_sha256": "d91196b84c019c5768703fb4b21b2eb1b206b16b75508314382d3010b33763d2",
+        "provenance": "OPEN",
+        "required": false,
+        "verdict": "RECORDED_ONLY"
+      },
+      {
+        "detail": "",
+        "label": "training_checkpoint_h5",
+        "observed_sha256": "815062f11d9a0631477405fd206ef5b351e469775a9283c0e66fa76f3a0081d0",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "training_source_snapshot",
+        "observed_sha256": "bd72609c19a1d5741033a4c67cff45041f68fd1af4a41318632cacb3604672d2",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "training_environment",
+        "observed_sha256": "5d32680bad8ae7268848280abb393b1291d52cab0ba4a6f9149ee9c95443601f",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "training_results_summary",
+        "observed_sha256": "3e0c2e563c61bcde79136fb3b95abd71f0b8811a79d4f040601ca94241475499",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "training_epoch_diagnostic",
+        "observed_sha256": "76719077033e3a7d650a49f1a15673b358761fc3fa732969975318b729621a39",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "training_history_round5",
+        "observed_sha256": "986b6de1f811092e0bfebd7999181adb0028de706bdfff41b8052b3e553d2d01",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "training_history_round6",
+        "observed_sha256": "4a023bc96525a133fef54817017db4f45f1e130db4a9bc2e7d99c82ac09f07c5",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "training_history_round7",
+        "observed_sha256": "5a33dd3175e74813e5686716ea3a0a9fed993c2547ac498a43b932dcc0953e5a",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "training_history_round8",
+        "observed_sha256": "b4c8f456fb6b1acb5f2b93c166c26db40a62fc5b6a2eb063b20e44615970bd79",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      },
+      {
+        "detail": "",
+        "label": "training_history_round9",
+        "observed_sha256": "8588470c5828c5e9814a67561fc1d8fdf1044ccda97bff054725c6d9d028b958",
+        "provenance": "AUTHOR_VERIFIED",
+        "required": false,
+        "verdict": "VERIFIED"
+      }
+    ],
+    "convergence_contribution": {
+      "contributes": false,
+      "rationale": "Independent reimplementation was NOT assessed, so Implementation Integrity contributes no independent-implementation convergence source. This says nothing about convergence sources from independent datasets or architectures elsewhere in the audit; LEVEL_4 remains determinable by the integration engine from whatever qualifying convergence evidence actually exists.",
+      "source_kind": null
+    },
+    "core_stages_satisfied": false,
+    "core_stages_unsatisfied": [
+      "II-1_BASELINE_RECONSTRUCTION",
+      "II-2_INDEPENDENT_REIMPLEMENTATION",
+      "II-3_CONTROLLED_VERIFICATION",
+      "II-4_COMPARATIVE_EVALUATION",
+      "II-5_STATISTICAL_ASSESSMENT"
+    ],
+    "discrepancy_confirmed": false,
+    "downstream_requires_reevaluation": [],
+    "findings": [],
+    "independent_reimplementation_status": "NOT_ASSESSED",
+    "methodology": {
+      "note": "All five II stages are CORE in audit.implementation.stages.STAGE_TIERS. II-2, II-4 and II-5 are recorded NOT_PERFORMED for AutoND with their reasons, not omitted and not downgraded.",
+      "section": "3.5.4",
+      "stages": [
+        "II-1_BASELINE_RECONSTRUCTION",
+        "II-2_INDEPENDENT_REIMPLEMENTATION",
+        "II-3_CONTROLLED_VERIFICATION",
+        "II-4_COMPARATIVE_EVALUATION",
+        "II-5_STATISTICAL_ASSESSMENT"
+      ]
+    },
+    "not_performed_reasons": {
+      "II-2_INDEPENDENT_REIMPLEMENTATION": "No independent reimplementation of AutoND exists in this project. The published Algorithm 1 reimplementation (R3) is specified in the successor preregistration but has not been written or run. Nothing here reimplements the differential-search procedure independently of the released repository.",
+      "II-4_COMPARATIVE_EVALUATION": "No comparative evaluation of a reference and an independent AutoND implementation under identical protocols has been performed, because no independent implementation exists (II-2). The R1 repository reproduction compares this execution against the repository's own released code and its README, which is a reproduction check, not a formal implementation comparison in the sense of II-4.",
+      "II-5_STATISTICAL_ASSESSMENT": "No statistical assessment exists for AutoND. The single R1 search execution yields one observation per cipher with no replicates, no variance estimate and no preregistered test. The shipped-checkpoint evaluation that would supply replicate accuracies is gated by the successor preregistration and has not been launched."
+    },
+    "outstanding_empirical_work": {
+      "ii2_independent_algorithm1": "Implement published Algorithm 1 from the paper text alone (R3), without reading optimizer.evo(), and run it on SPECK32/64 and SIMON32/64.",
+      "ii4_formal_comparison": "Run the released repository and the independent Algorithm 1 implementation under identical protocols and compare recovered differences and highest_non_random_round.",
+      "ii5_statistical_assessment": "Replicate the search with independent seeds to obtain a variance estimate, and evaluate the shipped checkpoints once the preregistration is frozen."
+    },
+    "paper_source_architecture": {
+      "does_not_establish": [
+        "That the shipped checkpoints were produced by this source. File identity and loadability are not provenance.",
+        "Agreement on the 8 properties recorded UNDERSPECIFIED: the paper side could not be located, so those comparisons were not made rather than passed.",
+        "ARCH-09 in either direction. The source head is exactly 256, 256, 64, but no paper statement of it was located; Figure 4c's internal text is not machine-extractable, and a prior review in this project retracted paper-derived head widths after reading a stale revision.",
+        "ARCH-16 as agreement. The paper's 'factor of two' does not describe the realised sequence 64 -> 33 -> 18 -> 11 -> 8.",
+        "Anything about trained weight values or predictive behaviour.",
+        "That the census could have established the source-only properties: padding, dilation semantics, residual wiring, input normalisation and regularisation are absent from a weights-only HDF5 by construction.",
+        "That the paper PDF compared against is the one the operator holds: its sha256 was never bound, because the build environment cannot fetch it."
+      ],
+      "establishes": [
+        "For every property the paper DOES pin down (ARCH-01, ARCH-02, ARCH-03, ARCH-06, ARCH-10, ARCH-12, ARCH-14, ARCH-15), the pinned source builds what the publication describes.",
+        "No property examined was found to DIFFER between the paper and the source.",
+        "The realised parameter count matches Table 4's published 298.11k at the precision the table prints (ARCH-12), which constrains every architectural choice simultaneously.",
+        "The dilation rule, its realised values, the filter progression, the block count and the d=1 companion layer are all specified by the paper and all reproduced exactly by the source."
+      ],
+      "note": "II-3 paper-to-source comparison over 16 architecture claims. UNDERSPECIFIED means the publication does not state the value precisely enough to compare, which is an observation about the paper's reporting, not a defect of the code.",
+      "record_digest": "a13a6b5885b4af1ab1a369e519a93431470bdf65946761f13b20fc3e98229a84",
+      "summary": {
+        "agrees": [
+          "ARCH-01",
+          "ARCH-02",
+          "ARCH-03",
+          "ARCH-06",
+          "ARCH-10",
+          "ARCH-12",
+          "ARCH-14",
+          "ARCH-15"
+        ],
+        "by_verdict": {
+          "AGREES": 8,
+          "UNDERSPECIFIED": 8
+        },
+        "differs": [],
+        "not_checkable_here": [],
+        "total_claims": 16,
+        "underspecified": [
+          "ARCH-04",
+          "ARCH-05",
+          "ARCH-07",
+          "ARCH-08",
+          "ARCH-09",
+          "ARCH-11",
+          "ARCH-13",
+          "ARCH-16"
+        ]
+      }
+    },
+    "preregistration_gate": {
+      "confirmatory_run_permitted": true,
+      "freeze_problems": [
+        "frozen 2026-10-16T04:42:27Z at plan-file commit fc46c5796390 by Sham"
+      ],
+      "frozen": true,
+      "gate_problems": [],
+      "note": "The shipped-checkpoint evaluation is withheld until this plan is frozen with a sidecar binding plan_hash, timestamp and git commit.",
+      "plan_hash": "f20cd9b12909d21dffd22aed83a6f303e8f445412490708f1f01c79a3c264bb7",
+      "plan_module": "audit.targets.autond.preregistrations.autond_ii_v2",
+      "unverified_fields": [
+        "no upstream checkout supplied; source digests were not verified. A plan may not be frozen on an unchecked digest."
+      ]
+    },
+    "preregistration_reference": null,
+    "published_value_discrepancy": {
+      "description": "The AutoND paper and the repository README report different SIMON accuracies. Preserved unreconciled; this audit does not choose between them.",
+      "values": {
+        "polished_versus_unpolished": "These values are for the POLISHED checkpoints. The project's own staged-training reproduction evaluated the UNPOLISHED round-8 checkpoint against a different published figure (0.5096) and must not be compared against 0.5144. The two checkpoints have different digests: 815062f1... unpolished, a7be788d... polished.",
+        "simon3264_round11": {
+          "agree": false,
+          "discrepancy_note": "The paper's Table 6 and the repository README give DIFFERENT means for SIMON32/64: 0.5179 and 0.5182. This plan does not choose between them. Both are carried into the analysis and the result is compared against each separately.",
+          "paper_table_6": 0.5179,
+          "readme_mean": 0.5182,
+          "readme_sd": 0.0004
+        },
+        "speck3264_round8": {
+          "agree": true,
+          "paper_table_6": 0.5144,
+          "readme_mean": 0.5144,
+          "readme_sd": 0.0003
+        },
+        "table_6_measurement_basis": "Table 6's caption states the reported value is the mean accuracy of five evaluations on freshly generated test datasets of 10^6 samples each - the same protocol eval_nets.py implements. The reported figure is therefore a fresh-test mean, NOT a selection maximum."
+      }
+    },
+    "rationale": "Rule IV: the CORE Implementation Integrity stages were not all satisfied, so no conclusion regarding implementation integrity is drawn. Missing or unperformed work is not interpreted as evidence against the original study.",
+    "run_manifest_references": [
+      {
+        "artifact_path": "run_manifest_ii-autond-assembly-001.json",
+        "content_hash": "d50dbf5204f7d8658fae4d6f15e976f778fa309f162a62927d6a50d1142bec7a",
+        "run_id": "ii-autond-assembly-001"
+      }
+    ],
+    "scientific_impact_demonstrated": false,
+    "stage_coverage": {
+      "II-1_BASELINE_RECONSTRUCTION": {
+        "n_components": 3,
+        "satisfied": false,
+        "status": "PARTIAL",
+        "tier": "CORE"
+      },
+      "II-2_INDEPENDENT_REIMPLEMENTATION": {
+        "n_components": 0,
+        "satisfied": false,
+        "status": "NOT_PERFORMED",
+        "tier": "CORE"
+      },
+      "II-3_CONTROLLED_VERIFICATION": {
+        "n_components": 3,
+        "satisfied": false,
+        "status": "PARTIAL",
+        "tier": "CORE"
+      },
+      "II-4_COMPARATIVE_EVALUATION": {
+        "n_components": 0,
+        "satisfied": false,
+        "status": "NOT_PERFORMED",
+        "tier": "CORE"
+      },
+      "II-5_STATISTICAL_ASSESSMENT": {
+        "n_components": 0,
+        "satisfied": false,
+        "status": "NOT_PERFORMED",
+        "tier": "CORE"
+      }
+    },
+    "stages": [
+      {
+        "components": [
+          {
+            "component_id": "II1-SEARCH-R1",
+            "evidence": {
+              "/Users/oishimoitra/Documents/autond_search_runs/r1_20261015T035553Z/MANIFEST.json": "4970edf1e4cc4ad898a2f33b3993f28c8a7514ff302af58f8165c71b936f2f2f",
+              "/Users/oishimoitra/Documents/autond_search_runs/r1_20261015T035553Z/run_000/generations.jsonl": "b15f929eca701050ce3f20ca838b76333d5d52bfbe18cd22df9f0a4eed86a9e6",
+              "/Users/oishimoitra/Documents/autond_search_runs/r1_20261015T035553Z/run_000/result.json": "ef6e261109263a8343de093d38c94acd4a744bbd6a5da84d934594ce147aee9c"
+            },
+            "kind": "REFERENCE_VERIFICATION",
+            "limitations": [
+              "one execution of an unseeded search; establishes nothing about run-to-run reliability",
+              "the released code hardcodes T_b=0.05 where the paper states 0.01; R1 used the released value because this is repository reproduction, and the difference is a finding, not a defect here",
+              "the result record's returned_differences_hex field holds decimal strings, inheriting upstream's mislabelling of an integer return as hex; parsed defensively",
+              "1 operating-system/interpreter file(s) present and not named in the manifest: ['.DS_Store']. These are RECORDED and LEFT IN PLACE. They are not evidence, were not present when the manifest was written, and cannot affect a result, so they do not invalidate the bundle."
+            ],
+            "question": "Does the released search, run as documented, return the input difference the published SPECK32/64 result uses?",
+            "status": "PARTIAL",
+            "summary": "bundle validated by the search harness (1 run(s), status COMPLETED, 53 logged scoring calls). 0x400000 recovered: True. Returned 2 epsilon-close difference(s) ['0x408000', '0x400000']; the README documents exactly one, ['0x400000']. highest_non_random_round=5, against 7 in the README prose and 6 implied by its own log sample and training output. Run with no behaviour-changing patches, at the released T_b=0.05."
+          },
+          {
+            "component_id": "II1-STAGED-TRAINING",
+            "evidence": {
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/AutoND_source_snapshot.tar.gz": "bd72609c19a1d5741033a4c67cff45041f68fd1af4a41318632cacb3604672d2",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/SHA256SUMS.txt": "d91196b84c019c5768703fb4b21b2eb1b206b16b75508314382d3010b33763d2",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/checkpoint_epoch_diagnostic.csv": "76719077033e3a7d650a49f1a15673b358761fc3fa732969975318b729621a39",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/pip_freeze.txt": "5d32680bad8ae7268848280abb393b1291d52cab0ba4a6f9149ee9c95443601f",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/results_summary.json": "3e0c2e563c61bcde79136fb3b95abd71f0b8811a79d4f040601ca94241475499",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/speck3264_single-key_0x400000_dbitnet_round8.h5": "815062f11d9a0631477405fd206ef5b351e469775a9283c0e66fa76f3a0081d0",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/speck3264_single-key_0x400000_dbitnet_round8_eval_10epoch_reproduction.npz": "303d3eb3ff48d67bcaf44a5ffa3de7b98f94d64ff00a9712f697258311b73561",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/speck3264_single-key_0x400000_dbitnet_training_history_round5.pkl": "986b6de1f811092e0bfebd7999181adb0028de706bdfff41b8052b3e553d2d01",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/speck3264_single-key_0x400000_dbitnet_training_history_round6.pkl": "4a023bc96525a133fef54817017db4f45f1e130db4a9bc2e7d99c82ac09f07c5",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/speck3264_single-key_0x400000_dbitnet_training_history_round7.pkl": "5a33dd3175e74813e5686716ea3a0a9fed993c2547ac498a43b932dcc0953e5a",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/speck3264_single-key_0x400000_dbitnet_training_history_round8.pkl": "b4c8f456fb6b1acb5f2b93c166c26db40a62fc5b6a2eb063b20e44615970bd79",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/training/speck3264_single-key_0x400000_dbitnet_training_history_round9.pkl": "8588470c5828c5e9814a67561fc1d8fdf1044ccda97bff054725c6d9d028b958"
+            },
+            "kind": "REFERENCE_VERIFICATION",
+            "limitations": [
+              "ONE staged-training execution; no evidence of training-to-training robustness",
+              "the evolutionary search was deliberately bypassed and the difference supplied directly",
+              "checkpoint selection used minimum validation loss at epoch 5 while the round's best validation accuracy occurred at epoch 2; see checkpoint_epoch_diagnostic.csv",
+              "this is the UNPOLISHED round-8 checkpoint against the 0.5096 figure. It is a DIFFERENT artifact from the shipped polished checkpoint (a7be788d...) whose published value is 0.5144, and the two must not be compared with each other",
+              "the source snapshot establishes which source the run used; it does not establish that the shipped checkpoints came from it"
+            ],
+            "question": "Does the released staged training, from round 5 with the fixed difference, reach the published round-8 accuracy?",
+            "status": "CONFORMANCE_VERIFIED",
+            "summary": "UNPOLISHED round-8 checkpoint (815062f11d9a...) evaluated on 5 fresh 10^6 test sets: mean 0.5097414, sample SD 0.0006707, against the bundle's recorded Table 6 target 0.5096 (difference 1.41e-04). 12/12 provenance artifacts bound: checkpoint, five per-round training histories, source snapshot, environment, epoch diagnostic and bundle manifest."
+          },
+          {
+            "component_id": "II1-SHIPPED-CHECKPOINT-EVAL",
+            "evidence": {
+              "/Users/oishimoitra/Documents/AutoND-upstream/model_weights/simon3264_single-key_0x400_round11_polished.h5": "769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af",
+              "/Users/oishimoitra/Documents/AutoND-upstream/model_weights/speck3264_single-key_0x400000_round8_polished.h5": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/RESULT.json": "1d791fe17e5fa977e5e23e29ce9f6095f9dec92dbbca86886850557d67489f2a",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/SHA256SUMS.txt": "204e9b624412565f79daf4600516251f83db05aa5cedcceb5d7d8674a6338ec3",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/checkpoints/simon3264_single-key_0x400_round11_polished.h5": "769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/checkpoints/simon3264_single-key_0x400_round11_polished_eval_a.npz": "44eac437a21233925c594867f0b3e8fc3ee55e0766a07f33cb736b4567d87447",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/checkpoints/simon3264_single-key_0x400_round11_polished_eval_b.npz": "bbfce24c4b35e466d67006c81468aac6f5c9f2078039f85ab75a3ebbbd9ebd66",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/checkpoints/speck3264_single-key_0x400000_round8_polished.h5": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/checkpoints/speck3264_single-key_0x400000_round8_polished_eval_a.npz": "b2dd0704b3bf6d409576d35b0e42367bc99601fe5c2babd3519bd5faa788d68c",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/checkpoints/speck3264_single-key_0x400000_round8_polished_eval_b.npz": "637ad839687dd2c8f26644e241d427a4463576fcfe5701d507ea62816af4b94e",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/journal/exec_simon3264_a.json": "2bbfbc98102b6d9d90974049431becfc8d04b24755137f999bb3bd4a6e12325c",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/journal/exec_simon3264_b.json": "614a36fccb36964f4bb5c360b5e03d5da5a9420a59fc3b1ee6bcd40b0e8f6259",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/journal/exec_speck3264_a.json": "812ba4df6b5ee3027fa1d8c9671f22d3aeed06379e315a76e0cb499ee81ec1c2",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/journal/exec_speck3264_b.json": "20af70bc33f783342ef8ffa85a76d3ac94cc8e1f92394c4c1ac52d50d631f52b",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/logs/simon3264_a.log": "1e1aebe54569c1168cd7e1ed8e510347a3df5e4aa96b1b40bbc70912b6657a21",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/logs/simon3264_b.log": "7cd88b40dbf50647aa94074f69232730595ec4612c93d67af83d635aed8a3ee1",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/logs/speck3264_a.log": "226dc915efc8c538fee48a438fb6c573978172a4b000abc4fe07936e8611066a",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/evaluation/logs/speck3264_b.log": "e49ba307e4e18ec7fd6d10a7e73fd3fd65ac848e80b34ed747f6cc5d1b55682b"
+            },
+            "kind": "REFERENCE_VERIFICATION",
+            "limitations": [
+              "the decision rule in the preregistration, not this component, decides whether the result supports a hypothesis",
+              "inference only on shipped weights; says nothing about the training pipeline or the search"
+            ],
+            "question": "Do the shipped polished checkpoints reproduce the published accuracies on freshly generated test sets?",
+            "status": "COMPLETED",
+            "summary": "a result bundle validated against autond-evaluation-result-v2 and bound to the frozen plan was ingested: simon3264 mean 0.517667 (n=10, SD 0.0005607); speck3264 mean 0.514449 (n=10, SD 0.0006688)"
+          }
+        ],
+        "findings": [
+          "II-FINDING-AUTOND-SEARCH-R1: the released search returned 2 epsilon-close differences where the README documents one. PARTIAL match, preserved as observed."
+        ],
+        "stage_id": "II-1_BASELINE_RECONSTRUCTION",
+        "status": "PARTIAL",
+        "summary": "II-1 repository reproduction: 2/3 component(s) satisfied. COMPLETED (II1-SHIPPED-CHECKPOINT-EVAL); CONFORMANCE_VERIFIED (II1-STAGED-TRAINING); PARTIAL (II1-SEARCH-R1).",
+        "tier": "CORE"
+      },
+      {
+        "findings": [
+          "II-2_INDEPENDENT_REIMPLEMENTATION: NOT_PERFORMED. No independent reimplementation of AutoND exists in this project. The published Algorithm 1 reimplementation (R3) is specified in the successor preregistration but has not been written or run. Nothing here reimplements the differential-search procedure independently of the released repository."
+        ],
+        "stage_id": "II-2_INDEPENDENT_REIMPLEMENTATION",
+        "status": "NOT_PERFORMED",
+        "summary": "No independent reimplementation of AutoND exists in this project. The published Algorithm 1 reimplementation (R3) is specified in the successor preregistration but has not been written or run. Nothing here reimplements the differential-search procedure independently of the released repository.",
+        "tier": "CORE"
+      },
+      {
+        "components": [
+          {
+            "component_id": "II3-ARCHITECTURE-CENSUS",
+            "evidence": {
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/census/arch_reconciliation_20261015T043855Z.json": "49881b1c2f5540ebeccbe5f3968bba78eabd484244d89a871f392200255cae4a",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/census/census_v2_20261015T043855Z.json": "8e1e085f97d86f0d78f39a1ac7237342e9169d6c6bf55c1d400d9ace3ebb7ca2"
+            },
+            "kind": "ARCHITECTURE_CENSUS",
+            "limitations": [
+              "a weights-only HDF5 cannot establish padding, dilation semantics, activations, residual wiring or input normalisation; the census records these under not_in_file",
+              "the two shipped models share one structural digest because DBitNet is sized by block width and both ciphers are 32-bit. This is the expected result and says nothing about their trained weights"
+            ],
+            "question": "Does the realised tensor structure of the shipped checkpoints match the architecture the pinned source constructs?",
+            "status": "CONFORMANCE_VERIFIED",
+            "summary": "2 checkpoint(s) censused: layer_count [34], tensor_count [68], total_parameters [298113], 1 distinct structural digest(s). all_models_reconcile=True, 0 refusal(s). Every figure read from the bound census and reconciliation files, not transcribed."
+          },
+          {
+            "component_id": "II3-CHECKPOINT-LOAD",
+            "evidence": {
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/census/load_verify_r2_20261015T051547Z.json": "51b58e11fe346dd02664663e7dd236527349f829184ac8699a3e36ea4f34b4f0"
+            },
+            "kind": "DETERMINISTIC_EQUIVALENCE",
+            "limitations": [
+              "loadability is not provenance: it does not show the checkpoint was produced by this source or by the published training procedure",
+              "matching is positional because Keras's layer-name counter is session-global; an earlier name-keyed verifier produced a spurious mismatch on the second model and was corrected"
+            ],
+            "question": "Does each shipped checkpoint load completely into the model the pinned source constructs, consuming every tensor?",
+            "status": "CONFORMANCE_VERIFIED",
+            "summary": "2 checkpoint(s) loaded: all_verified=True, tensors file/model [68]/[68], [298113] parameters loaded, 0 unconsumed, 0 unchanged-on-load, 0 load error(s). layer_names_agree=[True] (recorded as observation only; matching is positional). Every figure read from the bound load-verification file."
+          },
+          {
+            "component_id": "II3-PAPER-SOURCE-ARCHITECTURE",
+            "evidence": {
+              "/Users/oishimoitra/Documents/AutoND-upstream/dbitnet.py": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+              "/Users/oishimoitra/Documents/AutoND-upstream/eval_nets.py": "838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048",
+              "/Users/oishimoitra/Documents/AutoND-upstream/train_nets.py": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/architecture/paper_source_architecture_v2.json": "f9bbea680e3e0aa9c366330daf00f6c5e9e6a9929f562ff419261bd18910ee89",
+              "/Users/oishimoitra/Documents/deep_speck/audit/targets/autond/paper_source_architecture.py": "06212c4322af6fedc38a1929bd489511d6e8eafe90d09c488226adb58f57cf7c"
+            },
+            "kind": "REFERENCE_VERIFICATION",
+            "limitations": [
+              "That the shipped checkpoints were produced by this source. File identity and loadability are not provenance.",
+              "Agreement on the 8 properties recorded UNDERSPECIFIED: the paper side could not be located, so those comparisons were not made rather than passed.",
+              "ARCH-09 in either direction. The source head is exactly 256, 256, 64, but no paper statement of it was located; Figure 4c's internal text is not machine-extractable, and a prior review in this project retracted paper-derived head widths after reading a stale revision.",
+              "ARCH-16 as agreement. The paper's 'factor of two' does not describe the realised sequence 64 -> 33 -> 18 -> 11 -> 8.",
+              "Anything about trained weight values or predictive behaviour.",
+              "That the census could have established the source-only properties: padding, dilation semantics, residual wiring, input normalisation and regularisation are absent from a weights-only HDF5 by construction.",
+              "That the paper PDF compared against is the one the operator holds: its sha256 was never bound, because the build environment cannot fetch it.",
+              "the serialised record at /Users/oishimoitra/Documents/deep_speck/audit/targets/autond/evidence/architecture/paper_source_architecture_v2.json carries record_digest 717ae590c0d3f0dc... but the live comparison computes a13a6b5885b4af1a.... The file is stale; regenerate it with --write-architecture-record.",
+              "the paper PDF's own sha256 is NOT bound: the environment that built this comparison could not fetch it. UNVERIFIED. The environment that built this comparison cannot reach eprint.iacr.org, so the PDF was never hashed locally. The comparison was made against the document's extracted text. Run verify_paper_pdf(path) on a machine holding the PDF to bind the digest.",
+              "UNDERSPECIFIED verdicts mean the claim was not located in the authoritative revision's text. Figure 4c, which may state several of them, carries no machine-extractable text"
+            ],
+            "question": "Does the architecture the publication describes match the architecture the pinned source builds?",
+            "status": "PARTIAL",
+            "summary": "16 properties compared against ePrint 2022/1467 (last of 4 revisions, 2024-01-24 - the version served at the canonical ePrint URL); source verified: True. Effective verdicts: {'AGREES': 8, 'UNDERSPECIFIED': 8}. Agreeing: ARCH-01, ARCH-02, ARCH-03, ARCH-06, ARCH-10, ARCH-12, ARCH-14, ARCH-15. 0 differ. 8 not comparable here. Declared verdicts (against the pinned source) were {'AGREES': 8, 'UNDERSPECIFIED': 8}. Comparison content digest 717ae590c0d3f0dc... (not a file hash)."
+          }
+        ],
+        "findings": [
+          "II3-PAPER-SOURCE-ARCHITECTURE: 8 architectural properties unresolved (ARCH-04, ARCH-05, ARCH-07, ARCH-08, ARCH-09, ARCH-11, ARCH-13, ARCH-16); the architecture conformance claim cannot be adjudicated on the census alone."
+        ],
+        "stage_id": "II-3_CONTROLLED_VERIFICATION",
+        "status": "PARTIAL",
+        "summary": "II-3 controlled verification: 2/3 component(s) satisfied. CONFORMANCE_VERIFIED (II3-ARCHITECTURE-CENSUS, II3-CHECKPOINT-LOAD); PARTIAL (II3-PAPER-SOURCE-ARCHITECTURE).",
+        "tier": "CORE"
+      },
+      {
+        "findings": [
+          "II-4_COMPARATIVE_EVALUATION: NOT_PERFORMED. No comparative evaluation of a reference and an independent AutoND implementation under identical protocols has been performed, because no independent implementation exists (II-2). The R1 repository reproduction compares this execution against the repository's own released code and its README, which is a reproduction check, not a formal implementation comparison in the sense of II-4."
+        ],
+        "stage_id": "II-4_COMPARATIVE_EVALUATION",
+        "status": "NOT_PERFORMED",
+        "summary": "No comparative evaluation of a reference and an independent AutoND implementation under identical protocols has been performed, because no independent implementation exists (II-2). The R1 repository reproduction compares this execution against the repository's own released code and its README, which is a reproduction check, not a formal implementation comparison in the sense of II-4.",
+        "tier": "CORE"
+      },
+      {
+        "findings": [
+          "II-5_STATISTICAL_ASSESSMENT: NOT_PERFORMED. No statistical assessment exists for AutoND. The single R1 search execution yields one observation per cipher with no replicates, no variance estimate and no preregistered test. The shipped-checkpoint evaluation that would supply replicate accuracies is gated by the successor preregistration and has not been launched."
+        ],
+        "stage_id": "II-5_STATISTICAL_ASSESSMENT",
+        "status": "NOT_PERFORMED",
+        "summary": "No statistical assessment exists for AutoND. The single R1 search execution yields one observation per cipher with no replicates, no variance estimate and no preregistered test. The shipped-checkpoint evaluation that would supply replicate accuracies is gated by the successor preregistration and has not been launched.",
+        "tier": "CORE"
+      }
+    ]
+  },
+  "p_value": null,
+  "practical_threshold": null,
+  "provenance": {
+    "case_study": 2,
+    "framework_entry_point": "audit.implementation.certificate.build_implementation_evidence",
+    "framework_modified_for_this_target": false,
+    "framework_modules_bound": 11,
+    "runner": "audit.targets.autond.run_autond_implementation_audit",
+    "target": "AutoND",
+    "upstream_pinned_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+  },
+  "recorded_at_utc": "2026-10-16T05:47:28.864157+00:00",
+  "run_ids": [
+    "ii-autond-assembly-001"
+  ],
+  "statistics": {
+    "note": "II-5 is NOT_PERFORMED. No statistical assessment of AutoND exists: the R1 search reproduction is a single execution per cipher with no replicates and no variance estimate, and the shipped-checkpoint evaluation that would supply replicate accuracies has not been launched (gated by the successor preregistration). No p-value, confidence interval or effect size is reported for this target."
+  },
+  "tag": "EXPLORATORY"
+}
