@@ -27,8 +27,8 @@ its lines.
 
 Source: the attached PDF, *A Cipher-Agnostic Neural Training Pipeline with
 Automated Finding of Good Input Differences* (Bellini, Gerault, Hambitzer,
-Rossi). The brief gives a different title (AMBIGUITY_LOG S-1), and I could not
-check which revision this is (S-2).
+Rossi). The brief's title was an error, confirmed by the auditor (S-1,
+resolved). I could not check which revision this is (S-2, A-031).
 
 In scope:
 - the bias score, Definition 2 (§5.1);
@@ -298,8 +298,10 @@ These come from the paper or from the definitions. They are not results.
 6. b̃ lies in [0, 0.5], and b̃(0) = 0.5.
 7. On a random-function cipher at t = 10⁴, the mean b̃ is about 0.004 (§5.4),
    tested with a tolerance.
-8. A random-function cipher terminates at round 1 with R = 0.
-   A degenerate identity cipher hits the round cap.
+8. When no score at round 1 exceeds T_b, the search terminates with R = 0
+   (tested with a constant scorer). A cipher that is random after k rounds
+   yields R = k (tested with k = 2). A degenerate identity cipher hits the
+   round cap.
 9. The threshold comparison is strict.
 10. When nothing is removed by hygiene, the evaluation count equals the
     closed-form P₀ + G·C(P,2) per run.

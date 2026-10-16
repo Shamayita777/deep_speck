@@ -3,6 +3,12 @@
 ## Implementer
 - **Model:** a large language model, running in a chat interface with no file
   access and no code execution.
+- **Model identity withheld from this file.** The specific model and version
+  are known to the audit and are deliberately not recorded here. They are
+  available to reviewers on request. This is stated rather than omitted so
+  that a reader knows the information exists and is obtainable; the
+  independence caveat below does not depend on it, because it is stated
+  conservatively: corpus-level independence is NOT claimed either way.
 - **Date:** 2026-10-16.
 - **Duration:** a small number of conversational turns in one session. I have
   no clock and cannot report elapsed time.
@@ -64,6 +70,10 @@
    such findings are withheld. It is unrelated to this package and nothing
    here depends on it.
 
+5. The operator's direct verification of the §5.2 text and a rendered image
+   of the S_δ equation. This settled A-017 and refuted S-2 item 4.
+6. Auditor-measured sensitivity of the ranking to the weighting (A-017).
+
 None of these described the released code.
 
 ## Things in the paper the brief did not anticipate
@@ -100,8 +110,15 @@ In each case I logged the question instead.
 - **Not executed by me.** No test or line of code was run in my session.
 - **First execution, by the audit:** 43/43 tests passed on Python 3.11.17 /
   NumPy 1.26.4 with no modifications, deterministic across separate processes,
-  and seven additional paths probed. One assertion was added afterwards for
-  the A-017 attribution change, so a re-run is needed.
+  and seven additional paths probed.
+- **Re-run after the A-017 attribution change:** 43/43 pass. The added
+  assertion (`"round_weighting" not in res["paper_parameters"]`) sits inside
+  an existing test, so the count is unchanged. Verified across both
+  weightings and both modes that the weighting appears in neither
+  `paper_parameters` nor `paper_parameter_sources`, while `params_used`
+  still records it.
+- **Operator-side execution:** 43/43 pass on the operator's machine under
+  the pinned audit environment.
 - **Cost of a full run.** At paper defaults, each round costs about 25,800
   scorer calls of 2·10⁴ encryptions each. This is feasible only for ciphers
   with a vectorized `encrypt`.
