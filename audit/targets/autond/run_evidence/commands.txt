@@ -1,0 +1,38 @@
+# Exact commands that produced the logs beside this file. Cloud container.
+#   TF runs : /home/claude/venv-autond-tf215/bin/python
+#             python 3.11.17, tensorflow 2.15.1, numpy 1.26.4, keras 2.15.0
+#   Gohr run: system python3 3.13
+# Tree: complete framework + Phase 1 install + this package + search harness
+# Env (except where noted): AUTOND_ROOT=AUTOND_UPSTREAM=<pinned AutoND checkout>
+#
+# MINE = test_r3c_statistics test_r3_corrections test_corrections
+#        test_implementation_stages test_run_autond_implementation_audit
+#        test_packaging
+# P1   = test_architecture_census test_architecture_census_real
+#        test_census_load_verify
+
+# r3c_statistics.log       (58, the two corrections)
+python -m unittest audit.targets.autond.tests.test_r3c_statistics
+
+# r3c_suite_tf215.log      (298, this package)
+python -m unittest $MINE
+
+# r3c_suite_portable.log   (298, AUTOND_ROOT/AUTOND_UPSTREAM UNSET)
+env -u AUTOND_ROOT -u AUTOND_UPSTREAM python -m unittest $MINE
+
+# phase1_census_tf215.log  (61, Phase 1's own tests, unmodified)
+python -m unittest $P1
+
+# search_tf215.log         (40, search harness, unmodified)
+python -m unittest audit.targets.autond.search.tests.test_search_runner \
+                   audit.targets.autond.search.tests.test_no_training_import
+
+# discovery_tf215.log      (359 = 298 + 61)
+python -m unittest discover -s audit/targets/autond/tests -t . -p 'test_*.py'
+
+# gohr_regression_v3c.log  (426, shared framework + Gohr adapter, unmodified)
+python3 -m unittest discover -s audit/tests -t . -p 'test_*.py' -v
+
+# NOTE: the two logs above that show 2 packaging failures were captured
+# BEFORE the manifest was regenerated for r3c; the manifest now lists
+# audit/common/equivalence.py and both pass. See r3c_final_verify.log.

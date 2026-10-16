@@ -1,0 +1,20 @@
+# Dependencies for the AutoND evolutionary-search reproduction.
+#
+# numpy is PINNED to 1.26.x and this is not a preference. AutoND's
+# ciphers/speck3264.py calls check_testvectors() at import time, and under
+# NumPy 2 the expression
+#     X[:, i] += 2**(WORD_SIZE()-1-j)*arr[:, pos]
+# raises "OverflowError: Python integer 32768 out of bounds for uint8"
+# because of NEP 50 integer promotion. The cipher module cannot be
+# imported at all on NumPy 2. Verified 2026-10-14 on numpy 2.5.3.
+numpy==1.26.4
+
+# pandas is imported by optimizer.py and used for the CSV of ranked
+# differences. 2.2.3 is the version these scripts were tested against.
+pandas==2.2.3
+
+# NOTHING ELSE. The search imports numpy, os, random, sys, copy, types,
+# timeit and pandas. It does NOT import main.py and therefore does not
+# pull in train_nets.py or TensorFlow. Do not install TensorFlow for
+# this experiment; search_runner.verify_no_tensorflow() refuses to
+# proceed if it has been imported.

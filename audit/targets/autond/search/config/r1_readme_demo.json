@@ -1,0 +1,15 @@
+{
+  "_variant": "R1",
+  "_claim": "Reproduces the README's documented demonstration output for SPECK32 single-key: 'Found 1 0.1-close differences: [0x400000]'. This is the released code run as documented.",
+  "_patches": "NONE that change behaviour. num_generations is null, so evo's import-time default (5) stands. num_samples is null, so optimize() uses its own default (10**3) - exactly as main.findGoodInputDifferences leaves it.",
+  "mode": "r1_readme_demo",
+  "cipher": "speck3264",
+  "scenario": "single-key",
+  "num_generations": null,
+  "num_samples": null,
+  "epsilon": 0.1,
+  "population_init": "previous",
+  "runs": 1,
+  "numpy_seed": null,
+  "urandom_seed": null
+}

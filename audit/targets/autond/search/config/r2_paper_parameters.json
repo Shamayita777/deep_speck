@@ -1,0 +1,22 @@
+{
+  "_variant": "R2",
+  "_claim": "The paper's §5.2 parameters FOR EVERYTHING THE CODE EXPOSES: 50 generations, t = 10**4. This is NOT a full paper-faithful reproduction - see _deviations.",
+  "_deviations": [
+    "T_b: the paper states 0.01; optimizer.py line 138 hardcodes T = 0.05 and exposes no parameter. This run uses 0.05. Reaching 0.01 would require editing upstream.",
+    "Selection: Algorithm 1 replaces the population with the best of the new candidates; evo() sorts parents and children together (elitist). Unchanged here.",
+    "Mutation: the paper sets M = 1; evo() mutates with probability 99/100. Unchanged here.",
+    "De-duplication against an explored set and an early exit on all-0.5 are additions in evo() not present in Algorithm 1. Unchanged here.",
+    "population_init 'previous' is the shipped cross-round warm start; the paper restarts fresh each round. Set to 'fresh' to follow the paper, and record which you used.",
+    "num_samples is passed explicitly; main.findGoodInputDifferences passes nothing, so this is a deviation from the released code's own default."
+  ],
+  "mode": "r2_paper_parameters",
+  "cipher": "speck3264",
+  "scenario": "single-key",
+  "num_generations": 50,
+  "num_samples": 10000,
+  "epsilon": 0.1,
+  "population_init": "previous",
+  "runs": 1,
+  "numpy_seed": 20261014,
+  "urandom_seed": null
+}
