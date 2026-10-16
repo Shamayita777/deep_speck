@@ -1,0 +1,115 @@
+# r3e search harness suite (both modules), TF 2.15.1, AUTOND_UPSTREAM set
+# 2026-10-16T05:41:19Z
+
+test_a_valid_benchmark_config_loads (audit.targets.autond.search.tests.test_search_runner.TestConfigurationRefusals.test_a_valid_benchmark_config_loads) ... ok
+test_missing_keys_are_refused (audit.targets.autond.search.tests.test_search_runner.TestConfigurationRefusals.test_missing_keys_are_refused) ... ok
+test_r1_with_any_override_is_refused (audit.targets.autond.search.tests.test_search_runner.TestConfigurationRefusals.test_r1_with_any_override_is_refused) ... ok
+test_r2_below_published_settings_is_refused (audit.targets.autond.search.tests.test_search_runner.TestConfigurationRefusals.test_r2_below_published_settings_is_refused) ... ok
+test_r2_with_too_few_samples_is_refused (audit.targets.autond.search.tests.test_search_runner.TestConfigurationRefusals.test_r2_with_too_few_samples_is_refused) ... ok
+test_the_shipped_r2_config_is_valid_and_declares_its_deviations (audit.targets.autond.search.tests.test_search_runner.TestConfigurationRefusals.test_the_shipped_r2_config_is_valid_and_declares_its_deviations) ... ok
+test_unknown_mode_is_refused (audit.targets.autond.search.tests.test_search_runner.TestConfigurationRefusals.test_unknown_mode_is_refused) ... ok
+test_unknown_population_init_is_refused (audit.targets.autond.search.tests.test_search_runner.TestConfigurationRefusals.test_unknown_population_init_is_refused) ... ok
+test_evo_generation_default_is_bound_at_import (audit.targets.autond.search.tests.test_search_runner.TestEnvironmentFacts.test_evo_generation_default_is_bound_at_import)
+The reproducibility trap: assigning the module constant does not ... ok
+test_numpy_is_the_pinned_major_version (audit.targets.autond.search.tests.test_search_runner.TestEnvironmentFacts.test_numpy_is_the_pinned_major_version) ... ok
+test_optimize_accepts_nb_samples_as_a_parameter (audit.targets.autond.search.tests.test_search_runner.TestEnvironmentFacts.test_optimize_accepts_nb_samples_as_a_parameter) ... ok
+test_search_path_does_not_import_tensorflow (audit.targets.autond.search.tests.test_search_runner.TestEnvironmentFacts.test_search_path_does_not_import_tensorflow) ... ok
+test_fresh_population_patch_is_declared_behaviour_changing (audit.targets.autond.search.tests.test_search_runner.TestPatches.test_fresh_population_patch_is_declared_behaviour_changing) ... ok
+test_generation_patch_sets_the_default_and_is_declared (audit.targets.autond.search.tests.test_search_runner.TestPatches.test_generation_patch_sets_the_default_and_is_declared) ... ok
+test_previous_population_patch_is_observation_only (audit.targets.autond.search.tests.test_search_runner.TestPatches.test_previous_population_patch_is_observation_only) ... ok
+test_restore_returns_the_module_to_its_original_state (audit.targets.autond.search.tests.test_search_runner.TestPatches.test_restore_returns_the_module_to_its_original_state) ... ok
+test_scoring_observer_is_declared_behaviour_neutral (audit.targets.autond.search.tests.test_search_runner.TestPatches.test_scoring_observer_is_declared_behaviour_neutral) ... ok
+test_urandom_patch_is_absent_unless_requested (audit.targets.autond.search.tests.test_search_runner.TestPatches.test_urandom_patch_is_absent_unless_requested) ... ok
+test_urandom_patch_is_declared_a_deviation_when_requested (audit.targets.autond.search.tests.test_search_runner.TestPatches.test_urandom_patch_is_declared_a_deviation_when_requested) ... ok
+test_a_root_without_optimizer_is_refused (audit.targets.autond.search.tests.test_search_runner.TestSourceBindingRefusals.test_a_root_without_optimizer_is_refused) ... ok
+test_a_toy_run_completes_and_writes_its_record (audit.targets.autond.search.tests.test_search_runner.TestToySearchRun.test_a_toy_run_completes_and_writes_its_record) ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+ok
+test_manifest_hashes_every_produced_file (audit.targets.autond.search.tests.test_search_runner.TestToySearchRun.test_manifest_hashes_every_produced_file) ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+ok
+test_the_generation_log_is_contiguous_and_counted (audit.targets.autond.search.tests.test_search_runner.TestToySearchRun.test_the_generation_log_is_contiguous_and_counted) ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+ok
+test_the_module_is_unchanged_after_a_run (audit.targets.autond.search.tests.test_search_runner.TestToySearchRun.test_the_module_is_unchanged_after_a_run) ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+ok
+test_the_record_declares_its_reproducibility_honestly (audit.targets.autond.search.tests.test_search_runner.TestToySearchRun.test_the_record_declares_its_reproducibility_honestly) ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfcb3ded4', '0xfeefe416', '0xffabbaee', '0xd0c7d3f'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x4df69cd', '0xf9a08ffc', '0xf87c5a3c', '0xe364773'] with [0.01725    0.017375   0.0174375  0.01834375]
+ok
+test_a_manifested_file_is_still_hash_checked_even_if_benign_named (audit.targets.autond.search.tests.test_search_runner.TestVerifyOutputs.test_a_manifested_file_is_still_hash_checked_even_if_benign_named)
+A file the manifest DOES name is verified normally, whatever it is ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+ok
+test_a_missing_manifest_is_detected (audit.targets.autond.search.tests.test_search_runner.TestVerifyOutputs.test_a_missing_manifest_is_detected) ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+ok
+test_a_modified_file_is_detected (audit.targets.autond.search.tests.test_search_runner.TestVerifyOutputs.test_a_modified_file_is_detected) ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+ok
+test_a_name_merely_containing_a_benign_string_is_not_excused (audit.targets.autond.search.tests.test_search_runner.TestVerifyOutputs.test_a_name_merely_containing_a_benign_string_is_not_excused)
+Matched on path parts, not substrings. ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+ok
+test_a_real_added_file_still_fails_even_beside_debris (audit.targets.autond.search.tests.test_search_runner.TestVerifyOutputs.test_a_real_added_file_still_fails_even_beside_debris)
+The exemption must not become a hole: debris is excused, content is not. ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+ok
+test_an_added_file_is_detected (audit.targets.autond.search.tests.test_search_runner.TestVerifyOutputs.test_an_added_file_is_detected) ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+ok
+test_an_intact_bundle_verifies (audit.targets.autond.search.tests.test_search_runner.TestVerifyOutputs.test_an_intact_bundle_verifies) ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+ok
+test_os_debris_does_not_invalidate_the_bundle (audit.targets.autond.search.tests.test_search_runner.TestVerifyOutputs.test_os_debris_does_not_invalidate_the_bundle)
+REGRESSION. Browsing the evidence folder in Finder drops a ... Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+ok
+test_a_clean_process_passes_the_assertion (audit.targets.autond.search.tests.test_no_training_import.BoundaryRefusal.test_a_clean_process_passes_the_assertion) ... ok
+test_a_loaded_training_module_is_refused (audit.targets.autond.search.tests.test_no_training_import.BoundaryRefusal.test_a_loaded_training_module_is_refused) ... ok
+test_no_training_module_is_loaded_in_a_clean_process (audit.targets.autond.search.tests.test_no_training_import.DynamicImportCheck.test_no_training_module_is_loaded_in_a_clean_process) ... ok
+test_r1_passes_no_nb_samples_as_upstream_does_not (audit.targets.autond.search.tests.test_no_training_import.DynamicImportCheck.test_r1_passes_no_nb_samples_as_upstream_does_not) ... ok
+test_the_log_prefix_matches_upstreams_own_expression (audit.targets.autond.search.tests.test_no_training_import.DynamicImportCheck.test_the_log_prefix_matches_upstreams_own_expression)
+main.findGoodInputDifferences builds it as ... ok
+test_the_real_cipher_parameters_are_read (audit.targets.autond.search.tests.test_no_training_import.DynamicImportCheck.test_the_real_cipher_parameters_are_read) ... ok
+test_CONTROL_main_py_does_reach_tensorflow (audit.targets.autond.search.tests.test_no_training_import.StaticImportGraph.test_CONTROL_main_py_does_reach_tensorflow)
+Without this the analyser could be finding nothing at all and the ... ok
+test_CONTROL_train_nets_imports_tensorflow_directly (audit.targets.autond.search.tests.test_no_training_import.StaticImportGraph.test_CONTROL_train_nets_imports_tensorflow_directly) ... ok
+test_optimizer_imports_only_numpy_and_pandas_beyond_the_stdlib (audit.targets.autond.search.tests.test_no_training_import.StaticImportGraph.test_optimizer_imports_only_numpy_and_pandas_beyond_the_stdlib) ... ok
+test_optimizer_reaches_no_training_module (audit.targets.autond.search.tests.test_no_training_import.StaticImportGraph.test_optimizer_reaches_no_training_module) ... ok
+test_the_cipher_module_reaches_no_training_module (audit.targets.autond.search.tests.test_no_training_import.StaticImportGraph.test_the_cipher_module_reaches_no_training_module) ... ok
+
+----------------------------------------------------------------------
+Ran 44 tests in 9.295s
+
+OK

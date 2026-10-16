@@ -17,3 +17,7 @@ logs/
 
 # Temporary files
 *.log
+# Audit run evidence: these .log files are deliberate verification
+# records (test runs, regression suites), not build noise. The global
+# *.log rule above would silently drop them from history.
+!audit/targets/autond/run_evidence/*.log

@@ -1,0 +1,56 @@
+# r3d design tests (n=10, two invocations)
+# 2026-10-16T04:24:25Z
+# Python 3.11.17
+
+test_a_short_npz_is_refused (audit.targets.autond.tests.test_r3d_sample_size.TestAssemblerPoolsTwoInvocations.test_a_short_npz_is_refused) ... ok
+test_colliding_suffixes_lose_an_invocation_and_are_refused (audit.targets.autond.tests.test_r3d_sample_size.TestAssemblerPoolsTwoInvocations.test_colliding_suffixes_lose_an_invocation_and_are_refused)
+Two invocations sharing --add_str is not merely suspicious: the ... ok
+test_identical_npzs_are_refused_as_not_independent (audit.targets.autond.tests.test_r3d_sample_size.TestAssemblerPoolsTwoInvocations.test_identical_npzs_are_refused_as_not_independent) ... ok
+test_one_surviving_invocation_is_refused (audit.targets.autond.tests.test_r3d_sample_size.TestAssemblerPoolsTwoInvocations.test_one_surviving_invocation_is_refused) ... ok
+test_the_suffix_check_itself_refuses_when_both_journals_survive (audit.targets.autond.tests.test_r3d_sample_size.TestAssemblerPoolsTwoInvocations.test_the_suffix_check_itself_refuses_when_both_journals_survive)
+Defence in depth for the case the shortfall check cannot see: two ... ok
+test_two_invocations_pool_to_ten (audit.targets.autond.tests.test_r3d_sample_size.TestAssemblerPoolsTwoInvocations.test_two_invocations_pool_to_ten)
+The success path. Needs a FROZEN plan, because assembly refuses to ... ok
+test_unregistered_suffixes_are_refused (audit.targets.autond.tests.test_r3d_sample_size.TestAssemblerPoolsTwoInvocations.test_unregistered_suffixes_are_refused) ... ok
+test_five_sets_are_now_indeterminate_not_a_smaller_design (audit.targets.autond.tests.test_r3d_sample_size.TestDecisionRequiresTenSets.test_five_sets_are_now_indeterminate_not_a_smaller_design)
+The registered design is ten. A surviving five is NOT silently ... ok
+test_ten_sets_are_analysed (audit.targets.autond.tests.test_r3d_sample_size.TestDecisionRequiresTenSets.test_ten_sets_are_analysed) ... ok
+test_the_missing_data_rule_forbids_the_fallback_explicitly (audit.targets.autond.tests.test_r3d_sample_size.TestDecisionRequiresTenSets.test_the_missing_data_rule_forbids_the_fallback_explicitly) ... ok
+test_add_str_is_an_argument_the_target_actually_defines (audit.targets.autond.tests.test_r3d_sample_size.TestGateEmitsTwoInvocations.test_add_str_is_an_argument_the_target_actually_defines) ... ok
+test_each_invocation_carries_a_distinct_registered_suffix (audit.targets.autond.tests.test_r3d_sample_size.TestGateEmitsTwoInvocations.test_each_invocation_carries_a_distinct_registered_suffix) ... ok
+test_invocation_ids_are_unique_across_the_whole_run (audit.targets.autond.tests.test_r3d_sample_size.TestGateEmitsTwoInvocations.test_invocation_ids_are_unique_across_the_whole_run) ... ok
+test_invocations_differ_only_in_the_output_suffix (audit.targets.autond.tests.test_r3d_sample_size.TestGateEmitsTwoInvocations.test_invocations_differ_only_in_the_output_suffix)
+The two runs must be the same experiment, not two experiments. ... ok
+test_npz_paths_differ_between_invocations (audit.targets.autond.tests.test_r3d_sample_size.TestGateEmitsTwoInvocations.test_npz_paths_differ_between_invocations)
+If they did not, the second invocation would overwrite the ... ok
+test_two_invocations_per_checkpoint (audit.targets.autond.tests.test_r3d_sample_size.TestGateEmitsTwoInvocations.test_two_invocations_per_checkpoint) ... ok
+test_the_checkpoint_is_rehashed_before_every_invocation (audit.targets.autond.tests.test_r3d_sample_size.TestJournalNamesArePerInvocation.test_the_checkpoint_is_rehashed_before_every_invocation)
+Pooling assumes both invocations measured the same weights, so ... ok
+test_the_gate_writes_one_journal_per_invocation (audit.targets.autond.tests.test_r3d_sample_size.TestJournalNamesArePerInvocation.test_the_gate_writes_one_journal_per_invocation)
+Reads the source rather than running the gate: executing it needs ... ok
+test_the_journal_records_which_invocation_it_was (audit.targets.autond.tests.test_r3d_sample_size.TestJournalNamesArePerInvocation.test_the_journal_records_which_invocation_it_was) ... ok
+test_margin_sensitivity_uses_the_registered_n (audit.targets.autond.tests.test_r3d_sample_size.TestPowerIsComputedAtTheRegisteredN.test_margin_sensitivity_uses_the_registered_n) ... ok
+test_power_at_defaults_to_the_registered_n (audit.targets.autond.tests.test_r3d_sample_size.TestPowerIsComputedAtTheRegisteredN.test_power_at_defaults_to_the_registered_n) ... ok
+test_power_still_does_not_justify_the_margin (audit.targets.autond.tests.test_r3d_sample_size.TestPowerIsComputedAtTheRegisteredN.test_power_still_does_not_justify_the_margin)
+Raising n must not have turned power into a margin argument. ... ok
+test_registered_margin_power_improved_over_n_five (audit.targets.autond.tests.test_r3d_sample_size.TestPowerIsComputedAtTheRegisteredN.test_registered_margin_power_improved_over_n_five)
+Not a transcribed figure: both sides are computed here, and the ... ok
+test_robustness_to_a_worse_sd_is_recorded_and_true (audit.targets.autond.tests.test_r3d_sample_size.TestPowerIsComputedAtTheRegisteredN.test_robustness_to_a_worse_sd_is_recorded_and_true) ... ok
+test_the_n_five_figures_are_retained_not_deleted (audit.targets.autond.tests.test_r3d_sample_size.TestPowerIsComputedAtTheRegisteredN.test_the_n_five_figures_are_retained_not_deleted) ... ok
+test_n_is_ten_and_derived_not_hardcoded (audit.targets.autond.tests.test_r3d_sample_size.TestRegisteredDesign.test_n_is_ten_and_derived_not_hardcoded) ... ok
+test_pooling_rule_and_its_assumption_are_both_recorded (audit.targets.autond.tests.test_r3d_sample_size.TestRegisteredDesign.test_pooling_rule_and_its_assumption_are_both_recorded) ... ok
+test_sd_and_df_prose_match_the_registered_n (audit.targets.autond.tests.test_r3d_sample_size.TestRegisteredDesign.test_sd_and_df_prose_match_the_registered_n) ... ok
+test_suffixes_are_registered_and_distinct (audit.targets.autond.tests.test_r3d_sample_size.TestRegisteredDesign.test_suffixes_are_registered_and_distinct) ... ok
+test_the_design_records_why_a_constant_was_not_edited (audit.targets.autond.tests.test_r3d_sample_size.TestRegisteredDesign.test_the_design_records_why_a_constant_was_not_edited) ... ok
+test_the_margin_did_not_move (audit.targets.autond.tests.test_r3d_sample_size.TestRegisteredDesign.test_the_margin_did_not_move)
+The whole point: more samples, not a looser criterion. ... ok
+test_a_divergence_would_be_caught (audit.targets.autond.tests.test_r3d_sample_size.TestValidatorConstantsTrackThePlan.test_a_divergence_would_be_caught)
+Simulate the failure this guard exists for: the validator and the ... ok
+test_per_invocation_count_is_the_upstream_constant (audit.targets.autond.tests.test_r3d_sample_size.TestValidatorConstantsTrackThePlan.test_per_invocation_count_is_the_upstream_constant) ... ok
+test_pooled_count_is_what_the_validator_enforces (audit.targets.autond.tests.test_r3d_sample_size.TestValidatorConstantsTrackThePlan.test_pooled_count_is_what_the_validator_enforces) ... ok
+test_the_duplicate_constants_agree_with_the_preregistration (audit.targets.autond.tests.test_r3d_sample_size.TestValidatorConstantsTrackThePlan.test_the_duplicate_constants_agree_with_the_preregistration) ... ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 1.192s
+
+OK

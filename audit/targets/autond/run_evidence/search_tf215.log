@@ -1,0 +1,45 @@
+....................Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+.Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+.Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+.Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+.Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfe138424', '0xfe628b27', '0xfe645cef', '0x95a1ba5'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0x6355d3c', '0x28ce1ab', '0xfee6230a', '0xfbaa4ed5'] with [0.017      0.0170625  0.01734375 0.01846875]
+Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfcb3ded4', '0xfeefe416', '0xffabbaee', '0xd0c7d3f'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xf74fef8f', '0xdd7a47c', '0x571f1fa', '0xfadc2e74'] with [0.01728125 0.0173125  0.0174375  0.01965625]
+.Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+.Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+.Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+.Evaluating differences at round  1
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xff6154ea', '0xff6eaf31', '0xffe946a5', '0xc528f576'] with [0.5 0.5 0.5 0.5]
+Evaluating differences at round  2
+Generation 0/1, 528 nodes explored, 32 current, best is ['0xfd01bb4b', '0xeaaf7a29', '0x7ec6cc0', '0xc233c4e3'] with [0.01725    0.0175     0.01775    0.01803125]
+............
+----------------------------------------------------------------------
+Ran 40 tests in 7.346s
+
+OK

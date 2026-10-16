@@ -1,0 +1,312 @@
+# r3d portable suite: AUTOND_ROOT / AUTOND_UPSTREAM / AUTOND_PACKAGE_ZIP UNSET
+# 2026-10-16T04:25:01Z
+# Python 3.11.17
+
+.........2026-10-16 04:25:02.213737: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-16 04:25:02.216065: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-10-16 04:25:02.254591: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2026-10-16 04:25:02.254632: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2026-10-16 04:25:02.255671: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2026-10-16 04:25:02.261645: I external/local_tsl/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-10-16 04:25:02.261838: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-16 04:25:03.135132: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+..autond-evaluation-gate-v2
+  plan hash      f20cd9b12909d21dffd22aed83a6f303e8f445412490708f1f01c79a3c264bb7
+  upstream       /tmp/tmpgzeif1l1/up
+  output dir     /tmp/tmpgzeif1l1/out  (absent; will be created)
+  interface      verified=False
+  versions       {'python': '3.11.17', 'tensorflow': '2.15.1', 'numpy': '1.26.4', 'keras': '2.15.0'}
+  write check    tracked-clean;untracked-benign=0
+  permitted      False
+    simon3264_a: /home/claude/venv-autond-tf215/bin/python eval_nets.py --model_path /tmp/tmpgzeif1l1/out/checkpoints/simon3264_single-key_0x400_round11_polished.h5 --model_type dbitnet --cipher simon3264 --scenario single-key --input_difference 0x400 --round_number 11 --add_str _a
+    simon3264_b: /home/claude/venv-autond-tf215/bin/python eval_nets.py --model_path /tmp/tmpgzeif1l1/out/checkpoints/simon3264_single-key_0x400_round11_polished.h5 --model_type dbitnet --cipher simon3264 --scenario single-key --input_difference 0x400 --round_number 11 --add_str _b
+    speck3264_a: /home/claude/venv-autond-tf215/bin/python eval_nets.py --model_path /tmp/tmpgzeif1l1/out/checkpoints/speck3264_single-key_0x400000_round8_polished.h5 --model_type dbitnet --cipher speck3264 --scenario single-key --input_difference 0x400000 --round_number 8 --add_str _a
+    speck3264_b: /home/claude/venv-autond-tf215/bin/python eval_nets.py --model_path /tmp/tmpgzeif1l1/out/checkpoints/speck3264_single-key_0x400000_round8_polished.h5 --model_type dbitnet --cipher speck3264 --scenario single-key --input_difference 0x400000 --round_number 8 --add_str _b
+
+  REFUSING TO LAUNCH - 4 blocker(s):
+    - unverified required fields: ['dbitnet.py: sha256 bdfd84424ca1d6b2257089897b91cbfebe3778a10ac406794c73c5728a71037a != recorded b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736', 'eval_nets.py: sha256 b62fd9b9d9ee64513af82dff55a9ac08f16663af4817a07127d5406ca3c31a6e != recorded 838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048', 'main.py: sha256 80ac06c6d1db2ab84fd167930814e27bd6650b7e87115f29ea8bbea898c73983 != recorded 52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665', 'checkpoint simon3264: sha256 11e66f1e676379922720e28c4c201169bff09d81dbc632b2364a3a3f05e2f347 != recorded 769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af', 'checkpoint speck3264: sha256 11e66f1e676379922720e28c4c201169bff09d81dbc632b2364a3a3f05e2f347 != recorded a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26', 'upstream commit: checkout is at cc6adacbba22f28e38a89fc7ea58996affcb0ece, not the pinned 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779']
+    - not frozen: no freeze record at autond_ii_v2.frozen.json. Run this module to obtain the plan hash and the exact freeze procedure.
+    - target interface: eval_nets.py hashes to b62fd9b9d9ee64513af82dff55a9ac08f16663af4817a07127d5406ca3c31a6e, not the recorded 838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048. The interface recorded here was read from a different revision of the file, so the commands built from it may not be the ones this checkout accepts.
+    - target interface: recorded arguments absent from the source: ['add_str', 'cipher', 'dataset_path_X', 'dataset_path_Y', 'input_difference', 'model_path', 'model_type', 'round_number', 'scenario']
+
+  No evaluation was started. Nothing was written. The checkout was not modified.
+.................................................................s....autond-implementation-stages-v2   mode: validate, no experiment executed
+
+  upstream commit      e6034445a90fe26802a98e9cf8d8f62f0a78c619   ok=False
+
+  ARTIFACT INTEGRITY
+  !! MISSING        r1_search_manifest               [required, OPEN]
+  !! MISSING        r1_search_result                 [required, OPEN]
+  !! MISSING        r1_generation_log                [required, OPEN]
+  !! MISSING        training_evidence_npz            [optional, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  speck_polished_checkpoint        [required, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  simon_polished_checkpoint        [required, AUTHOR_VERIFIED]
+  !! MISSING        architecture_census              [required, RECORDED]
+  !! MISSING        architecture_reconciliation      [required, RECORDED]
+  !! MISSING        checkpoint_load_verification     [required, RECORDED]
+  !! MISSING        paper_source_architecture_record [optional, OPEN]
+  !! MISSING        training_bundle_manifest         [optional, OPEN]
+  !! MISSING        training_checkpoint_h5           [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_source_snapshot         [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_environment             [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_results_summary         [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_epoch_diagnostic        [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round5          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round6          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round7          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round8          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round9          [optional, AUTHOR_VERIFIED]
+
+  STAGES
+    II-1_BASELINE_RECONSTRUCTION  FAILED  (tier CORE)
+       FAILED                 II1-SEARCH-R1  [REFERENCE_VERIFICATION]  evidence: 0
+       NOT_PERFORMED          II1-STAGED-TRAINING  [REFERENCE_VERIFICATION]  evidence: 0
+       NOT_PERFORMED          II1-SHIPPED-CHECKPOINT-EVAL  [REFERENCE_VERIFICATION]  evidence: 2
+       FINDING  II1-SEARCH-R1: checkout is at e6034445a90fe26802a98e9cf8d8f62f0a78c619, not the pinned 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779
+       FINDING  II1-STAGED-TRAINING: evidence bundle not installed at audit/targets/autond/evidence/training; do not rerun the training.
+       FINDING  II1-SHIPPED-CHECKPOINT-EVAL blocked by the successor preregistration gate: unverified required fields: ['dbitnet.py: sha256 bdfd84424ca1d6b2257089897b91cbfebe3778a10ac406794c73c5728a71037a != recorded b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736', 'eval_nets.py: sha256 b62fd9b9d9ee64513af82dff55a9ac08f16663af4817a07127d5406ca3c31a6e != recorded 838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048', 'main.py: sha256 80ac06c6d1db2ab84fd167930814e27bd6650b7e87115f29ea8bbea898c73983 != recorded 52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665', 'checkpoint simon3264: sha256 11e66f1e676379922720e28c4c201169bff09d81dbc632b2364a3a3f05e2f347 != recorded 769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af', 'checkpoint speck3264: sha256 11e66f1e676379922720e28c4c201169bff09d81dbc632b2364a3a3f05e2f347 != recorded a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26', 'upstream commit: checkout is at e6034445a90fe26802a98e9cf8d8f62f0a78c619, not the pinned 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779']; not frozen: no freeze record at autond_ii_v2.frozen.json. Run this module to obtain the plan hash and the exact freeze procedure.
+    II-3_CONTROLLED_VERIFICATION  PARTIAL  (tier CORE)
+       NOT_PERFORMED          II3-ARCHITECTURE-CENSUS  [ARCHITECTURE_CENSUS]  evidence: 0
+       NOT_PERFORMED          II3-CHECKPOINT-LOAD  [DETERMINISTIC_EQUIVALENCE]  evidence: 0
+       PARTIAL                II3-PAPER-SOURCE-ARCHITECTURE  [REFERENCE_VERIFICATION]  evidence: 1
+       FINDING  II3-ARCHITECTURE-CENSUS: evidence absent on this machine; the component was not performed here.
+       FINDING  II3-CHECKPOINT-LOAD: evidence absent on this machine; the component was not performed here.
+       FINDING  II3-PAPER-SOURCE-ARCHITECTURE: 16 architectural properties unresolved (ARCH-04, ARCH-05, ARCH-07, ARCH-08, ARCH-09, ARCH-11, ARCH-13, ARCH-16, ARCH-01, ARCH-02, ARCH-03, ARCH-06, ARCH-10, ARCH-12, ARCH-14, ARCH-15); the architecture conformance claim cannot be adjudicated on the census alone.
+
+  stage records pass validate_stage_record()
+
+  BLOCKING PROBLEMS (independent of --strict)
+    - 2 artifact(s) HASH_MISMATCH: ['speck_polished_checkpoint', 'simon_polished_checkpoint']. This is an integrity failure whether or not --strict was passed.
+    - upstream checkout is not the pinned revision: checkout is at e6034445a90fe26802a98e9cf8d8f62f0a78c619, not the pinned 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779. Nothing read from it describes the pinned target, so no stage record built here may be treated as valid.
+    - II-1_BASELINE_RECONSTRUCTION came out FAILED: II-1 repository reproduction: 0/3 component(s) satisfied. FAILED (II1-SEARCH-R1); NOT_PERFORMED (II1-SHIPPED-CHECKPOINT-EVAL, II1-STAGED-TRAINING).
+
+  STRICT PROBLEMS
+    - --strict: 8 required artifact(s) have no established integrity on this machine: ['r1_search_manifest', 'r1_search_result', 'r1_generation_log', 'speck_polished_checkpoint', 'simon_polished_checkpoint', 'architecture_census', 'architecture_reconciliation', 'checkpoint_load_verification']
+
+  REFUSING to write /tmp/tmpxa63zogh/out.json: validation did not pass. A record that failed validation must not be left on disk for something else to read.
+
+  II-1_BASELINE_RECONSTRUCTION: FAILED
+  II-3_CONTROLLED_VERIFICATION: PARTIAL
+  Statuses above are computed from the evidence present on THIS machine.
+......ssss.ss.ss...........................autond-evaluation-gate-v2
+  plan hash      f20cd9b12909d21dffd22aed83a6f303e8f445412490708f1f01c79a3c264bb7
+  upstream       /tmp/tmpmn2pjnlo/up
+  output dir     /tmp/tmpmn2pjnlo/used  (/tmp/tmpmn2pjnlo/used already exists and is not empty (1 entries, e.g. ['RESULT.json']). Refusing to write into it: a previous run's checkpoints, logs, NPZs or RESULT.json would be overwritten. Choose a new run directory; prior evidence is never replaced.)
+  interface      verified=False
+  versions       {'python': '3.11.17', 'tensorflow': '2.15.1', 'numpy': '1.26.4', 'keras': '2.15.0'}
+  write check    tracked-clean;untracked-benign=0
+  permitted      False
+    simon3264_a: /home/claude/venv-autond-tf215/bin/python eval_nets.py --model_path /tmp/tmpmn2pjnlo/used/checkpoints/simon3264_single-key_0x400_round11_polished.h5 --model_type dbitnet --cipher simon3264 --scenario single-key --input_difference 0x400 --round_number 11 --add_str _a
+    simon3264_b: /home/claude/venv-autond-tf215/bin/python eval_nets.py --model_path /tmp/tmpmn2pjnlo/used/checkpoints/simon3264_single-key_0x400_round11_polished.h5 --model_type dbitnet --cipher simon3264 --scenario single-key --input_difference 0x400 --round_number 11 --add_str _b
+    speck3264_a: /home/claude/venv-autond-tf215/bin/python eval_nets.py --model_path /tmp/tmpmn2pjnlo/used/checkpoints/speck3264_single-key_0x400000_round8_polished.h5 --model_type dbitnet --cipher speck3264 --scenario single-key --input_difference 0x400000 --round_number 8 --add_str _a
+    speck3264_b: /home/claude/venv-autond-tf215/bin/python eval_nets.py --model_path /tmp/tmpmn2pjnlo/used/checkpoints/speck3264_single-key_0x400000_round8_polished.h5 --model_type dbitnet --cipher speck3264 --scenario single-key --input_difference 0x400000 --round_number 8 --add_str _b
+
+  REFUSING TO LAUNCH - 5 blocker(s):
+    - unverified required fields: ['dbitnet.py: sha256 bdfd84424ca1d6b2257089897b91cbfebe3778a10ac406794c73c5728a71037a != recorded b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736', 'eval_nets.py: sha256 b62fd9b9d9ee64513af82dff55a9ac08f16663af4817a07127d5406ca3c31a6e != recorded 838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048', 'main.py: sha256 80ac06c6d1db2ab84fd167930814e27bd6650b7e87115f29ea8bbea898c73983 != recorded 52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665', 'checkpoint simon3264: sha256 11e66f1e676379922720e28c4c201169bff09d81dbc632b2364a3a3f05e2f347 != recorded 769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af', 'checkpoint speck3264: sha256 11e66f1e676379922720e28c4c201169bff09d81dbc632b2364a3a3f05e2f347 != recorded a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26', 'upstream commit: checkout is at 4cc9d2b75ea24ae694404e7926f2c0d40c00e3f2, not the pinned 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779']
+    - not frozen: no freeze record at autond_ii_v2.frozen.json. Run this module to obtain the plan hash and the exact freeze procedure.
+    - target interface: eval_nets.py hashes to b62fd9b9d9ee64513af82dff55a9ac08f16663af4817a07127d5406ca3c31a6e, not the recorded 838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048. The interface recorded here was read from a different revision of the file, so the commands built from it may not be the ones this checkout accepts.
+    - target interface: recorded arguments absent from the source: ['add_str', 'cipher', 'dataset_path_X', 'dataset_path_Y', 'input_difference', 'model_path', 'model_type', 'round_number', 'scenario']
+    - /tmp/tmpmn2pjnlo/used already exists and is not empty (1 entries, e.g. ['RESULT.json']). Refusing to write into it: a previous run's checkpoints, logs, NPZs or RESULT.json would be overwritten. Choose a new run directory; prior evidence is never replaced.
+
+  No evaluation was started. Nothing was written. The checkout was not modified.
+...ss.s..autond-implementation-stages-v2   mode: validate, no experiment executed
+
+  upstream commit      4cc9d2b75ea24ae694404e7926f2c0d40c00e3f2   ok=False
+
+  ARTIFACT INTEGRITY
+  !! MISSING        r1_search_manifest               [required, OPEN]
+  !! MISSING        r1_search_result                 [required, OPEN]
+  !! MISSING        r1_generation_log                [required, OPEN]
+  !! MISSING        training_evidence_npz            [optional, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  speck_polished_checkpoint        [required, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  simon_polished_checkpoint        [required, AUTHOR_VERIFIED]
+  !! MISSING        architecture_census              [required, RECORDED]
+  !! MISSING        architecture_reconciliation      [required, RECORDED]
+  !! MISSING        checkpoint_load_verification     [required, RECORDED]
+  !! MISSING        paper_source_architecture_record [optional, OPEN]
+  !! MISSING        training_bundle_manifest         [optional, OPEN]
+  !! MISSING        training_checkpoint_h5           [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_source_snapshot         [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_environment             [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_results_summary         [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_epoch_diagnostic        [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round5          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round6          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round7          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round8          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round9          [optional, AUTHOR_VERIFIED]
+
+  STAGES
+    II-1_BASELINE_RECONSTRUCTION  FAILED  (tier CORE)
+       FAILED                 II1-SEARCH-R1  [REFERENCE_VERIFICATION]  evidence: 0
+       NOT_PERFORMED          II1-STAGED-TRAINING  [REFERENCE_VERIFICATION]  evidence: 0
+       NOT_PERFORMED          II1-SHIPPED-CHECKPOINT-EVAL  [REFERENCE_VERIFICATION]  evidence: 2
+       FINDING  II1-SEARCH-R1: checkout is at 4cc9d2b75ea24ae694404e7926f2c0d40c00e3f2, not the pinned 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779
+       FINDING  II1-STAGED-TRAINING: evidence bundle not installed at audit/targets/autond/evidence/training; do not rerun the training.
+       FINDING  II1-SHIPPED-CHECKPOINT-EVAL blocked by the successor preregistration gate: unverified required fields: ['dbitnet.py: sha256 bdfd84424ca1d6b2257089897b91cbfebe3778a10ac406794c73c5728a71037a != recorded b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736', 'eval_nets.py: sha256 b62fd9b9d9ee64513af82dff55a9ac08f16663af4817a07127d5406ca3c31a6e != recorded 838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048', 'main.py: sha256 80ac06c6d1db2ab84fd167930814e27bd6650b7e87115f29ea8bbea898c73983 != recorded 52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665', 'checkpoint simon3264: sha256 11e66f1e676379922720e28c4c201169bff09d81dbc632b2364a3a3f05e2f347 != recorded 769becfe854acd238f45ed4ade2810bb1e454166db3f5c6d557aa817275d25af', 'checkpoint speck3264: sha256 11e66f1e676379922720e28c4c201169bff09d81dbc632b2364a3a3f05e2f347 != recorded a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26', 'upstream commit: checkout is at 4cc9d2b75ea24ae694404e7926f2c0d40c00e3f2, not the pinned 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779']; not frozen: no freeze record at autond_ii_v2.frozen.json. Run this module to obtain the plan hash and the exact freeze procedure.
+    II-3_CONTROLLED_VERIFICATION  PARTIAL  (tier CORE)
+       NOT_PERFORMED          II3-ARCHITECTURE-CENSUS  [ARCHITECTURE_CENSUS]  evidence: 0
+       NOT_PERFORMED          II3-CHECKPOINT-LOAD  [DETERMINISTIC_EQUIVALENCE]  evidence: 0
+       PARTIAL                II3-PAPER-SOURCE-ARCHITECTURE  [REFERENCE_VERIFICATION]  evidence: 1
+       FINDING  II3-ARCHITECTURE-CENSUS: evidence absent on this machine; the component was not performed here.
+       FINDING  II3-CHECKPOINT-LOAD: evidence absent on this machine; the component was not performed here.
+       FINDING  II3-PAPER-SOURCE-ARCHITECTURE: 16 architectural properties unresolved (ARCH-04, ARCH-05, ARCH-07, ARCH-08, ARCH-09, ARCH-11, ARCH-13, ARCH-16, ARCH-01, ARCH-02, ARCH-03, ARCH-06, ARCH-10, ARCH-12, ARCH-14, ARCH-15); the architecture conformance claim cannot be adjudicated on the census alone.
+
+  stage records pass validate_stage_record()
+
+  BLOCKING PROBLEMS (independent of --strict)
+    - 2 artifact(s) HASH_MISMATCH: ['speck_polished_checkpoint', 'simon_polished_checkpoint']. This is an integrity failure whether or not --strict was passed.
+    - upstream checkout is not the pinned revision: checkout is at 4cc9d2b75ea24ae694404e7926f2c0d40c00e3f2, not the pinned 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779. Nothing read from it describes the pinned target, so no stage record built here may be treated as valid.
+    - II-1_BASELINE_RECONSTRUCTION came out FAILED: II-1 repository reproduction: 0/3 component(s) satisfied. FAILED (II1-SEARCH-R1); NOT_PERFORMED (II1-SHIPPED-CHECKPOINT-EVAL, II1-STAGED-TRAINING).
+
+  REFUSING to write /tmp/tmpktt7v2jk/out.json: validation did not pass. A record that failed validation must not be left on disk for something else to read.
+
+  II-1_BASELINE_RECONSTRUCTION: FAILED
+  II-3_CONTROLLED_VERIFICATION: PARTIAL
+  Statuses above are computed from the evidence present on THIS machine.
+.ss....s...s.s.s..ssssss...............................................................sssssss............................sssssssss...F................................................................AutoND Implementation Integrity (case study 2)
+upstream pinned commit: 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779
+upstream root:          /tmp/autond-fake-upstream-ttm4g9i0/up
+upstream HEAD ok:       False  (dfddd9c2af18e9de759862b6536f458e4beaf917)
+
+stage                                  tier  status
+II-1_BASELINE_RECONSTRUCTION           CORE  FAILED
+II-2_INDEPENDENT_REIMPLEMENTATION      CORE  NOT_PERFORMED
+II-3_CONTROLLED_VERIFICATION           CORE  PARTIAL
+II-4_COMPARATIVE_EVALUATION            CORE  NOT_PERFORMED
+II-5_STATISTICAL_ASSESSMENT            CORE  NOT_PERFORMED
+
+  !! MISSING        r1_search_manifest                 [required, OPEN]
+  !! MISSING        r1_search_result                   [required, OPEN]
+  !! MISSING        r1_generation_log                  [required, OPEN]
+  !! MISSING        training_evidence_npz              [optional, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  speck_polished_checkpoint          [required, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  simon_polished_checkpoint          [required, AUTHOR_VERIFIED]
+  !! MISSING        architecture_census                [required, RECORDED]
+  !! MISSING        architecture_reconciliation        [required, RECORDED]
+  !! MISSING        checkpoint_load_verification       [required, RECORDED]
+  !! MISSING        paper_source_architecture_record   [optional, OPEN]
+  !! MISSING        training_bundle_manifest           [optional, OPEN]
+  !! MISSING        training_checkpoint_h5             [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_source_snapshot           [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_environment               [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_results_summary           [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_epoch_diagnostic          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round5            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round6            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round7            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round8            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round9            [optional, AUTHOR_VERIFIED]
+
+II-3 paper-to-source: AGREES=8, UNDERSPECIFIED=8   digest=a13a6b5885b4af1a...
+preregistration frozen: False   confirmatory run permitted: False
+Decision: INCONCLUSIVE   tag: EXPLORATORY
+Dry run: nothing written.
+.....AutoND Implementation Integrity (case study 2)
+upstream pinned commit: 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779
+upstream root:          /tmp/autond-fake-upstream-ttm4g9i0/up
+upstream HEAD ok:       False  (dfddd9c2af18e9de759862b6536f458e4beaf917)
+
+stage                                  tier  status
+II-1_BASELINE_RECONSTRUCTION           CORE  FAILED
+II-2_INDEPENDENT_REIMPLEMENTATION      CORE  NOT_PERFORMED
+II-3_CONTROLLED_VERIFICATION           CORE  PARTIAL
+II-4_COMPARATIVE_EVALUATION            CORE  NOT_PERFORMED
+II-5_STATISTICAL_ASSESSMENT            CORE  NOT_PERFORMED
+
+  !! MISSING        r1_search_manifest                 [required, OPEN]
+  !! MISSING        r1_search_result                   [required, OPEN]
+  !! MISSING        r1_generation_log                  [required, OPEN]
+  !! MISSING        training_evidence_npz              [optional, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  speck_polished_checkpoint          [required, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  simon_polished_checkpoint          [required, AUTHOR_VERIFIED]
+  !! MISSING        architecture_census                [required, RECORDED]
+  !! MISSING        architecture_reconciliation        [required, RECORDED]
+  !! MISSING        checkpoint_load_verification       [required, RECORDED]
+  !! MISSING        paper_source_architecture_record   [optional, OPEN]
+  !! MISSING        training_bundle_manifest           [optional, OPEN]
+  !! MISSING        training_checkpoint_h5             [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_source_snapshot           [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_environment               [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_results_summary           [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_epoch_diagnostic          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round5            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round6            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round7            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round8            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round9            [optional, AUTHOR_VERIFIED]
+
+II-3 paper-to-source: AGREES=8, UNDERSPECIFIED=8   digest=a13a6b5885b4af1a...
+preregistration frozen: False   confirmatory run permitted: False
+Decision: INCONCLUSIVE   tag: EXPLORATORY
+Run manifest: /tmp/tmpya1fpv1w/evidence/run_manifest_ii-autond-assembly-001.json
+Versioned evidence written: /tmp/tmpya1fpv1w/evidence/autond-implementation-certificate-V1.json (autond-implementation-certificate-V1)
+.AutoND Implementation Integrity (case study 2)
+upstream pinned commit: 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779
+upstream root:          /tmp/autond-fake-upstream-ttm4g9i0/up
+upstream HEAD ok:       False  (dfddd9c2af18e9de759862b6536f458e4beaf917)
+
+stage                                  tier  status
+II-1_BASELINE_RECONSTRUCTION           CORE  FAILED
+II-2_INDEPENDENT_REIMPLEMENTATION      CORE  NOT_PERFORMED
+II-3_CONTROLLED_VERIFICATION           CORE  PARTIAL
+II-4_COMPARATIVE_EVALUATION            CORE  NOT_PERFORMED
+II-5_STATISTICAL_ASSESSMENT            CORE  NOT_PERFORMED
+
+  !! MISSING        r1_search_manifest                 [required, OPEN]
+  !! MISSING        r1_search_result                   [required, OPEN]
+  !! MISSING        r1_generation_log                  [required, OPEN]
+  !! MISSING        training_evidence_npz              [optional, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  speck_polished_checkpoint          [required, AUTHOR_VERIFIED]
+  !! HASH_MISMATCH  simon_polished_checkpoint          [required, AUTHOR_VERIFIED]
+  !! MISSING        architecture_census                [required, RECORDED]
+  !! MISSING        architecture_reconciliation        [required, RECORDED]
+  !! MISSING        checkpoint_load_verification       [required, RECORDED]
+  !! MISSING        paper_source_architecture_record   [optional, OPEN]
+  !! MISSING        training_bundle_manifest           [optional, OPEN]
+  !! MISSING        training_checkpoint_h5             [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_source_snapshot           [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_environment               [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_results_summary           [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_epoch_diagnostic          [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round5            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round6            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round7            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round8            [optional, AUTHOR_VERIFIED]
+  !! MISSING        training_history_round9            [optional, AUTHOR_VERIFIED]
+
+II-3 paper-to-source: AGREES=8, UNDERSPECIFIED=8   digest=a13a6b5885b4af1a...
+preregistration frozen: False   confirmatory run permitted: False
+Decision: INCONCLUSIVE   tag: EXPLORATORY
+Run manifest: /tmp/tmpv4lcxms3/evidence/run_manifest_ii-autond-assembly-001.json
+Versioned evidence written: /tmp/tmpv4lcxms3/evidence/autond-implementation-certificate-V1.json (autond-implementation-certificate-V1)
+refusing to overwrite existing /tmp/tmpv4lcxms3/evidence/run_manifest_ii-autond-assembly-001.json
+.
+======================================================================
+FAIL: test_manifest_is_self_consistent (audit.targets.autond.tests.test_packaging.TestManifestContract.test_manifest_is_self_consistent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/claude/r3/audit/targets/autond/tests/test_packaging.py", line 154, in test_manifest_is_self_consistent
+    self.assertEqual(wrong, [], f"digest mismatch: {wrong}")
+AssertionError: Lists differ: ['audit/targets/autond/STATISTICAL_NOTE.md[388 chars].py'] != []
+
+First list contains 9 additional elements.
+First extra element 0:
+'audit/targets/autond/STATISTICAL_NOTE.md'
+
++ []
+- ['audit/targets/autond/STATISTICAL_NOTE.md',
+-  'audit/targets/autond/evaluation_assemble.py',
+-  'audit/targets/autond/evaluation_gate.py',
+-  'audit/targets/autond/evaluation_results.py',
+-  'audit/targets/autond/preregistrations/autond_ii_v2.py',
+-  'audit/targets/autond/tests/portable.py',
+-  'audit/targets/autond/tests/test_corrections.py',
+-  'audit/targets/autond/tests/test_r3_corrections.py',
+-  'audit/targets/autond/tests/test_r3c_statistics.py'] : digest mismatch: ['audit/targets/autond/STATISTICAL_NOTE.md', 'audit/targets/autond/evaluation_assemble.py', 'audit/targets/autond/evaluation_gate.py', 'audit/targets/autond/evaluation_results.py', 'audit/targets/autond/preregistrations/autond_ii_v2.py', 'audit/targets/autond/tests/portable.py', 'audit/targets/autond/tests/test_corrections.py', 'audit/targets/autond/tests/test_r3_corrections.py', 'audit/targets/autond/tests/test_r3c_statistics.py']
+
+----------------------------------------------------------------------
+Ran 339 tests in 9.486s
+
+FAILED (failures=1, skipped=40)

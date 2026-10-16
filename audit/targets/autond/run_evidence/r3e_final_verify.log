@@ -1,0 +1,85 @@
+# r3e final verification
+# 2026-10-16T05:42:17Z
+
+DEFECT FIXED
+  search/verify_outputs.py rule 2 required every file in the R1 output
+  directory to be named in MANIFEST.json. A .DS_Store created by Finder
+  was therefore counted as an unmanifested file; the bundle failed
+  validation; validate_r1 correctly refused to read a scientific result
+  from a bundle that failed validation; and II1-SEARCH-R1 reported
+
+      FAILED - "R1 evidence failed validation, so no scientific result
+      was read from it: .DS_Store is present but not named in the
+      manifest."
+
+  which made II-1_BASELINE_RECONSTRUCTION FAILED instead of PARTIAL and
+  suppressed a real finding (the released search returning 2
+  epsilon-close differences where the README documents one).
+
+  The operator's evidence was intact throughout. Every digest named in
+  MANIFEST.json matched before and after.
+
+  This was an inconsistency in this adapter: evaluation_gate already had
+  the correct policy in BENIGN_UNTRACKED - OS/interpreter files are
+  recorded, do not block, and are never deleted - and the operator had
+  just seen it work ("untracked-benign=2:.DS_Store,__pycache__/",
+  "LEFT IN PLACE"). The R1 validator never received the same policy, so
+  two validators in one adapter disagreed about what counts as evidence.
+
+FIX
+  verify_outputs.py: BENIGN_NAMES / BENIGN_DIRS / BENIGN_SUFFIXES and
+  _is_benign(), mirroring evaluation_gate. Debris is excused, RECORDED in
+  summary["unmanifested_benign"] with a note, and left on disk. Matching
+  is on path PARTS, not substrings. Manifested files are hash-checked as
+  before, whatever they are named.
+
+  implementation_stages.py: validate_r1() carries the benign list up, and
+  the II1-SEARCH-R1 component adds the note to its own limitations so the
+  record DISCLOSES the debris rather than passing silently.
+
+PLAN UNCHANGED - THE OPERATOR'S FREEZE REMAINS VALID
+  plan hash f20cd9b12909d21dffd22aed83a6f303e8f445412490708f1f01c79a3c264bb7
+  No preregistration, decision-rule, power, margin, sample-size or gate
+  logic was touched. The confirmatory evaluation does NOT need rerunning:
+  the bundle is valid and II1-SHIPPED-CHECKPOINT-EVAL was already
+  COMPLETED in the run that reported II-1 FAILED.
+
+RESULTS
+  search harness, both modules ............ Ran 44 tests in 9.295s -> OK
+  full target discovery, TF 2.15.1 ........ Ran 400 tests in 25.860s
+  Gohr/DeepSpeck regression ............... Ran 426 tests in 154.029s -> OK
+
+  The only failure in the target log is test_manifest_is_self_consistent,
+  which fails until SHA256SUMS.txt is regenerated for the two changed
+  files. Regenerated below; the re-run result is in the RE-RUN section.
+
+NEW TESTS (4, in search/tests/test_search_runner.py)
+  test_os_debris_does_not_invalidate_the_bundle
+      the regression itself: .DS_Store, run_000/.DS_Store,
+      ._result.json, __pycache__/x.pyc, .ipynb_checkpoints/..., Thumbs.db
+      all excused, recorded, and STILL ON DISK afterwards
+  test_a_real_added_file_still_fails_even_beside_debris
+      the exemption is not a hole
+  test_a_name_merely_containing_a_benign_string_is_not_excused
+      my.DS_Store.json / __pycache__notes.txt / results.pyc.json still fail
+  test_a_manifested_file_is_still_hash_checked_even_if_benign_named
+      the exemption never reaches manifested files
+
+  test_an_added_file_is_detected is unchanged and still passes.
+
+GENERIC FRAMEWORK UNTOUCHED
+  Both changed files are under audit/targets/autond/.
+  audit/common/equivalence.py is byte-identical to r3c. Gohr's 426 tests
+  pass unchanged.
+
+NOTHING DELETED
+  No .DS_Store, __pycache__, evidence file, checkpoint, log or
+  certificate was deleted by this revision. The superseded certificate
+  procedure in README.md MOVES the incorrect certificate and records why,
+  because a record of a run that produced a wrong verdict is itself
+  evidence about the instrument.
+
+RE-RUN, after SHA256SUMS.txt was regenerated
+  full target discovery, TF 2.15, AUTOND_ROOT set ... 400 OK, 9 skipped
+  packaging, AUTOND_PACKAGE_ZIP set ................ 17 OK, 0 skipped
+  No failures remain.

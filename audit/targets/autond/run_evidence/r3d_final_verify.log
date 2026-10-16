@@ -1,0 +1,94 @@
+# r3d final verification
+# 2026-10-16T04:31:42Z
+# TF runs : /home/claude/venv-autond-tf215/bin/python  (Python 3.11.17, tensorflow 2.15.1, numpy 1.26.4, keras 2.15.0)
+# Gohr run: system python3 (Python 3.13.16) - as for v3c, same interpreter as that baseline
+# upstream: /home/claude/autond_src/repo @ 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779
+
+CHANGE UNDER TEST
+  Registered sample size n = 5 -> n = 10. Equivalence margin UNCHANGED at
+  Delta = 0.10 * (p_published - 0.5).
+
+  n = 10 is NOT a changed constant. eval_nets.nEval = 5 is a module-level
+  constant at eval_nets.py:22 and is not a command-line argument, so the
+  design invokes eval_nets.py twice per checkpoint with distinct --add_str
+  and pools the two NPZs. The pinned upstream is NOT modified.
+
+  Verified against the real pinned source, sha256 of eval_nets.py:
+    838587127c08834f6f9ecd7b27fc578da3942141fdcf5d9c513d46c646d63048
+  which matches the digest recorded in upstream_interface.py.
+
+PLAN HASH
+  r3c  b93fa50bb0914b17dc3423480466f18c6340225486c2dcbcb29c911d87207d40
+  r3d  f20cd9b12909d21dffd22aed83a6f303e8f445412490708f1f01c79a3c264bb7
+
+POWER, computed by the plan's own margin_sensitivity() at the registered n
+and the registered multiplicity - not transcribed:
+  fraction 0.02  delta 0.000288  @alpha 0.0244  @alpha/3 0.0030
+  fraction 0.05  delta 0.000720  @alpha 0.8620  @alpha/3 0.6050
+  fraction 0.10  delta 0.001440  @alpha 1.0000  @alpha/3 0.9998   <- REGISTERED
+  fraction 0.15  delta 0.002160  @alpha 1.0000  @alpha/3 1.0000
+  fraction 0.20  delta 0.002880  @alpha 1.0000  @alpha/3 1.0000
+  Registered margin at the conservative Holm step: 0.7965 -> 0.9998.
+  The n = 5 figures are retained in POWER["superseded_design"].
+
+DEFECT FOUND AND FIXED WHILE MAKING THIS CHANGE
+  The degenerate-variance guard in decide() was 'if not se:', an
+  exact-zero test. Whether n identical accuracies sum to exactly n*x is a
+  floating-point accident that differs by interpreter:
+    CPython 3.13: sum([0.5144]*10)/10 == 0.5144 exactly, sample SD 0.0
+    CPython 3.11: sum == 5.144000000000001, sample SD 1.1702778228589004e-16
+  3.11 is the REGISTERED environment. There the guard did not fire, the
+  TOST ran with SE = 3.700743415417188e-17, and decide() returned
+  EQUIVALENT on ten identical accuracies - a maximally confident verdict
+  from a sample carrying no information. Found because the n = 5 fixture
+  happened to produce exact zero and the n = 10 fixture did not.
+
+  Fixed with DEGENERATE_SD_RELATIVE_FLOOR = 1e-12, relative to the
+  measurement scale. Each accuracy is a mean of 10^6 Bernoulli trials
+  whose own SD near p = 0.5 is about 5e-4, so a real cross-set SD is of
+  that order; float noise from summing ten such values is of order 1e-15
+  relative. The floor sits three orders above the noise and nine below
+  any physically possible value, so it cannot reclassify a real result.
+  It is a numerical guard, not a statistical threshold. Both interpreters
+  now return INDETERMINATE with degenerate_variance = True.
+
+RESULTS
+  r3d design tests (test_r3d_sample_size) ........ OK  / Ran 35 tests in 1.192s
+  full target discovery, TF 2.15, AUTOND_ROOT set  Ran 400 tests in 25.177s
+  portable suite, all AUTOND_* unset ............. Ran 339 tests in 9.486s
+  statistics suite on BOTH interpreters .......... 63 OK on 3.13 and 63 OK on 3.11
+  Gohr/DeepSpeck regression ...................... Ran 426 tests in 148.077s -> OK
+
+  The only failure in the two suite logs above is
+  test_manifest_is_self_consistent, which fails until SHA256SUMS.txt is
+  regenerated for the changed files. It is regenerated below and the
+  suites are re-run; see the RE-RUN section.
+
+GENERIC FRAMEWORK UNTOUCHED
+  audit/common/equivalence.py is byte-identical to r3c. The generic
+  statistics needed no change because decide() already took n from the
+  data and df from the sample. The Gohr case study's 426 tests pass
+  unchanged. A target's design change did not reach the generic layer,
+  which is the framework property the paper claims.
+
+NOT RE-RUN, AND WHY
+  Phase 1 census/load-verify and the search-harness suite were not
+  re-executed for r3d: no file they exercise was modified. Their r3c
+  logs in this directory are unmodified and stand as the record
+  (phase1_census_tf215.log 61 OK, search_tf215.log 40 OK). The
+  TensorFlow-dependent census classes DID run as part of the full
+  discovery above, under TF 2.15.1, and passed.
+
+NO EVALUATION WAS RUN
+  The plan ships UNFROZEN. No freeze record was created, no freeze commit
+  was made, and no confirmatory evaluation was launched. The upstream
+  checkout was not modified.
+
+RE-RUN, after SHA256SUMS.txt was regenerated for the changed files
+  full target discovery, TF 2.15, AUTOND_ROOT set ... 400 OK, 9 skipped
+  packaging, AUTOND_PACKAGE_ZIP set ................ 17 OK, 0 skipped
+  portable suite, all AUTOND_* unset ............... 339 OK, 40 skipped
+  No failures remain.
+
+  Suite total 360 (r3c) -> 400 (r3d): +35 design tests, +4 degenerate-
+  variance and synth-helper regressions, +1 pooling cross-check.
