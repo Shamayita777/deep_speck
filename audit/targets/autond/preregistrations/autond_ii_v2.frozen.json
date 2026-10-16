@@ -1,0 +1,9 @@
+{
+  "preregistration": "autond-ii-v2",
+  "plan_hash": "f20cd9b12909d21dffd22aed83a6f303e8f445412490708f1f01c79a3c264bb7",
+  "frozen_at_utc": "2026-10-16T04:42:27Z",
+  "plan_file_commit": "fc46c57963907b1a8cdd9d8762501c54e4685651",
+  "plan_file_path": "audit/targets/autond/preregistrations/autond_ii_v2.py",
+  "plan_file_sha256": "15a7e9424e56bcad1b8d420a83df197441f1dcb80d749faa8ebd553f3167e860",
+  "approved_by": "Sham"
+}
