@@ -46,7 +46,7 @@ from tensorflow.keras.callbacks import Callback
 from pathlib import Path
 
 import numpy as np
-from audit.dataset.adapters.gohr import GohrAdapter
+from audit.dataset.adapters.gohr import MODEL_SELECTION_RULE, GohrAdapter
 from audit.dataset.d4_controlled_perturbation import (
     generate_certificate,
     print_report,
@@ -415,9 +415,15 @@ DEFAULT_AUDIT_SEED = 0
 DATASET_ID = "gohr-speck"
 DATASET_VERSION = "original-make-train-data"
 
-OUTPUT_DIRECTORY = Path(
-    "audit/dataset/evidence/d4"
-)
+# Resolved from this file, not the working directory, so a run started from
+# any directory writes under the repository's evidence tree.
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
+OUTPUT_DIRECTORY = REPOSITORY_ROOT / "audit" / "dataset" / "evidence" / "d4"
+
+#: Frozen input encoding: speck.make_train_data emits raw ciphertext-pair bits
+#: as uint8 in {0, 1}, width 64, consumed without scaling or normalisation.
+FEATURE_WIDTH = 64
+INPUT_ENCODING = "raw_bits_uint8_0_1_width64_no_scaling"
 
 
 # ============================================================
@@ -633,6 +639,7 @@ def save_dataset_cache(
         "config_hash": run_config_hash,
         "shapes": {name: list(np.asarray(array).shape) for name, array in arrays.items()},
         "dtypes": {name: str(np.asarray(array).dtype) for name, array in arrays.items()},
+        "sha256": {name: sha256_file(paths[name]) for name in arrays},
     }
     metadata_path = paths["metadata"]
     temporary_metadata = metadata_path.with_suffix(".tmp")
@@ -673,6 +680,49 @@ def load_dataset_cache(
         ),
     )
 
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def validate_input_encoding(partitions: dict) -> None:
+    """Refuse any partition that departs from the frozen input encoding."""
+    for name in ("train", "validation", "test"):
+        x = np.asarray(partitions[f"{name}_x"])
+        y = np.asarray(partitions[f"{name}_y"]).reshape(-1)
+        if x.dtype != np.uint8 or x.ndim != 2 or x.shape[1] != FEATURE_WIDTH:
+            raise RuntimeError(
+                f"{name}_x has dtype {x.dtype} and shape {x.shape}; the frozen "
+                f"encoding is uint8 with width {FEATURE_WIDTH}."
+            )
+        if x.size and int(x.max()) > 1:
+            raise RuntimeError(f"{name}_x contains values outside {{0, 1}}; inputs must not be rescaled.")
+        if len(y) != len(x):
+            raise RuntimeError(f"{name}_y length {len(y)} does not match {name}_x length {len(x)}.")
+        if y.size and (int(y.min()) < 0 or int(y.max()) > 1):
+            raise RuntimeError(f"{name}_y contains labels outside {{0, 1}}.")
+
+
+def write_certificate_exclusive(path: Path, certificate: dict) -> None:
+    """Write the certificate atomically; never replace an existing one."""
+    path = Path(path)
+    if path.exists():
+        raise RuntimeError(f"Refusing to overwrite existing D4 certificate {path}.")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + ".tmp")
+    with temporary.open("w", encoding="utf-8") as handle:
+        json.dump(certificate, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    # os.link fails if the destination appeared meanwhile, unlike os.replace.
+    try:
+        os.link(temporary, path)
+    finally:
+        temporary.unlink()
+
+
 def validate_dataset_cache(root: Path, run_config_hash: str) -> None:
     paths = dataset_cache_paths(root)
     with paths["metadata"].open("r", encoding="utf-8") as handle:
@@ -688,6 +738,12 @@ def validate_dataset_cache(root: Path, run_config_hash: str) -> None:
         expected_dtype = metadata.get("dtypes", {}).get(name)
         if expected_shape is None or list(arr.shape) != expected_shape or str(arr.dtype) != expected_dtype:
             raise RuntimeError(f"Cached dataset file {name} failed integrity metadata validation.")
+        expected_digest = metadata.get("sha256", {}).get(name)
+        if not expected_digest or sha256_file(paths[name]) != expected_digest:
+            raise RuntimeError(
+                f"Cached dataset file {name} does not match its recorded "
+                "SHA-256 (missing, stale or altered). Refusing to reuse it."
+            )
 
 
 # ============================================================
@@ -915,7 +971,10 @@ def build_run_config(args: argparse.Namespace) -> dict:
             "shuffle": False,
             "checkpoint_every_epoch": True,
             "checkpoint_format": "keras_full_model",
+            "model_selection": MODEL_SELECTION_RULE,
+            "selection_partition": "validation",
         },
+        "input_encoding": INPUT_ENCODING,
         "generator_randomness": "os.urandom",
         "input_difference": {"left_word": "0x0040", "right_word": "0x0000"},
     }
@@ -962,6 +1021,14 @@ def main() -> None:
     config = build_run_config(args)
     run_digest = config_hash(config)
     run_root = experiment_root(args)
+    output_path = (
+        Path(args.output)
+        if args.output is not None
+        else run_root / "d4_gohr_label_shuffle.json"
+    )
+    # Refuse before any training so a completed record is never redone.
+    if output_path.exists():
+        raise RuntimeError(f"Refusing to overwrite existing D4 certificate {output_path}.")
     save_or_validate_manifest(run_root, config, run_digest)
 
     dataset_root = run_root / "dataset"
@@ -985,6 +1052,13 @@ def main() -> None:
             dataset_root
         )
         validate_dataset_cache(dataset_root, run_digest)
+        validate_input_encoding(
+            {
+                "train_x": train_x, "train_y": train_y,
+                "validation_x": validation_x, "validation_y": validation_y,
+                "test_x": test_x, "test_y": test_y,
+            }
+        )
 
     else:
 
@@ -1001,6 +1075,13 @@ def main() -> None:
             test_samples=args.test_samples,
         )
 
+        validate_input_encoding(
+            {
+                "train_x": train_x, "train_y": train_y,
+                "validation_x": validation_x, "validation_y": validation_y,
+                "test_x": test_x, "test_y": test_y,
+            }
+        )
         save_dataset_cache(
             root=dataset_root,
             train_x=train_x,
@@ -1099,30 +1180,7 @@ def main() -> None:
 
     print_report(result)
 
-    output_path = (
-        Path(args.output)
-        if args.output is not None
-        else (
-            run_root / "d4_gohr_label_shuffle.json"
-        )
-    )
-
-    output_path.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    with output_path.open(
-        "w",
-        encoding="utf-8",
-    ) as handle:
-        json.dump(
-            certificate,
-            handle,
-            indent=2,
-            sort_keys=True,
-        )
-        handle.write("\n")
+    write_certificate_exclusive(output_path, certificate)
 
     print()
     print("=" * 72)

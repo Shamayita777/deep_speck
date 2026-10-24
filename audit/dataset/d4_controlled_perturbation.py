@@ -39,8 +39,10 @@ an effect exceeds a percentage threshold.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping, Optional, Sequence
+
+import os
 
 import numpy as np
 import json
@@ -119,6 +121,11 @@ class ReplicateResult:
     mcnemar_b: int
     mcnemar_c: int
     mcnemar_pvalue: float
+
+    # Selection record of the checkpoint each condition was evaluated with
+    # (adapter-supplied; empty for adapters that do not select).
+    baseline_selection: dict = field(default_factory=dict)
+    perturbed_selection: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -380,6 +387,61 @@ def checkpoint_paths(
     return directory, directory / "state.json"
 
 
+def _sha256_file(path: Path) -> str:
+    import hashlib
+
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def save_perturbation(path: Path, labels: Any) -> None:
+    """Persist perturbed labels atomically with a content digest sidecar.
+
+    An existing file is never replaced.
+    """
+    path = Path(path)
+    digest_path = path.with_name(path.name + ".sha256")
+    if path.exists() or digest_path.exists():
+        raise RuntimeError(f"Refusing to overwrite persisted perturbation {path}.")
+    temporary = path.with_name(path.name + ".tmp.npy")
+    np.save(temporary, np.ascontiguousarray(np.asarray(labels)))
+    os.replace(temporary, path)
+    temporary_digest = digest_path.with_name(digest_path.name + ".tmp")
+    temporary_digest.write_text(_sha256_file(path) + "\n", encoding="utf-8")
+    os.replace(temporary_digest, digest_path)
+
+
+def load_verified_perturbation(path: Path, train_labels: Any) -> np.ndarray:
+    """Reload persisted perturbed labels only if they are provably intact.
+
+    The file must match its digest sidecar and be a permutation of the
+    current training labels (same length and label multiset); otherwise a
+    resumed run would silently train on foreign or tampered labels.
+    """
+    path = Path(path)
+    digest_path = path.with_name(path.name + ".sha256")
+    if not digest_path.exists():
+        raise RuntimeError(f"Persisted perturbation {path} has no digest sidecar; refusing to reuse it.")
+    if _sha256_file(path) != digest_path.read_text(encoding="utf-8").strip():
+        raise RuntimeError(f"Persisted perturbation {path} does not match its recorded digest.")
+    labels = np.load(path, mmap_mode="r")
+    observed = np.unique(np.asarray(labels).reshape(-1), return_counts=True)
+    expected = np.unique(np.asarray(train_labels).reshape(-1), return_counts=True)
+    if (
+        np.asarray(labels).size != np.asarray(train_labels).size
+        or not np.array_equal(observed[0], expected[0])
+        or not np.array_equal(observed[1], expected[1])
+    ):
+        raise RuntimeError(
+            f"Persisted perturbation {path} is not a permutation of the "
+            "current training labels. Refusing to mix datasets."
+        )
+    return labels
+
+
 def load_completed_state(
     state_path: Path,
 ) -> dict[str, Any] | None:
@@ -574,9 +636,9 @@ def run_d4(
 
             perturbed_features = train_features
 
-            perturbed_labels = np.load(
+            perturbed_labels = load_verified_perturbation(
                 perturbation_path,
-                mmap_mode="r",
+                train_labels,
             )
 
         else:
@@ -594,7 +656,7 @@ def run_d4(
                 )
             )
 
-            np.save(
+            save_perturbation(
                 perturbation_path,
                 perturbed_labels,
             )
@@ -638,6 +700,24 @@ def run_d4(
             np.mean(perturbed_correct)
         )
 
+        baseline_selection = dict(
+            getattr(baseline_adapter, "selection", None) or {}
+        )
+        perturbed_selection = dict(
+            getattr(perturbed_adapter, "selection", None) or {}
+        )
+        if baseline_selection or perturbed_selection:
+            if (
+                baseline_selection.get("condition") != "baseline"
+                or perturbed_selection.get("condition") != "perturbed"
+                or baseline_selection.get("replicate") != replicate_index
+                or perturbed_selection.get("replicate") != replicate_index
+            ):
+                raise RuntimeError(
+                    "Selected-checkpoint records do not match the "
+                    f"baseline/perturbed fits of replicate {replicate_index}."
+                )
+
         # ----------------------------------------------------
         # Paired inference
         # ----------------------------------------------------
@@ -674,6 +754,8 @@ def run_d4(
                 mcnemar_b=b,
                 mcnemar_c=c,
                 mcnemar_pvalue=p_value,
+                baseline_selection=baseline_selection,
+                perturbed_selection=perturbed_selection,
             )
         )
 
@@ -893,6 +975,8 @@ def generate_certificate(
                     "mcnemar_b": r.mcnemar_b,
                     "mcnemar_c": r.mcnemar_c,
                     "mcnemar_pvalue": r.mcnemar_pvalue,
+                    "baseline_selection": r.baseline_selection,
+                    "perturbed_selection": r.perturbed_selection,
                 }
                 for r in result.replicates
             ],

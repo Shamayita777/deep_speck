@@ -27,6 +27,117 @@ import os
 import numpy as np
 import speck as sp
 import train_nets as tn
+#: Predeclared checkpoint-selection rule for D4: the epoch with minimum
+#: validation loss (Gohr's original ``make_checkpoint`` criterion), chosen
+#: over the complete epoch history and reloaded from its immutable file.
+MODEL_SELECTION_RULE = "argmin_val_loss_over_all_epochs_reloaded"
+
+
+def epoch_metrics_path(checkpoint_directory: Path, epoch: int) -> Path:
+    return Path(checkpoint_directory) / f"checkpoint_epoch_{int(epoch):03d}.metrics.json"
+
+
+def _sha256_file(path: Path) -> str:
+    import hashlib
+
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _write_json_atomic(path: Path, payload: dict) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    with temporary.open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, indent=2, sort_keys=True)
+        handle.write("\n")
+    os.replace(temporary, path)
+
+
+def select_checkpoint(
+    checkpoint_directory: Path,
+    *,
+    total_epochs: int,
+    seed: int,
+    condition: str,
+    replicate: int,
+    config_hash: str,
+) -> dict:
+    """Select the minimum-val_loss epoch from the immutable epoch records.
+
+    Every epoch 1..total_epochs must have a record whose identity fields
+    match this fit and whose checkpoint still hashes to the recorded
+    digest.  Anything missing, malformed, foreign or altered is refused.
+    Ties resolve to the earliest epoch.
+    """
+    checkpoint_directory = Path(checkpoint_directory)
+    expected = {
+        "seed": int(seed),
+        "condition": str(condition),
+        "replicate": int(replicate),
+        "config_hash": str(config_hash),
+    }
+    records = []
+    for epoch in range(1, int(total_epochs) + 1):
+        path = epoch_metrics_path(checkpoint_directory, epoch)
+        if not path.exists():
+            raise RuntimeError(f"Epoch record missing: {path}. Refusing to select a checkpoint.")
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(f"Epoch record is malformed: {path}") from exc
+        for key, value in expected.items():
+            if record.get(key) != value:
+                raise RuntimeError(
+                    f"Epoch record {path} has {key}={record.get(key)!r}, "
+                    f"expected {value!r}. Refusing to mix fits."
+                )
+        if record.get("epoch") != epoch or record.get("checkpoint") != f"checkpoint_epoch_{epoch:03d}.keras":
+            raise RuntimeError(f"Epoch record {path} does not describe epoch {epoch}.")
+        val_loss = record.get("val_loss")
+        if not isinstance(val_loss, float) or not np.isfinite(val_loss):
+            raise RuntimeError(f"Epoch record {path} has a non-finite val_loss.")
+        records.append(record)
+
+    best = min(records, key=lambda r: (r["val_loss"], r["epoch"]))
+    checkpoint = checkpoint_directory / best["checkpoint"]
+    if not checkpoint.exists():
+        raise RuntimeError(f"Selected checkpoint is missing: {checkpoint}")
+    actual = _sha256_file(checkpoint)
+    if actual != best["checkpoint_sha256"]:
+        raise RuntimeError(
+            f"Selected checkpoint {checkpoint} hashes to {actual}, but its "
+            f"epoch record says {best['checkpoint_sha256']}. Refusing to load."
+        )
+    return {
+        "schema_version": "1.0",
+        "rule": MODEL_SELECTION_RULE,
+        "selected_epoch": best["epoch"],
+        "selected_val_loss": best["val_loss"],
+        "checkpoint": best["checkpoint"],
+        "checkpoint_sha256": actual,
+        "total_epochs": int(total_epochs),
+        **expected,
+    }
+
+
+def record_selection(path: Path, selection: dict) -> None:
+    """Write the selection record once; an existing record must agree."""
+    path = Path(path)
+    if path.exists():
+        existing = json.loads(path.read_text(encoding="utf-8"))
+        if existing != selection:
+            raise RuntimeError(
+                f"Existing selection record {path} disagrees with the "
+                "recomputed selection. Refusing to overwrite it."
+            )
+        return
+    _write_json_atomic(path, selection)
+
+
 class EpochStateCallback(Callback):
     """Atomically persist the completed epoch after its checkpoint exists.
 
@@ -65,6 +176,39 @@ class EpochStateCallback(Callback):
                 "Epoch state cannot advance because the expected epoch "
                 f"checkpoint does not exist: {checkpoint}"
             )
+        epoch_logs = {
+            key: float(value)
+            for key, value in (logs or {}).items()
+            if np.isscalar(value)
+        }
+        # Immutable per-epoch record binding the validation metric to the
+        # exact checkpoint bytes.  Model selection reads these records, so
+        # it survives resumption and detects a replaced checkpoint.
+        if "val_loss" not in epoch_logs:
+            raise RuntimeError(
+                "val_loss is missing from the epoch logs; model selection "
+                "cannot be recorded."
+            )
+        metrics_path = epoch_metrics_path(self.checkpoint_directory, completed)
+        if metrics_path.exists():
+            raise RuntimeError(
+                f"Refusing to overwrite existing epoch record {metrics_path}."
+            )
+        _write_json_atomic(
+            metrics_path,
+            {
+                "schema_version": "1.0",
+                "epoch": completed,
+                "checkpoint": checkpoint.name,
+                "checkpoint_sha256": _sha256_file(checkpoint),
+                "val_loss": epoch_logs["val_loss"],
+                "logs": epoch_logs,
+                "seed": self.seed,
+                "condition": self.condition,
+                "replicate": self.replicate,
+                "config_hash": self.config_hash,
+            },
+        )
         state = {
             "schema_version": "2.0",
             "seed": self.seed,
@@ -142,6 +286,7 @@ class GohrAdapter:
 
         self.model = None
         self.history = None
+        self.selection = None
 
     # ==========================================================
     # Dataset generation
@@ -338,8 +483,9 @@ class GohrAdapter:
                 f"epoch {completed_epochs}/{self.epochs}..."
             )
             if completed_epochs >= self.epochs:
-                self.model = load_model(resume_checkpoint, compile=True)
-                return self.model
+                return self._load_selected(
+                    checkpoint_directory, condition, replicate, run_config_hash
+                )
 
             self.model = load_model(resume_checkpoint, compile=True)
         else:
@@ -351,16 +497,11 @@ class GohrAdapter:
             tn.cyclic_lr(10, 0.002, 0.0001)
         )
 
+        # Model selection is done after training from the immutable epoch
+        # records (see select_checkpoint), not by a save_best_only file: such
+        # a file restarts its "best" on resume and, keyed only by seed, was
+        # shared by the baseline and perturbed fits of a replicate.
         callbacks = [scheduler]
-
-        # Preserve the original best-model artifact separately.
-        best_checkpoint = tn.make_checkpoint(
-            str(
-                self.model_directory
-                / f"best_{self.num_rounds}r_depth{self.depth}.keras"
-            )
-        )
-        callbacks.insert(0, best_checkpoint)
 
         # Immutable per-epoch recovery checkpoint.  The epoch number is in
         # the filename so a successful epoch is never overwritten.
@@ -403,6 +544,29 @@ class GohrAdapter:
             verbose=1,
         )
 
+        return self._load_selected(
+            checkpoint_directory, condition, replicate, run_config_hash
+        )
+
+    def _load_selected(self, checkpoint_directory, condition, replicate, run_config_hash):
+        """Select by validation loss, record the choice, reload those weights.
+
+        Downstream prediction uses ``self.model``, so after this call it is
+        the selected checkpoint rather than the last epoch held in memory.
+        """
+        selection = select_checkpoint(
+            checkpoint_directory,
+            total_epochs=self.epochs,
+            seed=self.seed,
+            condition=condition,
+            replicate=replicate,
+            config_hash=run_config_hash,
+        )
+        record_selection(Path(checkpoint_directory) / "selected_checkpoint.json", selection)
+        self.model = load_model(
+            Path(checkpoint_directory) / selection["checkpoint"], compile=True
+        )
+        self.selection = selection
         return self.model
 
     # ==========================================================
