@@ -70,8 +70,9 @@ $PY -B -m audit.dataset.experiments.d4_gohr_label_shuffle verify --run-dir $RUN
   - the preregistration is pending, malformed, uncommitted, modified, or differs from the anchor;
   - the approval is dated after its commit;
   - any of the 8 D4 source files is not clean at HEAD;
-  - `$RUN` or `$RUN.preflight_refused.json` already exists.
-- **Overlap policy:** if the approved overlap policy refuses, preflight exits 4. It writes `$RUN.preflight_refused.json` (with the measurements) and `$RUN.preflight_refused_dataset/` (the generated data, kept as is). The protocol then stops. Do not re-run preflight to obtain a different dataset; a new dataset needs a documented protocol amendment.
+  - `$RUN` or `$RUN.preflight_refused/` already exists;
+  - a `.<run>.staging_*` directory from an interrupted write exists. Inspect it; it was never accepted.
+- **Overlap policy:** if the approved overlap policy refuses, preflight exits 4. It writes one atomic directory, `$RUN.preflight_refused/`, holding the measurements and the generated data, kept as is. The protocol then stops. Do not re-run preflight to obtain a different dataset; a new dataset needs a documented protocol amendment.
 - **Run refuses** if:
   - the approved design or anchor differs from preflight;
   - any partition file differs from preflight;

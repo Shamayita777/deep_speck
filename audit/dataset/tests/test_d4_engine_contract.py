@@ -18,6 +18,7 @@ import numpy as np
 import pytest
 
 from audit.dataset import d4_controlled_perturbation as d4
+from audit.dataset import integrity as I
 from audit.dataset.integrity import IntegrityError, labelled_partition_digest
 from audit.dataset.perturbations.label_shuffle import LabelShufflePerturbation
 
@@ -178,25 +179,107 @@ def test_resume_reuses_verified_perturbation(tmp_path):
     assert [r.perturbation_record for r in first.replicates] == [r.perturbation_record for r in second.replicates]
 
 
-def test_tampered_perturbed_labels_are_refused(tmp_path):
+def indices_path(tmp_path, r=2):
+    return tmp_path / "fits" / "perturbations" / f"replicate_{r:02d}_indices.npy"
+
+
+def rewrite_indices(tmp_path, indices, r=2, fix_digest=True):
+    """Replace the persisted indices; optionally re-record their SHA-256 so only
+    the structural checks (not the digest) can catch the change."""
+    np.save(indices_path(tmp_path, r), indices)
+    if fix_digest:
+        path = sidecar(tmp_path, r)
+        record = json.loads(path.read_text())
+        record["files"]["indices"]["sha256"] = I.sha256_file(indices_path(tmp_path, r))
+        record["files"]["indices"]["dtype"] = np.asarray(indices).dtype.str
+        record["files"]["indices"]["shape"] = list(np.asarray(indices).shape)
+        path.write_text(json.dumps(record))
+
+
+def test_persisted_indices_are_a_verified_int64_bijection(tmp_path):
     run(tmp_path)
-    path = tmp_path / "fits" / "perturbations" / "replicate_02_labels.npy"
-    labels = np.load(path)
-    labels[[0, 1]] = labels[[1, 0]] if labels[0] != labels[1] else (1 - labels[0], 1 - labels[1])
-    np.save(path, labels)
+    indices = np.load(indices_path(tmp_path))
+    assert indices.dtype == np.dtype("<i8") and len(indices) == 600
+    assert np.array_equal(np.sort(indices), np.arange(600))
+    record = json.loads(sidecar(tmp_path, 2).read_text())
+    assert record["kind"] == "permutation_indices" and record["condition"] == "perturbed"
+    assert record["seed"] == run(tmp_path).replicates[1].seed     # resume reuses them
+
+
+def test_tampered_indices_digest_is_refused(tmp_path):
+    run(tmp_path)
+    indices = np.load(indices_path(tmp_path))
+    indices[[0, 1]] = indices[[1, 0]]
+    rewrite_indices(tmp_path, indices, fix_digest=False)
     with pytest.raises(IntegrityError, match="digest"):
         run(tmp_path)
 
 
-@pytest.mark.parametrize("field, value", [("replicate", 2), ("audit_seed", 7),
-                                          ("source_train_digest", "0" * 64), ("perturbation", "other")])
-def test_perturbation_reused_across_replicates_or_datasets_is_refused(tmp_path, field, value):
+@pytest.mark.parametrize("make, match", [
+    (lambda i: np.r_[i[:-1], i[0]], "bijection"),                    # duplicate index
+    (lambda i: i.astype(np.int32), "dtype"),                           # wrong dtype
+    (lambda i: i[:-1], "shape"),                                       # wrong length
+    (lambda i: np.r_[i[:-1], 600], "outside"),                         # out of range
+    (lambda i: i.astype(">i8"), "dtype"),                              # wrong byte order
+    (lambda i: np.roll(i, 1), "regenerates"),                          # valid bijection, not the planned one
+])
+def test_structurally_invalid_or_unplanned_indices_are_refused(tmp_path, make, match):
     run(tmp_path)
-    record = json.loads(sidecar(tmp_path).read_text())
-    record[field] = value
-    sidecar(tmp_path).write_text(json.dumps(record))
-    with pytest.raises(IntegrityError, match=field):
+    rewrite_indices(tmp_path, make(np.load(indices_path(tmp_path))))
+    with pytest.raises(IntegrityError, match=match):
         run(tmp_path)
+
+
+def test_bijection_check_directly():
+    I.verify_permutation_indices(np.array([2, 0, 1], dtype="<i8"), 3)
+    I.verify_permutation_indices(np.zeros(0, dtype="<i8"), 0)
+    with pytest.raises(IntegrityError, match="bijection"):
+        I.verify_permutation_indices(np.array([0, 0, 2], dtype="<i8"), 3)
+
+
+def test_indices_bound_to_training_labels(tmp_path):
+    run(tmp_path)
+    x, y = data()
+    other = y.copy()
+    other[[0, 1, 2]] = 1 - other[[0, 1, 2]]
+    tx, ty = data(seed=4)
+    with pytest.raises(IntegrityError, match="source_train_digest|source_label_digest"):
+        d4.run_d4(perturbation=LabelShufflePerturbation(), train_features=x, train_labels=other,
+                  test_features=tx, test_labels=ty, adapter_factory=ThresholdAdapter,
+                  checkpoint_root=tmp_path / "fits", replicates=3, audit_seed=0, effect_threshold=0.01,
+                  bootstrap_replicates=1000, alpha=0.05, run_config_hash=CONFIG,
+                  decision_rule="directional_iut_v2")
+
+
+class FlipFirstLabel(d4.Perturbation):
+    """Generic (non-index) label-only perturbation, to exercise the label-file path."""
+
+    label_only = True
+
+    def __init__(self):
+        super().__init__(name="flip_first", description="flip label 0")
+
+    def apply(self, x, y, *, rng):
+        y = np.asarray(y).copy()
+        y[0] = 1 - y[0]
+        return x, y
+
+    def verify(self, x, y, px, py):
+        if int(np.sum(np.asarray(y) != np.asarray(py))) != 1:
+            raise ValueError("flip_first must change exactly one label")
+
+
+def test_generic_label_file_path_persists_and_detects_tampering(tmp_path):
+    run(tmp_path, perturbation=FlipFirstLabel())
+    record = json.loads(sidecar(tmp_path).read_text())
+    assert record["kind"] == "labels"
+    run(tmp_path, perturbation=FlipFirstLabel())                  # verified reuse
+    path = tmp_path / "fits" / "perturbations" / "replicate_01_labels.npy"
+    labels = np.load(path)
+    labels[5] = 1 - labels[5]
+    np.save(path, labels)
+    with pytest.raises(IntegrityError, match="digest"):
+        run(tmp_path, perturbation=FlipFirstLabel())
 
 
 def test_label_shuffle_definition_check():

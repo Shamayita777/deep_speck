@@ -21,9 +21,12 @@ preflight       HUMAN-AUTHORISED.  Verifies the preregistration is approved,
                 encoding from the arrays, runs the read-only overlap audit,
                 applies the approved overlap policy, and writes run-dir/
                 {dataset/*.npy, preflight.json} as one exclusive directory.
-                A policy refusal writes only <run-dir>.preflight_refused.json
-                (the generated partitions are kept alongside it, never
-                regenerated or altered).
+                A policy refusal writes only <run-dir>.preflight_refused/
+                (measurements and the generated partitions, never
+                regenerated or altered).  Every output directory is written
+                in a hidden staging directory and renamed into place, so a
+                partial write is never accepted; a leftover staging
+                directory makes later stages refuse.
 run             HUMAN-AUTHORISED PRODUCTION.  Re-verifies the anchored
                 preregistration, preflight.json, every partition file and the
                 source identity recorded at preflight; trains and evaluates;
@@ -68,8 +71,8 @@ from audit.dataset.integrity import (
     sha256_file,
     source_identity,
     verify_anchored_committed_record,
+    stale_staging_directories,
     write_directory_exclusive,
-    write_json_exclusive,
 )
 
 # ============================================================
@@ -238,12 +241,29 @@ def _npy_bytes(array) -> bytes:
     return buffer.getvalue()
 
 
+def refused_directory(run_dir: Path) -> Path:
+    return Path(run_dir).with_name(Path(run_dir).name + ".preflight_refused")
+
+
 def load_preflight(run_dir: Path) -> tuple[dict, dict]:
-    """Read preflight.json and re-verify every partition file from its bytes."""
+    """Read preflight.json and re-verify every partition file from its bytes.
+
+    The dataset directory must hold exactly the recorded files.
+    """
+    run_dir = Path(run_dir)
+    stale = stale_staging_directories(run_dir)
+    if stale:
+        raise IntegrityError(f"Interrupted write {[p.name for p in stale]} exists beside {run_dir}; refusing.")
     preflight_path = run_dir / "preflight.json"
     preflight = read_json(preflight_path, "preflight record")
     if preflight.get("schema_version") != PREFLIGHT_SCHEMA or preflight.get("outcome") != "PASS":
         raise IntegrityError(f"{preflight_path} is not a passing {PREFLIGHT_SCHEMA} record.")
+    recorded = {preflight["partitions"][r][f"{k}_file"] for r in PARTITIONS for k in ("x", "y")}
+    present = {p.relative_to(run_dir).as_posix() for p in (run_dir / "dataset").rglob("*") if p.is_file()} \
+        if (run_dir / "dataset").is_dir() else set()
+    if present != recorded:
+        raise IntegrityError(f"Dataset directory differs from preflight.json: missing "
+                             f"{sorted(recorded - present)}, unexpected {sorted(present - recorded)}.")
     partitions = {}
     for role in PARTITIONS:
         entry = preflight["partitions"][role]
@@ -289,10 +309,14 @@ def stage_protocol_check(args) -> int:
 
 def stage_preflight(args) -> int:
     run_dir = Path(args.run_dir)
-    refused_path = run_dir.with_name(run_dir.name + ".preflight_refused.json")
-    for existing in (run_dir, refused_path):
+    refused_dir = refused_directory(run_dir)
+    for existing in (run_dir, refused_dir):
         if existing.exists():
             raise IntegrityError(f"Refusing: {existing} exists. Preflight never reuses or replaces a run directory.")
+    stale = stale_staging_directories(run_dir) + stale_staging_directories(refused_dir)
+    if stale:
+        raise IntegrityError(f"Interrupted preflight output {[p.name for p in stale]} exists; it was never "
+                             "accepted and is kept for investigation. Refusing.")
     record, values, anchor = load_approved_preregistration(args.preregistration, args.preregistration_sha256)
     identity = source_identity(SOURCE_FILES)
     dirty = [f for f, e in identity["files"].items() if not e["clean_at_head"]]
@@ -328,16 +352,15 @@ def stage_preflight(args) -> int:
                                                    for k, a in (("x", x), ("y", y))}),
         "overlap_audit": report,
     }
+    files["preflight.json"] = json.dumps(preflight, indent=2, sort_keys=True).encode() + b"\n"
     if violations:
-        # Keep the generated data for investigation; never regenerate.
-        kept = run_dir.with_name(run_dir.name + ".preflight_refused_dataset")
-        write_directory_exclusive(kept, files)
-        write_json_exclusive(refused_path, dict(preflight, kept_dataset=kept.name))
+        # The generated data and the measurements are kept together, written
+        # atomically; the data is never regenerated, deduplicated or altered.
+        write_directory_exclusive(refused_dir, files)
         print(f"PREFLIGHT REFUSED by the approved overlap policy: {violations}\n"
-              f"Measurements: {refused_path}. The protocol stops here; a new dataset needs a "
+              f"Measurements and data: {refused_dir}. The protocol stops here; a new dataset needs a "
               "documented protocol amendment.")
         return 4
-    files["preflight.json"] = json.dumps(preflight, indent=2, sort_keys=True).encode() + b"\n"
     write_directory_exclusive(run_dir, files)
     print(f"PREFLIGHT PASSED. Wrote {run_dir}. No model was trained and no test statistic was computed.")
     return 0
@@ -465,10 +488,14 @@ def verify_run(run_dir: Path) -> dict:
         if on_disk != record:
             raise IntegrityError(f"Replicate {r} perturbation sidecar differs from the certificate.")
         from audit.dataset.perturbations.label_shuffle import LabelShufflePerturbation
-        d4.load_verified_perturbation(run_dir / "fits" / "perturbations", replicate=r,
-                                      perturbation=LabelShufflePerturbation(),
-                                      source_train_digest=source_digest, audit_seed=design["audit_seed"],
-                                      train_features=partitions["train"][0], train_labels=partitions["train"][1])
+        shuffle = LabelShufflePerturbation()
+        child = np.random.SeedSequence(design["audit_seed"]).spawn(design["replicates"])[r - 1]
+        planned = shuffle.permutation_indices(len(partitions["train"][1]), np.random.default_rng(child))
+        d4.load_verified_perturbation(run_dir / "fits" / "perturbations", replicate=r, seed=seed,
+                                      perturbation=shuffle, source_train_digest=source_digest,
+                                      source_label_digest=partition_digest({"labels": partitions["train"][1]}),
+                                      audit_seed=design["audit_seed"], train_features=partitions["train"][0],
+                                      train_labels=partitions["train"][1], expected_indices=planned)
         for condition, train_digest in (("baseline", source_digest), ("perturbed", record["perturbed_train_digest"])):
             selection = row[f"{condition}_selection"]
             identity = {key: selection[key] for key in gohr_d4.IDENTITY_FIELDS}

@@ -373,7 +373,7 @@ def _bump_val_loss(path):
      "does not match preflight"),
     ("result/d4_certificate.json", lambda p: p.write_text(p.read_text().replace('"seed"', '"seed" ', 1)),
      "does not match the run manifest"),
-    ("fits/perturbations/replicate_01_labels.npy",
+    ("fits/perturbations/replicate_01_indices.npy",
      lambda p: p.write_bytes(p.read_bytes()[:-1] + bytes([p.read_bytes()[-1] ^ 1])), "digest"),
 ])
 def test_verify_detects_tampering(completed, tmp_path, target, mutate, match):
@@ -385,22 +385,159 @@ def test_verify_detects_tampering(completed, tmp_path, target, mutate, match):
         driver.verify_run(copy)
 
 
-def test_preflight_overlap_refusal_keeps_data_and_writes_no_run_dir(tmp_path, monkeypatch):
-    stub_gates(monkeypatch)
-    run_dir = tmp_path / "d4_run"
+def overlapping_partitions(sizes):
     rng = np.random.default_rng(1)
     x = rng.integers(0, 2, (40, 64), dtype=np.uint8)
     y = rng.integers(0, 2, 40, dtype=np.uint8)
-    monkeypatch.setattr(driver, "generate_gohr_partitions", lambda sizes: {
-        "train": (x, y), "validation": (x[:10].copy(), y[:10].copy()), "test": (x[30:].copy(), y[30:].copy())})
+    return {"train": (x, y), "validation": (x[:10].copy(), y[:10].copy()),
+            "test": (x[30:].copy(), y[30:].copy())}
+
+
+def test_preflight_overlap_refusal_keeps_data_and_writes_no_run_dir(tmp_path, monkeypatch):
+    stub_gates(monkeypatch)
+    run_dir = tmp_path / "d4_run"
+    monkeypatch.setattr(driver, "generate_gohr_partitions", overlapping_partitions)
     assert driver.main(["preflight", *stage_args(run_dir)]) == 4
     assert not run_dir.exists()
-    refused = json.loads(run_dir.with_name(run_dir.name + ".preflight_refused.json").read_text())
+    refused_dir = driver.refused_directory(run_dir)
+    refused = json.loads((refused_dir / "preflight.json").read_text())
     assert refused["outcome"] == "REFUSED"
     assert refused["overlap_audit"]["cross"]["train__test"]["rows"] == 10
-    kept = run_dir.with_name(run_dir.name + ".preflight_refused_dataset")
-    assert np.array_equal(np.load(kept / "dataset" / "train_x.npy"), x)
+    assert np.array_equal(np.load(refused_dir / "dataset" / "train_x.npy"), overlapping_partitions(None)["train"][0])
     assert driver.main(["preflight", *stage_args(run_dir)]) == 1   # not silently retried
+    with pytest.raises(I.IntegrityError, match="not a passing"):
+        driver.load_preflight(refused_dir)                          # a refusal is never usable as a run
+
+
+# ============================================================ crash-safe preflight persistence
+
+
+def small_partitions(sizes):
+    rng = np.random.default_rng(2)
+    return {r: (rng.integers(0, 2, (n, 64), dtype=np.uint8), rng.integers(0, 2, n, dtype=np.uint8))
+            for r, n in (("train", 64), ("validation", 32), ("test", 32))}
+
+
+def test_failure_during_dataset_write_leaves_nothing_accepted(tmp_path, monkeypatch):
+    stub_gates(monkeypatch)
+    monkeypatch.setattr(driver, "generate_gohr_partitions", small_partitions)
+    run_dir = tmp_path / "d4_run"
+    real_open, calls = Path.open, {"n": 0}
+
+    def failing_open(self, mode="r", *a, **k):
+        if "w" in mode and ".staging_" in str(self):
+            calls["n"] += 1
+            if calls["n"] == 4:
+                raise OSError("disk full (simulated)")
+        return real_open(self, mode, *a, **k)
+
+    monkeypatch.setattr(Path, "open", failing_open)
+    with pytest.raises(OSError, match="simulated"):
+        driver.main(["preflight", *stage_args(run_dir)])
+    monkeypatch.setattr(Path, "open", real_open)
+    assert not run_dir.exists()
+    assert I.stale_staging_directories(run_dir) == []              # in-process failure cleans up
+    assert driver.main(["preflight", *stage_args(run_dir)]) == 0   # a fresh, complete preflight is possible
+    driver.load_preflight(run_dir)
+
+
+def test_hard_crash_leftover_is_never_accepted_and_blocks_later_stages(tmp_path, monkeypatch):
+    stub_gates(monkeypatch)
+    monkeypatch.setattr(driver, "generate_gohr_partitions", small_partitions)
+    run_dir = tmp_path / "d4_run"
+    # Simulate a crash after some files were written but before the rename:
+    stale = tmp_path / ".d4_run.staging_crashed"
+    (stale / "dataset").mkdir(parents=True)
+    (stale / "dataset" / "train_x.npy").write_bytes(b"partial")
+    assert driver.main(["preflight", *stage_args(run_dir)]) == 1
+    assert not run_dir.exists() and (stale / "dataset" / "train_x.npy").read_bytes() == b"partial"
+    assert driver.main(["run", *stage_args(run_dir)]) == 1
+
+
+def test_crash_during_rename_cannot_expose_a_partial_run_dir(tmp_path, monkeypatch):
+    stub_gates(monkeypatch)
+    monkeypatch.setattr(driver, "generate_gohr_partitions", small_partitions)
+    run_dir = tmp_path / "d4_run"
+    monkeypatch.setattr(I.os, "rename", lambda a, b: (_ for _ in ()).throw(OSError("crash (simulated)")))
+    with pytest.raises(OSError, match="simulated"):
+        driver.main(["preflight", *stage_args(run_dir)])
+    assert not run_dir.exists()                                    # claimed empty dir is released
+
+
+@pytest.mark.parametrize("mutate, match", [
+    (lambda d: (d / "preflight.json").unlink(), "missing"),
+    (lambda d: (d / "dataset" / "extra.npy").write_bytes(b"x"), "unexpected"),
+    (lambda d: (d / "dataset" / "validation_y.npy").unlink(), "missing"),
+    (lambda d: (d / "preflight.json").write_text('{"schema_version"'), "truncated or malformed"),
+])
+def test_incomplete_or_altered_preflight_directory_is_refused(tmp_path, monkeypatch, mutate, match):
+    stub_gates(monkeypatch)
+    monkeypatch.setattr(driver, "generate_gohr_partitions", small_partitions)
+    run_dir = tmp_path / "d4_run"
+    assert driver.main(["preflight", *stage_args(run_dir)]) == 0
+    mutate(run_dir)
+    with pytest.raises(I.IntegrityError, match=match):
+        driver.load_preflight(run_dir)
+    assert driver.main(["run", *stage_args(run_dir)]) == 1
+
+
+# ============================================================ wiring and evidence identity
+
+PINNED_GOHR_ADAPTER_SHA256 = "3c0b7ac5327c68233ac792062f3559232cfc965b8a403312e552bcb2b516b488"
+
+
+def test_experiment_trains_with_the_d4_adapter_not_the_pinned_base(tmp_path):
+    _, _, vx, vy = tiny()
+    factory = driver.make_adapter_factory(tmp_path, {"epochs": 2}, {"validation": (vx, vy)}, "f" * 64)
+    adapter = factory(5)
+    assert type(adapter) is G.GohrD4Adapter
+    assert adapter.test_x is None and adapter.evaluation_digest == "f" * 64
+    import inspect
+    source = inspect.getsource(driver)
+    # The pinned base adapter is used only to generate data, never to train.
+    assert source.count("from audit.dataset.adapters.gohr import GohrAdapter") == 1
+    assert "GohrAdapter(num_rounds=NUM_ROUNDS, depth=DEPTH)" in inspect.getsource(driver.generate_gohr_partitions)
+
+
+def test_completed_run_was_trained_by_the_d4_lifecycle(completed):
+    run_dir, _ = completed
+    for r in (1, 2):
+        for condition in ("baseline", "perturbed"):
+            directory = run_dir / "fits" / f"replicate_{r:02d}" / condition
+            assert json.loads((directory / "state.json").read_text())["schema_version"] == G.STATE_SCHEMA
+            assert json.loads((directory / "selected_checkpoint.json").read_text())["rule"] == G.MODEL_SELECTION_RULE
+    assert not list((run_dir / "fits").rglob("best_*"))
+
+
+def test_pinned_gohr_adapter_is_byte_identical():
+    assert I.sha256_file(I.REPOSITORY_ROOT / "audit/dataset/adapters/gohr.py") == PINNED_GOHR_ADAPTER_SHA256
+
+
+SEALED = ["audit/dataset/evidence/d0_gohr_speck_r5_production_730516c79981/d0_gohr_build_attestation.json",
+          "audit/dataset/evidence/d3_gohr_speck3264_r5_confirmatory_730516c79981/d3_gohr_certificate.json"]
+
+
+@pytest.mark.parametrize("record", SEALED)
+def test_every_source_pinned_by_sealed_d0_d3_evidence_still_matches(record):
+    path = I.REPOSITORY_ROOT / record
+    if not path.is_file():
+        pytest.skip(f"sealed evidence not present on this machine: {record}")
+    pins = []
+
+    def walk(node):
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key.endswith(".py") and isinstance(value, dict) and "sha256" in value:
+                    pins.append((key, value["sha256"]))
+                walk(value)
+        elif isinstance(node, list):
+            for value in node:
+                walk(value)
+
+    walk(json.loads(path.read_text()))
+    assert pins, "no source pins found"
+    mismatched = [k for k, h in pins if I.sha256_file(I.REPOSITORY_ROOT / k) != h]
+    assert mismatched == []
 
 
 def test_input_encoding_is_checked_from_arrays():

@@ -21,9 +21,9 @@
   },
   "perturbation": {
     "name": "label_shuffle",
-    "construction": "rng.permutation(train_labels) with rng = default_rng(SeedSequence(audit_seed).spawn(replicates)[r-1]); features unchanged.",
+    "construction": "indices = rng.permutation(n_train) as little-endian int64, with rng = default_rng(SeedSequence(audit_seed).spawn(replicates)[r-1]); perturbed_labels[i] = train_labels[indices[i]]; features unchanged.",
     "definition_check": "LabelShufflePerturbation.verify: features byte-identical; labels same length, dtype and label multiset.",
-    "persistence": "Perturbed labels persisted per replicate with a sidecar binding their SHA-256 to the source training digest, replicate, audit seed and perturbation name; on resume they must also equal the permutation the audit seed regenerates."
+    "persistence": "Only the permutation indices are persisted per replicate. Before any reuse they must be a bijection of range(n_train) with dtype <i8 and length n_train, match their SHA-256, equal the permutation the audit seed regenerates, and their sidecar must bind them to the training-data and training-label digests, condition (perturbed), replicate, model seed, audit seed and perturbation name. The perturbed labels are re-derived from them and checked against the recorded perturbed-data digest."
   },
   "fixed_design": {
     "source": "Carried unchanged from the existing D4 run configuration (audit/dataset/evidence/d4/run_manifest.json) and Gohr's published training procedure; approved as a whole by the top-level approval.",

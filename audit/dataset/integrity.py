@@ -120,16 +120,46 @@ def read_json(path: Path, what: str) -> dict:
     return value
 
 
+def stale_staging_directories(out_dir: Path) -> list[Path]:
+    """Staging directories an interrupted write_directory_exclusive left behind."""
+    out_dir = Path(out_dir)
+    if not out_dir.parent.is_dir():
+        return []
+    return sorted(out_dir.parent.glob(f".{out_dir.name}.staging_*"))
+
+
+def _fsync_directory(path: Path) -> None:
+    try:
+        fd = os.open(str(path), os.O_RDONLY)
+    except OSError:
+        return
+    try:
+        os.fsync(fd)
+    except OSError:
+        pass
+    finally:
+        os.close(fd)
+
+
 def write_directory_exclusive(out_dir: Path, files: Mapping[str, bytes]) -> None:
     """Write a complete set of files into a new directory, or nothing.
 
-    The directory is claimed with an exclusive mkdir and the fully written
-    staging directory is renamed onto it, so a refusal or crash never leaves
-    a partially replaced record.
+    Files are written and fsynced in a hidden staging directory beside the
+    target; the target is claimed with an exclusive mkdir and the staging
+    directory renamed onto it.  A failure inside the process removes the
+    staging directory; a hard crash can leave one behind, which is never
+    read as a result and makes every later write to the same target refuse
+    until a human has looked at it.
     """
     out_dir = Path(out_dir)
     if out_dir.exists():
         raise IntegrityError(f"Refusing to write into existing directory {out_dir}.")
+    stale = stale_staging_directories(out_dir)
+    if stale:
+        raise IntegrityError(
+            f"An interrupted write left {[p.name for p in stale]} beside {out_dir}. It was never "
+            "accepted as complete; it is kept for investigation. Refusing until it is resolved."
+        )
     out_dir.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=f".{out_dir.name}.staging_", dir=str(out_dir.parent)))
     claimed = False
@@ -137,7 +167,10 @@ def write_directory_exclusive(out_dir: Path, files: Mapping[str, bytes]) -> None
         for name, data in files.items():
             target = staging / name
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(data)
+            with target.open("wb") as handle:
+                handle.write(data)
+                handle.flush()
+                os.fsync(handle.fileno())
         try:
             os.mkdir(out_dir)
         except FileExistsError:
@@ -145,6 +178,7 @@ def write_directory_exclusive(out_dir: Path, files: Mapping[str, bytes]) -> None
         claimed = True
         os.rename(staging, out_dir)
         claimed = False
+        _fsync_directory(out_dir.parent)
     finally:
         if staging.exists():
             shutil.rmtree(staging, ignore_errors=True)
@@ -357,3 +391,29 @@ def source_identity(paths: Iterable[Path], root: Path = REPOSITORY_ROOT) -> dict
             "clean_at_head": status.returncode == 0 and not status.stdout.strip(),
         }
     return {"git_head": head.stdout.decode().strip() if head.returncode == 0 else None, "files": files}
+
+
+# ============================================================
+# Permutations
+# ============================================================
+
+PERMUTATION_INDEX_DTYPE = np.dtype("<i8")
+
+
+def verify_permutation_indices(indices: Any, n: int) -> np.ndarray:
+    """Return ``indices`` if it is a bijection of range(n) stored as little-endian int64.
+
+    Checks dtype, dimensionality, length, bounds and that every index occurs
+    exactly once (bincount over n, so O(n) time and 8n bytes of memory).
+    """
+    indices = np.asarray(indices)
+    if indices.dtype != PERMUTATION_INDEX_DTYPE:
+        raise IntegrityError(f"Permutation indices have dtype {indices.dtype.str}, expected "
+                             f"{PERMUTATION_INDEX_DTYPE.str}.")
+    if indices.ndim != 1 or len(indices) != int(n):
+        raise IntegrityError(f"Permutation indices have shape {indices.shape}, expected ({int(n)},).")
+    if n and (int(indices.min()) < 0 or int(indices.max()) >= n):
+        raise IntegrityError("Permutation indices fall outside range(n).")
+    if n and not np.all(np.bincount(indices, minlength=int(n)) == 1):
+        raise IntegrityError("Permutation indices repeat or omit an index; not a bijection of range(n).")
+    return indices

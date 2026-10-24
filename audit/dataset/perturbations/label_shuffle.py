@@ -15,6 +15,17 @@ class LabelShufflePerturbation(Perturbation):
     """Randomly permute training labels using an explicit RNG."""
 
     label_only = True
+    index_based = True
+
+    def permutation_indices(self, n: int, rng: np.random.Generator) -> np.ndarray:
+        """A uniformly random bijection of range(n) as little-endian int64."""
+        if not isinstance(rng, np.random.Generator):
+            raise TypeError("rng must be an instance of numpy.random.Generator.")
+        return rng.permutation(int(n)).astype("<i8")
+
+    def apply_indices(self, features, labels, indices):
+        """Perturbed labels[i] = labels[indices[i]]; features unchanged."""
+        return features, np.asarray(labels)[np.asarray(indices)]
 
     def __init__(self) -> None:
         super().__init__(
@@ -44,7 +55,7 @@ class LabelShufflePerturbation(Perturbation):
         if len(features) != len(labels):
             raise ValueError("features and labels must contain the same number of samples.")
 
-        shuffled = rng.permutation(labels)
+        _, shuffled = self.apply_indices(features, labels, self.permutation_indices(len(labels), rng))
 
         if not np.array_equal(
             np.sort(labels.reshape(-1)),

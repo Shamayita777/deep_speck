@@ -32,8 +32,14 @@ Fit identity = seed, condition, replicate, config hash, `train_digest` (features
 
 ## 3. Data, perturbation and leakage
 
+- **Preflight persistence** is crash-safe. Every output directory (run directory or refusal) is written and fsynced in a hidden `.<name>.staging_*` directory and renamed into place. An in-process failure removes the staging directory. A hard crash leaves it behind: it is never read as a result, and preflight and run then refuse until a human has looked at it. `load_preflight` requires `preflight.json` and exactly the recorded dataset files.
 - **Partitions** are generated once at preflight by three independent `speck.make_train_data(n, 5)` calls (os.urandom, not seedable) and persisted. Each file's SHA-256 and a canonical digest are recorded; the digest covers role, dtype with byte order, shape and C-order bytes. Every later stage re-verifies them and re-checks the input encoding from the arrays themselves.
-- **Label shuffle** is persisted per replicate. Its sidecar binds the label digest to the source training digest, replicate, audit seed and perturbation name. On resume the labels must also equal the permutation the audit seed regenerates, and must pass `LabelShufflePerturbation.verify`: features byte-identical, labels the same multiset. Reuse across replicates, seeds or datasets is refused.
+- **Label shuffle** persists only its permutation indices. Before reuse they must:
+  - be a bijection of range(n), checked by bincount, as little-endian int64 of length n;
+  - match their SHA-256;
+  - equal the permutation the audit seed regenerates.
+
+  The sidecar binds the indices to the training-data digest, the training-label digest, the condition (`perturbed`), replicate, model seed, audit seed and perturbation name. The labels are re-derived from the indices, checked against the recorded perturbed-data digest, and passed through `LabelShufflePerturbation.verify`. Non-index perturbations use the generic label/feature-file path, which is tested separately.
 - **Leakage:** the test partition only ever reaches `predict()` of the reloaded selected models. `GohrD4Adapter` refuses to be constructed with test data. Checkpoint selection uses validation loss only, and no test statistic is computed before every fit has finished.
 
 ## 4. Partition overlap
@@ -44,7 +50,7 @@ Fit identity = seed, condition, replicate, config hash, `train_digest` (features
 
 Tests cover high-bit and low-bit separation, row order, wide and non-binary rows, chunking, empty partitions and length mismatch.
 
-The audit runs at preflight on the actual D4 partitions, before any training. The counts and digests are bound into `preflight.json` and the certificate. The policy (pending) decides refusal. A refusal keeps the generated data beside the run directory and records the measurements; nothing is regenerated, deduplicated or altered.
+The audit runs at preflight on the actual D4 partitions, before any training. The counts and digests are bound into `preflight.json` and the certificate. The policy (pending) decides refusal. A refusal writes one atomic `<run>.preflight_refused/` directory holding the measurements and the generated data; nothing is regenerated, deduplicated or altered.
 
 **Prior measurements:**
 - **Historical D4 partitions: not measurable.** Only `audit/dataset/evidence/d4/metadata.json` exists; the `.npy` files are not on disk. No overlap claim is made about them.
@@ -67,7 +73,7 @@ Both rules are implemented. Which one is confirmatory is decision `decision_rule
 
 ## 6. Traceability
 
-The original "nine fixes" list is not recorded anywhere in the repository and could not be recovered item for item. The table lists every defect that is recoverable from the repository history, diffs, reviews and code.
+**The original "nine fixes" list could not be recovered.** I searched the repository, its history and every local Claude Code transcript under `~/.claude/projects/-Users-oishimoitra/`. The only transcript mentioning the D4 code (`e9599995…`) contains no such list, and every other "nine" refers to nine D3 test files. The list was therefore made in a conversation not stored on this machine. The table below lists every defect recoverable from history, diffs, reviews and code; no item is invented to reach nine.
 
 | # | Defect / requirement | File / function | Change | Regression test(s) | Result |
 |---|---|---|---|---|---|
@@ -92,6 +98,9 @@ The original "nine fixes" list is not recorded anywhere in the repository and co
 | 19 | No D4 preregistration, approval gate or staged workflow | prereg JSON, engine `review_/require_approved_preregistration`, driver stages | Draft + gates; preflight/run refuse until approved, committed and anchored | `test_protocol_check_reports_pending_draft`, `test_preflight_refuses_the_unapproved_draft`, `test_anchored_record_*`, `test_shipped_gohr_draft_is_well_formed_and_entirely_pending` | PASS (code); approval **BLOCKED** (human) |
 | 20 | Test data given to the training adapter | `GohrD4Adapter.__init__` | Refuses test arrays; test bound by digest only | `test_adapter_refuses_test_data` | PASS |
 | 21 | `feature_shuffle`, `class_imbalance`, `metadata_removal` have no definition check | `perturbations/*.py` | Engine now refuses them (`verify` missing); not implemented | `test_perturbation_without_verify_is_refused` | NOT FIXED (out of D4 Gohr scope) |
+| 23 | Persisted permutation not checked as a bijection or bound to the label digest, condition and seed | `integrity.verify_permutation_indices`, engine `save_/load_verified_perturbation`, `LabelShufflePerturbation.permutation_indices` | Indices persisted and verified (dtype, length, bounds, bijection, digest, regenerated plan); sidecar binds condition, seed, label digest | `test_persisted_indices_are_a_verified_int64_bijection`, `test_structurally_invalid_or_unplanned_indices_are_refused[6 cases]`, `test_indices_bound_to_training_labels`, `test_perturbation_reused_across_…[8 fields]` | PASS |
+| 24 | Preflight dataset persistence not crash-safe; refusal written in two steps | `integrity.write_directory_exclusive`, `stale_staging_directories`; driver `stage_preflight`, `load_preflight` | fsync + atomic rename; stale staging refused; single refusal directory; exact file set | `test_failure_during_dataset_write_…`, `test_hard_crash_leftover_…`, `test_crash_during_rename_…`, `test_incomplete_or_altered_preflight_directory_is_refused[4]` | PASS |
+| 25 | Experiment must train with the D4 adapter while the pinned base stays byte-identical | driver `make_adapter_factory`, `generate_gohr_partitions` | `GohrD4Adapter` trains; the pinned `GohrAdapter` only generates data | `test_experiment_trains_with_the_d4_adapter_…`, `test_completed_run_was_trained_by_the_d4_lifecycle`, `test_pinned_gohr_adapter_is_byte_identical`, `test_every_source_pinned_by_sealed_d0_d3_evidence_still_matches[2]` | PASS |
 | 22 | AutoND staged 5→7 training hand-off | AutoND implementation-integrity workflow | Not touched: it is a separate workflow with no shared D4 component, and no AutoND D4 design exists | — | **BLOCKED**: needs an AutoND D4 protocol before any code |
 
 ## 7. Residual engineering notes

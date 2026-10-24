@@ -53,6 +53,8 @@ from scipy.stats import binomtest
 from audit.dataset.integrity import (
     IntegrityError,
     labelled_partition_digest,
+    partition_digest,
+    verify_permutation_indices,
     read_json,
     sha256_file,
     write_bytes_exclusive,
@@ -114,6 +116,17 @@ class Perturbation:
     #: True if apply() returns the input features unchanged (only labels
     #: are perturbed); the engine then persists labels only.
     label_only: bool = False
+
+    #: True if the perturbation is a permutation of label positions given by
+    #: ``permutation_indices(n, rng)`` and applied by ``apply_indices``; the
+    #: engine then persists and verifies the indices themselves.
+    index_based: bool = False
+
+    def permutation_indices(self, n: int, rng: np.random.Generator) -> np.ndarray:
+        raise NotImplementedError("index_based perturbations must implement permutation_indices().")
+
+    def apply_indices(self, features: Any, labels: Any, indices: Any) -> tuple[Any, Any]:
+        raise NotImplementedError("index_based perturbations must implement apply_indices().")
 
     def verify(
         self,
@@ -477,19 +490,47 @@ def verify_adapter_selection(adapter: Any, *, condition: str, replicate: int, se
 # ============================================================
 
 
-def save_perturbation(directory: Path, *, replicate: int, perturbation: Perturbation,
-                      source_train_digest: str, audit_seed: int, features: Any, labels: Any) -> dict:
-    """Persist one replicate's perturbed training data with provenance.
+PERTURBATION_SCHEMA = "d4-perturbation-3"
 
-    Writes ``replicate_NN_labels.npy`` (and ``replicate_NN_features.npy``
-    unless the perturbation is label-only) and a sidecar binding their
-    SHA-256 to the source training data, replicate, audit seed and
-    perturbation.  Nothing existing is replaced.
+
+def _perturbation_binding(*, replicate, seed, perturbation, audit_seed, source_train_digest,
+                          source_label_digest) -> dict:
+    return {
+        "schema_version": PERTURBATION_SCHEMA,
+        "perturbation": perturbation.name,
+        "kind": "permutation_indices" if perturbation.index_based else
+                ("labels" if perturbation.label_only else "features_and_labels"),
+        "condition": "perturbed",
+        "replicate": int(replicate),
+        "seed": int(seed),
+        "audit_seed": int(audit_seed),
+        "source_train_digest": source_train_digest,
+        "source_label_digest": source_label_digest,
+    }
+
+
+def save_perturbation(directory: Path, *, replicate: int, seed: int, perturbation: Perturbation,
+                      source_train_digest: str, source_label_digest: str, audit_seed: int,
+                      features: Any, labels: Any, indices: Any = None) -> dict:
+    """Persist one replicate's perturbation with provenance; never replace anything.
+
+    Index-based perturbations (label shuffle) persist only the permutation
+    indices (``replicate_NN_indices.npy``, little-endian int64, a verified
+    bijection of range(n)); the perturbed labels are re-derived from them.
+    Other perturbations persist their labels, and features unless label-only.
+    The sidecar binds the files' SHA-256 to the perturbation, condition,
+    replicate, model seed, audit seed and the source training-data and
+    training-label digests.
     """
     directory = Path(directory)
     stem = f"replicate_{replicate:02d}"
     sidecar_path = directory / f"{stem}.perturbation.json"
-    arrays = {"labels": labels} if perturbation.label_only else {"features": features, "labels": labels}
+    if perturbation.index_based:
+        arrays = {"indices": verify_permutation_indices(indices, len(np.asarray(labels).reshape(-1)))}
+    elif perturbation.label_only:
+        arrays = {"labels": labels}
+    else:
+        arrays = {"features": features, "labels": labels}
     paths = {name: directory / f"{stem}_{name}.npy" for name in arrays}
     for path in [sidecar_path, *paths.values()]:
         if path.exists():
@@ -500,52 +541,69 @@ def save_perturbation(directory: Path, *, replicate: int, perturbation: Perturba
         buffer = io.BytesIO()
         np.save(buffer, np.ascontiguousarray(np.asarray(array)))
         write_bytes_exclusive(paths[name], buffer.getvalue())
-        files[name] = {"file": paths[name].name, "sha256": sha256_file(paths[name])}
-    sidecar = {
-        "schema_version": "d4-perturbation-2",
-        "perturbation": perturbation.name,
-        "label_only": bool(perturbation.label_only),
-        "replicate": int(replicate),
-        "audit_seed": int(audit_seed),
-        "source_train_digest": source_train_digest,
-        "perturbed_train_digest": labelled_partition_digest(features, labels),
-        "files": files,
-    }
+        files[name] = {"file": paths[name].name, "sha256": sha256_file(paths[name]),
+                       "dtype": np.asarray(array).dtype.str, "shape": list(np.asarray(array).shape)}
+    sidecar = dict(
+        _perturbation_binding(replicate=replicate, seed=seed, perturbation=perturbation,
+                              audit_seed=audit_seed, source_train_digest=source_train_digest,
+                              source_label_digest=source_label_digest),
+        files=files,
+        perturbed_train_digest=labelled_partition_digest(features, labels),
+    )
     write_json_exclusive(sidecar_path, sidecar)
     return sidecar
 
 
-def load_verified_perturbation(directory: Path, *, replicate: int, perturbation: Perturbation,
-                               source_train_digest: str, audit_seed: int,
-                               train_features: Any, train_labels: Any) -> tuple[Any, Any, dict]:
+def load_verified_perturbation(directory: Path, *, replicate: int, seed: int, perturbation: Perturbation,
+                               source_train_digest: str, source_label_digest: str, audit_seed: int,
+                               train_features: Any, train_labels: Any,
+                               expected_indices: Any = None) -> tuple[Any, Any, dict]:
     """Reload a persisted perturbation only if it provably belongs here.
 
-    The sidecar must name this perturbation, replicate, audit seed and
-    source training data; every file must match its digest; and the
-    perturbation's own ``verify`` must accept the result.
+    The sidecar must carry exactly this perturbation, condition, replicate,
+    seed, audit seed and source digests; every file must match its digest,
+    dtype and shape; permutation indices must be a bijection of range(n)
+    and, when ``expected_indices`` is given, equal the permutation the audit
+    seed regenerates; and the perturbation's ``verify`` must accept the
+    re-derived data.
     """
     directory = Path(directory)
     stem = f"replicate_{replicate:02d}"
     sidecar = read_json(directory / f"{stem}.perturbation.json", f"replicate {replicate} perturbation record")
-    expected = {"schema_version": "d4-perturbation-2", "perturbation": perturbation.name,
-                "label_only": bool(perturbation.label_only), "replicate": int(replicate),
-                "audit_seed": int(audit_seed), "source_train_digest": source_train_digest}
+    expected = _perturbation_binding(replicate=replicate, seed=seed, perturbation=perturbation,
+                                     audit_seed=audit_seed, source_train_digest=source_train_digest,
+                                     source_label_digest=source_label_digest)
     for key, value in expected.items():
         if sidecar.get(key) != value:
             raise IntegrityError(
                 f"Persisted perturbation for replicate {replicate} has {key}={sidecar.get(key)!r}, "
-                f"expected {value!r}. Refusing to reuse it across conditions, replicates or datasets."
+                f"expected {value!r}. Refusing to reuse it across conditions, replicates, seeds or datasets."
             )
+    names = {"permutation_indices": ("indices",), "labels": ("labels",),
+             "features_and_labels": ("features", "labels")}[expected["kind"]]
+    if set(sidecar.get("files", {})) != set(names):
+        raise IntegrityError(f"Persisted perturbation for replicate {replicate} lists unexpected files.")
     arrays = {}
-    for name in (("labels",) if perturbation.label_only else ("features", "labels")):
-        entry = sidecar.get("files", {}).get(name) or {}
+    for name in names:
+        entry = sidecar["files"][name]
         path = directory / str(entry.get("file", ""))
         if not path.is_file() or sha256_file(path) != entry.get("sha256"):
             raise IntegrityError(f"Persisted perturbation {name} for replicate {replicate} is missing "
                                  "or does not match its recorded digest.")
-        arrays[name] = np.load(path, mmap_mode="r")
-    features = train_features if perturbation.label_only else arrays["features"]
-    labels = arrays["labels"]
+        array = np.load(path, mmap_mode="r")
+        if array.dtype.str != entry.get("dtype") or list(array.shape) != entry.get("shape"):
+            raise IntegrityError(f"Persisted perturbation {name} for replicate {replicate} has the wrong "
+                                 "dtype or shape.")
+        arrays[name] = array
+    if perturbation.index_based:
+        indices = verify_permutation_indices(arrays["indices"], len(np.asarray(train_labels).reshape(-1)))
+        if expected_indices is not None and not np.array_equal(indices, expected_indices):
+            raise IntegrityError(f"Persisted permutation for replicate {replicate} differs from the one "
+                                 "the audit seed regenerates. Refusing to resume.")
+        features, labels = perturbation.apply_indices(train_features, train_labels, indices)
+    else:
+        features = train_features if perturbation.label_only else arrays["features"]
+        labels = arrays["labels"]
     if labelled_partition_digest(features, labels) != sidecar.get("perturbed_train_digest"):
         raise IntegrityError(f"Persisted perturbation for replicate {replicate} does not reproduce "
                              "its recorded perturbed-data digest.")
@@ -698,6 +756,7 @@ def run_d4(
 
     checkpoint_root = Path(checkpoint_root)
     source_digest = labelled_partition_digest(train_features, train_labels)
+    label_digest = partition_digest({"labels": train_labels})
     child_sequences = np.random.SeedSequence(audit_seed).spawn(replicates)
     replicate_results: list[ReplicateResult] = []
 
@@ -726,12 +785,19 @@ def run_d4(
         sidecar_path = perturbation_directory / f"replicate_{replicate_index:02d}.perturbation.json"
         # The perturbation RNG is always drawn, so the stream does not depend
         # on whether this is a fresh run or a resume.
-        fresh_features, fresh_labels = perturbation.apply(train_features, train_labels, rng=rng)
+        if perturbation.index_based:
+            fresh_indices = perturbation.permutation_indices(len(np.asarray(train_labels).reshape(-1)), rng)
+            fresh_features, fresh_labels = perturbation.apply_indices(train_features, train_labels, fresh_indices)
+        else:
+            fresh_indices = None
+            fresh_features, fresh_labels = perturbation.apply(train_features, train_labels, rng=rng)
+        binding = dict(replicate=replicate_index, seed=seed_value, perturbation=perturbation,
+                       source_train_digest=source_digest, source_label_digest=label_digest,
+                       audit_seed=audit_seed)
         if sidecar_path.exists():
             perturbed_features, perturbed_labels, perturbation_record = load_verified_perturbation(
-                perturbation_directory, replicate=replicate_index, perturbation=perturbation,
-                source_train_digest=source_digest, audit_seed=audit_seed,
-                train_features=train_features, train_labels=train_labels,
+                perturbation_directory, train_features=train_features, train_labels=train_labels,
+                expected_indices=fresh_indices, **binding,
             )
             if labelled_partition_digest(fresh_features, fresh_labels) != perturbation_record["perturbed_train_digest"]:
                 raise IntegrityError(
@@ -741,9 +807,8 @@ def run_d4(
         else:
             perturbation.verify(train_features, train_labels, fresh_features, fresh_labels)
             perturbation_record = save_perturbation(
-                perturbation_directory, replicate=replicate_index, perturbation=perturbation,
-                source_train_digest=source_digest, audit_seed=audit_seed,
-                features=fresh_features, labels=fresh_labels,
+                perturbation_directory, features=fresh_features, labels=fresh_labels,
+                indices=fresh_indices, **binding,
             )
             perturbed_features, perturbed_labels = fresh_features, fresh_labels
 
