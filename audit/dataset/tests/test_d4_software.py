@@ -29,6 +29,8 @@ from __future__ import annotations
 import json
 
 import numpy as np
+
+from audit.dataset.integrity import labelled_partition_digest
 import pytest
 
 from audit.dataset.d4_controlled_perturbation import (
@@ -67,6 +69,12 @@ class IdentityPerturbation(Perturbation):
             name="identity_test",
             description="Test-only identity perturbation.",
         )
+
+    label_only = True
+
+    def verify(self, features, labels, perturbed_features, perturbed_labels):
+        if not np.array_equal(np.asarray(labels), np.asarray(perturbed_labels)):
+            raise ValueError("identity perturbation changed the labels")
 
     def apply(
         self,
@@ -161,6 +169,15 @@ class DeterministicFakeAdapter:
             ),
             encoding="utf-8",
         )
+
+        # D4 adapter contract: expose the selection record of this fit.
+        self.selection = {
+            "condition": condition, "replicate": replicate, "seed": self.seed,
+            "config_hash": run_config_hash,
+            "train_digest": labelled_partition_digest(train_features, train_labels),
+            "rule": "test_only_single_epoch", "selected_epoch": 1,
+            "checkpoint_sha256": "test-only",
+        }
 
         return self
 
@@ -749,6 +766,7 @@ def test_run_d4_requires_at_least_two_replicates(
             test_features=train_x,
             test_labels=train_y,
             adapter_factory=DeterministicFakeAdapter,
+            run_config_hash="t" * 64,
             checkpoint_root=tmp_path,
             replicates=1,
             audit_seed=0,
@@ -771,6 +789,7 @@ def test_run_d4_rejects_negative_effect_threshold(
             test_features=train_x,
             test_labels=train_y,
             adapter_factory=DeterministicFakeAdapter,
+            run_config_hash="t" * 64,
             checkpoint_root=tmp_path,
             replicates=2,
             audit_seed=0,

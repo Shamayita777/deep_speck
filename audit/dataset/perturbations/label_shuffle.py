@@ -14,6 +14,8 @@ from audit.dataset.d4_controlled_perturbation import Perturbation
 class LabelShufflePerturbation(Perturbation):
     """Randomly permute training labels using an explicit RNG."""
 
+    label_only = True
+
     def __init__(self) -> None:
         super().__init__(
             name="label_shuffle",
@@ -53,3 +55,22 @@ class LabelShufflePerturbation(Perturbation):
         # A full random permutation can rarely leave some positions unchanged;
         # the perturbation is still valid because the correspondence is randomized.
         return features, shuffled
+
+    def verify(self, features, labels, perturbed_features, perturbed_labels) -> None:
+        """Definition check: features untouched, labels a permutation of the originals.
+
+        Features must be the same array object or byte-identical; labels
+        must have the same length, dtype and label multiset.
+        """
+        if perturbed_features is not features:
+            a, b = np.asarray(features), np.asarray(perturbed_features)
+            if a.shape != b.shape or a.dtype != b.dtype or not np.array_equal(a, b):
+                raise ValueError("label_shuffle must leave the feature matrix unchanged.")
+        original = np.asarray(labels).reshape(-1)
+        shuffled = np.asarray(perturbed_labels).reshape(-1)
+        if original.shape != shuffled.shape or original.dtype != shuffled.dtype:
+            raise ValueError("label_shuffle output labels differ in length or dtype from the input.")
+        u0, c0 = np.unique(original, return_counts=True)
+        u1, c1 = np.unique(shuffled, return_counts=True)
+        if not (np.array_equal(u0, u1) and np.array_equal(c0, c1)):
+            raise ValueError("label_shuffle output is not a permutation of the input labels.")

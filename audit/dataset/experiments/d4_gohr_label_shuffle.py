@@ -1,1271 +1,536 @@
 """
-Gohr D4 - Label Shuffle Controlled Perturbation Experiment.
+Gohr D4 - label-shuffle controlled perturbation, Speck32/64, 5 rounds.
 
-This is the Gohr-specific experiment driver.
+Target-specific experiment definition and stage orchestration only.  The
+statistics, adapter contract, perturbation provenance, decision and
+certificate are the shared engine (``audit.dataset.d4_controlled_perturbation``);
+hashing, exclusive writes, partition digests and the overlap audit are
+``audit.dataset.integrity``; the model-fit lifecycle is
+``audit.dataset.adapters.gohr_d4``.
 
-Dataset generation
-------------------
-All Gohr partitions are generated through GohrAdapter, which
-delegates directly to speck.make_train_data(). No alternate
-dataset-generation implementation is used.
+STAGES (each refuses, and writes nothing it would replace, on any failure)
+--------------------------------------------------------------------------
+protocol-check  Structural review of the preregistration; lists every field
+                still pending.  Read-only.  Exit 0 if well-formed (pending
+                fields are reported, not an error), 2 if malformed;
+                --require-approved also exits 3 while anything is pending.
+preflight       HUMAN-AUTHORISED.  Verifies the preregistration is approved,
+                committed and matches the approver's SHA-256 anchor; the D4
+                sources are clean at HEAD; --run-dir does not exist.  Then
+                generates the three partitions ONCE, validates the input
+                encoding from the arrays, runs the read-only overlap audit,
+                applies the approved overlap policy, and writes run-dir/
+                {dataset/*.npy, preflight.json} as one exclusive directory.
+                A policy refusal writes only <run-dir>.preflight_refused.json
+                (the generated partitions are kept alongside it, never
+                regenerated or altered).
+run             HUMAN-AUTHORISED PRODUCTION.  Re-verifies the anchored
+                preregistration, preflight.json, every partition file and the
+                source identity recorded at preflight; trains and evaluates;
+                writes run-dir/result/ {d4_certificate.json,
+                d4_run_manifest.json} once, exclusively.  Resumable: fits
+                resume through the adapter's verified recovery.
+verify          Independent post-run verification.  Read-only.
 
-Experimental design
--------------------
-For each independent replicate:
-
-    1. train the Gohr distinguisher on the original labels;
-    2. train the same distinguisher on a random permutation
-       of the training labels;
-    3. evaluate both models on the SAME fixed held-out test
-       partition;
-    4. perform paired McNemar inference on per-example
-       correctness.
-
-The test partition is generated once and then reused for every
-training replicate. It is never used to fit the models.
-
-Interpretation
---------------
-A reproducible performance collapse under label shuffling is
-evidence that predictive performance depends on the original
-feature/label correspondence.
-
-It is NOT, by itself, evidence that the model specifically learned
-cryptographic structure. Alternative explanations such as
-dataset-construction artifacts or implementation artifacts remain
-possible.
+USAGE (from the repository root)
+    PY=~/.venvs/autond-tf215-audit-20261015T050853Z/bin/python
+    $PY -B -m audit.dataset.experiments.d4_gohr_label_shuffle protocol-check \\
+        --preregistration audit/targets/gohr/preregistrations/d4_gohr_label_shuffle.json
+    $PY -B -m audit.dataset.experiments.d4_gohr_label_shuffle preflight \\
+        --preregistration <P> --preregistration-sha256 <anchor> --run-dir <D>
+    $PY -B -m audit.dataset.experiments.d4_gohr_label_shuffle run \\
+        --preregistration <P> --preregistration-sha256 <anchor> --run-dir <D>
+    $PY -B -m audit.dataset.experiments.d4_gohr_label_shuffle verify --run-dir <D>
 """
 
 from __future__ import annotations
 
 import argparse
+import io
 import json
-import os
-import hashlib
-from tensorflow.keras.callbacks import Callback
+import sys
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
-from audit.dataset.adapters.gohr import MODEL_SELECTION_RULE, GohrAdapter
-from audit.dataset.d4_controlled_perturbation import (
-    generate_certificate,
-    print_report,
-    run_d4,
+
+from audit.dataset import d4_controlled_perturbation as d4
+from audit.dataset.integrity import (
+    REPOSITORY_ROOT,
+    IntegrityError,
+    audit_partition_overlap,
+    canonical_json_bytes,
+    labelled_partition_digest,
+    partition_digest,
+    read_json,
+    sha256_bytes,
+    sha256_file,
+    source_identity,
+    verify_anchored_committed_record,
+    write_directory_exclusive,
+    write_json_exclusive,
 )
-from audit.dataset.perturbations.label_shuffle import (
-    LabelShufflePerturbation,
-)
 
 # ============================================================
-# Persistent dataset storage
-# ============================================================
-
-def dataset_paths(
-    root: Path,
-) -> dict[str, Path]:
-
-    dataset_dir = root / "dataset"
-
-    return {
-        "train_x": dataset_dir / "train_x.npy",
-        "train_y": dataset_dir / "train_y.npy",
-        "validation_x": dataset_dir / "validation_x.npy",
-        "validation_y": dataset_dir / "validation_y.npy",
-        "test_x": dataset_dir / "test_x.npy",
-        "test_y": dataset_dir / "test_y.npy",
-        "metadata": dataset_dir / "metadata.json",
-    }
-
-def dataset_exists(
-    root: Path,
-) -> bool:
-
-    paths = dataset_paths(root)
-
-    return all(
-        path.exists()
-        for path in paths.values()
-    )
-def save_dataset(
-    *,
-    root: Path,
-    train_x: np.ndarray,
-    train_y: np.ndarray,
-    validation_x: np.ndarray,
-    validation_y: np.ndarray,
-    test_x: np.ndarray,
-    test_y: np.ndarray,
-    metadata: dict,
-) -> None:
-
-    paths = dataset_paths(root)
-
-    paths["train_x"].parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    np.save(
-        paths["train_x"],
-        train_x,
-    )
-
-    np.save(
-        paths["train_y"],
-        train_y,
-    )
-
-    np.save(
-        paths["validation_x"],
-        validation_x,
-    )
-
-    np.save(
-        paths["validation_y"],
-        validation_y,
-    )
-
-    np.save(
-        paths["test_x"],
-        test_x,
-    )
-
-    np.save(
-        paths["test_y"],
-        test_y,
-    )
-
-    save_state(
-        paths["metadata"],
-        metadata,
-    )
-def load_dataset(
-    root: Path,
-):
-    paths = dataset_paths(root)
-
-    return (
-        np.load(
-            paths["train_x"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["train_y"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["validation_x"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["validation_y"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["test_x"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["test_y"],
-            mmap_mode="r",
-        ),
-    )
-
-def permutation_path(
-    root: Path,
-    replicate: int,
-) -> Path:
-
-    return (
-        root
-        / "perturbations"
-        / f"replicate_{replicate:02d}_labels.npy"
-    )
-
-
-def load_or_create_label_permutation(
-    *,
-    root: Path,
-    replicate: int,
-    labels: np.ndarray,
-    rng: np.random.Generator,
-) -> np.ndarray:
-
-    path = permutation_path(
-        root,
-        replicate,
-    )
-
-    path.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    if path.exists():
-
-        permutation = np.load(
-            path,
-            mmap_mode="r",
-        )
-
-        if permutation.shape != labels.shape:
-            raise ValueError(
-                "Persisted label permutation has "
-                "an incompatible shape."
-            )
-
-        return permutation
-
-    permutation = rng.permutation(
-        len(labels)
-    ).astype(
-        np.int64,
-        copy=False,
-    )
-
-    temporary = path.with_suffix(
-        ".tmp.npy"
-    )
-
-    np.save(
-        temporary,
-        permutation,
-    )
-
-    temporary.replace(
-        path
-    )
-
-    return np.load(
-        path,
-        mmap_mode="r",
-    )
-
-def experiment_metadata(
-    *,
-    train_samples: int,
-    validation_samples: int,
-    test_samples: int,
-) -> dict:
-
-    return {
-        "schema_version": "1.0",
-        "dataset_id": DATASET_ID,
-        "dataset_version": DATASET_VERSION,
-        "generator": "speck.make_train_data",
-        "randomness_source": "os.urandom",
-        "num_rounds": NUM_ROUNDS,
-        "depth": DEPTH,
-        "epochs": EPOCHS,
-        "batch_size": 5000,
-        "train_samples": train_samples,
-        "validation_samples": validation_samples,
-        "test_samples": test_samples,
-        "input_difference": {
-            "left_word": "0x0040",
-            "right_word": "0x0000",
-        },
-    }
-
-def state_path(
-    root: Path,
-    replicate: int,
-    condition: str,
-) -> Path:
-
-    return (
-        root
-        / "state"
-        / f"replicate_{replicate:02d}_{condition}.json"
-    )
-
-
-def checkpoint_path(
-    root: Path,
-    replicate: int,
-    condition: str,
-) -> Path:
-
-    return (
-        root
-        / "checkpoints"
-        / f"replicate_{replicate:02d}"
-        / condition
-        / "latest.keras"
-    )
-
-
-def save_state(
-    path: Path,
-    state: dict,
-) -> None:
-
-    path.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    temporary = path.with_suffix(".tmp")
-
-    with temporary.open(
-        "w",
-        encoding="utf-8",
-    ) as handle:
-
-        json.dump(
-            state,
-            handle,
-            indent=2,
-            sort_keys=True,
-        )
-
-    os.replace(
-        temporary,
-        path,
-    )
-
-
-def load_state(
-    path: Path,
-) -> dict:
-
-    with path.open(
-        "r",
-        encoding="utf-8",
-    ) as handle:
-
-        return json.load(handle)
-
-class EpochStateCallback(Callback):
-    """
-    Persist the completed epoch in a sidecar state file.
-
-    Epoch numbering stored here is one-based:
-        epoch 1 means the first epoch has completed.
-    """
-
-    def __init__(
-        self,
-        *,
-        state_path: Path,
-        replicate: int,
-        condition: str,
-        seed: int,
-        total_epochs: int,
-    ) -> None:
-
-        super().__init__()
-
-        self.state_path = state_path
-        self.replicate = replicate
-        self.condition = condition
-        self.seed = seed
-        self.total_epochs = total_epochs
-
-    def on_epoch_end(
-        self,
-        epoch,
-        logs=None,
-    ):
-
-        state = {
-            "schema_version": "1.0",
-            "replicate": self.replicate,
-            "condition": self.condition,
-            "seed": self.seed,
-            "total_epochs": self.total_epochs,
-            "completed_epochs": int(epoch + 1),
-            "status": (
-                "complete"
-                if epoch + 1 >= self.total_epochs
-                else "in_progress"
-            ),
-            "last_epoch_logs": {
-                key: float(value)
-                for key, value in (logs or {}).items()
-                if np.isscalar(value)
-            },
-        }
-
-        save_state(
-            self.state_path,
-            state,
-        )
-
-
-# ============================================================
-# Gohr configuration
+# Target definition (fixed design; must equal the preregistration)
 # ============================================================
 
 NUM_ROUNDS = 5
-
 DEPTH = 10
-EPOCHS = 200
-
-DEFAULT_TRAIN_SAMPLES = 10**7
-DEFAULT_TEST_SAMPLES = 10**6
-
-DEFAULT_REPLICATES = 5
-DEFAULT_BOOTSTRAP_REPLICATES = 5000
-
-DEFAULT_EFFECT_THRESHOLD = 0.01
-DEFAULT_ALPHA = 0.05
-DEFAULT_AUDIT_SEED = 0
-
-DATASET_ID = "gohr-speck"
-DATASET_VERSION = "original-make-train-data"
-
-# Resolved from this file, not the working directory, so a run started from
-# any directory writes under the repository's evidence tree.
-REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
-OUTPUT_DIRECTORY = REPOSITORY_ROOT / "audit" / "dataset" / "evidence" / "d4"
-
-#: Frozen input encoding: speck.make_train_data emits raw ciphertext-pair bits
-#: as uint8 in {0, 1}, width 64, consumed without scaling or normalisation.
+BATCH_SIZE = 5000
+AUDIT_SEED = 0
+BOOTSTRAP_REPLICATES = 5000
+CONFIDENCE_LEVEL = 0.95
 FEATURE_WIDTH = 64
 INPUT_ENCODING = "raw_bits_uint8_0_1_width64_no_scaling"
+DATASET_ID = "gohr-speck"
+DATASET_VERSION = "original-make-train-data"
+PARTITIONS = ("train", "validation", "test")
+DEFAULT_PREREGISTRATION = REPOSITORY_ROOT / "audit/targets/gohr/preregistrations/d4_gohr_label_shuffle.json"
+OUTPUT_DIRECTORY = REPOSITORY_ROOT / "audit" / "dataset" / "evidence"
+
+SOURCE_FILES = tuple(REPOSITORY_ROOT / p for p in (
+    "audit/dataset/d4_controlled_perturbation.py",
+    "audit/dataset/integrity.py",
+    "audit/dataset/adapters/gohr.py",
+    "audit/dataset/adapters/gohr_d4.py",
+    "audit/dataset/perturbations/label_shuffle.py",
+    "audit/dataset/experiments/d4_gohr_label_shuffle.py",
+    "speck.py",
+    "train_nets.py",
+))
+
+PREFLIGHT_SCHEMA = "d4-gohr-preflight-1"
+OVERLAP_POLICIES = ("refuse_on_any_cross_partition_feature_row", "record_only")
+DUPLICATE_POLICIES = ("record_only", "refuse_on_any_within_partition_duplicate")
+
+
+def _utc() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+# ============================================================
+# Preregistration
+# ============================================================
+
+
+def check_target_design(record: dict) -> list[str]:
+    """Problems if the preregistration's fixed design differs from this runner."""
+    problems = []
+    fixed = record.get("fixed_design", {})
+    expected = {
+        ("target", "num_rounds"): NUM_ROUNDS,
+        ("model", "depth"): DEPTH,
+        ("model", "batch_size"): BATCH_SIZE,
+        ("seeds", "audit_seed"): AUDIT_SEED,
+        ("bootstrap", "replicates"): BOOTSTRAP_REPLICATES,
+        ("bootstrap", "confidence_level"): CONFIDENCE_LEVEL,
+        ("dataset", "input_encoding"): INPUT_ENCODING,
+    }
+    from audit.dataset.adapters import gohr_d4
+    expected[("model_selection", "rule")] = gohr_d4.MODEL_SELECTION_RULE
+    for (section, key), value in expected.items():
+        actual = fixed.get(section, {}).get(key)
+        if actual != value:
+            problems.append(f"fixed_design.{section}.{key} is {actual!r}; this runner implements {value!r}")
+    if record.get("perturbation", {}).get("name") != "label_shuffle":
+        problems.append("perturbation.name must be 'label_shuffle'")
+    return problems
+
+
+def check_decision_values(values: dict) -> list[str]:
+    problems = []
+    sizes = values.get("sample_sizes")
+    if not (isinstance(sizes, dict) and set(sizes) == set(PARTITIONS)
+            and all(isinstance(sizes[p], int) and sizes[p] >= 1 for p in PARTITIONS)):
+        problems.append("decisions.sample_sizes must give positive integers for train/validation/test")
+    if not (isinstance(values.get("epochs"), int) and values["epochs"] >= 1):
+        problems.append("decisions.epochs must be a positive integer")
+    if not (isinstance(values.get("replicates"), int) and values["replicates"] >= 2):
+        problems.append("decisions.replicates must be an integer >= 2")
+    if not (isinstance(values.get("alpha"), float) and 0 < values["alpha"] < 1):
+        problems.append("decisions.alpha must be a float in (0, 1)")
+    if not (isinstance(values.get("effect_threshold"), float) and values["effect_threshold"] >= 0):
+        problems.append("decisions.effect_threshold must be a non-negative float")
+    if values.get("partition_overlap_policy") not in OVERLAP_POLICIES:
+        problems.append("decisions.partition_overlap_policy is not implemented")
+    if values.get("within_partition_duplicates_policy") not in DUPLICATE_POLICIES:
+        problems.append("decisions.within_partition_duplicates_policy is not implemented")
+    return problems
+
+
+def load_approved_preregistration(path: Path, anchor: str) -> tuple[dict, dict, str]:
+    """Anchored + committed + approved + matching this runner; returns (record, values, sha)."""
+    record = verify_anchored_committed_record(path, expected_sha256=anchor, what="D4 preregistration")
+    commit = record.pop("_commit")
+    values = d4.require_approved_preregistration(record)
+    problems = check_target_design(record) + check_decision_values(values)
+    if problems:
+        raise IntegrityError(f"Preregistration does not match this runner: {problems}")
+    approved = datetime.strptime(record["approved_utc"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    if commit["committed_utc"] and approved > datetime.fromisoformat(commit["committed_utc"]):
+        raise IntegrityError("approved_utc is after the commit that records the preregistration.")
+    return record, dict(values, _commit=commit), anchor
+
+
+def design_of(values: dict, anchor: str) -> dict:
+    """The complete design a run executes; its hash is the run_config_hash."""
+    return {
+        "audit": "D4", "target": "gohr-speck3264-r5", "perturbation": "label_shuffle",
+        "preregistration_sha256": anchor,
+        "num_rounds": NUM_ROUNDS, "depth": DEPTH, "batch_size": BATCH_SIZE,
+        "audit_seed": AUDIT_SEED, "bootstrap_replicates": BOOTSTRAP_REPLICATES,
+        "confidence_level": CONFIDENCE_LEVEL, "input_encoding": INPUT_ENCODING,
+        **{k: v for k, v in values.items() if not k.startswith("_")},
+    }
+
+
+def run_config_hash(design: dict) -> str:
+    return sha256_bytes(canonical_json_bytes(design))
+
+
+# ============================================================
+# Data
+# ============================================================
+
+
+def generate_gohr_partitions(sizes: dict) -> dict:
+    """Three independent speck.make_train_data calls; returns {role: (x, y)}."""
+    from audit.dataset.adapters.gohr import GohrAdapter
+
+    generator = GohrAdapter(num_rounds=NUM_ROUNDS, depth=DEPTH)
+    partitions = {}
+    for role in PARTITIONS:
+        print(f"Generating {role} partition ({sizes[role]} rows, speck.make_train_data, os.urandom)...")
+        partitions[role] = generator.generate_partition(int(sizes[role]))
+    return partitions
+
+
+def validate_input_encoding(partitions: dict) -> None:
+    """Refuse any partition that departs from the frozen input encoding."""
+    for role, (x, y) in partitions.items():
+        x, y = np.asarray(x), np.asarray(y).reshape(-1)
+        if x.dtype != np.uint8 or x.ndim != 2 or x.shape[1] != FEATURE_WIDTH:
+            raise IntegrityError(f"{role} features have dtype {x.dtype} and shape {x.shape}; the frozen "
+                                 f"encoding is uint8 with width {FEATURE_WIDTH}.")
+        if x.size and int(x.max()) > 1:
+            raise IntegrityError(f"{role} features contain values outside {{0, 1}}; inputs must not be rescaled.")
+        if y.dtype != np.uint8 or len(y) != len(x):
+            raise IntegrityError(f"{role} labels must be uint8 with one label per row.")
+        if y.size and int(y.max()) > 1:
+            raise IntegrityError(f"{role} labels contain values outside {{0, 1}}.")
+
+
+def overlap_violations(report: dict, values: dict) -> list[str]:
+    violations = []
+    if values["partition_overlap_policy"] == "refuse_on_any_cross_partition_feature_row":
+        violations += [f"cross {pair}: {c['rows']} shared rows" for pair, c in report["cross"].items() if c["rows"]]
+    if values["within_partition_duplicates_policy"] == "refuse_on_any_within_partition_duplicate":
+        violations += [f"within {role}: {w['duplicate_rows']} duplicate rows"
+                       for role, w in report["within"].items() if w["duplicate_rows"]]
+    return violations
+
+
+def _npy_bytes(array) -> bytes:
+    buffer = io.BytesIO()
+    np.save(buffer, np.ascontiguousarray(array))
+    return buffer.getvalue()
+
+
+def load_preflight(run_dir: Path) -> tuple[dict, dict]:
+    """Read preflight.json and re-verify every partition file from its bytes."""
+    preflight_path = run_dir / "preflight.json"
+    preflight = read_json(preflight_path, "preflight record")
+    if preflight.get("schema_version") != PREFLIGHT_SCHEMA or preflight.get("outcome") != "PASS":
+        raise IntegrityError(f"{preflight_path} is not a passing {PREFLIGHT_SCHEMA} record.")
+    partitions = {}
+    for role in PARTITIONS:
+        entry = preflight["partitions"][role]
+        arrays = []
+        for kind in ("x", "y"):
+            path = run_dir / entry[f"{kind}_file"]
+            if not path.is_file() or sha256_file(path) != entry[f"{kind}_sha256"]:
+                raise IntegrityError(f"Partition file {path} is missing or does not match preflight.json.")
+            arrays.append(np.load(path, mmap_mode="r"))
+        if labelled_partition_digest(*arrays) != entry["digest"]:
+            raise IntegrityError(f"{role} partition content does not reproduce its recorded digest.")
+        partitions[role] = tuple(arrays)
+    validate_input_encoding(partitions)
+    if partition_digest({f"{r}_{k}": a for r, (x, y) in partitions.items()
+                         for k, a in (("x", x), ("y", y))}) != preflight["all_partitions_digest"]:
+        raise IntegrityError("The combined partition digest does not match preflight.json.")
+    return preflight, partitions
+
+
+# ============================================================
+# Stages
+# ============================================================
+
+
+def stage_protocol_check(args) -> int:
+    record = read_json(args.preregistration, "D4 preregistration")
+    review = d4.review_preregistration(record)
+    problems = review["problems"] + check_target_design(record)
+    if review["values"]:
+        problems += [p for p in check_decision_values(review["values"])
+                     if p.split()[0].split(".")[-1] in review["values"]]
+    print(json.dumps({"sha256": sha256_file(args.preregistration), "problems": problems,
+                      "pending": review["pending"]}, indent=2))
+    if problems:
+        print("PROTOCOL MALFORMED")
+        return 2
+    if review["pending"]:
+        print(f"PROTOCOL WELL-FORMED; {len(review['pending'])} field(s) PENDING human approval.")
+        return 3 if args.require_approved else 0
+    print("PROTOCOL WELL-FORMED AND APPROVED (anchoring and commit are checked at preflight).")
+    return 0
+
+
+def stage_preflight(args) -> int:
+    run_dir = Path(args.run_dir)
+    refused_path = run_dir.with_name(run_dir.name + ".preflight_refused.json")
+    for existing in (run_dir, refused_path):
+        if existing.exists():
+            raise IntegrityError(f"Refusing: {existing} exists. Preflight never reuses or replaces a run directory.")
+    record, values, anchor = load_approved_preregistration(args.preregistration, args.preregistration_sha256)
+    identity = source_identity(SOURCE_FILES)
+    dirty = [f for f, e in identity["files"].items() if not e["clean_at_head"]]
+    if dirty:
+        raise IntegrityError(f"D4 sources are not clean at HEAD: {dirty}")
+
+    partitions = generate_gohr_partitions(values["sample_sizes"])
+    validate_input_encoding(partitions)
+    report = audit_partition_overlap(partitions)
+    print(f"Partition overlap audit: {json.dumps(report, sort_keys=True)}")
+    violations = overlap_violations(report, values)
+
+    files, entries = {}, {}
+    for role, (x, y) in partitions.items():
+        x_bytes, y_bytes = _npy_bytes(x), _npy_bytes(y)
+        files[f"dataset/{role}_x.npy"], files[f"dataset/{role}_y.npy"] = x_bytes, y_bytes
+        entries[role] = {"x_file": f"dataset/{role}_x.npy", "x_sha256": sha256_bytes(x_bytes),
+                         "y_file": f"dataset/{role}_y.npy", "y_sha256": sha256_bytes(y_bytes),
+                         "rows": int(len(x)), "digest": labelled_partition_digest(x, y)}
+    preflight = {
+        "schema_version": PREFLIGHT_SCHEMA,
+        "outcome": "REFUSED" if violations else "PASS",
+        "violations": violations,
+        "created_utc": _utc(),
+        "preregistration": {"path": values["_commit"]["path"], "sha256": anchor,
+                            "commit": values["_commit"]["sha"]},
+        "design": design_of(values, anchor),
+        "run_config_hash": run_config_hash(design_of(values, anchor)),
+        "source_identity": identity,
+        "input_encoding": INPUT_ENCODING,
+        "partitions": entries,
+        "all_partitions_digest": partition_digest({f"{r}_{k}": a for r, (x, y) in partitions.items()
+                                                   for k, a in (("x", x), ("y", y))}),
+        "overlap_audit": report,
+    }
+    if violations:
+        # Keep the generated data for investigation; never regenerate.
+        kept = run_dir.with_name(run_dir.name + ".preflight_refused_dataset")
+        write_directory_exclusive(kept, files)
+        write_json_exclusive(refused_path, dict(preflight, kept_dataset=kept.name))
+        print(f"PREFLIGHT REFUSED by the approved overlap policy: {violations}\n"
+              f"Measurements: {refused_path}. The protocol stops here; a new dataset needs a "
+              "documented protocol amendment.")
+        return 4
+    files["preflight.json"] = json.dumps(preflight, indent=2, sort_keys=True).encode() + b"\n"
+    write_directory_exclusive(run_dir, files)
+    print(f"PREFLIGHT PASSED. Wrote {run_dir}. No model was trained and no test statistic was computed.")
+    return 0
+
+
+def make_adapter_factory(run_dir: Path, design: dict, partitions: dict, evaluation_digest: str):
+    from audit.dataset.adapters.gohr_d4 import GohrD4Adapter
+
+    validation_x, validation_y = partitions["validation"]
+
+    def factory(seed: int):
+        return GohrD4Adapter(
+            validation_x=validation_x, validation_y=validation_y,
+            evaluation_digest=evaluation_digest,
+            num_rounds=NUM_ROUNDS, depth=DEPTH, epochs=design["epochs"],
+            batch_size=BATCH_SIZE, seed=seed, model_directory=str(run_dir / "fits" / "models"),
+        )
+
+    return factory
+
+
+def stage_run(args) -> int:
+    run_dir = Path(args.run_dir)
+    result_dir = run_dir / "result"
+    if result_dir.exists():
+        raise IntegrityError(f"Refusing: {result_dir} exists. A completed D4 result is never replaced.")
+    record, values, anchor = load_approved_preregistration(args.preregistration, args.preregistration_sha256)
+    preflight, partitions = load_preflight(run_dir)
+    design = design_of(values, anchor)
+    if preflight["design"] != design or preflight["preregistration"]["sha256"] != anchor:
+        raise IntegrityError("The approved preregistration differs from the one preflight was run under.")
+    identity = source_identity(SOURCE_FILES)
+    if identity["files"] != preflight["source_identity"]["files"]:
+        raise IntegrityError("D4 sources differ from those recorded at preflight. Refusing to run.")
+    from audit.dataset.perturbations.label_shuffle import LabelShufflePerturbation
+
+    run_id, started = uuid.uuid4().hex, _utc()
+    test_x, test_y = partitions["test"]
+    config_hash = preflight["run_config_hash"]
+    result = d4.run_d4(
+        perturbation=LabelShufflePerturbation(),
+        train_features=partitions["train"][0], train_labels=partitions["train"][1],
+        test_features=test_x, test_labels=test_y,
+        adapter_factory=make_adapter_factory(run_dir, design, partitions, preflight["partitions"]["test"]["digest"]),
+        checkpoint_root=run_dir / "fits", replicates=design["replicates"], audit_seed=AUDIT_SEED,
+        effect_threshold=design["effect_threshold"], bootstrap_replicates=BOOTSTRAP_REPLICATES,
+        confidence_level=CONFIDENCE_LEVEL, alpha=design["alpha"], run_config_hash=config_hash,
+        decision_rule=design["decision_rule"],
+    )
+    preflight_sha = sha256_file(run_dir / "preflight.json")
+    certificate = d4.generate_certificate(
+        result, dataset_id=DATASET_ID, dataset_version=DATASET_VERSION,
+        generation_procedure="speck.make_train_data(n, 5), three independent calls, persisted at preflight",
+        generation_parameters={"sample_sizes": design["sample_sizes"], "randomness_source": "os.urandom",
+                               "input_difference": {"left_word": "0x0040", "right_word": "0x0000"}},
+        audit_seed=AUDIT_SEED, confidence_level=CONFIDENCE_LEVEL, alpha=design["alpha"],
+        provenance={"preregistration": preflight["preregistration"], "preflight_sha256": preflight_sha,
+                    "run_config_hash": config_hash, "partitions": preflight["partitions"],
+                    "overlap_audit": preflight["overlap_audit"], "source_identity": identity,
+                    "run_id": run_id},
+    )
+    d4.recompute_certificate_decision(certificate)
+    certificate_bytes = json.dumps(certificate, indent=2, sort_keys=True, allow_nan=True).encode() + b"\n"
+    manifest = {"schema_version": "d4-run-manifest-1", "run_id": run_id, "started_utc": started,
+                "finished_utc": _utc(), "run_status": "COMPLETE", "preflight_sha256": preflight_sha,
+                "preregistration_sha256": anchor, "source_identity": identity,
+                "files": {"d4_certificate.json": sha256_bytes(certificate_bytes)}}
+    write_directory_exclusive(result_dir, {
+        "d4_certificate.json": certificate_bytes,
+        "d4_run_manifest.json": json.dumps(manifest, indent=2, sort_keys=True).encode() + b"\n",
+    })
+    d4.print_report(result)
+    print(f"D4 RUN COMPLETE: {certificate['decision']['outcome']}  ->  {result_dir}")
+    return 0
+
+
+def verify_run(run_dir: Path) -> dict:
+    """Independent post-run verification; read-only. Raises IntegrityError on any defect."""
+    from audit.dataset.adapters import gohr_d4
+
+    run_dir = Path(run_dir)
+    manifest = read_json(run_dir / "result" / "d4_run_manifest.json", "run manifest")
+    if manifest.get("run_status") != "COMPLETE" or set(manifest.get("files", {})) != {"d4_certificate.json"}:
+        raise IntegrityError("Run manifest is not a COMPLETE manifest of exactly the certificate.")
+    certificate_path = run_dir / "result" / "d4_certificate.json"
+    if not certificate_path.is_file() or sha256_file(certificate_path) != manifest["files"]["d4_certificate.json"]:
+        raise IntegrityError("Certificate is missing or does not match the run manifest.")
+    certificate = json.loads(certificate_path.read_text())
+    preflight, partitions = load_preflight(run_dir)
+    provenance = certificate["provenance"]
+    preflight_sha = sha256_file(run_dir / "preflight.json")
+    if provenance["preflight_sha256"] != preflight_sha or manifest["preflight_sha256"] != preflight_sha:
+        raise IntegrityError("Certificate or manifest is bound to a different preflight record.")
+    if provenance["preregistration"] != preflight["preregistration"]:
+        raise IntegrityError("Certificate preregistration binding differs from preflight.")
+    if provenance["source_identity"]["files"] != preflight["source_identity"]["files"]:
+        raise IntegrityError("The run used sources that differ from those recorded at preflight.")
+    config_hash = preflight["run_config_hash"]
+    if provenance["run_config_hash"] != config_hash or certificate["settings"]["run_config_hash"] != config_hash:
+        raise IntegrityError("Certificate run_config_hash differs from preflight.")
+    design = preflight["design"]
+    settings = certificate["settings"]
+    for key in ("alpha", "decision_rule", "replicates", "audit_seed", "bootstrap_replicates", "confidence_level"):
+        if settings[key] != design[key]:
+            raise IntegrityError(f"Certificate setting {key} differs from the preregistered design.")
+    if certificate["methodology"]["practical_effect_threshold"] != design["effect_threshold"]:
+        raise IntegrityError("Certificate effect threshold differs from the preregistered design.")
+    source_digest = labelled_partition_digest(*partitions["train"])
+    if settings["source_train_digest"] != source_digest:
+        raise IntegrityError("Certificate training digest differs from the preflight training partition.")
+    decision = d4.recompute_certificate_decision(certificate)
+
+    validation_digest = labelled_partition_digest(*partitions["validation"])
+    seeds = [int(s.generate_state(1, dtype=np.uint32)[0])
+             for s in np.random.SeedSequence(design["audit_seed"]).spawn(design["replicates"])]
+    for row, seed in zip(certificate["findings"]["replicates"], seeds):
+        r = row["replicate"]
+        if row["seed"] != seed:
+            raise IntegrityError(f"Replicate {r} seed differs from the audit-seed plan.")
+        record = row["perturbation_record"]
+        if record.get("replicate") != r or record.get("source_train_digest") != source_digest:
+            raise IntegrityError(f"Replicate {r} perturbation record is not bound to this replicate/data.")
+        on_disk = read_json(run_dir / "fits" / "perturbations" / f"replicate_{r:02d}.perturbation.json",
+                            f"replicate {r} perturbation record")
+        if on_disk != record:
+            raise IntegrityError(f"Replicate {r} perturbation sidecar differs from the certificate.")
+        from audit.dataset.perturbations.label_shuffle import LabelShufflePerturbation
+        d4.load_verified_perturbation(run_dir / "fits" / "perturbations", replicate=r,
+                                      perturbation=LabelShufflePerturbation(),
+                                      source_train_digest=source_digest, audit_seed=design["audit_seed"],
+                                      train_features=partitions["train"][0], train_labels=partitions["train"][1])
+        for condition, train_digest in (("baseline", source_digest), ("perturbed", record["perturbed_train_digest"])):
+            selection = row[f"{condition}_selection"]
+            identity = {key: selection[key] for key in gohr_d4.IDENTITY_FIELDS}
+            expected = {"condition": condition, "replicate": r, "seed": seed, "config_hash": config_hash,
+                        "train_digest": train_digest, "validation_digest": validation_digest,
+                        "evaluation_digest": preflight["partitions"]["test"]["digest"]}
+            for key, value in expected.items():
+                if identity[key] != value:
+                    raise IntegrityError(f"Replicate {r} {condition} selection has {key}={identity[key]!r}, "
+                                         f"expected {value!r}.")
+            directory, state_path = d4.checkpoint_paths(run_dir / "fits", r, condition)
+            state = gohr_d4.load_committed_state(state_path, directory, identity=identity,
+                                                 total_epochs=design["epochs"])
+            recomputed = gohr_d4.select_checkpoint(directory, total_epochs=design["epochs"], identity=identity,
+                                                   chain_head=state["record_chain_head"])
+            recomputed["retries"] = state["retries"]
+            if recomputed != selection or read_json(directory / "selected_checkpoint.json",
+                                                    "selection record") != selection:
+                raise IntegrityError(f"Replicate {r} {condition}: selection does not match the verified "
+                                     "epoch history on disk.")
+    return {"outcome": decision["outcome"], "replicates": len(seeds), "run_id": manifest["run_id"]}
+
+
+def stage_verify(args) -> int:
+    summary = verify_run(Path(args.run_dir))
+    print(json.dumps(summary, indent=2))
+    print("ALL CHECKS PASSED (post-run verification; read-only).")
+    return 0
 
 
 # ============================================================
 # CLI
 # ============================================================
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description=(
-            "Run the repeated Gohr label-shuffle "
-            "controlled perturbation audit."
-        )
-    )
 
-    parser.add_argument(
-        "--train-samples",
-        type=int,
-        default=DEFAULT_TRAIN_SAMPLES,
-    )
-
-    parser.add_argument(
-        "--validation-samples",
-        type=int,
-        default=10**6,
-        help=(
-            "Number of samples in the fixed Gohr validation "
-            "partition used during training."
-        ),
-    )
-    
-    parser.add_argument(
-        "--test-samples",
-        type=int,
-        default=DEFAULT_TEST_SAMPLES,
-    )
-
-    parser.add_argument(
-        "--replicates",
-        type=int,
-        default=DEFAULT_REPLICATES,
-        help=(
-            "Number of independent baseline/perturbed "
-            "training replicates."
-        ),
-    )
-
-    parser.add_argument(
-        "--epochs",
-        type=int,
-        default=EPOCHS,
-        help=(
-            "Total training epochs. This is part of the immutable "
-            "experiment configuration and is resume-checked."
-        ),
-    )
-
-    parser.add_argument(
-        "--bootstrap-replicates",
-        type=int,
-        default=DEFAULT_BOOTSTRAP_REPLICATES,
-    )
-
-    parser.add_argument(
-        "--effect-threshold",
-        type=float,
-        default=DEFAULT_EFFECT_THRESHOLD,
-        help=(
-            "Minimum absolute accuracy difference "
-            "in fraction-of-one units regarded as "
-            "practically meaningful."
-        ),
-    )
-
-    parser.add_argument(
-        "--alpha",
-        type=float,
-        default=DEFAULT_ALPHA,
-    )
-
-    parser.add_argument(
-        "--audit-seed",
-        type=int,
-        default=DEFAULT_AUDIT_SEED,
-    )
-
-    parser.add_argument(
-        "--output",
-        type=str,
-        default=None,
-    )
-
-    return parser.parse_args()
+def parse_args(argv=None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Gohr D4 label-shuffle controlled perturbation audit.")
+    sub = parser.add_subparsers(dest="stage", required=True)
+    check = sub.add_parser("protocol-check", help="structural review of the preregistration (read-only)")
+    check.add_argument("--preregistration", type=Path, default=DEFAULT_PREREGISTRATION)
+    check.add_argument("--require-approved", action="store_true")
+    for name, text in (("preflight", "HUMAN-AUTHORISED: generate and audit partitions"),
+                       ("run", "HUMAN-AUTHORISED PRODUCTION: train, evaluate, certify")):
+        stage = sub.add_parser(name, help=text)
+        stage.add_argument("--preregistration", type=Path, required=True)
+        stage.add_argument("--preregistration-sha256", required=True)
+        stage.add_argument("--run-dir", type=Path, required=True)
+    verify = sub.add_parser("verify", help="independent post-run verification (read-only)")
+    verify.add_argument("--run-dir", type=Path, required=True)
+    return parser.parse_args(argv)
 
 
-def validate_args(
-    args: argparse.Namespace,
-) -> None:
-
-    if args.train_samples < 1:
-        raise ValueError(
-            "--train-samples must be >= 1."
-        )
-
-    if args.validation_samples < 1:
-        raise ValueError(
-            "--validation-samples must be >= 1."
-        )
-
-    if args.test_samples < 1:
-        raise ValueError(
-            "--test-samples must be >= 1."
-        )
-
-    if args.replicates < 2:
-        raise ValueError(
-            "--replicates must be >= 2."
-        )
-
-    if args.epochs < 1:
-        raise ValueError(
-            "--epochs must be >= 1."
-        )
-
-    if args.bootstrap_replicates < 1000:
-        raise ValueError(
-            "--bootstrap-replicates must be >= 1000."
-        )
-
-    if args.effect_threshold < 0:
-        raise ValueError(
-            "--effect-threshold must be non-negative."
-        )
-
-    if not 0.0 < args.alpha < 1.0:
-        raise ValueError(
-            "--alpha must lie in (0, 1)."
-        )
-
-def dataset_cache_paths(
-    root: Path,
-) -> dict[str, Path]:
-
-    directory = root / "dataset"
-
-    return {
-        "train_x": directory / "train_x.npy",
-        "train_y": directory / "train_y.npy",
-        "validation_x": directory / "validation_x.npy",
-        "validation_y": directory / "validation_y.npy",
-        "test_x": directory / "test_x.npy",
-        "test_y": directory / "test_y.npy",
-        "metadata": directory / "metadata.json",
-    }
-
-def cached_dataset_exists(
-    root: Path,
-) -> bool:
-
-    paths = dataset_cache_paths(root)
-
-    return all(
-        path.exists()
-        for path in paths.values()
-    )
-
-def save_dataset_cache(
-    *,
-    root: Path,
-    train_x: np.ndarray,
-    train_y: np.ndarray,
-    validation_x: np.ndarray,
-    validation_y: np.ndarray,
-    test_x: np.ndarray,
-    test_y: np.ndarray,
-    run_config_hash: str,
-) -> None:
-
-    paths = dataset_cache_paths(root)
-
-    paths["train_x"].parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    arrays = {
-        "train_x": train_x,
-        "train_y": train_y,
-        "validation_x": validation_x,
-        "validation_y": validation_y,
-        "test_x": test_x,
-        "test_y": test_y,
-    }
-
-    for name, array in arrays.items():
-
-        final_path = paths[name]
-
-        temporary_path = final_path.with_suffix(
-            ".tmp.npy"
-        )
-
-        np.save(
-            temporary_path,
-            array,
-        )
-
-        temporary_path.replace(
-            final_path,
-        )
-
-    metadata = {
-        "schema_version": "2.0",
-        "config_hash": run_config_hash,
-        "shapes": {name: list(np.asarray(array).shape) for name, array in arrays.items()},
-        "dtypes": {name: str(np.asarray(array).dtype) for name, array in arrays.items()},
-        "sha256": {name: sha256_file(paths[name]) for name in arrays},
-    }
-    metadata_path = paths["metadata"]
-    temporary_metadata = metadata_path.with_suffix(".tmp")
-    with temporary_metadata.open("w", encoding="utf-8") as handle:
-        json.dump(metadata, handle, indent=2, sort_keys=True)
-        handle.write("\n")
-    os.replace(temporary_metadata, metadata_path)
-
-def load_dataset_cache(
-    root: Path,
-):
-    paths = dataset_cache_paths(root)
-
-    return (
-        np.load(
-            paths["train_x"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["train_y"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["validation_x"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["validation_y"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["test_x"],
-            mmap_mode="r",
-        ),
-        np.load(
-            paths["test_y"],
-            mmap_mode="r",
-        ),
-    )
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as handle:
-        for block in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def validate_input_encoding(partitions: dict) -> None:
-    """Refuse any partition that departs from the frozen input encoding."""
-    for name in ("train", "validation", "test"):
-        x = np.asarray(partitions[f"{name}_x"])
-        y = np.asarray(partitions[f"{name}_y"]).reshape(-1)
-        if x.dtype != np.uint8 or x.ndim != 2 or x.shape[1] != FEATURE_WIDTH:
-            raise RuntimeError(
-                f"{name}_x has dtype {x.dtype} and shape {x.shape}; the frozen "
-                f"encoding is uint8 with width {FEATURE_WIDTH}."
-            )
-        if x.size and int(x.max()) > 1:
-            raise RuntimeError(f"{name}_x contains values outside {{0, 1}}; inputs must not be rescaled.")
-        if len(y) != len(x):
-            raise RuntimeError(f"{name}_y length {len(y)} does not match {name}_x length {len(x)}.")
-        if y.size and (int(y.min()) < 0 or int(y.max()) > 1):
-            raise RuntimeError(f"{name}_y contains labels outside {{0, 1}}.")
-
-
-def write_certificate_exclusive(path: Path, certificate: dict) -> None:
-    """Write the certificate atomically; never replace an existing one."""
-    path = Path(path)
-    if path.exists():
-        raise RuntimeError(f"Refusing to overwrite existing D4 certificate {path}.")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp")
-    with temporary.open("w", encoding="utf-8") as handle:
-        json.dump(certificate, handle, indent=2, sort_keys=True)
-        handle.write("\n")
-    # os.link fails if the destination appeared meanwhile, unlike os.replace.
+def main(argv=None) -> int:
+    args = parse_args(argv)
+    stages = {"protocol-check": stage_protocol_check, "preflight": stage_preflight,
+              "run": stage_run, "verify": stage_verify}
     try:
-        os.link(temporary, path)
-    finally:
-        temporary.unlink()
-
-
-def _row_keys(features, chunk_rows: int = 1 << 20) -> np.ndarray:
-    """Pack each 64-bit feature row into one uint64 key, chunk by chunk.
-
-    Peak memory is 8 bytes per row plus one chunk, so a memory-mapped
-    10^7-row partition is never materialised as 640 MB of uint8.
-    """
-    features = np.asarray(features)
-    keys = np.empty(len(features), dtype=np.uint64)
-    for start in range(0, len(features), chunk_rows):
-        packed = np.packbits(np.asarray(features[start:start + chunk_rows], dtype=np.uint8), axis=1)
-        keys[start:start + chunk_rows] = np.ascontiguousarray(packed).view(">u8").reshape(-1)
-    return keys
-
-
-def audit_partition_overlap(train_x, validation_x, test_x) -> dict:
-    """Count exact feature-row overlap within and across the partitions.
-
-    Read-only: the partitions are never modified.  For each pair, ``rows``
-    is the number of rows of the second partition whose feature vector
-    also occurs in the first, and ``distinct`` the number of shared
-    feature vectors.
-    """
-    keys = {
-        "train": np.sort(_row_keys(train_x)),
-        "validation": np.sort(_row_keys(validation_x)),
-        "test": np.sort(_row_keys(test_x)),
-    }
-    report = {"method": "exact_64bit_row_equality", "rows": {}, "within_duplicate_rows": {}, "cross": {}}
-    for name, sorted_keys in keys.items():
-        report["rows"][name] = int(len(sorted_keys))
-        report["within_duplicate_rows"][name] = int(len(sorted_keys) - len(np.unique(sorted_keys)))
-    for first, second in (("train", "validation"), ("train", "test"), ("validation", "test")):
-        reference = keys[first]
-        probe = keys[second]
-        position = np.searchsorted(reference, probe)
-        position[position == len(reference)] = 0
-        hit = reference[position] == probe if len(reference) else np.zeros(len(probe), bool)
-        report["cross"][f"{first}_{second}"] = {
-            "rows": int(hit.sum()),
-            "distinct": int(len(np.unique(probe[hit]))),
-        }
-    return report
-
-
-def require_partition_separation(report: dict) -> None:
-    """Fail closed on any feature row shared between partitions.
-
-    The D4 design declares that the test partition is never used to fit
-    the models, and validation drives checkpoint selection; a row shared
-    across partitions breaks that separation.  Within-partition duplicates
-    are recorded but are not a separation violation.
-    """
-    violations = {pair: c for pair, c in report["cross"].items() if c["rows"]}
-    if violations:
-        raise RuntimeError(
-            f"Partition separation violated (exact shared feature rows): {violations}. "
-            "Refusing to run; how to handle overlap is a scientific decision "
-            "and the dataset is left unchanged."
-        )
-
-
-def validate_dataset_cache(root: Path, run_config_hash: str) -> None:
-    paths = dataset_cache_paths(root)
-    with paths["metadata"].open("r", encoding="utf-8") as handle:
-        metadata = json.load(handle)
-    if metadata.get("config_hash") != run_config_hash:
-        raise RuntimeError(
-            "Cached D4 dataset configuration does not match the requested "
-            "run. Refusing to reuse or mix datasets from another experiment."
-        )
-    for name in ("train_x", "train_y", "validation_x", "validation_y", "test_x", "test_y"):
-        arr = np.load(paths[name], mmap_mode="r")
-        expected_shape = metadata.get("shapes", {}).get(name)
-        expected_dtype = metadata.get("dtypes", {}).get(name)
-        if expected_shape is None or list(arr.shape) != expected_shape or str(arr.dtype) != expected_dtype:
-            raise RuntimeError(f"Cached dataset file {name} failed integrity metadata validation.")
-        expected_digest = metadata.get("sha256", {}).get(name)
-        if not expected_digest or sha256_file(paths[name]) != expected_digest:
-            raise RuntimeError(
-                f"Cached dataset file {name} does not match its recorded "
-                "SHA-256 (missing, stale or altered). Refusing to reuse it."
-            )
-
-
-# ============================================================
-# Gohr data generation
-# ============================================================
-def generate_gohr_partitions(
-    *,
-    train_samples: int,
-    validation_samples: int,
-    test_samples: int,
-) -> tuple[
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-]:
-    """
-    Generate the Gohr training, validation, and held-out test
-    partitions.
-
-    All partitions are generated directly through GohrAdapter,
-    which delegates to speck.make_train_data().
-
-    The validation partition is generated independently from the
-    training and test partitions and is supplied to every model
-    fit. The test partition is generated once and remains fixed
-    across all D4 replicates and perturbation conditions.
-
-    Returns
-    -------
-    train_x, train_y,
-    validation_x, validation_y,
-    test_x, test_y
-    """
-
-    if train_samples < 1:
-        raise ValueError(
-            "train_samples must be >= 1."
-        )
-
-    if validation_samples < 1:
-        raise ValueError(
-            "validation_samples must be >= 1."
-        )
-
-    if test_samples < 1:
-        raise ValueError(
-            "test_samples must be >= 1."
-        )
-
-    generator_adapter = GohrAdapter(
-        validation_x=None,
-        validation_y=None,
-        test_x=None,
-        test_y=None,
-        num_rounds=NUM_ROUNDS,
-        depth=DEPTH,
-        epochs=EPOCHS,
-    )
-
-    print("=" * 72)
-    print("Gohr D4 Dataset Generation")
-    print("=" * 72)
-    print()
-
-    print(
-        f"Speck rounds             : {NUM_ROUNDS}"
-    )
-
-    print(
-        f"Training samples         : {train_samples}"
-    )
-
-    print(
-        f"Validation samples       : {validation_samples}"
-    )
-
-    print(
-        f"Test samples             : {test_samples}"
-    )
-
-    print(
-        "Generator                : "
-        "speck.make_train_data"
-    )
-
-    print(
-        "Generator randomness     : os.urandom"
-    )
-
-    print()
-
-    print(
-        "Generating training partition..."
-    )
-
-    train_x, train_y = (
-        generator_adapter.generate_partition(
-            train_samples
-        )
-    )
-
-    print(
-        f"  shape={train_x.shape}, "
-        f"dtype={train_x.dtype}"
-    )
-
-    print(
-        "Generating validation partition..."
-    )
-
-    validation_x, validation_y = (
-        generator_adapter.generate_partition(
-            validation_samples
-        )
-    )
-
-    print(
-        f"  shape={validation_x.shape}, "
-        f"dtype={validation_x.dtype}"
-    )
-
-    print(
-        "Generating fixed held-out test partition..."
-    )
-
-    test_x, test_y = (
-        generator_adapter.generate_partition(
-            test_samples
-        )
-    )
-
-    print(
-        f"  shape={test_x.shape}, "
-        f"dtype={test_x.dtype}"
-    )
-
-    print()
-
-    return (
-        train_x,
-        train_y,
-        validation_x,
-        validation_y,
-        test_x,
-        test_y,
-    )
-
-# ============================================================
-# Adapter factory
-# ============================================================
-def make_adapter(
-    *,
-    validation_x: np.ndarray,
-    validation_y: np.ndarray,
-    test_x: np.ndarray,
-    test_y: np.ndarray,
-    seed: int,
-    model_directory: Path,
-    epochs: int,
-) -> GohrAdapter:
-    """
-    Construct a fresh Gohr adapter for one independent fit.
-
-    The validation and test partitions are fixed across the
-    baseline/perturbed comparison for a given D4 experiment.
-
-    Each fit receives its own model directory so checkpoint files
-    cannot collide between baseline and perturbed conditions.
-    """
-
-    return GohrAdapter(
-        validation_x=validation_x,
-        validation_y=validation_y,
-        test_x=test_x,
-        test_y=test_y,
-        num_rounds=NUM_ROUNDS,
-        depth=DEPTH,
-        epochs=epochs,
-        seed=seed,
-        model_directory=str(model_directory),
-    )
-
-def experiment_root(args: argparse.Namespace) -> Path:
-    """Return an immutable run directory keyed by the full experiment size."""
-    return (
-        OUTPUT_DIRECTORY
-        / (
-            f"run_train{args.train_samples}"
-            f"_val{args.validation_samples}"
-            f"_test{args.test_samples}"
-            f"_rep{args.replicates}"
-            f"_epochs{args.epochs}"
-            f"_seed{args.audit_seed}"
-        )
-    )
-
-
-def build_run_config(args: argparse.Namespace) -> dict:
-    return {
-        "schema_version": "2.0",
-        "audit": "D4",
-        "perturbation": "label_shuffle",
-        "dataset_id": DATASET_ID,
-        "dataset_version": DATASET_VERSION,
-        "generator": "speck.make_train_data",
-        "num_rounds": NUM_ROUNDS,
-        "depth": DEPTH,
-        "epochs": int(args.epochs),
-        "batch_size": 5000,
-        "train_samples": int(args.train_samples),
-        "validation_samples": int(args.validation_samples),
-        "test_samples": int(args.test_samples),
-        "replicates": int(args.replicates),
-        "audit_seed": int(args.audit_seed),
-        "bootstrap_replicates": int(args.bootstrap_replicates),
-        "effect_threshold": float(args.effect_threshold),
-        "alpha": float(args.alpha),
-        "training_protocol": {
-            "optimizer": "adam",
-            "loss": "mse",
-            "learning_rate_schedule": "train_nets.cyclic_lr(10,0.002,0.0001)",
-            "shuffle": False,
-            "checkpoint_every_epoch": True,
-            "checkpoint_format": "keras_full_model",
-            "model_selection": MODEL_SELECTION_RULE,
-            "selection_partition": "validation",
-        },
-        "input_encoding": INPUT_ENCODING,
-        "generator_randomness": "os.urandom",
-        "input_difference": {"left_word": "0x0040", "right_word": "0x0000"},
-    }
-
-
-def config_hash(config: dict) -> str:
-    payload = json.dumps(config, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    return hashlib.sha256(payload).hexdigest()
-
-
-def save_or_validate_manifest(root: Path, config: dict, digest: str) -> None:
-    path = root / "run_manifest.json"
-    root.mkdir(parents=True, exist_ok=True)
-    if path.exists():
-        with path.open("r", encoding="utf-8") as handle:
-            existing = json.load(handle)
-        if existing.get("config_hash") != digest or existing.get("config") != config:
-            raise RuntimeError(
-                "Existing D4 run configuration does not match the requested "
-                "configuration. Refusing to mix parameters or resume a different run."
-            )
-        return
-    payload = {
-        "schema_version": "2.0",
-        "config_hash": digest,
-        "config": config,
-    }
-    tmp = path.with_suffix(".tmp")
-    with tmp.open("w", encoding="utf-8") as handle:
-        json.dump(payload, handle, indent=2, sort_keys=True)
-        handle.write("\n")
-    os.replace(tmp, path)
-
-
-# ============================================================
-# Main
-# ============================================================
-
-def main() -> None:
-
-    args = parse_args()
-    validate_args(args)
-
-    config = build_run_config(args)
-    run_digest = config_hash(config)
-    run_root = experiment_root(args)
-    output_path = (
-        Path(args.output)
-        if args.output is not None
-        else run_root / "d4_gohr_label_shuffle.json"
-    )
-    # Refuse before any training so a completed record is never redone.
-    if output_path.exists():
-        raise RuntimeError(f"Refusing to overwrite existing D4 certificate {output_path}.")
-    save_or_validate_manifest(run_root, config, run_digest)
-
-    dataset_root = run_root / "dataset"
-
-    if cached_dataset_exists(
-        dataset_root
-    ):
-
-        print("=" * 72)
-        print("Loading cached D4 dataset")
-        print("=" * 72)
-
-        (
-            train_x,
-            train_y,
-            validation_x,
-            validation_y,
-            test_x,
-            test_y,
-        ) = load_dataset_cache(
-            dataset_root
-        )
-        validate_dataset_cache(dataset_root, run_digest)
-        validate_input_encoding(
-            {
-                "train_x": train_x, "train_y": train_y,
-                "validation_x": validation_x, "validation_y": validation_y,
-                "test_x": test_x, "test_y": test_y,
-            }
-        )
-
-    else:
-
-        (
-            train_x,
-            train_y,
-            validation_x,
-            validation_y,
-            test_x,
-            test_y,
-        ) = generate_gohr_partitions(
-            train_samples=args.train_samples,
-            validation_samples=args.validation_samples,
-            test_samples=args.test_samples,
-        )
-
-        validate_input_encoding(
-            {
-                "train_x": train_x, "train_y": train_y,
-                "validation_x": validation_x, "validation_y": validation_y,
-                "test_x": test_x, "test_y": test_y,
-            }
-        )
-        save_dataset_cache(
-            root=dataset_root,
-            train_x=train_x,
-            train_y=train_y,
-            validation_x=validation_x,
-            validation_y=validation_y,
-            test_x=test_x,
-            test_y=test_y,
-            run_config_hash=run_digest,
-        )
-
-        print(
-            "D4 dataset cached for future resumes."
-        )
-
-    overlap_report = audit_partition_overlap(train_x, validation_x, test_x)
-    print(f"Partition overlap audit    : {json.dumps(overlap_report, sort_keys=True)}")
-    require_partition_separation(overlap_report)
-
-    perturbation = (
-        LabelShufflePerturbation()
-    )
-
-    def adapter_factory(seed: int):
-        model_directory = (
-            run_root
-            / "models"
-            / f"seed{seed}"
-        )
-
-        return make_adapter(
-            validation_x=validation_x,
-            validation_y=validation_y,
-            test_x=test_x,
-            test_y=test_y,
-            seed=seed,
-            model_directory=model_directory,
-            epochs=args.epochs,
-        )
-
-    print("=" * 72)
-    print("Running D4 Controlled Perturbation Audit")
-    print("=" * 72)
-
-    result = run_d4(
-        perturbation=perturbation,
-        train_features=train_x,
-        train_labels=train_y,
-        test_features=test_x,
-        test_labels=test_y,
-        adapter_factory=adapter_factory,
-        checkpoint_root=(run_root / "checkpoints"),
-        replicates=args.replicates,
-        audit_seed=args.audit_seed,
-        effect_threshold=args.effect_threshold,
-        bootstrap_replicates=args.bootstrap_replicates,
-        confidence_level=0.95,
-        alpha=args.alpha,
-        run_config_hash=run_digest,
-    )
-
-    provenance = {
-        "dataset_id": DATASET_ID,
-        "dataset_version": DATASET_VERSION,
-        "generation_procedure": (
-            "speck.make_train_data(n, nr)"
-        ),
-        "generation_parameters": {
-            "generator": "speck.make_train_data",
-            "num_rounds": NUM_ROUNDS,
-            "depth": DEPTH,
-            "epochs": args.epochs,
-            "train_samples": args.train_samples,
-            "validation_samples": args.validation_samples,
-            "test_samples": args.test_samples,
-            "randomness_source": "os.urandom",
-            "partition_overlap": overlap_report,
-            "input_difference": {
-                "left_word": "0x0040",
-                "right_word": "0x0000",
-            },
-        },
-    }
-
-    certificate = generate_certificate(
-        result,
-        dataset_id=provenance["dataset_id"],
-        dataset_version=provenance["dataset_version"],
-        generation_procedure=(
-            provenance["generation_procedure"]
-        ),
-        generation_parameters=(
-            provenance["generation_parameters"]
-        ),
-        audit_seed=args.audit_seed,
-        confidence_level=0.95,
-        alpha=args.alpha,
-    )
-
-    print()
-
-    print_report(result)
-
-    write_certificate_exclusive(output_path, certificate)
-
-    print()
-    print("=" * 72)
-    print("D4 COMPLETE")
-    print("=" * 72)
-    print(
-        f"Outcome                    : "
-        f"{certificate['decision']['outcome']}"
-    )
-    print(
-        f"Certificate                : "
-        f"{output_path}"
-    )
-    print(
-        "Interpretation             : "
-        "label-shuffle dependence; "
-        "not cryptographic attribution"
-    )
+        return stages[args.stage](args)
+    except IntegrityError as exc:
+        print(f"REFUSED ({args.stage}): {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

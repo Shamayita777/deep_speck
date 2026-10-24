@@ -32,6 +32,8 @@ from __future__ import annotations
 import json
 
 import numpy as np
+
+from audit.dataset.integrity import labelled_partition_digest
 import pytest
 
 import audit.dataset.d4_controlled_perturbation as d4
@@ -105,6 +107,12 @@ class NoOpPerturbation(Perturbation):
             name="noop_test",
             description="Test-only identity perturbation.",
         )
+
+    label_only = True
+
+    def verify(self, features, labels, perturbed_features, perturbed_labels):
+        if not np.array_equal(np.asarray(labels), np.asarray(perturbed_labels)):
+            raise ValueError("identity perturbation changed the labels")
 
     def apply(
         self,
@@ -189,6 +197,15 @@ class KnownSignalAdapter:
             encoding="utf-8",
         )
 
+        # D4 adapter contract: expose the selection record of this fit.
+        self.selection = {
+            "condition": condition, "replicate": replicate, "seed": self.seed,
+            "config_hash": run_config_hash,
+            "train_digest": labelled_partition_digest(train_features, train_labels),
+            "rule": "test_only_single_epoch", "selected_epoch": 1,
+            "checkpoint_sha256": "test-only",
+        }
+
         return self
 
     def predict(self, test_features):
@@ -221,6 +238,7 @@ def test_clean_control_has_no_confirmed_d4_effect(
         test_features=test_x,
         test_labels=test_y,
         adapter_factory=KnownSignalAdapter,
+        run_config_hash="t" * 64,
         checkpoint_root=tmp_path / "clean_control",
         replicates=3,
         audit_seed=0,
@@ -253,6 +271,7 @@ def test_label_shuffle_destroys_known_predictive_signal(
         test_features=test_x,
         test_labels=test_y,
         adapter_factory=KnownSignalAdapter,
+        run_config_hash="t" * 64,
         checkpoint_root=tmp_path / "known_effect",
         replicates=3,
         audit_seed=0,
@@ -518,6 +537,7 @@ def test_noop_perturbation_has_no_detected_effect(
         test_features=test_x,
         test_labels=test_y,
         adapter_factory=KnownSignalAdapter,
+        run_config_hash="t" * 64,
         checkpoint_root=tmp_path / "noop",
         replicates=3,
         audit_seed=0,
@@ -600,6 +620,7 @@ def test_statistical_evidence_without_practical_effect_does_not_detect(
         test_features=test_x,
         test_labels=test_y,
         adapter_factory=KnownSignalAdapter,
+        run_config_hash="t" * 64,
         checkpoint_root=tmp_path / "statistical_only",
         replicates=3,
         audit_seed=0,
@@ -653,6 +674,7 @@ def test_practical_effect_without_inferential_support_does_not_detect(
         test_features=test_x,
         test_labels=test_y,
         adapter_factory=KnownSignalAdapter,
+        run_config_hash="t" * 64,
         checkpoint_root=tmp_path / "practical_only",
         replicates=3,
         audit_seed=0,
@@ -707,6 +729,7 @@ def test_all_required_gates_detect_effect(
         test_features=test_x,
         test_labels=test_y,
         adapter_factory=KnownSignalAdapter,
+        run_config_hash="t" * 64,
         checkpoint_root=tmp_path / "all_gates",
         replicates=3,
         audit_seed=0,
@@ -750,11 +773,13 @@ def test_one_failed_replicate_blocks_confirmed_effect(
     ):
         calls["count"] += 1
 
+        # A genuinely non-significant replicate: the engine recomputes
+        # p-values from (b, c), so the injected counts must carry the failure.
         if calls["count"] == 3:
             return (
-                0,
-                20,
-                0.5,
+                10,
+                10,
+                1.0,
             )
 
         return (
@@ -776,6 +801,7 @@ def test_one_failed_replicate_blocks_confirmed_effect(
         test_features=test_x,
         test_labels=test_y,
         adapter_factory=KnownSignalAdapter,
+        run_config_hash="t" * 64,
         checkpoint_root=tmp_path / "failed_replicate",
         replicates=3,
         audit_seed=0,
