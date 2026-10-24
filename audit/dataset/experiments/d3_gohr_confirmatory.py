@@ -106,6 +106,25 @@ CONFIRMATORY_FAMILIES = tuple(f for f in d3.CLASS_STRATIFIED_CONFIRMATORY_FAMILI
 EXPECTED_ALLOCATION = d3.allocate_familywise_alpha(GLOBAL_ALPHA / d3.GUARANTEE_COUNT, CONFIRMATORY_FAMILIES)
 SUPPORTED_CLASS_FRACTION = [0.45, 0.55]
 
+#: Frozen source identity for the D1 implementation that generated the canonical
+#: Gohr D1 certificate (run_id b255cbc0b3584447909744ccd3d14edf).  These are
+#: intentionally separate from the certificate's self-reported code_identity:
+#: the gate verifies both the report AND the bytes currently on disk.  A future
+#: intentional D1 code change must update these pins in a reviewed commit; it
+#: must not silently make an old D1 certificate acceptable under new code.
+D1_CODE_IDENTITY_PINS = {
+    "runner": {"path": "audit/dataset/experiments/d1_gohr_canonical_census.py",
+               "sha256": "c107b1876c8e427844e779cfa4a7fe0ae7fb923a455059425d3f2b3a3ea3e92f"},
+    "engine": {"path": "audit/dataset/d1_duplicate_detection.py",
+               "sha256": "c62603281a746e85f0a08def299ea4cfc12cec8725e4e897e343447ebb211c14"},
+    "canonical": {"path": "audit/dataset/canonical.py",
+                  "sha256": "7fc650f5b451850cd461761b0ac117d7052707dd9fec1c045cab4d754b73ea1d"},
+    "attestation_tool": {"path": "audit/dataset/tools/d0_gohr_attested_build.py",
+                         "sha256": "f08bd5ea3d9778e0ee9bc39f01f9ac61f1dd5a47950f182d22af17417df92c3a"},
+    "generator": {"path": "speck.py",
+                  "sha256": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce"},
+}
+
 #: Engine entry point behind one name so a test can prove a refused run never reaches it.
 D3_ENGINE = d3.class_stratified_audit
 
@@ -274,46 +293,123 @@ def check_protocol(content: dict, calibration_design: dict) -> None:
 # ---------------------------------------------------------------------------
 
 def verify_d1_evidence(d1_dir: Path, instance_dir: Path) -> dict:
-    """The frozen D1 gate: complete instance-bound D1 evidence for THIS instance, outcome PASS.
+    """Fail-closed verification of complete D1 evidence for this exact instance.
 
-    Raises SystemExit unless the directory holds exactly the D1 certificate and
-    run manifest, the manifest is COMPLETE and hashes the certificate, and both
-    name this instance's id, manifest SHA-256 and build-attestation SHA-256.
+    Verifies the certificate/manifest binding, shared run ID, D0 instance and
+    attestation hashes, the frozen D1 code identity, and the corresponding
+    source bytes currently loaded/on disk.  It never writes or repairs evidence.
     """
     d1_dir, instance_dir = Path(d1_dir), Path(instance_dir)
-    problems = []
     if not d1_dir.is_dir():
         raise SystemExit(f"REFUSED: D1 evidence directory {d1_dir} is missing; the frozen D1 gate is not met.")
     names = sorted(p.name for p in d1_dir.iterdir())
-    if names != sorted([D1R.CERTIFICATE_NAME, D1R.RUN_MANIFEST_NAME]):
+    expected_names = sorted([D1R.CERTIFICATE_NAME, D1R.RUN_MANIFEST_NAME])
+    if names != expected_names:
         raise SystemExit(f"REFUSED: D1 evidence directory must hold exactly the D1 certificate and run manifest; "
                          f"found {names}.")
-    cert_sha = _sha256(d1_dir / D1R.CERTIFICATE_NAME)
-    man_sha = _sha256(d1_dir / D1R.RUN_MANIFEST_NAME)
-    cert = json.loads((d1_dir / D1R.CERTIFICATE_NAME).read_text())
-    rm = json.loads((d1_dir / D1R.RUN_MANIFEST_NAME).read_text())
-    inst_id = C.load_manifest(instance_dir)["canonical_instance_id"]
+
+    cert_path = d1_dir / D1R.CERTIFICATE_NAME
+    manifest_path = d1_dir / D1R.RUN_MANIFEST_NAME
+    try:
+        cert_bytes = cert_path.read_bytes()
+        manifest_bytes = manifest_path.read_bytes()
+        cert = json.loads(cert_bytes)
+        rm = json.loads(manifest_bytes)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"REFUSED: D1 certificate/run manifest is unreadable or malformed ({exc.__class__.__name__}).") \
+            from None
+    if not isinstance(cert, dict) or not isinstance(rm, dict):
+        raise SystemExit("REFUSED: D1 certificate and run manifest must each be JSON objects.")
+
+    cert_sha = hashlib.sha256(cert_bytes).hexdigest()
+    man_sha = hashlib.sha256(manifest_bytes).hexdigest()
+    inst_manifest = C.load_manifest(instance_dir)
+    inst_id = inst_manifest.get("canonical_instance_id")
+    if not isinstance(inst_id, str) or not inst_id:
+        raise SystemExit("REFUSED: the D0 manifest has no valid canonical_instance_id.")
     d0_man_sha = _sha256(instance_dir / C.MANIFEST_NAME)
     att_sha = _sha256(instance_dir / ATT.ATTESTATION_NAME)
-    if rm.get("run_status") != "COMPLETE" or (rm.get("files") or {}).get(D1R.CERTIFICATE_NAME) != cert_sha:
-        problems.append("the D1 run manifest is not COMPLETE or does not hash the certificate")
-    if (cert.get("runner") or {}).get("schema_version") != D1R.RUNNER_SCHEMA_VERSION:
-        problems.append("the certificate was not written by the instance-bound Gohr D1 runner")
-    ci = cert.get("canonical_instance") or {}
-    if not (ci.get("canonical_instance_id") == rm.get("canonical_instance_id") == inst_id):
+    problems = []
+
+    # The manifest must enumerate exactly the certificate that is present.
+    expected_files = {D1R.CERTIFICATE_NAME: cert_sha}
+    if rm.get("run_status") != "COMPLETE" or rm.get("files") != expected_files:
+        problems.append("the D1 run manifest is not COMPLETE or its file inventory/hash does not exactly match")
+
+    runner = cert.get("runner")
+    if not isinstance(runner, dict) or runner.get("schema_version") != D1R.RUNNER_SCHEMA_VERSION:
+        problems.append("the certificate was not written by the instance-bound Gohr D1 runner schema")
+
+    # A certificate and the manifest are one run, not two independently
+    # plausible JSON records.  Check a non-empty run ID on both sides.
+    cert_run_id = runner.get("run_id") if isinstance(runner, dict) else None
+    manifest_run_id = rm.get("run_id")
+    if (not isinstance(cert_run_id, str) or not cert_run_id or
+            not isinstance(manifest_run_id, str) or not manifest_run_id or
+            cert_run_id != manifest_run_id):
+        problems.append("the D1 certificate runner.run_id does not exactly match the non-empty run-manifest run_id")
+
+    ci = cert.get("canonical_instance")
+    ci = ci if isinstance(ci, dict) else {}
+    rm_instance_id = rm.get("canonical_instance_id")
+    if not (ci.get("canonical_instance_id") == rm_instance_id == inst_id):
         problems.append("D1 evidence names a different canonical instance")
     if not (ci.get("manifest_sha256") == rm.get("d0_manifest_sha256") == d0_man_sha):
         problems.append("D1 evidence names a different D0 manifest")
-    if not ((cert.get("build_attestation") or {}).get("sha256") == rm.get("build_attestation_sha256") == att_sha):
-        problems.append("D1 evidence names a different build attestation")
+    if ci.get("specification_sha256") != inst_manifest.get("specification_sha256"):
+        problems.append("the D1 certificate specification hash differs from the persisted D0 manifest")
+    if ci.get("manifest_path") != _rel(instance_dir / C.MANIFEST_NAME):
+        problems.append("the D1 certificate names an unexpected D0 manifest path")
+
+    build_attestation = cert.get("build_attestation")
+    build_attestation = build_attestation if isinstance(build_attestation, dict) else {}
+    if not (build_attestation.get("sha256") == rm.get("build_attestation_sha256") == att_sha):
+        problems.append("D1 evidence names a different D0 build attestation")
+    if build_attestation.get("path") != _rel(instance_dir / ATT.ATTESTATION_NAME):
+        problems.append("the D1 certificate names an unexpected build-attestation path")
+
+    # Do not trust a certificate to authenticate its own code identity.  Require
+    # the exact frozen inventory, exact path/hash pairs, and matching bytes for
+    # the modules actually imported by this D3 runner.
+    reported_identity = cert.get("code_identity")
+    if not isinstance(reported_identity, dict) or set(reported_identity) != set(D1_CODE_IDENTITY_PINS):
+        problems.append("D1 code_identity is missing required source identities or contains unexpected entries")
+        reported_identity = reported_identity if isinstance(reported_identity, dict) else {}
+
+    runtime_paths = {
+        "runner": Path(D1R.__file__),
+        "engine": Path(D1R.D1.__file__),
+        "canonical": Path(C.__file__),
+        "attestation_tool": Path(ATT.__file__),
+        "generator": REPO_ROOT / "speck.py",
+    }
+    for key, expected in D1_CODE_IDENTITY_PINS.items():
+        reported = reported_identity.get(key)
+        if not isinstance(reported, dict) or reported != expected:
+            problems.append(f"D1 code_identity[{key!r}] does not match the frozen path and SHA-256")
+        runtime_path = runtime_paths[key]
+        expected_path = (REPO_ROOT / expected["path"]).resolve()
+        if runtime_path.resolve() != expected_path:
+            problems.append(f"loaded D1 source {key!r} is not the frozen repository path {expected['path']}")
+        try:
+            current_sha = _sha256(runtime_path)
+        except OSError:
+            problems.append(f"frozen D1 source {key!r} is missing or unreadable at {runtime_path}")
+        else:
+            if current_sha != expected["sha256"]:
+                problems.append(f"frozen D1 source {key!r} has SHA-256 {current_sha}, expected {expected['sha256']}")
+
     if problems:
-        raise SystemExit("REFUSED: the D1 evidence is not bound to this instance:\n  - " + "\n  - ".join(problems))
-    outcome = (cert.get("verdict") or {}).get("outcome")
+        raise SystemExit("REFUSED: the D1 evidence failed the frozen instance/provenance gate:\n  - "
+                         + "\n  - ".join(problems))
+
+    verdict = cert.get("verdict")
+    outcome = verdict.get("outcome") if isinstance(verdict, dict) else None
     if outcome != "PASS":
         raise SystemExit(f"REFUSED: the frozen D1 gate requires D1 outcome PASS; this instance's D1 outcome is "
                          f"{outcome!r}. Stop, preserve all data and evidence, and investigate.")
     return {"path": _rel(d1_dir), "certificate_sha256": cert_sha, "run_manifest_sha256": man_sha,
-            "run_id": rm.get("run_id"), "outcome": outcome}
+            "run_id": manifest_run_id, "outcome": outcome}
 
 
 def preflight(instance_dir: Path, d1_dir: Path, *, log=print) -> dict:
