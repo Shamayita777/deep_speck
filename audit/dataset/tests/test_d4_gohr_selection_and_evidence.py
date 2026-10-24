@@ -25,92 +25,132 @@ import audit.dataset.d4_controlled_perturbation as d4
 import audit.dataset.experiments.d4_gohr_label_shuffle as driver
 from audit.dataset.perturbations.label_shuffle import LabelShufflePerturbation
 
-IDENTITY = {"seed": 7, "condition": "baseline", "replicate": 1, "config_hash": "c" * 64}
+IDENTITY = {
+    "seed": 7, "condition": "baseline", "replicate": 1,
+    "config_hash": "c" * 64, "data_digest": "d" * 64,
+}
 
 
-def write_epoch(directory: Path, epoch: int, val_loss: float, **overrides) -> Path:
-    checkpoint = directory / f"checkpoint_epoch_{epoch:03d}.keras"
-    checkpoint.write_bytes(f"weights-{epoch}".encode())
-    record = {
-        "schema_version": "1.0",
-        "epoch": epoch,
-        "checkpoint": checkpoint.name,
-        "checkpoint_sha256": gohr._sha256_file(checkpoint),
-        "val_loss": float(val_loss),
-        "logs": {"val_loss": float(val_loss)},
-        **IDENTITY,
-    }
-    record.update(overrides)
-    gohr.epoch_metrics_path(directory, epoch).write_text(json.dumps(record), encoding="utf-8")
-    return checkpoint
+def write_chain(directory: Path, losses, overrides=None) -> str:
+    """Write chained epoch records (as the callback does); return the head."""
+    head = gohr.GENESIS_RECORD_SHA256
+    for epoch, loss in enumerate(losses, start=1):
+        checkpoint = gohr.epoch_checkpoint_path(directory, epoch)
+        checkpoint.write_bytes(f"weights-{epoch}".encode())
+        record = {
+            "schema_version": "2.0",
+            "epoch": epoch,
+            "checkpoint": checkpoint.name,
+            "checkpoint_sha256": gohr._sha256_file(checkpoint),
+            "val_loss": float(loss),
+            "logs": {"val_loss": float(loss)},
+            "previous_record_sha256": head,
+            **IDENTITY,
+        }
+        record.update((overrides or {}).get(epoch, {}))
+        path = gohr.epoch_metrics_path(directory, epoch)
+        path.write_text(json.dumps(record), encoding="utf-8")
+        head = gohr._sha256_file(path)
+    return head
 
 
-def select(directory: Path, total_epochs: int = 3) -> dict:
-    return gohr.select_checkpoint(directory, total_epochs=total_epochs, **IDENTITY)
+def select(directory: Path, head: str, total_epochs: int = 3) -> dict:
+    return gohr.select_checkpoint(directory, total_epochs=total_epochs, chain_head=head, **IDENTITY)
+
+
+def edit_record(directory: Path, epoch: int, **changes) -> None:
+    path = gohr.epoch_metrics_path(directory, epoch)
+    record = json.loads(path.read_text())
+    record.update(changes)
+    path.write_text(json.dumps(record), encoding="utf-8")
 
 
 # ============================================================================
-# Selection rule
+# Selection rule and record integrity
 # ============================================================================
 
 
 def test_selects_minimum_val_loss_not_last_epoch(tmp_path):
-    for epoch, loss in [(1, 0.30), (2, 0.10), (3, 0.20)]:
-        write_epoch(tmp_path, epoch, loss)
-    selection = select(tmp_path)
+    head = write_chain(tmp_path, [0.30, 0.10, 0.20])
+    selection = select(tmp_path, head)
     assert selection["selected_epoch"] == 2
     assert selection["selected_val_loss"] == pytest.approx(0.10)
     assert selection["rule"] == gohr.MODEL_SELECTION_RULE
-    assert selection["condition"] == "baseline"
+    assert selection["record_chain_head"] == head
+    assert selection["data_digest"] == "d" * 64
 
 
 def test_ties_resolve_to_earliest_epoch(tmp_path):
-    for epoch in (1, 2, 3):
-        write_epoch(tmp_path, epoch, 0.25)
-    assert select(tmp_path)["selected_epoch"] == 1
+    head = write_chain(tmp_path, [0.25, 0.25, 0.25])
+    assert select(tmp_path, head)["selected_epoch"] == 1
 
 
 def test_missing_epoch_record_is_refused(tmp_path):
-    write_epoch(tmp_path, 1, 0.3)
-    write_epoch(tmp_path, 3, 0.1)
+    head = write_chain(tmp_path, [0.3, 0.1, 0.2])
+    gohr.epoch_metrics_path(tmp_path, 2).unlink()
     with pytest.raises(RuntimeError, match="missing"):
-        select(tmp_path)
+        select(tmp_path, head)
 
 
 def test_record_from_other_condition_is_refused(tmp_path):
-    write_epoch(tmp_path, 1, 0.3)
-    write_epoch(tmp_path, 2, 0.1, condition="perturbed")
-    write_epoch(tmp_path, 3, 0.2)
+    head = write_chain(tmp_path, [0.3, 0.1, 0.2], overrides={2: {"condition": "perturbed"}})
     with pytest.raises(RuntimeError, match="condition"):
-        select(tmp_path)
+        select(tmp_path, head)
 
 
-def test_record_from_other_config_is_refused(tmp_path):
-    write_epoch(tmp_path, 1, 0.3, config_hash="d" * 64)
-    with pytest.raises(RuntimeError, match="config_hash"):
-        select(tmp_path, total_epochs=1)
+def test_record_from_other_data_is_refused(tmp_path):
+    head = write_chain(tmp_path, [0.3], overrides={1: {"data_digest": "e" * 64}})
+    with pytest.raises(RuntimeError, match="data_digest"):
+        select(tmp_path, head, total_epochs=1)
 
 
 def test_tampered_selected_checkpoint_is_refused(tmp_path):
-    write_epoch(tmp_path, 1, 0.3)
-    best = write_epoch(tmp_path, 2, 0.1)
-    write_epoch(tmp_path, 3, 0.2)
-    best.write_bytes(b"replaced")
+    head = write_chain(tmp_path, [0.3, 0.1, 0.2])
+    gohr.epoch_checkpoint_path(tmp_path, 2).write_bytes(b"replaced")
     with pytest.raises(RuntimeError, match="hashes to"):
-        select(tmp_path)
+        select(tmp_path, head)
+
+
+@pytest.mark.parametrize("epoch", [1, 3])
+def test_tampered_non_selected_checkpoint_is_refused(tmp_path, epoch):
+    head = write_chain(tmp_path, [0.3, 0.1, 0.2])
+    gohr.epoch_checkpoint_path(tmp_path, epoch).write_bytes(b"replaced")
+    with pytest.raises(RuntimeError, match="hashes to"):
+        select(tmp_path, head)
+
+
+def test_lowered_val_loss_in_earlier_record_is_refused(tmp_path):
+    head = write_chain(tmp_path, [0.3, 0.1, 0.2])
+    edit_record(tmp_path, 1, val_loss=0.01, logs={"val_loss": 0.01})
+    with pytest.raises(RuntimeError, match="does not chain"):
+        select(tmp_path, head)
+
+
+def test_modified_val_loss_in_last_record_is_refused(tmp_path):
+    head = write_chain(tmp_path, [0.3, 0.1, 0.2])
+    edit_record(tmp_path, 3, val_loss=0.01, logs={"val_loss": 0.01})
+    with pytest.raises(RuntimeError, match="head committed"):
+        select(tmp_path, head)
+
+
+def test_recomputed_chain_still_disagrees_with_committed_head(tmp_path):
+    head = write_chain(tmp_path, [0.3, 0.1, 0.2])
+    write_chain(tmp_path, [0.3, 0.1, 0.01])  # consistent forgery of the whole chain
+    with pytest.raises(RuntimeError, match="head committed"):
+        select(tmp_path, head)
 
 
 def test_non_finite_val_loss_is_refused(tmp_path):
-    write_epoch(tmp_path, 1, float("nan"))
+    head = write_chain(tmp_path, [float("nan")])
     with pytest.raises(RuntimeError, match="non-finite"):
-        select(tmp_path, total_epochs=1)
+        select(tmp_path, head, total_epochs=1)
 
 
 def test_malformed_record_is_refused(tmp_path):
-    write_epoch(tmp_path, 1, 0.3)
+    head = write_chain(tmp_path, [0.3])
     gohr.epoch_metrics_path(tmp_path, 1).write_text("{not json", encoding="utf-8")
     with pytest.raises(RuntimeError, match="malformed"):
-        select(tmp_path, total_epochs=1)
+        select(tmp_path, head, total_epochs=1)
 
 
 def test_selection_record_is_never_silently_replaced(tmp_path):
@@ -123,34 +163,102 @@ def test_selection_record_is_never_silently_replaced(tmp_path):
 
 
 # ============================================================================
+# Crash between the epoch record and the state update
+# ============================================================================
+
+
+def committed_state(directory: Path, completed: int, head: str) -> Path:
+    state = directory / "state.json"
+    gohr.write_training_state(state, identity=IDENTITY, total_epochs=3, completed=completed, chain_head=head)
+    return state
+
+
+def test_interrupted_state_update_adopts_the_completed_epoch(tmp_path):
+    write_chain(tmp_path, [0.3])
+    head_1 = gohr._sha256_file(gohr.epoch_metrics_path(tmp_path, 1))
+    state = committed_state(tmp_path, 1, head_1)
+    head_2 = write_chain(tmp_path, [0.3, 0.2])  # epoch 2 written, then "crash"
+    assert json.loads(state.read_text())["completed_epochs"] == 1
+
+    completed, head = gohr.reconcile_uncommitted_epochs(
+        tmp_path, state, identity=IDENTITY, total_epochs=3, committed=1, chain_head=head_1
+    )
+    assert (completed, head) == (2, head_2)
+    recorded = json.loads(state.read_text())
+    assert recorded["completed_epochs"] == 2 and recorded["record_chain_head"] == head_2
+    assert gohr.epoch_metrics_path(tmp_path, 2).exists()
+    assert gohr._sha256_file(gohr.epoch_metrics_path(tmp_path, 2)) == head_2
+
+
+def test_interrupted_first_epoch_without_state_is_adopted(tmp_path):
+    head_1 = write_chain(tmp_path, [0.3])
+    state = tmp_path / "state.json"
+    completed, head = gohr.reconcile_uncommitted_epochs(
+        tmp_path, state, identity=IDENTITY, total_epochs=3, committed=0,
+        chain_head=gohr.GENESIS_RECORD_SHA256,
+    )
+    assert (completed, head) == (1, head_1)
+    assert json.loads(state.read_text())["completed_epochs"] == 1
+
+
+def test_unverifiable_uncommitted_epoch_is_set_aside_not_overwritten(tmp_path):
+    write_chain(tmp_path, [0.3])
+    head_1 = gohr._sha256_file(gohr.epoch_metrics_path(tmp_path, 1))
+    state = committed_state(tmp_path, 1, head_1)
+    write_chain(tmp_path, [0.3, 0.2])
+    gohr.epoch_checkpoint_path(tmp_path, 2).write_bytes(b"torn write")
+    completed, head = gohr.reconcile_uncommitted_epochs(
+        tmp_path, state, identity=IDENTITY, total_epochs=3, committed=1, chain_head=head_1
+    )
+    assert (completed, head) == (1, head_1)
+    assert not gohr.epoch_checkpoint_path(tmp_path, 2).exists()
+    assert not gohr.epoch_metrics_path(tmp_path, 2).exists()
+    kept = sorted(p.name for p in tmp_path.glob("*.uncommitted-1"))
+    assert kept == ["checkpoint_epoch_002.keras.uncommitted-1",
+                    "checkpoint_epoch_002.metrics.json.uncommitted-1"]
+    assert (tmp_path / kept[0]).read_bytes() == b"torn write"
+
+
+def test_checkpoint_without_record_is_set_aside(tmp_path):
+    gohr.epoch_checkpoint_path(tmp_path, 1).write_bytes(b"partial")
+    completed, _ = gohr.reconcile_uncommitted_epochs(
+        tmp_path, tmp_path / "state.json", identity=IDENTITY, total_epochs=3,
+        committed=0, chain_head=gohr.GENESIS_RECORD_SHA256,
+    )
+    assert completed == 0
+    assert (tmp_path / "checkpoint_epoch_001.keras.uncommitted-1").read_bytes() == b"partial"
+
+
+# ============================================================================
 # Real hand-off: the reloaded model is the selected checkpoint
 # ============================================================================
 
 
-def test_adapter_reloads_selected_checkpoint_and_resume_agrees(tmp_path):
-    from keras.models import load_model
-
+def tiny_fit(tmp_path, *, epochs=3, train=None):
     rng = np.random.default_rng(0)
     x = rng.integers(0, 2, size=(64, 64), dtype=np.uint8)
     y = rng.integers(0, 2, size=64, dtype=np.uint8)
     vx = rng.integers(0, 2, size=(32, 64), dtype=np.uint8)
     vy = rng.integers(0, 2, size=32, dtype=np.uint8)
-
-    def adapter():
-        return gohr.GohrAdapter(
-            validation_x=vx, validation_y=vy, test_x=vx, test_y=vy,
-            num_rounds=5, depth=1, epochs=3, seed=11,
-            model_directory=str(tmp_path / "model"),
-        )
-
+    if train is not None:
+        x, y = train
+    adapter = gohr.GohrAdapter(
+        validation_x=vx, validation_y=vy, test_x=vx, test_y=vy,
+        num_rounds=5, depth=1, epochs=epochs, seed=11,
+        model_directory=str(tmp_path / "model"),
+    )
     condition_dir = tmp_path / "replicate_01" / "baseline"
-    kwargs = dict(
-        checkpoint_path=condition_dir, state_path=condition_dir / "state.json",
+    adapter.train(
+        x, y, checkpoint_path=condition_dir, state_path=condition_dir / "state.json",
         replicate=1, condition="baseline", run_config_hash="e" * 64,
     )
-    first = adapter()
-    model = first.train(x, y, **kwargs)
+    return adapter, condition_dir, (x, y)
 
+
+def test_adapter_reloads_selected_checkpoint_and_resume_agrees(tmp_path):
+    from keras.models import load_model
+
+    first, condition_dir, _ = tiny_fit(tmp_path)
     records = [
         json.loads(gohr.epoch_metrics_path(condition_dir, e).read_text()) for e in (1, 2, 3)
     ]
@@ -158,8 +266,8 @@ def test_adapter_reloads_selected_checkpoint_and_resume_agrees(tmp_path):
     assert first.selection["selected_epoch"] == expected_epoch
     assert first.selection["condition"] == "baseline"
 
-    reference = load_model(condition_dir / f"checkpoint_epoch_{expected_epoch:03d}.keras")
-    for got, want in zip(model.get_weights(), reference.get_weights()):
+    reference = load_model(gohr.epoch_checkpoint_path(condition_dir, expected_epoch))
+    for got, want in zip(first.model.get_weights(), reference.get_weights()):
         np.testing.assert_array_equal(got, want)
 
     recorded = json.loads((condition_dir / "selected_checkpoint.json").read_text())
@@ -167,9 +275,33 @@ def test_adapter_reloads_selected_checkpoint_and_resume_agrees(tmp_path):
     assert not list((tmp_path / "model").glob("best_*"))
 
     # A completed fit resumed in a new process yields the same selection.
-    second = adapter()
-    second.train(x, y, **kwargs)
+    second, _, _ = tiny_fit(tmp_path)
     assert second.selection == first.selection
+
+
+def test_resume_against_substituted_partition_is_refused(tmp_path):
+    _, condition_dir, (x, y) = tiny_fit(tmp_path, epochs=1)
+    swapped = x.copy()
+    swapped[0] ^= 1  # same shape, dtype and configuration; different content
+    with pytest.raises(RuntimeError, match="data_digest"):
+        tiny_fit(tmp_path, epochs=1, train=(swapped, y))
+    assert json.loads((condition_dir / "state.json").read_text())["completed_epochs"] == 1
+
+
+def test_resume_refuses_tampered_committed_checkpoint(tmp_path):
+    _, condition_dir, _ = tiny_fit(tmp_path, epochs=1)
+    gohr.epoch_checkpoint_path(condition_dir, 1).write_bytes(b"replaced")
+    with pytest.raises(RuntimeError, match="hashes to"):
+        tiny_fit(tmp_path, epochs=1)
+
+
+def test_partition_digest_depends_on_content_only_through_bytes():
+    a = np.zeros((4, 64), dtype=np.uint8)
+    b = a.copy()
+    b[3, 63] = 1
+    assert gohr.partition_digest({"x": a}) == gohr.partition_digest({"x": a.copy()})
+    assert gohr.partition_digest({"x": a}) != gohr.partition_digest({"x": b})
+    assert gohr.partition_digest({"x": a}, chunk_rows=1) == gohr.partition_digest({"x": a})
 
 
 # ============================================================================
@@ -357,3 +489,58 @@ def test_certificate_is_never_overwritten(tmp_path):
         driver.write_certificate_exclusive(path, {"decision": "second"})
     assert json.loads(path.read_text()) == {"decision": "first"}
     assert not list(tmp_path.glob("*.tmp"))
+
+
+# ============================================================================
+# Partition overlap audit
+# ============================================================================
+
+
+def bits(rows):
+    return np.array([[int(c) for c in f"{r:064b}"] for r in rows], dtype=np.uint8)
+
+
+def test_overlap_audit_counts_shared_and_duplicate_rows():
+    train = bits([1, 2, 2, 3, 2**63 + 5])
+    validation = bits([3, 4, 9])
+    test = bits([2, 2**63 + 5, 4, 7])
+    report = driver.audit_partition_overlap(train, validation, test)
+    assert report["rows"] == {"train": 5, "validation": 3, "test": 4}
+    assert report["within_duplicate_rows"] == {"train": 1, "validation": 0, "test": 0}
+    assert report["cross"]["train_validation"] == {"rows": 1, "distinct": 1}
+    assert report["cross"]["train_test"] == {"rows": 2, "distinct": 2}
+    assert report["cross"]["validation_test"] == {"rows": 1, "distinct": 1}
+    with pytest.raises(RuntimeError, match="separation violated"):
+        driver.require_partition_separation(report)
+
+
+def test_overlap_audit_chunking_matches_unchunked():
+    rng = np.random.default_rng(9)
+    x = rng.integers(0, 2, size=(1000, 64), dtype=np.uint8)
+    np.testing.assert_array_equal(driver._row_keys(x, chunk_rows=7), driver._row_keys(x))
+
+
+def test_disjoint_partitions_pass_with_duplicates_only_recorded():
+    report = driver.audit_partition_overlap(bits([1, 1, 2]), bits([3]), bits([4]))
+    assert report["within_duplicate_rows"]["train"] == 1
+    driver.require_partition_separation(report)
+
+
+def test_adapter_recovers_from_crash_before_state_update(tmp_path):
+    first, condition_dir, _ = tiny_fit(tmp_path, epochs=2)
+    record_2 = gohr.epoch_metrics_path(condition_dir, 2)
+    before = (record_2.read_bytes(), gohr.epoch_checkpoint_path(condition_dir, 2).read_bytes())
+    # Roll state back to epoch 1, as if the process died after writing the
+    # epoch-2 record but before state.json advanced.
+    state_path = condition_dir / "state.json"
+    state = json.loads(state_path.read_text())
+    identity = {k: state[k] for k in ("seed", "condition", "replicate", "config_hash", "data_digest")}
+    gohr.write_training_state(
+        state_path, identity=identity, total_epochs=2, completed=1,
+        chain_head=gohr._sha256_file(gohr.epoch_metrics_path(condition_dir, 1)),
+    )
+    second, _, _ = tiny_fit(tmp_path, epochs=2)
+    assert json.loads(state_path.read_text())["completed_epochs"] == 2
+    assert (record_2.read_bytes(), gohr.epoch_checkpoint_path(condition_dir, 2).read_bytes()) == before
+    assert second.selection == first.selection
+    assert not list(condition_dir.glob("*.uncommitted-*"))

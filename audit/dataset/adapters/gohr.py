@@ -32,9 +32,16 @@ import train_nets as tn
 #: over the complete epoch history and reloaded from its immutable file.
 MODEL_SELECTION_RULE = "argmin_val_loss_over_all_epochs_reloaded"
 
+#: ``previous_record_sha256`` of the first epoch record.
+GENESIS_RECORD_SHA256 = "0" * 64
+
 
 def epoch_metrics_path(checkpoint_directory: Path, epoch: int) -> Path:
     return Path(checkpoint_directory) / f"checkpoint_epoch_{int(epoch):03d}.metrics.json"
+
+
+def epoch_checkpoint_path(checkpoint_directory: Path, epoch: int) -> Path:
+    return Path(checkpoint_directory) / f"checkpoint_epoch_{int(epoch):03d}.keras"
 
 
 def _sha256_file(path: Path) -> str:
@@ -44,6 +51,22 @@ def _sha256_file(path: Path) -> str:
     with Path(path).open("rb") as handle:
         for block in iter(lambda: handle.read(1 << 20), b""):
             digest.update(block)
+    return digest.hexdigest()
+
+
+def partition_digest(partitions: dict, chunk_rows: int = 1 << 18) -> str:
+    """SHA-256 over the names, dtypes, shapes and bytes of the partitions.
+
+    Hashed in row chunks so memory-mapped arrays are never copied whole.
+    """
+    import hashlib
+
+    digest = hashlib.sha256()
+    for name in sorted(partitions):
+        array = np.asarray(partitions[name])
+        digest.update(f"{name}|{array.dtype.str}|{array.shape}\n".encode())
+        for start in range(0, len(array), chunk_rows):
+            digest.update(np.ascontiguousarray(array[start:start + chunk_rows]).tobytes())
     return digest.hexdigest()
 
 
@@ -57,6 +80,53 @@ def _write_json_atomic(path: Path, payload: dict) -> None:
     os.replace(temporary, path)
 
 
+def _verify_epoch_record(path: Path, epoch: int, identity: dict, previous_sha256: str) -> dict:
+    """Return the record for ``epoch`` if it is intact and links to its predecessor."""
+    try:
+        record = json.loads(Path(path).read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Epoch record is malformed: {path}") from exc
+    for key, value in identity.items():
+        if record.get(key) != value:
+            raise RuntimeError(
+                f"Epoch record {path} has {key}={record.get(key)!r}, "
+                f"expected {value!r}. Refusing to mix fits."
+            )
+    if record.get("epoch") != epoch or record.get("checkpoint") != epoch_checkpoint_path(".", epoch).name:
+        raise RuntimeError(f"Epoch record {path} does not describe epoch {epoch}.")
+    if record.get("previous_record_sha256") != previous_sha256:
+        raise RuntimeError(
+            f"Epoch record {path} does not chain to the record of epoch "
+            f"{epoch - 1}; an earlier record was altered or replaced."
+        )
+    val_loss = record.get("val_loss")
+    if not isinstance(val_loss, float) or not np.isfinite(val_loss):
+        raise RuntimeError(f"Epoch record {path} has a non-finite val_loss.")
+    checkpoint = Path(path).parent / record["checkpoint"]
+    if not checkpoint.exists():
+        raise RuntimeError(f"Checkpoint for epoch {epoch} is missing: {checkpoint}")
+    actual = _sha256_file(checkpoint)
+    if actual != record.get("checkpoint_sha256"):
+        raise RuntimeError(
+            f"Checkpoint {checkpoint} hashes to {actual}, but its epoch "
+            f"record says {record.get('checkpoint_sha256')}. Refusing to use it."
+        )
+    return record
+
+
+def verify_epoch_chain(checkpoint_directory: Path, *, epochs: int, identity: dict) -> tuple[list, str]:
+    """Verify epoch records 1..epochs and return them with the chain head."""
+    records = []
+    head = GENESIS_RECORD_SHA256
+    for epoch in range(1, int(epochs) + 1):
+        path = epoch_metrics_path(checkpoint_directory, epoch)
+        if not path.exists():
+            raise RuntimeError(f"Epoch record missing: {path}. Refusing to select a checkpoint.")
+        records.append(_verify_epoch_record(path, epoch, identity, head))
+        head = _sha256_file(path)
+    return records, head
+
+
 def select_checkpoint(
     checkpoint_directory: Path,
     *,
@@ -65,62 +135,41 @@ def select_checkpoint(
     condition: str,
     replicate: int,
     config_hash: str,
+    data_digest: str,
+    chain_head: str,
 ) -> dict:
     """Select the minimum-val_loss epoch from the immutable epoch records.
 
     Every epoch 1..total_epochs must have a record whose identity fields
-    match this fit and whose checkpoint still hashes to the recorded
-    digest.  Anything missing, malformed, foreign or altered is refused.
-    Ties resolve to the earliest epoch.
+    (including the partition digest) match this fit and whose checkpoint
+    still hashes to the recorded digest.  The records form a hash chain
+    whose head is committed in state.json, so altering any val_loss (or
+    any other record field) is refused.  Ties resolve to the earliest epoch.
     """
-    checkpoint_directory = Path(checkpoint_directory)
-    expected = {
+    identity = {
         "seed": int(seed),
         "condition": str(condition),
         "replicate": int(replicate),
         "config_hash": str(config_hash),
+        "data_digest": str(data_digest),
     }
-    records = []
-    for epoch in range(1, int(total_epochs) + 1):
-        path = epoch_metrics_path(checkpoint_directory, epoch)
-        if not path.exists():
-            raise RuntimeError(f"Epoch record missing: {path}. Refusing to select a checkpoint.")
-        try:
-            record = json.loads(path.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(f"Epoch record is malformed: {path}") from exc
-        for key, value in expected.items():
-            if record.get(key) != value:
-                raise RuntimeError(
-                    f"Epoch record {path} has {key}={record.get(key)!r}, "
-                    f"expected {value!r}. Refusing to mix fits."
-                )
-        if record.get("epoch") != epoch or record.get("checkpoint") != f"checkpoint_epoch_{epoch:03d}.keras":
-            raise RuntimeError(f"Epoch record {path} does not describe epoch {epoch}.")
-        val_loss = record.get("val_loss")
-        if not isinstance(val_loss, float) or not np.isfinite(val_loss):
-            raise RuntimeError(f"Epoch record {path} has a non-finite val_loss.")
-        records.append(record)
-
-    best = min(records, key=lambda r: (r["val_loss"], r["epoch"]))
-    checkpoint = checkpoint_directory / best["checkpoint"]
-    if not checkpoint.exists():
-        raise RuntimeError(f"Selected checkpoint is missing: {checkpoint}")
-    actual = _sha256_file(checkpoint)
-    if actual != best["checkpoint_sha256"]:
+    records, head = verify_epoch_chain(checkpoint_directory, epochs=total_epochs, identity=identity)
+    if head != chain_head:
         raise RuntimeError(
-            f"Selected checkpoint {checkpoint} hashes to {actual}, but its "
-            f"epoch record says {best['checkpoint_sha256']}. Refusing to load."
+            "The epoch-record chain does not end at the head committed in "
+            "state.json; a record was altered, added or replaced."
         )
+    best = min(records, key=lambda r: (r["val_loss"], r["epoch"]))
     return {
-        "schema_version": "1.0",
+        "schema_version": "2.0",
         "rule": MODEL_SELECTION_RULE,
         "selected_epoch": best["epoch"],
         "selected_val_loss": best["val_loss"],
         "checkpoint": best["checkpoint"],
-        "checkpoint_sha256": actual,
+        "checkpoint_sha256": best["checkpoint_sha256"],
+        "record_chain_head": head,
         "total_epochs": int(total_epochs),
-        **expected,
+        **identity,
     }
 
 
@@ -138,14 +187,89 @@ def record_selection(path: Path, selection: dict) -> None:
     _write_json_atomic(path, selection)
 
 
-class EpochStateCallback(Callback):
-    """Atomically persist the completed epoch after its checkpoint exists.
+def write_training_state(
+    state_path: Path,
+    *,
+    identity: dict,
+    total_epochs: int,
+    completed: int,
+    chain_head: str,
+    logs: dict | None = None,
+) -> None:
+    _write_json_atomic(
+        state_path,
+        {
+            "schema_version": "3.0",
+            **identity,
+            "total_epochs": int(total_epochs),
+            "completed_epochs": int(completed),
+            "latest_checkpoint": epoch_checkpoint_path(".", completed).name,
+            "record_chain_head": chain_head,
+            "status": "complete" if completed >= total_epochs else "in_progress",
+            "last_epoch_logs": dict(logs or {}),
+        },
+    )
 
-    The callback is deliberately registered after ModelCheckpoint.  Thus a
-    state file can only advance after the corresponding immutable epoch
-    checkpoint has been written successfully.  If a process dies between
-    those two operations, the state safely points to the previous epoch and
-    that epoch is rerun rather than silently skipped.
+
+def reconcile_uncommitted_epochs(
+    checkpoint_directory: Path,
+    state_path: Path,
+    *,
+    identity: dict,
+    total_epochs: int,
+    committed: int,
+    chain_head: str,
+) -> tuple[int, str]:
+    """Recover or set aside work written after the last committed state.
+
+    A crash can land after an epoch's checkpoint and record are written
+    but before state.json advances.  If that record is intact and chains
+    to the committed head, the epoch is complete and is adopted (state is
+    advanced).  Anything else past the committed epoch is renamed with an
+    ``.uncommitted-N`` suffix, never deleted, so rerunning the epoch cannot
+    silently overwrite it.
+    """
+    checkpoint_directory = Path(checkpoint_directory)
+    epoch = committed + 1
+    record_path = epoch_metrics_path(checkpoint_directory, epoch)
+    if epoch <= total_epochs and record_path.exists():
+        try:
+            record = _verify_epoch_record(record_path, epoch, identity, chain_head)
+        except RuntimeError as exc:
+            print(f"Epoch {epoch} record is not adoptable ({exc}); setting it aside.")
+        else:
+            committed, chain_head = epoch, _sha256_file(record_path)
+            write_training_state(
+                state_path, identity=identity, total_epochs=total_epochs,
+                completed=committed, chain_head=chain_head, logs=record.get("logs"),
+            )
+            print(f"Adopted epoch {epoch}, completed before an interrupted state update.")
+            return reconcile_uncommitted_epochs(
+                checkpoint_directory, state_path, identity=identity,
+                total_epochs=total_epochs, committed=committed, chain_head=chain_head,
+            )
+    for path in sorted(checkpoint_directory.glob("checkpoint_epoch_*")):
+        stem = path.name.split(".")[0]
+        try:
+            number = int(stem.rsplit("_", 1)[1])
+        except ValueError:
+            continue
+        if number > committed and ".uncommitted-" not in path.name:
+            suffix = 1
+            while path.with_name(f"{path.name}.uncommitted-{suffix}").exists():
+                suffix += 1
+            path.rename(path.with_name(f"{path.name}.uncommitted-{suffix}"))
+            print(f"Set aside uncommitted file {path.name}.")
+    return committed, chain_head
+
+
+class EpochStateCallback(Callback):
+    """Record each completed epoch, then atomically advance the state.
+
+    Registered after ModelCheckpoint, so an epoch record is written only
+    once its checkpoint exists, and state.json only after the record.  A
+    crash between the two is repaired on the next start by
+    ``reconcile_uncommitted_epochs``.
     """
 
     def __init__(
@@ -158,19 +282,25 @@ class EpochStateCallback(Callback):
         total_epochs: int,
         config_hash: str,
         checkpoint_directory: Path,
+        data_digest: str,
+        chain_head: str,
     ) -> None:
         super().__init__()
         self.state_path = Path(state_path)
-        self.seed = int(seed)
-        self.condition = str(condition)
-        self.replicate = int(replicate)
         self.total_epochs = int(total_epochs)
-        self.config_hash = str(config_hash)
         self.checkpoint_directory = Path(checkpoint_directory)
+        self.identity = {
+            "seed": int(seed),
+            "condition": str(condition),
+            "replicate": int(replicate),
+            "config_hash": str(config_hash),
+            "data_digest": str(data_digest),
+        }
+        self.chain_head = str(chain_head)
 
     def on_epoch_end(self, epoch, logs=None):
         completed = int(epoch + 1)
-        checkpoint = self.checkpoint_directory / f"checkpoint_epoch_{completed:03d}.keras"
+        checkpoint = epoch_checkpoint_path(self.checkpoint_directory, completed)
         if not checkpoint.exists():
             raise RuntimeError(
                 "Epoch state cannot advance because the expected epoch "
@@ -181,9 +311,6 @@ class EpochStateCallback(Callback):
             for key, value in (logs or {}).items()
             if np.isscalar(value)
         }
-        # Immutable per-epoch record binding the validation metric to the
-        # exact checkpoint bytes.  Model selection reads these records, so
-        # it survives resumption and detects a replaced checkpoint.
         if "val_loss" not in epoch_logs:
             raise RuntimeError(
                 "val_loss is missing from the epoch logs; model selection "
@@ -197,40 +324,22 @@ class EpochStateCallback(Callback):
         _write_json_atomic(
             metrics_path,
             {
-                "schema_version": "1.0",
+                "schema_version": "2.0",
                 "epoch": completed,
                 "checkpoint": checkpoint.name,
                 "checkpoint_sha256": _sha256_file(checkpoint),
                 "val_loss": epoch_logs["val_loss"],
                 "logs": epoch_logs,
-                "seed": self.seed,
-                "condition": self.condition,
-                "replicate": self.replicate,
-                "config_hash": self.config_hash,
+                "previous_record_sha256": self.chain_head,
+                **self.identity,
             },
         )
-        state = {
-            "schema_version": "2.0",
-            "seed": self.seed,
-            "condition": self.condition,
-            "replicate": self.replicate,
-            "total_epochs": self.total_epochs,
-            "completed_epochs": completed,
-            "latest_checkpoint": checkpoint.name,
-            "config_hash": self.config_hash,
-            "status": "complete" if completed >= self.total_epochs else "in_progress",
-            "last_epoch_logs": {
-                key: float(value)
-                for key, value in (logs or {}).items()
-                if np.isscalar(value)
-            },
-        }
-        self.state_path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = self.state_path.with_suffix(".tmp")
-        with temporary.open("w", encoding="utf-8") as handle:
-            json.dump(state, handle, indent=2, sort_keys=True)
-            handle.write("\n")
-        os.replace(self.state_path if False else temporary, self.state_path)
+        self.chain_head = _sha256_file(metrics_path)
+        write_training_state(
+            self.state_path, identity=self.identity, total_epochs=self.total_epochs,
+            completed=completed, chain_head=self.chain_head, logs=epoch_logs,
+        )
+
 
 class GohrAdapter:
     """Adapter for Gohr's neural distinguisher and dataset generator."""
@@ -436,58 +545,72 @@ class GohrAdapter:
         if run_config_hash is None:
             raise ValueError("run_config_hash is required for resumable D4 training.")
 
+        # Bind the fit to the exact partition contents, not only the config
+        # hash: resuming against different data under the same config must
+        # be refused.
+        partitions = {"train_x": train_x, "train_y": train_y,
+                      "validation_x": self.validation_x, "validation_y": self.validation_y}
+        if self.test_x is not None:
+            partitions.update(test_x=self.test_x, test_y=self.test_y)
+        data_digest = partition_digest(partitions)
+        identity = {
+            "seed": int(self.seed),
+            "condition": str(condition),
+            "replicate": int(replicate),
+            "config_hash": str(run_config_hash),
+            "data_digest": data_digest,
+        }
+
         completed_epochs = 0
-        resume_checkpoint = None
+        chain_head = GENESIS_RECORD_SHA256
 
         if state_path.exists():
             with state_path.open("r", encoding="utf-8") as handle:
                 state = json.load(handle)
 
-            expected = {
-                "seed": int(self.seed),
-                "condition": str(condition),
-                "replicate": int(replicate),
-                "total_epochs": int(self.epochs),
-                "config_hash": str(run_config_hash),
-            }
-            for key, expected_value in expected.items():
+            for key, expected_value in {**identity, "total_epochs": int(self.epochs)}.items():
                 actual = state.get(key)
                 if actual != expected_value:
                     raise RuntimeError(
                         f"Refusing to resume {condition} replicate {replicate}: "
                         f"state field {key!r} is {actual!r}, expected {expected_value!r}. "
-                        "The experiment configuration must remain immutable across sessions."
+                        "The experiment configuration and data must remain "
+                        "immutable across sessions."
                     )
 
             completed_epochs = int(state.get("completed_epochs", 0))
             if completed_epochs < 0 or completed_epochs > self.epochs:
                 raise RuntimeError("Invalid completed_epochs in D4 state.json.")
+            if state.get("latest_checkpoint") != epoch_checkpoint_path(".", completed_epochs).name:
+                raise RuntimeError(
+                    "D4 state/checkpoint mismatch: latest_checkpoint does not "
+                    "match completed_epochs."
+                )
+            # Every committed checkpoint and record is re-verified before reuse.
+            _, chain_head = verify_epoch_chain(
+                checkpoint_directory, epochs=completed_epochs, identity=identity
+            )
+            if chain_head != state.get("record_chain_head"):
+                raise RuntimeError(
+                    "Committed epoch records do not match the chain head in "
+                    "state.json. Refusing to resume."
+                )
 
-            checkpoint_name = state.get("latest_checkpoint")
-            if completed_epochs > 0:
-                expected_name = f"checkpoint_epoch_{completed_epochs:03d}.keras"
-                if checkpoint_name != expected_name:
-                    raise RuntimeError(
-                        "D4 state/checkpoint mismatch: latest_checkpoint does not "
-                        "match completed_epochs."
-                    )
-                resume_checkpoint = checkpoint_directory / expected_name
-                if not resume_checkpoint.exists():
-                    raise RuntimeError(
-                        f"D4 state says epoch {completed_epochs} is complete, but "
-                        f"{resume_checkpoint} is missing. Refusing to guess."
-                    )
+        completed_epochs, chain_head = reconcile_uncommitted_epochs(
+            checkpoint_directory, state_path, identity=identity,
+            total_epochs=self.epochs, committed=completed_epochs, chain_head=chain_head,
+        )
 
+        if completed_epochs > 0:
             print(
                 f"Resuming {condition} replicate {replicate} from "
                 f"epoch {completed_epochs}/{self.epochs}..."
             )
             if completed_epochs >= self.epochs:
-                return self._load_selected(
-                    checkpoint_directory, condition, replicate, run_config_hash
-                )
-
-            self.model = load_model(resume_checkpoint, compile=True)
+                return self._load_selected(checkpoint_directory, identity, chain_head)
+            self.model = load_model(
+                epoch_checkpoint_path(checkpoint_directory, completed_epochs), compile=True
+            )
         else:
             self.model = self.build_model()
 
@@ -526,6 +649,8 @@ class GohrAdapter:
                 total_epochs=self.epochs,
                 config_hash=run_config_hash,
                 checkpoint_directory=checkpoint_directory,
+                data_digest=data_digest,
+                chain_head=chain_head,
             )
         )
 
@@ -544,11 +669,12 @@ class GohrAdapter:
             verbose=1,
         )
 
+        state = json.loads(state_path.read_text(encoding="utf-8"))
         return self._load_selected(
-            checkpoint_directory, condition, replicate, run_config_hash
+            checkpoint_directory, identity, state.get("record_chain_head")
         )
 
-    def _load_selected(self, checkpoint_directory, condition, replicate, run_config_hash):
+    def _load_selected(self, checkpoint_directory, identity, chain_head):
         """Select by validation loss, record the choice, reload those weights.
 
         Downstream prediction uses ``self.model``, so after this call it is
@@ -557,10 +683,8 @@ class GohrAdapter:
         selection = select_checkpoint(
             checkpoint_directory,
             total_epochs=self.epochs,
-            seed=self.seed,
-            condition=condition,
-            replicate=replicate,
-            config_hash=run_config_hash,
+            chain_head=chain_head,
+            **identity,
         )
         record_selection(Path(checkpoint_directory) / "selected_checkpoint.json", selection)
         self.model = load_model(

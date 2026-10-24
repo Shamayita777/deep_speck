@@ -723,6 +723,67 @@ def write_certificate_exclusive(path: Path, certificate: dict) -> None:
         temporary.unlink()
 
 
+def _row_keys(features, chunk_rows: int = 1 << 20) -> np.ndarray:
+    """Pack each 64-bit feature row into one uint64 key, chunk by chunk.
+
+    Peak memory is 8 bytes per row plus one chunk, so a memory-mapped
+    10^7-row partition is never materialised as 640 MB of uint8.
+    """
+    features = np.asarray(features)
+    keys = np.empty(len(features), dtype=np.uint64)
+    for start in range(0, len(features), chunk_rows):
+        packed = np.packbits(np.asarray(features[start:start + chunk_rows], dtype=np.uint8), axis=1)
+        keys[start:start + chunk_rows] = np.ascontiguousarray(packed).view(">u8").reshape(-1)
+    return keys
+
+
+def audit_partition_overlap(train_x, validation_x, test_x) -> dict:
+    """Count exact feature-row overlap within and across the partitions.
+
+    Read-only: the partitions are never modified.  For each pair, ``rows``
+    is the number of rows of the second partition whose feature vector
+    also occurs in the first, and ``distinct`` the number of shared
+    feature vectors.
+    """
+    keys = {
+        "train": np.sort(_row_keys(train_x)),
+        "validation": np.sort(_row_keys(validation_x)),
+        "test": np.sort(_row_keys(test_x)),
+    }
+    report = {"method": "exact_64bit_row_equality", "rows": {}, "within_duplicate_rows": {}, "cross": {}}
+    for name, sorted_keys in keys.items():
+        report["rows"][name] = int(len(sorted_keys))
+        report["within_duplicate_rows"][name] = int(len(sorted_keys) - len(np.unique(sorted_keys)))
+    for first, second in (("train", "validation"), ("train", "test"), ("validation", "test")):
+        reference = keys[first]
+        probe = keys[second]
+        position = np.searchsorted(reference, probe)
+        position[position == len(reference)] = 0
+        hit = reference[position] == probe if len(reference) else np.zeros(len(probe), bool)
+        report["cross"][f"{first}_{second}"] = {
+            "rows": int(hit.sum()),
+            "distinct": int(len(np.unique(probe[hit]))),
+        }
+    return report
+
+
+def require_partition_separation(report: dict) -> None:
+    """Fail closed on any feature row shared between partitions.
+
+    The D4 design declares that the test partition is never used to fit
+    the models, and validation drives checkpoint selection; a row shared
+    across partitions breaks that separation.  Within-partition duplicates
+    are recorded but are not a separation violation.
+    """
+    violations = {pair: c for pair, c in report["cross"].items() if c["rows"]}
+    if violations:
+        raise RuntimeError(
+            f"Partition separation violated (exact shared feature rows): {violations}. "
+            "Refusing to run; how to handle overlap is a scientific decision "
+            "and the dataset is left unchanged."
+        )
+
+
 def validate_dataset_cache(root: Path, run_config_hash: str) -> None:
     paths = dataset_cache_paths(root)
     with paths["metadata"].open("r", encoding="utf-8") as handle:
@@ -1097,6 +1158,10 @@ def main() -> None:
             "D4 dataset cached for future resumes."
         )
 
+    overlap_report = audit_partition_overlap(train_x, validation_x, test_x)
+    print(f"Partition overlap audit    : {json.dumps(overlap_report, sort_keys=True)}")
+    require_partition_separation(overlap_report)
+
     perturbation = (
         LabelShufflePerturbation()
     )
@@ -1154,6 +1219,7 @@ def main() -> None:
             "validation_samples": args.validation_samples,
             "test_samples": args.test_samples,
             "randomness_source": "os.urandom",
+            "partition_overlap": overlap_report,
             "input_difference": {
                 "left_word": "0x0040",
                 "right_word": "0x0000",
