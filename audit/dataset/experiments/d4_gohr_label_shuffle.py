@@ -45,9 +45,10 @@ verify          Independent post-run verification.  Read-only.  Recounts every
                 checkpoint (digest-checked) and requires its thresholded
                 test predictions to equal the persisted ones.
 
-Decision rule: near_chance_tost_v3 only.  The primary endpoint is near-chance
-equivalence of every label-shuffled fit; the paired comparison with the
-baseline is a separate endpoint (see the engine and the RATIONALE).
+Decision rule: near_chance_baseline_gated_v4 only.  Overall SUPPORTED requires
+every label-shuffled fit to be near-chance equivalent AND every intact-label
+baseline fit to pass the adequacy floor; the paired comparison with the
+baseline is secondary and never gates (see the engine and the RATIONALE).
 
 USAGE (from the repository root)
     PY=~/.venvs/autond-tf215-audit-20261015T050853Z/bin/python
@@ -153,11 +154,14 @@ def check_target_design(record: dict) -> list[str]:
         if actual != value:
             problems.append(f"fixed_design.{section}.{key} is {actual!r}; this runner implements {value!r}")
     for section, procedure in (("primary_endpoint", d4.NEAR_CHANCE_PROCEDURE),
+                               ("baseline_adequacy_endpoint", d4.BASELINE_ADEQUACY_PROCEDURE),
                                ("supporting_endpoint", d4.PAIRED_PROCEDURE)):
         registered = fixed.get(section, {}).get("procedure")
         if registered != procedure:
             problems.append(f"fixed_design.{section}.procedure differs from the implemented "
                             f"{d4.NEAR_CHANCE_RULE} procedure (estimand, sidedness, aggregation or level)")
+    if fixed.get("overall_rule") != d4.OVERALL_RULE:
+        problems.append("fixed_design.overall_rule differs from the implemented composite outcome rule")
     if fixed.get("primary_endpoint", {}).get("procedure", {}).get("chance_reference") != CHANCE_LEVEL:
         problems.append(f"fixed_design.primary_endpoint chance reference must be {CHANCE_LEVEL}")
     if record.get("perturbation", {}).get("name") != "label_shuffle":
@@ -189,6 +193,9 @@ def check_decision_values(values: dict) -> list[str]:
     margin = values.get("chance_margin")
     if not (isinstance(margin, float) and 0.0 < margin < CHANCE_LEVEL):
         problems.append("decisions.chance_margin must be a float in (0, 0.5), a fraction of accuracy")
+    floor = values.get("baseline_adequacy_threshold")
+    if not (isinstance(floor, float) and 0.5 < floor < 1.0):
+        problems.append("decisions.baseline_adequacy_threshold must be a float in (0.5, 1), a fraction of accuracy")
     if values.get("paired_endpoint_role") not in d4.PAIRED_ENDPOINT_ROLES:
         problems.append(f"decisions.paired_endpoint_role must be one of {d4.PAIRED_ENDPOINT_ROLES}")
     return problems
@@ -217,7 +224,8 @@ def design_of(values: dict, anchor: str) -> dict:
         "audit_seed": AUDIT_SEED, "bootstrap_replicates": BOOTSTRAP_REPLICATES,
         "confidence_level": CONFIDENCE_LEVEL, "input_encoding": INPUT_ENCODING,
         "chance_level": CHANCE_LEVEL, "primary_procedure": d4.NEAR_CHANCE_PROCEDURE,
-        "supporting_procedure": d4.PAIRED_PROCEDURE,
+        "baseline_procedure": d4.BASELINE_ADEQUACY_PROCEDURE, "supporting_procedure": d4.PAIRED_PROCEDURE,
+        "overall_rule": d4.OVERALL_RULE,
         **{k: v for k, v in values.items() if not k.startswith("_")},
     }
 
@@ -443,6 +451,7 @@ def stage_run(args) -> int:
         confidence_level=CONFIDENCE_LEVEL, alpha=design["alpha"], run_config_hash=config_hash,
         decision_rule=design["decision_rule"], chance_margin=design["chance_margin"],
         paired_endpoint_role=design["paired_endpoint_role"], chance_level=CHANCE_LEVEL,
+        baseline_adequacy_threshold=design["baseline_adequacy_threshold"],
     )
     preflight_sha = sha256_file(run_dir / "preflight.json")
     certificate = d4.generate_certificate(
@@ -470,7 +479,7 @@ def stage_run(args) -> int:
     })
     d4.print_report(result)
     outcome = certificate["decision"]["outcome"]
-    print(f"D4 RUN COMPLETE. Primary outcome: {outcome}"
+    print(f"D4 RUN COMPLETE. Overall D4 outcome: {outcome}"
           f"{'' if outcome == 'SUPPORTED' else ' (NOT a scientific pass)'}  ->  {result_dir}")
     return 0
 
@@ -502,15 +511,16 @@ def verify_run(run_dir: Path) -> dict:
     design = preflight["design"]
     settings = certificate["settings"]
     for key in ("alpha", "decision_rule", "replicates", "audit_seed", "bootstrap_replicates", "confidence_level",
-                "chance_level", "chance_margin", "paired_endpoint_role", "effect_threshold"):
+                "chance_level", "chance_margin", "baseline_adequacy_threshold", "paired_endpoint_role",
+                "effect_threshold"):
         if settings.get(key) != design[key]:
             raise IntegrityError(f"Certificate setting {key} differs from the preregistered design.")
     if settings.get("test_examples") != design["sample_sizes"]["test"] or \
             settings.get("test_examples") != len(partitions["test"][1]):
         raise IntegrityError("Certificate test sample size differs from the preregistered design.")
     methodology = certificate.get("methodology", {})
-    if methodology.get("primary_procedure") != design["primary_procedure"] or \
-            methodology.get("supporting_procedure") != design["supporting_procedure"]:
+    if any(methodology.get(key) != design[key] for key in
+           ("primary_procedure", "baseline_procedure", "supporting_procedure", "overall_rule")):
         raise IntegrityError("Certificate endpoint procedure (sidedness, aggregation or level) differs from "
                              "the preregistered design.")
     source_digest = labelled_partition_digest(*partitions["train"])
@@ -566,9 +576,12 @@ def verify_run(run_dir: Path) -> dict:
                 raise IntegrityError(f"Replicate {r} {condition}: selection does not match the verified "
                                      "epoch history on disk.")
     return {"integrity": "VERIFIED", "outcome": decision["outcome"],
-            "primary_claim_supported": decision["outcome"] == "SUPPORTED",
-            "primary_outcome": decision["primary"]["outcome"],
-            "supporting_degradation_established": decision["supporting"]["established"],
+            "overall_d4_outcome": decision["outcome"],
+            "overall_supported": decision["outcome"] == "SUPPORTED",
+            "shuffled_near_chance_endpoint": decision["primary"]["outcome"],
+            "baseline_adequacy_gate": decision["baseline"]["outcome"],
+            "paired_degradation_endpoint": {"role": "secondary_non_gating",
+                                            "established": decision["supporting"]["established"]},
             "replicates": len(seeds), "run_id": manifest["run_id"]}
 
 
@@ -594,6 +607,9 @@ def recount_from_predictions(run_dir: Path, certificate: dict, test_labels) -> N
             if predictions.dtype.str != entry.get("dtype") or list(predictions.shape) != entry.get("shape"):
                 raise IntegrityError(f"Replicate {r} {condition} predictions have the wrong dtype or shape.")
             correct[condition] = d4.binary_predictions_to_correctness(predictions, test_labels)
+            if entry.get("class_counts") != d4.class_diagnostics(correct[condition], test_labels):
+                raise IntegrityError(f"Replicate {r} {condition}: certificate class counts differ from those the "
+                                     "persisted predictions give.")
         b, c, _ = d4.mcnemar_exact_pvalue(correct["baseline"], correct["perturbed"])
         recounted = {"test_examples": int(len(test_labels)), "baseline_correct": int(correct["baseline"].sum()),
                      "perturbed_correct": int(correct["perturbed"].sum()), "mcnemar_b": b, "mcnemar_c": c}
@@ -647,7 +663,7 @@ def rerun_selected_models(run_dir: Path) -> list[dict]:
 
 def stage_verify(args) -> int:
     if not (Path(args.run_dir) / "result").exists():
-        print(json.dumps({"outcome": "NOT_COMPLETED", "primary_claim_supported": False}, indent=2))
+        print(json.dumps({"overall_d4_outcome": "NOT_COMPLETED", "overall_supported": False}, indent=2))
         print(f"NO RESULT: {Path(args.run_dir) / 'result'} does not exist; the run is NOT_COMPLETED.")
         return 5
     summary = verify_run(Path(args.run_dir))
@@ -655,8 +671,8 @@ def stage_verify(args) -> int:
         summary["reloaded_checkpoints_reproduce_predictions"] = rerun_selected_models(Path(args.run_dir))
     print(json.dumps(summary, indent=2))
     print("INTEGRITY CHECKS PASSED (post-run verification; read-only). "
-          f"Primary outcome: {summary['outcome']}"
-          f"{'' if summary['primary_claim_supported'] else ' (NOT a scientific pass)'}.")
+          f"Overall D4 outcome: {summary['outcome']}"
+          f"{'' if summary['overall_supported'] else ' (NOT a scientific pass)'}.")
     return 0
 
 

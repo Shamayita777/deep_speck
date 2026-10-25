@@ -308,7 +308,8 @@ def test_preflight_refuses_the_unapproved_draft(tmp_path):
     assert code == 1 and not (tmp_path / "run").exists()
 
 
-APPROVED = {"decision_rule": "near_chance_tost_v3", "chance_margin": 0.2, "paired_endpoint_role": "secondary",
+APPROVED = {"decision_rule": "near_chance_baseline_gated_v4", "chance_margin": 0.2, "paired_endpoint_role": "secondary",
+            "baseline_adequacy_threshold": 0.9, "planning_source_attestation": "confirmed_by_protocol_owner",
             "alpha": 0.05, "effect_threshold": 0.01,
             "replicates": 2, "sample_sizes": {"train": 512, "validation": 128, "test": 256},
             "epochs": 2, "partition_overlap_policy": "refuse_on_any_cross_partition_feature_row",
@@ -404,6 +405,10 @@ def _rewrite_certificate(run_dir, mutate):
     (lambda c: c["settings"].update(chance_margin=0.3), "chance_margin differs"),
     (lambda c: c["settings"].update(alpha=0.1), "alpha differs"),
     (lambda c: c["settings"].update(paired_endpoint_role="co_primary"), "paired_endpoint_role differs"),
+    (lambda c: c["settings"].update(baseline_adequacy_threshold=0.6), "baseline_adequacy_threshold differs"),
+    (lambda c: c["methodology"]["baseline_procedure"].update(adequacy_test="two_sided"), "procedure"),
+    (lambda c: c["findings"]["replicates"][0]["perturbed_predictions"]["class_counts"]["label_1"].update(rows=0),
+     "class counts differ"),
     (lambda c: c["settings"].update(decision_rule="directional_iut_v2"), "decision_rule differs"),
     (lambda c: c["settings"].update(test_examples=255), "test sample size"),
     (lambda c: c["methodology"]["primary_procedure"].update(equivalence_test="one_sided_only"), "procedure"),
@@ -425,9 +430,15 @@ def test_verify_reports_the_primary_outcome_and_never_calls_a_non_supported_run_
     certificate = json.loads((run_dir / "result" / "d4_certificate.json").read_text())
     assert summary["integrity"] == "VERIFIED"
     assert summary["outcome"] == certificate["decision"]["outcome"]
-    assert summary["primary_claim_supported"] is (summary["outcome"] == "SUPPORTED")
+    assert summary["overall_supported"] is (summary["outcome"] == "SUPPORTED")
+    assert summary["overall_d4_outcome"] == certificate["decision"]["overall_d4_outcome"]
+    assert summary["baseline_adequacy_gate"] == certificate["decision"]["baseline_adequacy_gate"]
+    assert summary["shuffled_near_chance_endpoint"] == certificate["decision"]["shuffled_near_chance_endpoint"]
+    assert summary["paired_degradation_endpoint"]["role"] == "secondary_non_gating"
     rows = certificate["findings"]["primary_endpoint"]["replicates"]
     assert len(rows) == 2 and all("equivalence_interval" in r and "accuracy" in r for r in rows)
+    baselines = certificate["findings"]["baseline_adequacy"]["replicates"]
+    assert len(baselines) == 2 and all("one_sided_lower_bound" in r for r in baselines)
     assert driver.main(["verify", "--run-dir", str(run_dir)]) == 0
     out = capsys.readouterr().out
     assert ("NOT a scientific pass" in out) is (summary["outcome"] != "SUPPORTED")

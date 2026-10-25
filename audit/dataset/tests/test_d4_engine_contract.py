@@ -110,7 +110,7 @@ def test_identity_perturbation_yields_no_effect(tmp_path, rule):
         def verify(self, x, y, px, py):
             assert np.array_equal(y, py)
 
-    extra = ({"chance_margin": 0.05, "paired_endpoint_role": "secondary"}
+    extra = ({"chance_margin": 0.05, "paired_endpoint_role": "secondary", "baseline_adequacy_threshold": 0.9}
              if rule == d4.NEAR_CHANCE_RULE else {})
     result = run(tmp_path, rule=rule, perturbation=Identity(), **extra)
     assert not result.effect_detected

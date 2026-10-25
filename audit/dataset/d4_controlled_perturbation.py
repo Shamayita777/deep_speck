@@ -33,11 +33,13 @@ The framework therefore reports:
 - effect-detection decision based on a pre-specified effect size
   and inferential criterion.
 
-Under rule ``near_chance_tost_v3`` the primary endpoint is different: it
+Under rule ``near_chance_baseline_gated_v4`` the primary endpoint is different: it
 asks whether each label-shuffled fit's test accuracy is practically
 equivalent to chance (exact binomial TOST against a registered band
 [0.5 - margin, 0.5 + margin]).  The paired baseline-vs-perturbed McNemar
-comparison is then a separate supporting (or co-primary) endpoint.  A
+comparison is then a separate, secondary, non-gating endpoint, and an
+intact-label baseline-adequacy gate must pass before the control can be
+called successful.  A
 reduction relative to baseline never substitutes for near-chance evidence:
 a shuffled model at 0.70 is far worse than a 0.93 baseline yet far from
 chance.
@@ -626,6 +628,17 @@ def load_verified_perturbation(directory: Path, *, replicate: int, seed: int, pe
     return features, labels, sidecar
 
 
+def class_diagnostics(correct: Any, labels: Any) -> dict:
+    """Descriptive class-conditional counts: label_0 -> true-negative rate, label_1 -> true-positive rate."""
+    correct, labels = np.asarray(correct, dtype=bool), np.asarray(labels).reshape(-1)
+    out = {}
+    for value, rate_name in ((0, "true_negative_rate"), (1, "true_positive_rate")):
+        mask = labels == value
+        rows, hits = int(mask.sum()), int(correct[mask].sum())
+        out[f"label_{value}"] = {"rows": rows, "correct": hits, rate_name: (hits / rows) if rows else None}
+    return out
+
+
 def prediction_path(checkpoint_root: Path, replicate: int, condition: str) -> Path:
     return Path(checkpoint_root) / "predictions" / f"replicate_{replicate:02d}_{condition}.npy"
 
@@ -667,10 +680,10 @@ def load_completed_state(state_path: Path) -> dict[str, Any] | None:
 
 #: ``conservative_two_sided_v1`` is the rule the September 2026 run used.
 #: ``directional_iut_v2`` tests paired degradation only; it never establishes
-#: near-chance accuracy.  ``near_chance_tost_v3`` (below) makes near-chance
-#: equivalence the primary endpoint.  Which applies is a preregistration
+#: near-chance accuracy.  ``near_chance_baseline_gated_v4`` (below) makes
+#: near-chance equivalence the primary endpoint, gated on baseline adequacy.  Which applies is a preregistration
 #: decision, never chosen by this module.
-DECISION_RULES = ("conservative_two_sided_v1", "directional_iut_v2", "near_chance_tost_v3")
+DECISION_RULES = ("conservative_two_sided_v1", "directional_iut_v2", "near_chance_baseline_gated_v4")
 
 
 def mcnemar_one_sided_pvalue(b: int, c: int) -> float:
@@ -751,43 +764,58 @@ def mcnemar_exact_pvalue_from_counts(b: int, c: int) -> float:
 
 
 # ============================================================
-# Near-chance primary endpoint (rule near_chance_tost_v3)
+# Rule near_chance_baseline_gated_v4
 # ============================================================
 #
-# Per perturbed fit r, X_r = number of correct test predictions out of n.
-# Conditional on the fitted model and given test rows drawn i.i.d. from the
-# generator independently of training, X_r ~ Binomial(n, p_r), where p_r is
-# that model's accuracy over the test-generating distribution.  Nothing is
-# pooled across fits: all fits share one test sample, so their X_r are
-# dependent, and every multiplicity argument below holds without independence.
+# Sampling model.  The test partition is one speck.make_train_data call:
+# each row draws its label as an independent urandom bit and its own key and
+# plaintexts, so rows are i.i.d. and class counts are NOT fixed.  The test
+# partition is generated independently of training and reaches only
+# predict().  Hence, conditional on a fitted model m, its correctness
+# indicators on the n test rows are i.i.d. Bernoulli(p_m), where p_m is m's
+# accuracy over the generating distribution, and X_m ~ Binomial(n, p_m)
+# exactly.  No stratified procedure is needed because no stratum is fixed.
+# All fits share one test sample, so their X_m are dependent: nothing is
+# pooled, and every multiplicity argument below holds without independence.
 #
-#   Equivalence (fit r):  H0: p_r <= L or p_r >= U   vs   H1: L < p_r < U,
-#     L = chance - margin, U = chance + margin.  Two exact one-sided tests
-#     (TOST), each at alpha:  P(X >= x | L) < alpha  and  P(X <= x | U) < alpha.
-#     Equivalent to the two-sided 1-2*alpha Clopper-Pearson interval lying
-#     strictly inside (L, U).  Level alpha (Berger & Hsu 1996).
-#   Departure (fit r):  H0: L <= p_r <= U  vs  H1: p_r > U or p_r < L.
-#     Exact one-sided tests, each side at alpha / (2k):
-#     P(X >= x | U) < alpha/(2k)  (above band)  or  P(X <= x | L) < alpha/(2k).
-#   Joint:  SUPPORTED     iff every fit is equivalent (intersection-union
-#                         test: level alpha with no adjustment, Berger 1982);
-#           NOT_SUPPORTED iff some fit departs (Bonferroni over the 2k
-#                         one-sided tests: familywise level alpha);
-#           INCONCLUSIVE  otherwise;  NOT_COMPLETED if any fit is missing.
-#   Equivalence and departure of one fit are mutually exclusive (asserted).
+# Shuffled-label near-chance endpoint (fit r, band L = 0.5 - d, U = 0.5 + d):
+#   EQUIVALENT   iff P(X >= x | L) < alpha and P(X <= x | U) < alpha (TOST);
+#                same as the 1-2*alpha Clopper-Pearson interval inside (L, U).
+#   ABOVE_BAND   iff P(X >= x | U) < alpha/(2k);  BELOW_BAND iff P(X <= x | L) < alpha/(2k).
+#   endpoint SUPPORTED iff all k EQUIVALENT (intersection-union, level alpha);
+#   NOT_SUPPORTED iff any departs (Bonferroni over 2k one-sided tests, alpha);
+#   INCONCLUSIVE otherwise.
+# Intact-label baseline-adequacy gate (fit r, floor t):
+#   ADEQUATE     iff P(X >= x | t) < alpha, i.e. the one-sided 1-alpha
+#                Clopper-Pearson lower bound is strictly greater than t.
+#   INADEQUATE   iff P(X <= x | t) < alpha/k, i.e. the one-sided 1-alpha/k
+#                upper bound is strictly below t (demonstrably below the floor).
+#   gate PASSED iff all k ADEQUATE (IUT, level alpha); FAILED iff any
+#   INADEQUATE (Bonferroni, alpha); INDETERMINATE otherwise.
+# Overall D4 outcome:
+#   NOT_COMPLETED       any planned fit missing;
+#   NOT_SUPPORTED       near-chance endpoint NOT_SUPPORTED (a shuffled fit is
+#                       outside the band, whatever the baseline);
+#   BASELINE_INADEQUATE baseline gate FAILED (the control is uninformative);
+#   SUPPORTED           endpoint SUPPORTED and gate PASSED (IUT over both, level alpha);
+#   INCONCLUSIVE        otherwise.
+# Paired degradation (McNemar) is secondary and never changes the outcome.
 #
 # Failing to reject p = chance is never used: it is not evidence of
 # equivalence (audit methodology PDF 3.9.8, 3.9.9 Rule III; the near-chance
 # criterion itself is the D4-specific operationalization, not a PDF provision).
 
-NEAR_CHANCE_RULE = "near_chance_tost_v3"
-PAIRED_ENDPOINT_ROLES = ("secondary", "co_primary")
+NEAR_CHANCE_RULE = "near_chance_baseline_gated_v4"
+PAIRED_ENDPOINT_ROLES = ("secondary",)
 PRIMARY_OUTCOMES = ("SUPPORTED", "NOT_SUPPORTED", "INCONCLUSIVE", "NOT_COMPLETED")
+BASELINE_GATE_OUTCOMES = ("PASSED", "FAILED", "INDETERMINATE", "NOT_COMPLETED")
+OVERALL_OUTCOMES = ("SUPPORTED", "NOT_SUPPORTED", "BASELINE_INADEQUATE", "INCONCLUSIVE", "NOT_COMPLETED")
 
-#: The registered procedure.  A preregistration's fixed design must equal
+#: The registered procedures.  A preregistration's fixed design must equal
 #: these exactly, and certificates record them; any change is a new procedure.
 NEAR_CHANCE_PROCEDURE = {
     "estimand": "per perturbed fit: test accuracy p_r of the reloaded selected model, conditional on that model",
+    "sampling_model": "test rows i.i.d. from make_train_data (labels independent urandom bits, class counts not fixed); X_r ~ Binomial(n, p_r) given the model",
     "chance_reference": 0.5,
     "equivalence_test": "exact_binomial_tost_each_one_sided_test_at_alpha",
     "equivalence_interval": "clopper_pearson_two_sided_1_minus_2alpha_strictly_inside_band",
@@ -797,6 +825,17 @@ NEAR_CHANCE_PROCEDURE = {
     "rejection": "p_value_strictly_less_than_level",
     "outcomes": list(PRIMARY_OUTCOMES),
 }
+BASELINE_ADEQUACY_PROCEDURE = {
+    "estimand": "per intact-label baseline fit: test accuracy q_r of the reloaded selected model, conditional on that model",
+    "sampling_model": "same test rows and binomial model as the near-chance endpoint",
+    "adequacy_test": "exact_one_sided_binomial_h0_q_at_most_threshold_at_alpha",
+    "adequacy_bound": "clopper_pearson_one_sided_1_minus_alpha_lower_bound_strictly_above_threshold",
+    "adequacy_aggregation": "intersection_union_every_baseline_adequate",
+    "inadequacy_test": "exact_one_sided_binomial_h0_q_at_least_threshold_at_alpha_over_k",
+    "inadequacy_aggregation": "bonferroni_any_baseline_inadequate",
+    "rejection": "p_value_strictly_less_than_level",
+    "outcomes": list(BASELINE_GATE_OUTCOMES),
+}
 PAIRED_PROCEDURE = {
     "estimand": "per replicate: delta_r = acc(perturbed_r) - acc(baseline_r) = (b - c) / n on the same test rows",
     "discordance": "b = baseline wrong & perturbed right; c = baseline right & perturbed wrong",
@@ -805,6 +844,15 @@ PAIRED_PROCEDURE = {
     "practical": "delta_r_at_most_minus_effect_threshold",
     "aggregation": "intersection_union_every_replicate_degrades",
     "rejection": "p_value_strictly_less_than_level",
+    "role": "secondary_supporting_never_gates_the_outcome",
+}
+OVERALL_RULE = {
+    "NOT_COMPLETED": "any planned fit missing",
+    "NOT_SUPPORTED": "near-chance endpoint NOT_SUPPORTED",
+    "BASELINE_INADEQUATE": "otherwise, baseline-adequacy gate FAILED",
+    "SUPPORTED": "otherwise, near-chance endpoint SUPPORTED and baseline-adequacy gate PASSED",
+    "INCONCLUSIVE": "otherwise",
+    "paired_degradation": "reported, never gating",
 }
 
 
@@ -825,11 +873,15 @@ def clopper_pearson(x: int, n: int, tail: float) -> tuple[float, float]:
     return lower, upper
 
 
+def _check_counts(x, n):
+    if not (isinstance(n, int) and n >= 1 and isinstance(x, int) and 0 <= x <= n):
+        raise ValueError(f"Invalid binomial counts x={x!r}, n={n!r}.")
+
+
 def near_chance_replicate(x: int, n: int, *, chance: float, margin: float, alpha: float,
                           replicates: int) -> dict:
     """Classify one perturbed fit: EQUIVALENT, ABOVE_BAND, BELOW_BAND or INDETERMINATE."""
-    if not (isinstance(n, int) and n >= 1 and isinstance(x, int) and 0 <= x <= n):
-        raise ValueError(f"Invalid binomial counts x={x!r}, n={n!r}.")
+    _check_counts(x, n)
     low, high = chance - margin, chance + margin
     departure_level = alpha / (2 * replicates)
     p_not_below = binomial_upper_tail(x, n, low)    # TOST H01: p <= L
@@ -856,9 +908,28 @@ def near_chance_replicate(x: int, n: int, *, chance: float, margin: float, alpha
     }
 
 
+def baseline_adequacy_replicate(x: int, n: int, *, threshold: float, alpha: float, replicates: int) -> dict:
+    """Classify one intact-label baseline fit: ADEQUATE, INADEQUATE or INDETERMINATE."""
+    _check_counts(x, n)
+    inadequacy_level = alpha / replicates
+    p_adequate = binomial_upper_tail(x, n, threshold)    # H0: q <= t
+    p_inadequate = binomial_lower_tail(x, n, threshold)  # H0: q >= t
+    adequate, inadequate = p_adequate < alpha, p_inadequate < inadequacy_level
+    if adequate and inadequate:
+        raise AssertionError("Adequacy and inadequacy are mutually exclusive; numerical defect.")
+    return {
+        "test_examples": n, "correct": x, "accuracy": x / n, "threshold": threshold,
+        "pvalue_h0_at_or_below_threshold": p_adequate, "adequacy_level": alpha,
+        "one_sided_lower_bound": clopper_pearson(x, n, alpha)[0],
+        "pvalue_h0_at_or_above_threshold": p_inadequate, "inadequacy_level": inadequacy_level,
+        "one_sided_upper_bound": clopper_pearson(x, n, inadequacy_level)[1],
+        "state": "ADEQUATE" if adequate else "INADEQUATE" if inadequate else "INDETERMINATE",
+    }
+
+
 def evaluate_near_chance(rows: Sequence[Mapping[str, Any]], *, planned_replicates: int, chance: float,
                          margin: float, alpha: float) -> dict:
-    """Primary endpoint over all planned fits; rows need test_examples, perturbed_correct."""
+    """Shuffled-label endpoint over all planned fits; rows need test_examples, perturbed_correct."""
     if not 0.0 < margin < min(chance, 1.0 - chance):
         raise ValueError(f"chance margin {margin!r} must lie strictly inside (0, {min(chance, 1 - chance)}).")
     if not 0.0 < alpha < 0.5:
@@ -878,9 +949,25 @@ def evaluate_near_chance(rows: Sequence[Mapping[str, Any]], *, planned_replicate
     return {"outcome": outcome, "replicates": per, "chance": chance, "margin": margin, "alpha": alpha}
 
 
+def evaluate_baseline_adequacy(rows: Sequence[Mapping[str, Any]], *, planned_replicates: int,
+                               threshold: float, alpha: float) -> dict:
+    """Baseline gate over all planned fits; rows need test_examples, baseline_correct."""
+    if not 0.5 < threshold < 1.0:
+        raise ValueError(f"baseline adequacy threshold {threshold!r} must lie in (0.5, 1).")
+    if len(rows) != planned_replicates:
+        return {"outcome": "NOT_COMPLETED", "replicates": [],
+                "reason": f"{len(rows)} of {planned_replicates} planned fits are present"}
+    per = [baseline_adequacy_replicate(int(r["baseline_correct"]), int(r["test_examples"]), threshold=threshold,
+                                       alpha=alpha, replicates=planned_replicates) for r in rows]
+    states = [p["state"] for p in per]
+    outcome = ("PASSED" if all(s == "ADEQUATE" for s in states) else
+               "FAILED" if "INADEQUATE" in states else "INDETERMINATE")
+    return {"outcome": outcome, "replicates": per, "threshold": threshold, "alpha": alpha}
+
+
 def evaluate_paired_degradation(rows: Sequence[Mapping[str, Any]], *, alpha: float,
                                 effect_threshold: float) -> dict:
-    """Supporting endpoint: every replicate's perturbed model is worse than its baseline."""
+    """Secondary endpoint: every replicate's perturbed model is worse than its baseline."""
     per = []
     for r in rows:
         b, c, n = int(r["mcnemar_b"]), int(r["mcnemar_c"]), int(r["test_examples"])
@@ -896,36 +983,38 @@ def evaluate_paired_degradation(rows: Sequence[Mapping[str, Any]], *, alpha: flo
         })
     established = bool(per) and all(p["significant"] and p["practical"] for p in per)
     return {"established": established, "alpha": alpha, "effect_threshold": effect_threshold,
-            "replicates": per}
+            "role": "secondary_non_gating", "replicates": per}
+
+
+def combine_outcome(primary: str, baseline: str) -> str:
+    """Overall D4 outcome from the two gating components (OVERALL_RULE)."""
+    if primary == "NOT_COMPLETED" or baseline == "NOT_COMPLETED":
+        return "NOT_COMPLETED"
+    if primary == "NOT_SUPPORTED":
+        return "NOT_SUPPORTED"
+    if baseline == "FAILED":
+        return "BASELINE_INADEQUATE"
+    if primary == "SUPPORTED" and baseline == "PASSED":
+        return "SUPPORTED"
+    return "INCONCLUSIVE"
 
 
 def evaluate_near_chance_decision(rows: Sequence[Mapping[str, Any]], *, planned_replicates: int,
                                   chance: float, margin: float, alpha: float, effect_threshold: float,
-                                  paired_endpoint_role: str) -> dict:
-    """Decision of rule near_chance_tost_v3; pure, used at run and verify time.
-
-    secondary:  outcome = primary outcome; the paired endpoint is reported
-                beside it at its own level and never changes the outcome.
-    co_primary: SUPPORTED needs primary SUPPORTED and paired degradation
-                established (intersection-union over all 2k component tests,
-                level alpha).  Primary NOT_SUPPORTED gives NOT_SUPPORTED;
-                paired degradation that is not established gives
-                INCONCLUSIVE, because non-significance is not evidence of
-                no degradation.
-    """
+                                  baseline_threshold: float, paired_endpoint_role: str) -> dict:
+    """Decision of rule near_chance_baseline_gated_v4; pure, used at run and verify time."""
     if paired_endpoint_role not in PAIRED_ENDPOINT_ROLES:
         raise ValueError(f"paired_endpoint_role must be one of {PAIRED_ENDPOINT_ROLES}.")
     primary = evaluate_near_chance(rows, planned_replicates=planned_replicates, chance=chance,
                                    margin=margin, alpha=alpha)
-    if primary["outcome"] == "NOT_COMPLETED":
-        return {"rule": NEAR_CHANCE_RULE, "outcome": "NOT_COMPLETED", "primary_claim_supported": False,
-                "paired_endpoint_role": paired_endpoint_role, "primary": primary, "supporting": None}
-    supporting = evaluate_paired_degradation(rows, alpha=alpha, effect_threshold=effect_threshold)
-    outcome = primary["outcome"]
-    if paired_endpoint_role == "co_primary" and outcome == "SUPPORTED" and not supporting["established"]:
-        outcome = "INCONCLUSIVE"
-    return {"rule": NEAR_CHANCE_RULE, "outcome": outcome, "primary_claim_supported": outcome == "SUPPORTED",
-            "paired_endpoint_role": paired_endpoint_role, "primary": primary, "supporting": supporting}
+    baseline = evaluate_baseline_adequacy(rows, planned_replicates=planned_replicates,
+                                          threshold=baseline_threshold, alpha=alpha)
+    outcome = combine_outcome(primary["outcome"], baseline["outcome"])
+    supporting = (None if outcome == "NOT_COMPLETED" else
+                  evaluate_paired_degradation(rows, alpha=alpha, effect_threshold=effect_threshold))
+    return {"rule": NEAR_CHANCE_RULE, "outcome": outcome, "overall_supported": outcome == "SUPPORTED",
+            "paired_endpoint_role": paired_endpoint_role, "primary": primary, "baseline": baseline,
+            "supporting": supporting}
 
 
 # ============================================================
@@ -953,6 +1042,7 @@ def run_d4(
     chance_margin: float | None = None,
     paired_endpoint_role: str | None = None,
     chance_level: float = 0.5,
+    baseline_adequacy_threshold: float | None = None,
 ) -> D4Result:
     """Execute repeated, paired controlled-perturbation inference.
 
@@ -969,18 +1059,22 @@ def run_d4(
     the run, and a resumed run must reproduce the identical replicate
     plan.  ``effect_threshold`` is an accuracy difference as a fraction.
 
-    Under ``near_chance_tost_v3``, ``chance_margin`` (the registered
-    near-chance equivalence margin, a fraction of accuracy, separate from
-    ``effect_threshold``) and ``paired_endpoint_role`` are required.
+    Under ``near_chance_baseline_gated_v4``, ``chance_margin`` (the
+    registered near-chance equivalence margin, a fraction of accuracy,
+    separate from ``effect_threshold``), ``baseline_adequacy_threshold`` and
+    ``paired_endpoint_role`` are required; none is ever defaulted.
     """
     if decision_rule == NEAR_CHANCE_RULE:
         if not (isinstance(chance_margin, float) and 0.0 < chance_margin < min(chance_level, 1 - chance_level)):
-            raise ValueError("near_chance_tost_v3 needs a registered chance_margin in (0, 0.5); "
+            raise ValueError(f"{NEAR_CHANCE_RULE} needs a registered chance_margin in (0, 0.5); "
                              "it is never defaulted or taken from effect_threshold.")
+        if not (isinstance(baseline_adequacy_threshold, float) and 0.5 < baseline_adequacy_threshold < 1.0):
+            raise ValueError(f"{NEAR_CHANCE_RULE} needs a registered baseline_adequacy_threshold in (0.5, 1).")
         if paired_endpoint_role not in PAIRED_ENDPOINT_ROLES:
-            raise ValueError(f"near_chance_tost_v3 needs paired_endpoint_role in {PAIRED_ENDPOINT_ROLES}.")
-    elif chance_margin is not None or paired_endpoint_role is not None:
-        raise ValueError("chance_margin and paired_endpoint_role apply only to near_chance_tost_v3.")
+            raise ValueError(f"{NEAR_CHANCE_RULE} needs paired_endpoint_role in {PAIRED_ENDPOINT_ROLES}.")
+    elif chance_margin is not None or paired_endpoint_role is not None or baseline_adequacy_threshold is not None:
+        raise ValueError(f"chance_margin, baseline_adequacy_threshold and paired_endpoint_role apply only to "
+                         f"{NEAR_CHANCE_RULE}.")
     if replicates < 2:
         raise ValueError("At least two independent training replicates are required.")
     if effect_threshold < 0:
@@ -1020,6 +1114,7 @@ def run_d4(
             predictions, record = persist_predictions(
                 prediction_path(checkpoint_root, replicate_index, condition), adapter.predict(test_features))
             correct = binary_predictions_to_correctness(predictions, test_labels)
+            record = dict(record, class_counts=class_diagnostics(correct, test_labels))
             return correct, selection, record
 
         baseline_correct, baseline_selection, baseline_predictions = fit(train_features, train_labels, "baseline")
@@ -1085,19 +1180,21 @@ def run_d4(
 
     rows = [{"baseline_score": r.baseline_score, "perturbed_score": r.perturbed_score,
              "mcnemar_b": r.mcnemar_b, "mcnemar_c": r.mcnemar_c, "test_examples": r.test_examples,
-             "perturbed_correct": r.perturbed_correct} for r in replicate_results]
+             "perturbed_correct": r.perturbed_correct, "baseline_correct": r.baseline_correct}
+            for r in replicate_results]
     if decision_rule == NEAR_CHANCE_RULE:
         decision = evaluate_near_chance_decision(
             rows, planned_replicates=replicates, chance=chance_level, margin=chance_margin, alpha=alpha,
-            effect_threshold=effect_threshold, paired_endpoint_role=paired_endpoint_role)
+            effect_threshold=effect_threshold, baseline_threshold=baseline_adequacy_threshold,
+            paired_endpoint_role=paired_endpoint_role)
         diffs = [r["perturbed_score"] - r["baseline_score"] for r in rows]
         ci_low, ci_high = bootstrap_mean_ci(
             diffs, rng=np.random.default_rng(np.random.SeedSequence([audit_seed, 0xD4])),
             bootstrap_replicates=bootstrap_replicates, confidence_level=confidence_level)
         decision.update(mean_difference=float(np.mean(diffs)), sd_difference=float(np.std(diffs, ddof=1)),
                         bootstrap_ci=[ci_low, ci_high], per_test_alpha=alpha,
-                        effect_detected=decision["supporting"]["established"],
-                        inference_supported=decision["primary_claim_supported"])
+                        effect_detected=bool(decision["supporting"] and decision["supporting"]["established"]),
+                        inference_supported=decision["overall_supported"])
     else:
         decision = evaluate_decision(rows, rule=decision_rule, alpha=alpha,
                                      effect_threshold=effect_threshold, audit_seed=audit_seed,
@@ -1135,6 +1232,7 @@ def run_d4(
                   "replicates": replicates, "run_config_hash": run_config_hash,
                   "source_train_digest": source_digest,
                   **({"chance_level": chance_level, "chance_margin": chance_margin,
+                      "baseline_adequacy_threshold": baseline_adequacy_threshold,
                       "paired_endpoint_role": paired_endpoint_role, "effect_threshold": effect_threshold,
                       "test_examples": int(len(np.asarray(test_labels).reshape(-1)))}
                      if decision_rule == NEAR_CHANCE_RULE else {})},
@@ -1143,15 +1241,19 @@ def run_d4(
 
 NEAR_CHANCE_INTERPRETATION = {
     "SUPPORTED": "Every label-shuffled fit's test accuracy is established, at the registered level, to lie "
-                 "inside the registered near-chance band, conditional on each fitted model and the shared "
+                 "inside the registered near-chance band, and every intact-label baseline fit is established "
+                 "to exceed the registered adequacy floor, conditional on each fitted model and the shared "
                  "test sample. This is a blunt control: it does not show that no leakage of any form exists.",
     "NOT_SUPPORTED": "At least one label-shuffled fit's test accuracy is established to lie outside the "
                      "registered near-chance band (familywise level alpha). The pipeline produced non-chance "
                      "performance without the original feature/label correspondence; this calls for "
                      "targeted leakage investigation.",
-    "INCONCLUSIVE": "Neither near-chance equivalence of every label-shuffled fit nor a departure of any fit "
-                    "from the band was established (or, with a co-primary paired endpoint, paired degradation "
-                    "was not established). This is not evidence of near-chance behaviour.",
+    "BASELINE_INADEQUATE": "At least one intact-label baseline fit is established to fall below the registered "
+                           "adequacy floor (familywise level alpha). The pipeline did not reproduce adequate "
+                           "signal, so the label-shuffle control is uninformative whatever the shuffled fits show.",
+    "INCONCLUSIVE": "The registered evidence establishes neither a successful control (every shuffled fit "
+                    "near chance and every baseline adequate) nor a failure (a shuffled fit outside the band, "
+                    "or a baseline below the floor). This is not evidence of near-chance behaviour.",
     "NOT_COMPLETED": "Not every planned fit completed; no scientific conclusion is drawn.",
 }
 
@@ -1264,13 +1366,15 @@ def generate_certificate(
     }
 
 
-NEAR_CHANCE_CERTIFICATE_SCHEMA = "d4-certificate-4"
+NEAR_CHANCE_CERTIFICATE_SCHEMA = "d4-certificate-5"
 
-#: What a v4 certificate lets a third party check, and what it does not.
+#: What a v5 certificate lets a third party check, and what it does not.
 VERIFIABILITY = {
     "recomputed_from_persisted_evidence": [
-        "per-fit correct counts and McNemar (b, c), from the persisted raw predictions and the test labels",
-        "every p-value, interval, per-fit state, endpoint result and the outcome, from those counts",
+        "per-fit correct counts, class-conditional counts and McNemar (b, c), from the persisted raw "
+        "predictions and the test labels",
+        "every p-value, bound, interval, per-fit state, endpoint and gate result and the overall outcome, "
+        "from those counts",
         "the test partition, by its SHA-256 and canonical digest recorded at preflight",
         "the identity of each selected checkpoint, by SHA-256, and its validation-loss selection history",
         "with verify --rerun-models: that each reloaded selected checkpoint reproduces its persisted "
@@ -1285,6 +1389,21 @@ VERIFIABILITY = {
 }
 
 
+def _decision_summary(decision: Mapping[str, Any]) -> dict:
+    return {
+        "rule": decision["rule"],
+        "overall_d4_outcome": decision["outcome"],
+        "outcome": decision["outcome"],
+        "overall_supported": decision["overall_supported"],
+        "shuffled_near_chance_endpoint": decision["primary"]["outcome"],
+        "baseline_adequacy_gate": decision["baseline"]["outcome"],
+        "paired_degradation_endpoint": {
+            "role": "secondary_non_gating",
+            "established": None if decision["supporting"] is None else decision["supporting"]["established"],
+        },
+    }
+
+
 def _near_chance_certificate(result: D4Result, *, dataset_id, dataset_version, generation_procedure,
                              generation_parameters, audit_seed, confidence_level, provenance) -> dict:
     decision = result.decision
@@ -1293,19 +1412,12 @@ def _near_chance_certificate(result: D4Result, *, dataset_id, dataset_version, g
         "schema_version": NEAR_CHANCE_CERTIFICATE_SCHEMA,
         "audit": {
             "id": "D4", "name": "Controlled Perturbation Audit",
-            "claim": ("Primary: whether every label-shuffled fit's test accuracy is practically equivalent to "
-                      "chance (inside the registered band), conditional on each fitted model and the shared "
-                      "test sample. Supporting: whether every shuffled fit is less accurate than its paired "
-                      "baseline on the same test rows."),
+            "claim": ("Whether every label-shuffled fit's test accuracy is practically equivalent to chance "
+                      "(inside the registered band) while every intact-label baseline fit is adequate (above the "
+                      "registered floor), conditional on each fitted model and the shared test sample. The paired "
+                      "baseline-versus-shuffled comparison is reported as a secondary, non-gating endpoint."),
         },
-        "decision": {
-            "rule": decision["rule"],
-            "outcome": decision["outcome"],
-            "primary_claim_supported": decision["primary_claim_supported"],
-            "paired_endpoint_role": decision["paired_endpoint_role"],
-            "primary_outcome": decision["primary"]["outcome"],
-            "supporting_degradation_established": decision["supporting"]["established"],
-        },
+        "decision": _decision_summary(decision),
         "settings": settings,
         "findings": {
             "perturbation": result.perturbation,
@@ -1325,6 +1437,7 @@ def _near_chance_certificate(result: D4Result, *, dataset_id, dataset_version, g
                 for r in result.replicates
             ],
             "primary_endpoint": decision["primary"],
+            "baseline_adequacy": decision["baseline"],
             "supporting_endpoint": decision["supporting"],
             "descriptive": {
                 "mean_baseline_accuracy": result.mean_baseline_score,
@@ -1335,18 +1448,22 @@ def _near_chance_certificate(result: D4Result, *, dataset_id, dataset_version, g
                                                  "low": decision["bootstrap_ci"][0],
                                                  "high": decision["bootstrap_ci"][1],
                                                  "role": "descriptive only; not used by the decision"},
+                "class_conditional_rates": "per fit in <condition>_predictions.class_counts; descriptive only",
             },
         },
         "methodology": {
             "primary_procedure": NEAR_CHANCE_PROCEDURE,
+            "baseline_procedure": BASELINE_ADEQUACY_PROCEDURE,
             "supporting_procedure": PAIRED_PROCEDURE,
+            "overall_rule": OVERALL_RULE,
             "chance_margin": settings["chance_margin"],
             "chance_margin_units": "accuracy_fraction",
+            "baseline_adequacy_threshold": settings["baseline_adequacy_threshold"],
             "effect_threshold": settings["effect_threshold"],
             "alpha": settings["alpha"],
             "paired_endpoint_role": settings["paired_endpoint_role"],
-            "unit_of_inference": "each fitted model, conditional on it; the k fits share one test sample and "
-                                 "are never pooled or treated as independent test sets",
+            "unit_of_inference": "each fitted model, conditional on it; the k fits per condition share one test "
+                                 "sample and are never pooled or treated as independent test sets",
             "verifiability": VERIFIABILITY,
         },
         "dataset": {"dataset_id": dataset_id, "dataset_version": dataset_version,
@@ -1360,24 +1477,45 @@ def _near_chance_certificate(result: D4Result, *, dataset_id, dataset_version, g
             "together. Near-chance accuracy does not show that no leakage of any form exists; targeted "
             "generation-order and label-leakage checks are a separate, complementary audit not performed here.",
             "Inference is conditional on each fitted model and assumes test rows i.i.d. from the generator, "
-            "independent of training. It is a statement about these k fits, not a population estimate over "
-            "training seeds.",
+            "independent of training. It is a statement about these k fits per condition, not a population "
+            "estimate over training seeds; seed-to-seed variance is not estimated by any confidence bound here.",
             "The chance reference 0.5 assumes labels are fair coin flips independent of the features under "
-            "the generator; the observed test class balance is recorded but not tested here.",
-            "A near-chance result is informative only if the baseline pipeline produces signal; the paired "
-            "endpoint reports this, and gates the outcome only when registered as co-primary.",
+            "the generator; observed test class counts and class-conditional rates are descriptive only.",
+            "The baseline adequacy floor is a registered practical tolerance below the published 5-round "
+            "benchmark, not a value prescribed by Gohr or by the audit methodology.",
         ],
     }
+
+
+def _check_class_counts(r: Mapping[str, Any], condition: str, correct: int, total: int) -> dict:
+    counts = (r.get(f"{condition}_predictions") or {}).get("class_counts")
+    if not isinstance(counts, Mapping) or set(counts) != {"label_0", "label_1"}:
+        raise IntegrityError(f"Replicate {r.get('replicate')} {condition}: class counts are missing.")
+    rows = 0
+    hits = 0
+    for value, rate_name in ((0, "true_negative_rate"), (1, "true_positive_rate")):
+        entry = counts[f"label_{value}"]
+        n_c, k_c = entry.get("rows"), entry.get("correct")
+        if not (isinstance(n_c, int) and isinstance(k_c, int) and 0 <= k_c <= n_c):
+            raise IntegrityError(f"Replicate {r['replicate']} {condition}: invalid class counts.")
+        if entry.get(rate_name) != ((k_c / n_c) if n_c else None):
+            raise IntegrityError(f"Replicate {r['replicate']} {condition}: {rate_name} does not equal its counts.")
+        rows, hits = rows + n_c, hits + k_c
+    if rows != total or hits != correct:
+        raise IntegrityError(f"Replicate {r['replicate']} {condition}: class counts do not add up to the totals.")
+    return {k: v["rows"] for k, v in counts.items()}
 
 
 def _recompute_near_chance(certificate: Mapping[str, Any]) -> dict:
     settings = certificate.get("settings") or {}
     methodology = certificate.get("methodology") or {}
     findings = certificate.get("findings") or {}
-    if methodology.get("primary_procedure") != NEAR_CHANCE_PROCEDURE or \
-            methodology.get("supporting_procedure") != PAIRED_PROCEDURE:
-        raise IntegrityError("Certificate records a procedure other than the implemented near_chance_tost_v3.")
-    for key in ("chance_margin", "effect_threshold", "alpha", "paired_endpoint_role"):
+    if (methodology.get("primary_procedure") != NEAR_CHANCE_PROCEDURE
+            or methodology.get("baseline_procedure") != BASELINE_ADEQUACY_PROCEDURE
+            or methodology.get("supporting_procedure") != PAIRED_PROCEDURE
+            or methodology.get("overall_rule") != OVERALL_RULE):
+        raise IntegrityError(f"Certificate records a procedure other than the implemented {NEAR_CHANCE_RULE}.")
+    for key in ("chance_margin", "baseline_adequacy_threshold", "effect_threshold", "alpha", "paired_endpoint_role"):
         if methodology.get(key) != settings.get(key):
             raise IntegrityError(f"Certificate methodology {key} differs from its settings.")
     rows = findings.get("replicates") or []
@@ -1386,6 +1524,7 @@ def _recompute_near_chance(certificate: Mapping[str, Any]) -> dict:
         raise IntegrityError(f"Certificate has {len(rows)} replicate rows; settings declare {k}. "
                              "A missing replicate is not allowed.")
     n = settings.get("test_examples")
+    label_rows = None
     for r in rows:
         counts = [r.get(f) for f in ("test_examples", "baseline_correct", "perturbed_correct", "mcnemar_b",
                                      "mcnemar_c")]
@@ -1404,22 +1543,27 @@ def _recompute_near_chance(certificate: Mapping[str, Any]) -> dict:
         if mcnemar_exact_pvalue_from_counts(b, c) != r["mcnemar_pvalue"] or \
                 mcnemar_one_sided_pvalue(b, c) != r["mcnemar_one_sided_pvalue"]:
             raise IntegrityError(f"Replicate {r['replicate']}: McNemar p-value does not match (b, c).")
+        for condition, correct in (("baseline", base), ("perturbed", pert)):
+            observed = _check_class_counts(r, condition, correct, total)
+            if label_rows is None:
+                label_rows = observed
+            elif observed != label_rows:
+                raise IntegrityError(f"Replicate {r['replicate']} {condition}: class row counts differ between "
+                                     "fits evaluated on the same test partition.")
     decision = evaluate_near_chance_decision(
         [{"test_examples": r["test_examples"], "perturbed_correct": r["perturbed_correct"],
-          "mcnemar_b": r["mcnemar_b"], "mcnemar_c": r["mcnemar_c"]} for r in rows],
+          "baseline_correct": r["baseline_correct"], "mcnemar_b": r["mcnemar_b"], "mcnemar_c": r["mcnemar_c"]}
+         for r in rows],
         planned_replicates=k, chance=settings.get("chance_level"), margin=settings.get("chance_margin"),
         alpha=settings.get("alpha"), effect_threshold=settings.get("effect_threshold"),
+        baseline_threshold=settings.get("baseline_adequacy_threshold"),
         paired_endpoint_role=settings.get("paired_endpoint_role"))
-    if findings.get("primary_endpoint") != decision["primary"] or \
-            findings.get("supporting_endpoint") != decision["supporting"]:
+    if (findings.get("primary_endpoint") != decision["primary"]
+            or findings.get("baseline_adequacy") != decision["baseline"]
+            or findings.get("supporting_endpoint") != decision["supporting"]):
         raise IntegrityError("Certificate endpoint statistics do not match the values recomputed from its counts.")
     recorded = certificate.get("decision") or {}
-    expected = {"rule": decision["rule"], "outcome": decision["outcome"],
-                "primary_claim_supported": decision["primary_claim_supported"],
-                "paired_endpoint_role": decision["paired_endpoint_role"],
-                "primary_outcome": decision["primary"]["outcome"],
-                "supporting_degradation_established": decision["supporting"]["established"]}
-    if recorded != expected:
+    if recorded != _decision_summary(decision):
         raise IntegrityError(f"Certificate decision {recorded.get('outcome')!r} does not match the "
                              f"recomputed decision {decision['outcome']!r}.")
     if certificate.get("interpretation") != NEAR_CHANCE_INTERPRETATION[decision["outcome"]]:
@@ -1433,7 +1577,7 @@ def recompute_certificate_decision(certificate: Mapping[str, Any]) -> dict:
     Recomputes every p-value from (b, c) and every difference from the
     accuracies, then applies the recorded rule and settings.  Raises
     IntegrityError if the certificate's decision or statistics disagree.
-    A near_chance_tost_v3 certificate is recomputed from its integer counts.
+    A near_chance_baseline_gated_v4 certificate is recomputed from its integer counts.
     """
     if certificate.get("schema_version") == NEAR_CHANCE_CERTIFICATE_SCHEMA or \
             (certificate.get("settings") or {}).get("decision_rule") == NEAR_CHANCE_RULE:
@@ -1566,9 +1710,15 @@ def print_report(
             print(f"Shuffled fit {r:2d}               : acc={row['accuracy']:.6f} "
                   f"{100 * (1 - 2 * row['equivalence_level']):.0f}% CP={row['equivalence_interval']} "
                   f"-> {row['state']}")
-        print(f"Primary endpoint              : {primary['outcome']}")
-        print(f"Paired degradation established: {decision['supporting']['established']}")
-        print(f"OUTCOME                       : {decision['outcome']}")
+        print(f"Shuffled near-chance endpoint : {primary['outcome']}")
+        for r, row in enumerate(decision["baseline"]["replicates"], start=1):
+            print(f"Baseline fit {r:2d}               : acc={row['accuracy']:.6f} "
+                  f"one-sided LB={row['one_sided_lower_bound']:.6f} vs {row['threshold']} -> {row['state']}")
+        print(f"Baseline adequacy gate        : {decision['baseline']['outcome']}")
+        supporting = decision["supporting"]
+        print(f"Paired degradation (secondary, non-gating): "
+              f"{None if supporting is None else supporting['established']}")
+        print(f"OVERALL D4 OUTCOME            : {decision['outcome']}")
         print(f"Interpretation                : {result.interpretation}")
         print("=" * 72)
         return
@@ -1616,7 +1766,8 @@ REQUIRED_DECISIONS = (
     "within_partition_duplicates_policy", "failure_handling", "calibration",
 )
 #: Further decisions a rule needs whenever it is the chosen rule or one of the options.
-RULE_REQUIRED_DECISIONS = {"near_chance_tost_v3": ("chance_margin", "paired_endpoint_role")}
+RULE_REQUIRED_DECISIONS = {"near_chance_baseline_gated_v4": ("chance_margin", "baseline_adequacy_threshold",
+                                                            "paired_endpoint_role")}
 
 
 def review_preregistration(record: Mapping[str, Any]) -> dict:
@@ -1667,6 +1818,14 @@ def review_preregistration(record: Mapping[str, Any]) -> dict:
             margin = values["chance_margin"]
             if not (isinstance(margin, float) and 0.0 < margin < 0.5):
                 problems.append(f"decisions.chance_margin {margin!r} must be a float in (0, 0.5)")
+    floor_entry = decisions.get("baseline_adequacy_threshold")
+    if isinstance(floor_entry, Mapping):
+        if floor_entry.get("units") != "accuracy_fraction":
+            problems.append("decision 'baseline_adequacy_threshold' must declare units 'accuracy_fraction'")
+        if "baseline_adequacy_threshold" in values:
+            floor = values["baseline_adequacy_threshold"]
+            if not (isinstance(floor, float) and 0.5 < floor < 1.0):
+                problems.append(f"decisions.baseline_adequacy_threshold {floor!r} must be a float in (0.5, 1)")
     if values.get("decision_rule") == NEAR_CHANCE_RULE and "paired_endpoint_role" in values and \
             values["paired_endpoint_role"] not in PAIRED_ENDPOINT_ROLES:
         problems.append(f"decisions.paired_endpoint_role must be one of {PAIRED_ENDPOINT_ROLES}")
