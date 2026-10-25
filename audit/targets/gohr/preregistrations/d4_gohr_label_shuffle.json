@@ -1,12 +1,12 @@
 {
   "schema_version": "d4-preregistration-1",
   "protocol_id": "d4-gohr-speck3264-r5-label-shuffle-v4",
-  "status": "DRAFT_PENDING_HUMAN_APPROVAL",
-  "approved": false,
-  "approved_by": null,
-  "approved_utc": null,
-  "approval_statement": "PENDING_HUMAN_APPROVAL",
-  "data_examined_before_approval": "PENDING_HUMAN_APPROVAL",
+  "status": "APPROVED",
+  "approved": true,
+  "approved_by": "human-approver-01",
+  "approved_utc": "2026-10-25T10:11:14Z",
+  "approval_statement": "I approve the Gohr D4 label-shuffle protocol under near_chance_baseline_gated_v4. The primary endpoint is exact-binomial TOST for near-chance equivalence of each shuffled-label fit around chance accuracy 0.5, using margin 0.005 and band [0.495, 0.505] at alpha 0.05. Overall SUPPORTED additionally requires every intact-label baseline fit to have a one-sided 95% exact lower confidence bound strictly above 0.90. The chance margin and baseline-adequacy floor are protocol-owner-selected practical tolerances, not values prescribed by the overarching methodology, the D4 planning note or Gohr's paper. The paired McNemar comparison is secondary and non-gating, with effect_threshold 0.01. The protocol uses five planned replicates, training/validation/test sizes of 10000000/1000000/1000000 and 200 epochs. Label shuffling is a blunt control and does not rule out all forms of leakage; targeted generation-order and label-leakage audits are outside this D4 protocol. The thresholds were not selected using the September historical D4 outcome.",
+  "data_examined_before_approval": "Before approval, I reviewed the proposed v4 decision rules, numerical thresholds, source-provenance record, rationale, approval sheet and reported offline validation results. I reviewed rationale section 0.5 on the baseline-adequacy threshold and its design-only operating-characteristic calculations, section 0.7 on the chance margin and its design-only operating-characteristic calculations, and section 4 on partition overlap and prior measurements. Section 4 reports zero duplicate rows, zero cross-partition overlap, and zero label conflicts for the D0 Gohr production instance, which is a different dataset. Those D0 measurements establish nothing about the new D4 partitions. The historical September 2026 D4 result was reported as EFFECT_DETECTED. Its per-replicate arrays were unavailable, were not inspected, and were not used to select the new thresholds. No v4 preflight, calibration, or production run has occurred, and no v4 outcome data was examined before approval.",
   "methodology_source": {
     "overarching_methodology": {
       "document": "~/Downloads/31 (1).pdf (outside the repository)",
@@ -29,7 +29,6 @@
       "bytes": 31047,
       "title": "Dataset Integrity — Redesign From First Principles",
       "date": "2026-08-27, as encoded in the filename; supplied by the protocol owner on 2026-10-25 and archived byte-identical",
-      "earlier_reference": "Earlier drafts referred to this note as 'Pasted markdown(20260827-073650).md'. That the archived file is that note is the owner's attestation (decision planning_source_attestation).",
       "section": "F. Controlled Perturbations — D4 critique and additions (with table L, row 'Label-shuffle perturbation (D4)')",
       "section_f_quotes": [
         "What D4 actually establishes, precisely: that the training pipeline does not produce above-chance accuracy when the label carries no information",
@@ -208,8 +207,8 @@
   },
   "decisions": {
     "decision_rule": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": "near_chance_baseline_gated_v4",
       "options": [
         "near_chance_baseline_gated_v4"
       ],
@@ -217,8 +216,8 @@
       "rationale": "Overall SUPPORTED requires near-chance equivalence of every shuffled fit and adequacy of every intact-label baseline fit. The paired comparison is secondary and non-gating. Paired-only rules (directional_iut_v2, conservative_two_sided_v1) cannot establish near-chance accuracy, and v3 had no baseline gate, so this runner refuses them. Their code stays in the engine to reproduce historical evidence."
     },
     "chance_margin": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": 0.005,
       "units": "accuracy_fraction",
       "recommended": 0.005,
       "rationale": "chance_margin fixes the near-chance band [0.5 - delta, 0.5 + delta]; the candidate 0.005 gives [0.495, 0.505], with chance reference 0.5 and alpha 0.05. It is a separate quantity from effect_threshold, which is a minimum paired difference from baseline. It is an explicit practical design choice of the protocol owner. Neither the overarching methodology PDF nor the D4 planning note (section F) prescribes a numerical D4 margin, and Gohr's paper does not either. What the band means for this diagnostic: a label-shuffled fit counts as 'near chance' if its population test accuracy is established to be within half a percentage point of 0.5. That is at most about 1.2% of the published 5-round signal (0.929 - 0.5 = 0.429). So the control asks whether shuffling removes essentially all of the pipeline's advantage, not whether it removes every conceivable trace. A residual advantage larger than 0.005 surviving the shuffle is treated as a practically relevant leak; one inside the band is not ruled out by D4 and remains the province of the targeted leakage screens (section E). The test-set size does not set the margin. n = 10^6 determines precision and the operating characteristics, not what is scientifically acceptable, and the margin was not narrowed because a narrower one would still be powered. The margin must not be selected or altered using any new D4 result, and the historical September D4 result does not determine it. Design-only operating characteristics (n_test = 10^6, alpha = 0.05, k = 5; table below): at 0.005, P(a fit is not EQUIVALENT | p_r = 0.5) = 6.5e-17, so P(all five EQUIVALENT) >= 1 - 3.3e-16 by the union bound; a fit with true accuracy 0.5025 is declared equivalent with probability 0.9996; the size at the band edge is <= 0.05. Any reproducible advantage is exploitable in principle given enough data, so the band does not mean 'cryptanalytically worthless'.",
@@ -320,15 +319,15 @@
       }
     },
     "baseline_adequacy_threshold": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": 0.90,
       "units": "accuracy_fraction",
       "recommended": 0.9,
       "rationale": "The intact-label baseline-adequacy floor t. A near-chance result for the shuffled models is informative only if the same pipeline, with intact labels, does distinguish the classes. Each of the k registered baseline fits is ADEQUATE only if its one-sided 95% exact lower confidence bound on test accuracy is strictly greater than t. The gate passes only if all k are adequate. Candidate 0.90: a proposed reproduction-adequacy threshold. It is not prescribed by Gohr or by the audit methodology. The published 5-round benchmark is 0.929 on 10^6 test samples, as cited by the protocol owner. The floor sits 2.9 percentage points below it, as an explicit practical tolerance for differences between this pipeline and the published one: shuffle=False, seeded initialisation, and the TF 2.15 runtime (fixed_design.comparability_to_published_pipeline), and for seed-to-seed training variation. That variation is NOT measured by the paper's test-set uncertainty: at n = 10^6 the binomial standard error at 0.929 is about 0.00026, which describes one model's test sample, not how much accuracy varies between training runs. No repository evidence measures the seed-to-seed spread of this pipeline, so the 2.9-point tolerance is a judgment, not an estimate. Operating characteristics (design only): with n = 10^6 and alpha = 0.05, a fit is ADEQUATE iff it has at least 900494 correct predictions and INADEQUATE iff at most 899301. P(ADEQUATE | q = 0.929) = 1, P(ADEQUATE | q = 0.902) = 1.000, P(ADEQUATE | q = 0.901) = 0.955, P(ADEQUATE | q = 0.90) = 0.0499 (the size). It was not chosen from the September D4 result or from any new D4 baseline. Weak baselines are never re-run or excluded after their accuracy is seen."
     },
     "paired_endpoint_role": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": "secondary",
       "options": [
         "secondary"
       ],
@@ -336,26 +335,26 @@
       "rationale": "The paired McNemar comparison (one-sided exact, perturbed worse, effect_threshold 0.01, IUT over replicates) is reported as a secondary, supporting endpoint and never changes the outcome. It is secondary because the D4 question concerns the shuffled condition: a shuffled model can be much worse than its baseline and still far from chance. The concern that a co-primary role used to address (a baseline that itself shows no signal) is now handled directly by the baseline-adequacy gate, which tests absolute baseline accuracy rather than a difference. The certificate marks the endpoint secondary_non_gating. Citing it as an additional confirmatory claim would raise the familywise error to <= 2*alpha; it is supporting evidence only."
     },
     "alpha": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": 0.05,
       "recommended": 0.05,
       "rationale": "alpha = 0.05 is the level of each TOST one-sided test (each fit's equivalence is a 90% exact interval inside the band), the level of each baseline adequacy test (one-sided 95% lower bound), the level of the intersection-union claims (all shuffled fits equivalent; all baselines adequate; both together), and the familywise level of the Bonferroni departure (alpha/(2k) per one-sided test) and inadequacy (alpha/k per test) families. It is also the level of the secondary paired IUT. Carried from the existing configuration."
     },
     "effect_threshold": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": 0.01,
       "recommended": 0.01,
       "rationale": "Supporting endpoint only: the minimum paired accuracy reduction delta_r <= -effect_threshold, as a fraction (0.01 = one percentage point). It is an operational practical-relevance threshold carried from the existing configuration, not a validated margin. It is never used as the near-chance margin."
     },
     "replicates": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": 5,
       "recommended": 5,
       "rationale": "Carried from the existing configuration. Each replicate is 2 x 200 epochs on 10^7 rows; k=5 makes the replicate-level criteria about reproducibility across seeds, not a population estimate."
     },
     "sample_sizes": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": {"train": 10000000, "validation": 1000000, "test": 1000000},
       "recommended": {
         "train": 10000000,
         "validation": 1000000,
@@ -364,14 +363,14 @@
       "rationale": "Carried from the existing configuration and Gohr's 5-round setting."
     },
     "epochs": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": 200,
       "recommended": 200,
       "rationale": "Carried from the existing configuration and Gohr's published 5-round training length."
     },
     "partition_overlap_policy": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": "refuse_on_any_cross_partition_feature_row",
       "options": [
         "refuse_on_any_cross_partition_feature_row",
         "record_only"
@@ -380,8 +379,8 @@
       "rationale": "Measured at preflight on the actual persisted partitions, before any training. Features are 64-bit rows from os.urandom-keyed encryptions, so expected accidental cross-partition collisions are about n_a*n_b/2^64 (about 5e-7 for train-test), and any shared row signals a generation defect. train-test and validation-test sharing would let fitted or selection-used rows into evaluation; train-validation sharing would bias checkpoint selection. A refusal ends this protocol; the partitions are kept and not regenerated, deduplicated or altered, and any new dataset needs a documented, prospective protocol amendment."
     },
     "within_partition_duplicates_policy": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": "record_only",
       "options": [
         "record_only",
         "refuse_on_any_within_partition_duplicate"
@@ -390,8 +389,8 @@
       "rationale": "A duplicate inside one partition does not cross the fit/selection/evaluation boundary; it is recorded in the evidence with its label-conflict count. It is also astronomically unlikely here, so a non-zero count should be reported as an anomaly in the write-up."
     },
     "label_conflict_reporting": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": "report_separately_non_gating",
       "options": [
         "report_separately_non_gating"
       ],
@@ -399,8 +398,8 @@
       "rationale": "Feature-row overlap and label agreement are checked separately: within each partition, distinct feature rows seen with more than one label; across partitions, shared rows whose labels differ. Under the recommended overlap policy any cross-partition row already refuses, so label conflicts add information but not a separate gate."
     },
     "failure_handling": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": "abort_whole_run_no_exclusions",
       "options": [
         "abort_whole_run_no_exclusions"
       ],
@@ -408,22 +407,13 @@
       "rationale": "No replicate is ever excluded or replaced. A crash may be resumed only through the adapter's verified recovery (uncommitted epochs quarantined and retrained, all retries recorded); any integrity refusal stops the run, and the outcome is then NOT_COMPLETED (no certificate; verify exits 5), never as a result on fewer replicates. Stopping rule: the run ends when all k replicates finish; there is no interim look at test statistics."
     },
     "calibration": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
+      "status": "APPROVED",
+      "value": "none_required",
       "options": [
         "none_required"
       ],
       "recommended": "none_required",
       "rationale": "Every confirmatory test is exact: binomial tails for the TOST, departure and baseline tests, and the conditional binomial for McNemar. Their levels hold given i.i.d. test rows from the generator, independent of training, which holds by the generator's construction (estimand). No simulation calibration is needed for the error guarantees. test_d4_near_chance.py checks the software against exact rational-arithmetic references and exact level computations on small enumerated cases. That is software validation, not scientific calibration."
-    },
-    "planning_source_attestation": {
-      "status": "PENDING_HUMAN_APPROVAL",
-      "value": null,
-      "options": [
-        "confirmed_by_protocol_owner"
-      ],
-      "recommended": "confirmed_by_protocol_owner",
-      "rationale": "The planning note is archived at methodology_source.d4_operationalization.file (SHA-256 0fd2854a49fd0676a24a69cdb5132063ad4c7e2a3bc50f842b1a3ae8c9c3b4c7, 31047 bytes), byte-identical to the copy the owner supplied on 2026-10-25, and was read in full. The hash fixes the bytes. It cannot show that this file is the 2026-08-27 planning note referred to earlier: its file timestamp is the 2026-10-25 download. Approving this decision attests that it is, and that section F and the quotes recorded here are the D4 source."
     }
   },
   "outcomes": {

@@ -1,8 +1,11 @@
 # D4 Gohr label shuffle — design rationale, statistical review, traceability
 
 Companion to `d4_gohr_label_shuffle.json` (protocol `d4-gohr-speck3264-r5-label-shuffle-v4`,
-status **DRAFT, pending human approval**). Approval fields and commands are in
+status **APPROVED**). The approver identity, approval timestamp, approval statement,
+and pre-approval disclosure are recorded in the JSON and summarized in
 `d4_gohr_label_shuffle.APPROVAL_SHEET.md`.
+
+No D4 preflight or production stage has been run under this protocol.
 
 ## 0. Statistical design (rule `near_chance_baseline_gated_v4`, 2026-10-25)
 
@@ -19,7 +22,6 @@ There are two distinct sources. No provision of one is attributed to the other.
 
 It does **not** prescribe D4 label shuffling, a near-chance expectation, the blunt-control limitation, a baseline floor, or any numerical margin.
 
-**D4 planning source.** *Dataset Integrity — Redesign From First Principles* (dated 2026-08-27 in its filename). It is archived at `sources/d4_planning_notes_2026-08-27.md` (SHA-256 `0fd2854a…c3b4c7`, 31 047 bytes), byte-identical to the copy you supplied on 2026-10-25, and was read in full. The hash fixes the bytes. That this file is the 2026-08-27 note, earlier referred to as "Pasted markdown(20260827-073650).md", is your attestation (`planning_source_attestation`, pending).
 
 What section F, "Controlled Perturbations — D4 critique and additions", supplies (verbatim quotes are in the JSON):
 - D4 establishes "that the training pipeline does not produce above-chance accuracy when the label carries no information". Table L gives the decision basis as "near-chance under shuffle".
@@ -51,7 +53,7 @@ Neither v2 nor v3 was approved or run.
 - **Class diagnostics.** True-negative and true-positive rates per fit are reported descriptively and never gate.
 
 ### 0.4 Shuffled-label near-chance endpoint
-Band: L = 0.5 − δ, U = 0.5 + δ, with δ = `chance_margin` (candidate 0.005, giving [0.495, 0.505]).
+Band: L = 0.5 − δ, U = 0.5 + δ, with δ = `chance_margin` (approved value: 0.005, giving [0.495, 0.505]).
 
 | Per fit | H0 | H1 | Exact test (reject iff p < level) | Level |
 |---|---|---|---|---|
@@ -63,7 +65,7 @@ Band: L = 0.5 − δ, U = 0.5 + δ, with δ = `chance_margin` (candidate 0.005, 
 - **INCONCLUSIVE:** otherwise.
 
 ### 0.5 Intact-label baseline-adequacy gate
-Floor t = `baseline_adequacy_threshold` (candidate 0.90). It uses the k registered baseline fits and the same test partition.
+Floor t = `baseline_adequacy_threshold` (approved value: 0.90). It uses the k registered baseline fits and the same test partition.
 
 | Per fit | H0 | H1 | Exact test | Level |
 |---|---|---|---|---|
@@ -121,7 +123,7 @@ Overall outcome (`fixed_design.overall_rule`, `combine_outcome`):
 - **Why it doesn't gate.** It is secondary because a shuffled model can be much worse than its baseline and still far from chance. The old co-primary option's purpose is now served by the baseline gate.
 - **Error rate.** Citing it as an additional confirmatory claim would raise the familywise error to ≤ 2α. The certificate marks it `secondary_non_gating`.
 
-### 0.7 The near-chance margin (`chance_margin`, PENDING; candidate 0.005)
+### 0.7 The near-chance margin (`chance_margin` = 0.005; approved)
 ±0.5 percentage points is an **explicit practical design choice** of the protocol owner. It is not prescribed by the PDF, by section F of the planning note, or by Gohr's paper.
 
 **What the band [0.495, 0.505] means here.** A shuffled fit counts as near chance if its accuracy is established to be within half a point of 0.5. That is at most about 1.2 % of the published 5-round signal (0.929 − 0.5 = 0.429). D4 therefore asks whether shuffling removes essentially all of the pipeline's advantage. A larger surviving residual is treated as a practically relevant leak. A residual inside the band is not ruled out by D4; it is left to the targeted screens.
@@ -203,7 +205,7 @@ Fit identity = seed, condition, replicate, config hash, `train_digest` (features
 
 Tests cover high-bit and low-bit separation, row order, wide and non-binary rows, chunking, empty partitions and length mismatch.
 
-The audit runs at preflight on the actual D4 partitions, before any training. The counts and digests are bound into `preflight.json` and the certificate. The policy (pending) decides refusal. A refusal writes one atomic `<run>.preflight_refused/` directory holding the measurements and the generated data; nothing is regenerated, deduplicated or altered.
+The audit runs at preflight on the actual D4 partitions, before any training. The counts and digests are bound into `preflight.json` and the certificate. The approved policy (`refuse_on_any_cross_partition_feature_row`) determines whether cross-partition feature overlap causes refusal. A refusal writes one atomic `<run>.preflight_refused/` directory holding the measurements and the generated data; nothing is regenerated, deduplicated or altered.
 
 **Prior measurements:**
 - **Historical D4 partitions: not measurable.** Only `audit/dataset/evidence/d4/metadata.json` exists; the `.npy` files are not on disk. No overlap claim is made about them.

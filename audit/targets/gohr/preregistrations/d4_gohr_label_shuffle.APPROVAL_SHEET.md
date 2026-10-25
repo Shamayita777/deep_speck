@@ -2,53 +2,57 @@
 
 Protocol: `audit/targets/gohr/preregistrations/d4_gohr_label_shuffle.json`. Rationale: `d4_gohr_label_shuffle.RATIONALE.md`.
 
-Nothing here has been approved. No D4 preflight or production stage has been run under this protocol (v4, rule `near_chance_baseline_gated_v4`).
+**Approval status: APPROVED.** The approved design, approval identity,
+timestamp, and pre-approval disclosure are recorded in
+`d4_gohr_label_shuffle.json`.
 
-**Scientific decisions only you can make** (RATIONALE §0):
-1. **`planning_source_attestation`.** The planning note *Dataset Integrity — Redesign From First Principles* (2026-08-27) is archived at `sources/d4_planning_notes_2026-08-27.md` (SHA-256 `0fd2854a49fd0676a24a69cdb5132063ad4c7e2a3bc50f842b1a3ae8c9c3b4c7`). Approve only if this is the original D4 planning note and section F is the D4 source. The PDF `~/Downloads/31 (1).pdf` is the overarching methodology only.
-2. **`chance_margin`.** The candidate 0.005 gives the band [0.495, 0.505]. It is an explicit practical design choice that no source prescribes. It means a shuffled fit keeps at most about 1.2 % of the published 5-round advantage. It is not narrowed because n = 10⁶ would allow it, and it is not tuned to any D4 result.
-3. **`baseline_adequacy_threshold`.** The candidate 0.90 is a reproduction-adequacy tolerance 2.9 points below the published 0.929. It is not prescribed by Gohr or by the methodology. Its pipeline differences are listed in `fixed_design.comparability_to_published_pipeline`.
-4. **`paired_endpoint_role`.** `secondary`, the only option: reported, never gating.
+No D4 preflight or production stage has been run under this protocol.
 
-**Overall outcome:** `SUPPORTED` only if every shuffled fit is near chance **and** every intact-label baseline is adequate. `BASELINE_INADEQUATE`, `INCONCLUSIVE` and `NOT_COMPLETED` are never passes.
+## A. Approved decisions
 
-The September 2026 `EFFECT_DETECTED` result is historical. Its status is known; its per-replicate arrays are not on disk and were not inspected. It did not set the margin or the floor.
+The table below records the decisions approved in the companion JSON.
+The JSON is the authoritative machine-readable record.
 
-## A. Decisions to make
-
-For each decision, edit `decisions.<name>` in the JSON: set `"value"` and change `"status"` to `"APPROVED"`. Choose only from `options` where they are listed. The recommendation is in the JSON with its rationale.
-
-| Decision | Recommended | Options / note |
+| Decision | Approved value | Interpretation |
 |---|---|---|
-| `decision_rule` | `near_chance_baseline_gated_v4` | single option; the runner refuses paired-only and ungated rules |
-| `chance_margin` | `0.005` (candidate, **your scientific decision**) | float in (0, 0.5), a **fraction** of accuracy; must keep `"units": "accuracy_fraction"`; never copied from `effect_threshold` |
-| `baseline_adequacy_threshold` | `0.90` (candidate, **your scientific decision**) | float in (0.5, 1), a **fraction** of accuracy; must keep `"units": "accuracy_fraction"` |
-| `paired_endpoint_role` | `secondary` | single option; non-gating |
-| `planning_source_attestation` | `confirmed_by_protocol_owner` | single option; only if the recorded description of section F is accurate |
-| `alpha` | `0.05` | float; TOST level per one-sided test, baseline lower-bound level, IUT level, Bonferroni family level (α/(2k) per departure test, α/k per inadequacy test) |
-| `effect_threshold` | `0.01` | float, a **fraction** of accuracy (0.01 = 1 pp); supporting paired endpoint only |
-| `replicates` | `5` | integer ≥ 2 |
-| `sample_sizes` | `{"train": 10000000, "validation": 1000000, "test": 1000000}` | positive integers |
-| `epochs` | `200` | integer |
-| `partition_overlap_policy` | `refuse_on_any_cross_partition_feature_row` | or `record_only` |
-| `within_partition_duplicates_policy` | `record_only` | or `refuse_on_any_within_partition_duplicate` |
-| `label_conflict_reporting` | `report_separately_non_gating` | single option |
-| `failure_handling` | `abort_whole_run_no_exclusions` | single option |
-| `calibration` | `none_required` | single option |
+| `decision_rule` | `near_chance_baseline_gated_v4` | Near-chance equivalence gated by intact-label baseline adequacy |
+| `chance_margin` | `0.005` | Accuracy band `[0.495, 0.505]` around chance `0.5` |
+| `baseline_adequacy_threshold` | `0.90` | Every intact-label fit must have a one-sided 95% exact lower confidence bound strictly above `0.90` |
+| `paired_endpoint_role` | `secondary` | Paired McNemar endpoint is secondary and never gates the outcome |
+| `alpha` | `0.05` | Significance level |
+| `effect_threshold` | `0.01` | Fraction of accuracy; `0.01` means one percentage point |
+| `replicates` | `5` | Five planned paired replicates |
+| `sample_sizes` | `{"train": 10000000, "validation": 1000000, "test": 1000000}` | Fixed train, validation and test sample sizes |
+| `epochs` | `200` | Fixed epoch limit |
+| `partition_overlap_policy` | `refuse_on_any_cross_partition_feature_row` | Refuse preflight if any cross-partition feature row overlaps |
+| `within_partition_duplicates_policy` | `record_only` | Record within-partition duplicates without refusing solely for that reason |
+| `label_conflict_reporting` | `report_separately_non_gating` | Report label conflicts separately; non-gating |
+| `failure_handling` | `abort_whole_run_no_exclusions` | Abort the whole run; no selective exclusions |
+| `calibration` | `none_required` | No calibration run required by this protocol |
+| `planning_source_attestation` | `confirmed_by_protocol_owner` | Confirms the archived D4 planning note as the intended source; retain only if genuinely confirmed |
 
-Top-level fields to fill:
+### Approval record
 
-| Field | What to write |
-|---|---|
-| `approved` | `true` |
-| `approved_by` | your approver identifier |
-| `approved_utc` | `YYYY-MM-DDTHH:MM:SSZ`, at or before the commit time (preflight checks this) |
-| `approval_statement` | your statement of what you approve |
-| `data_examined_before_approval` | what you have seen. At minimum, disclose: the September D4 status (EFFECT_DETECTED; its per-replicate arrays are unavailable and were not inspected); the D0 overlap measurement (on a different dataset); and the design-only operating characteristics in RATIONALE §0.5 and §0.7 |
-| `status` | e.g. `APPROVED` (informational) |
+The JSON's top-level fields record the approver, approval timestamp, approval
+statement, and what was examined before approval.
 
-The fixed design (`fixed_design`) was carried over from the existing D4 configuration and Gohr's procedure. It is approved as a whole by the top-level approval; `protocol-check` refuses any edit that departs from what the runner implements.
+The approved `chance_margin` of `0.005` and baseline-adequacy floor of `0.90`
+are protocol-owner-selected practical tolerances. They are not presented as
+numerical values prescribed by the overarching methodology or the D4 planning
+note, and they were not selected using the September 2026 historical D4 result.
 
+The prior D0 overlap measurement concerns a different dataset. Its zero
+duplicates, zero cross-partition overlap, and zero label conflicts do not
+establish anything about the new D4 partitions. The new D4 partitions have
+not yet been generated or audited by preflight.
+
+The historical September D4 result was reported as `EFFECT_DETECTED`; its
+per-replicate arrays were unavailable and were not used to choose the v4
+thresholds. The v4 preflight and production run remain unexecuted.
+
+The fixed design (`fixed_design`) is approved as a whole by the top-level
+approval. `protocol-check` must pass before proceeding; it refuses edits that
+depart from the design implemented by the runner.
 ## B. Commands, in order (from `~/Documents/deep_speck`)
 
 ```bash
@@ -63,9 +67,11 @@ $PY -B -m audit.dataset.tools.d4_near_chance_operating_characteristics
 # 1. After editing: structural check; exit 0 means well-formed and fully approved
 $PY -B -m audit.dataset.experiments.d4_gohr_label_shuffle protocol-check --preregistration $P --require-approved
 
-# 2. Commit ONLY the protocol (and, if you edited them, its .md companions)
-git add -- $P
-git commit -m "Approve D4 Gohr label-shuffle preregistration"
+# 2. Commit the protocol and both synchronized companion documents
+git add -- "$P" \
+    audit/targets/gohr/preregistrations/d4_gohr_label_shuffle.RATIONALE.md \
+    audit/targets/gohr/preregistrations/d4_gohr_label_shuffle.APPROVAL_SHEET.md
+git commit -m "Approve D4 Gohr label-shuffle preregistration and companion docs"
 
 # 3. Anchor: record this hash OUTSIDE the file (e.g. in your notes)
 shasum -a 256 $P
