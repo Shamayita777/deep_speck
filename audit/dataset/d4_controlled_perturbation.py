@@ -777,7 +777,8 @@ def mcnemar_exact_pvalue_from_counts(b: int, c: int) -> float:
 #   Equivalence and departure of one fit are mutually exclusive (asserted).
 #
 # Failing to reject p = chance is never used: it is not evidence of
-# equivalence (methodology 3.9.8, 3.9.9 Rule III).
+# equivalence (audit methodology PDF 3.9.8, 3.9.9 Rule III; the near-chance
+# criterion itself is the D4-specific operationalization, not a PDF provision).
 
 NEAR_CHANCE_RULE = "near_chance_tost_v3"
 PAIRED_ENDPOINT_ROLES = ("secondary", "co_primary")
@@ -1272,11 +1273,13 @@ VERIFIABILITY = {
         "every p-value, interval, per-fit state, endpoint result and the outcome, from those counts",
         "the test partition, by its SHA-256 and canonical digest recorded at preflight",
         "the identity of each selected checkpoint, by SHA-256, and its validation-loss selection history",
+        "with verify --rerun-models: that each reloaded selected checkpoint reproduces its persisted "
+        "thresholded test predictions exactly",
     ],
     "not_recomputed": [
-        "that the persisted predictions are what the selected checkpoint outputs: verify does not rerun "
-        "the network (that needs TensorFlow and the run machine); it checks the checkpoint digests and the "
-        "prediction digests only",
+        "without --rerun-models, that the persisted predictions are what the selected checkpoint outputs "
+        "(only checkpoint and prediction digests are checked)",
+        "the training itself: TensorFlow training is not bitwise reproducible, so fits are not re-trained",
         "the data generator's assumptions (i.i.d. rows, fair labels), which are D3's subject",
     ],
 }

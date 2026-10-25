@@ -41,6 +41,9 @@ verify          Independent post-run verification.  Read-only.  Recounts every
                 verified (the printed primary outcome may still be
                 INCONCLUSIVE or NOT_SUPPORTED, which is never a pass);
                 exit 5 = no result (NOT_COMPLETED); exit 1 = refused.
+                --rerun-models additionally reloads every selected
+                checkpoint (digest-checked) and requires its thresholded
+                test predictions to equal the persisted ones.
 
 Decision rule: near_chance_tost_v3 only.  The primary endpoint is near-chance
 equivalence of every label-shuffled fit; the paired comparison with the
@@ -600,12 +603,56 @@ def recount_from_predictions(run_dir: Path, certificate: dict, test_labels) -> N
                                      f"predictions give {value!r}.")
 
 
+def _load_selected_model(path: Path):
+    from keras.models import load_model
+
+    return load_model(path, compile=False)
+
+
+def rerun_selected_models(run_dir: Path) -> list[dict]:
+    """Reload every fit's selected checkpoint, re-predict the test partition, compare.
+
+    Call only after verify_run has passed.  The checkpoint must match the
+    SHA-256 in its selection record; its thresholded test predictions must
+    equal those of the persisted prediction file exactly (raw scores may
+    differ in the last bits across processes, so the maximum absolute
+    difference is reported, not gated).  Read-only; needs TensorFlow.
+    """
+    run_dir = Path(run_dir)
+    certificate = json.loads((run_dir / "result" / "d4_certificate.json").read_text())
+    _, partitions = load_preflight(run_dir)
+    test_x = partitions["test"][0]
+    report = []
+    for row in certificate["findings"]["replicates"]:
+        r = row["replicate"]
+        for condition in ("baseline", "perturbed"):
+            selection = row[f"{condition}_selection"]
+            directory, _ = d4.checkpoint_paths(run_dir / "fits", r, condition)
+            checkpoint = directory / selection["checkpoint"]
+            if not checkpoint.is_file() or sha256_file(checkpoint) != selection["checkpoint_sha256"]:
+                raise IntegrityError(f"Replicate {r} {condition}: selected checkpoint is missing or does not "
+                                     "match its selection record.")
+            fresh = np.asarray(_load_selected_model(checkpoint).predict(test_x, verbose=0)).reshape(-1)
+            stored = np.load(d4.prediction_path(run_dir / "fits", r, condition))
+            disagreements = int(np.sum((fresh >= 0.5) != (stored >= 0.5))) if fresh.shape == stored.shape else -1
+            if disagreements != 0:
+                raise IntegrityError(f"Replicate {r} {condition}: the reloaded selected checkpoint (epoch "
+                                     f"{selection['selected_epoch']}) does not reproduce the persisted predictions "
+                                     f"({disagreements} label disagreements).")
+            report.append({"replicate": r, "condition": condition, "selected_epoch": selection["selected_epoch"],
+                           "checkpoint_sha256": selection["checkpoint_sha256"], "label_disagreements": 0,
+                           "max_abs_score_difference": float(np.max(np.abs(fresh - stored))) if fresh.size else 0.0})
+    return report
+
+
 def stage_verify(args) -> int:
     if not (Path(args.run_dir) / "result").exists():
         print(json.dumps({"outcome": "NOT_COMPLETED", "primary_claim_supported": False}, indent=2))
         print(f"NO RESULT: {Path(args.run_dir) / 'result'} does not exist; the run is NOT_COMPLETED.")
         return 5
     summary = verify_run(Path(args.run_dir))
+    if args.rerun_models:
+        summary["reloaded_checkpoints_reproduce_predictions"] = rerun_selected_models(Path(args.run_dir))
     print(json.dumps(summary, indent=2))
     print("INTEGRITY CHECKS PASSED (post-run verification; read-only). "
           f"Primary outcome: {summary['outcome']}"
@@ -632,6 +679,8 @@ def parse_args(argv=None) -> argparse.Namespace:
         stage.add_argument("--run-dir", type=Path, required=True)
     verify = sub.add_parser("verify", help="independent post-run verification (read-only)")
     verify.add_argument("--run-dir", type=Path, required=True)
+    verify.add_argument("--rerun-models", action="store_true",
+                        help="also reload every selected checkpoint and re-predict the test partition (needs TF)")
     return parser.parse_args(argv)
 
 

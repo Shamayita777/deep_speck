@@ -433,6 +433,76 @@ def test_verify_reports_the_primary_outcome_and_never_calls_a_non_supported_run_
     assert ("NOT a scientific pass" in out) is (summary["outcome"] != "SUPPORTED")
 
 
+def test_label_shuffle_end_to_end_permutes_only_the_training_labels(completed):
+    """Only training labels change; features, validation, test and every other controlled variable do not."""
+    from audit.dataset.perturbations.label_shuffle import LabelShufflePerturbation
+
+    run_dir, _ = completed
+    preflight, partitions = driver.load_preflight(run_dir)
+    certificate = json.loads((run_dir / "result" / "d4_certificate.json").read_text())
+    (train_x, train_y), (val_x, val_y), (test_x, test_y) = (partitions[p] for p in driver.PARTITIONS)
+    source = I.labelled_partition_digest(train_x, train_y)
+    seeds = np.random.SeedSequence(driver.AUDIT_SEED).spawn(len(certificate["findings"]["replicates"]))
+    for row, child in zip(certificate["findings"]["replicates"], seeds):
+        r = row["replicate"]
+        indices = np.load(run_dir / "fits" / "perturbations" / f"replicate_{r:02d}_indices.npy")
+        planned = LabelShufflePerturbation().permutation_indices(len(train_y), np.random.default_rng(child))
+        np.testing.assert_array_equal(indices, planned)                           # the audit-seed plan
+        assert np.array_equal(np.sort(indices), np.arange(len(train_y)))          # a bijection
+        assert not np.array_equal(indices, np.arange(len(train_y)))               # not the identity
+        shuffled = np.asarray(train_y)[indices]
+        assert np.array_equal(np.bincount(shuffled), np.bincount(train_y))        # label multiset kept
+        assert np.any(shuffled != train_y)
+        base, pert = row["baseline_selection"], row["perturbed_selection"]
+        assert base["train_digest"] == source                                     # baseline: original data
+        assert pert["train_digest"] == I.labelled_partition_digest(train_x, shuffled)  # same features, new labels
+        assert row["perturbation_record"]["perturbed_train_digest"] == pert["train_digest"]
+        assert row["perturbation_record"]["source_train_digest"] == source
+        assert {k: row["perturbation_record"][k] for k in ("perturbation", "condition", "replicate", "seed")} == \
+            {"perturbation": "label_shuffle", "condition": "perturbed", "replicate": r, "seed": row["seed"]}
+        for key in ("seed", "replicate", "config_hash", "validation_digest", "evaluation_digest", "model"):
+            assert base[key] == pert[key], key                                    # all else controlled
+        assert base["validation_digest"] == I.labelled_partition_digest(val_x, val_y)
+        assert base["evaluation_digest"] == preflight["partitions"]["test"]["digest"]
+    # Ground truth used for scoring is exactly the preflight test labels.
+    assert I.labelled_partition_digest(test_x, test_y) == preflight["partitions"]["test"]["digest"]
+    assert certificate["provenance"]["test_label_counts"] == {"zeros": int(np.sum(test_y == 0)),
+                                                              "ones": int(np.sum(test_y == 1))}
+
+
+def test_selected_checkpoint_is_the_val_loss_argmin_and_its_reload_reproduces_the_predictions(completed):
+    run_dir, _ = completed
+    certificate = json.loads((run_dir / "result" / "d4_certificate.json").read_text())
+    for row in certificate["findings"]["replicates"]:
+        for condition in ("baseline", "perturbed"):
+            selection = row[f"{condition}_selection"]
+            directory, _ = driver.d4.checkpoint_paths(run_dir / "fits", row["replicate"], condition)
+            losses = [json.loads(G.epoch_record_path(directory, e).read_text())["val_loss"]
+                      for e in range(1, APPROVED["epochs"] + 1)]
+            assert selection["selected_epoch"] == 1 + int(np.argmin(losses))
+            assert selection["checkpoint_sha256"] == I.sha256_file(directory / selection["checkpoint"])
+    report = driver.rerun_selected_models(run_dir)
+    assert len(report) == 2 * len(certificate["findings"]["replicates"])
+    assert all(entry["label_disagreements"] == 0 for entry in report)
+    assert driver.main(["verify", "--run-dir", str(run_dir), "--rerun-models"]) == 0
+
+
+def test_rerun_detects_predictions_not_produced_by_the_selected_checkpoint(completed, monkeypatch):
+    run_dir, _ = completed
+    real = driver._load_selected_model
+
+    class Inverted:
+        def __init__(self, model):
+            self.model = model
+
+        def predict(self, x, verbose=0):
+            return 1.0 - self.model.predict(x, verbose=verbose)
+
+    monkeypatch.setattr(driver, "_load_selected_model", lambda path: Inverted(real(path)))
+    with pytest.raises(I.IntegrityError, match="does not reproduce the persisted predictions"):
+        driver.rerun_selected_models(run_dir)
+
+
 def test_verify_without_a_result_is_not_completed(tmp_path, capsys):
     (tmp_path / "run").mkdir()
     assert driver.main(["verify", "--run-dir", str(tmp_path / "run")]) == 5
