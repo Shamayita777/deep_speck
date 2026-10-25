@@ -1,6 +1,6 @@
 {
   "schema_version": "d4-preregistration-1",
-  "protocol_id": "d4-gohr-speck3264-r5-label-shuffle-v3",
+  "protocol_id": "d4-gohr-speck3264-r5-label-shuffle-v4",
   "status": "DRAFT_PENDING_HUMAN_APPROVAL",
   "approved": false,
   "approved_by": null,
@@ -8,32 +8,67 @@
   "approval_statement": "PENDING_HUMAN_APPROVAL",
   "data_examined_before_approval": "PENDING_HUMAN_APPROVAL",
   "methodology_source": {
-    "document": "~/Downloads/31 (1).pdf (outside the repository)",
-    "sha256": "79cb7ca33d9c1fc12ee14873b8db3f40eb636c64ae43079336032cf9742e36c3",
-    "pages": 44,
-    "sections_applied": [
-      "3.6.4 Stage 4-6 (controlled perturbation; comparative evaluation; statistical assessment; inconclusive when criteria are not all met)",
-      "3.9.4 (confidence interval for every primary result, including distinguishing accuracy)",
-      "3.9.6 (hypotheses fixed before results; post hoc analyses exploratory)",
-      "3.9.7 (multiple-comparison control)",
-      "3.9.8 and 3.9.9 Rule III (failure to reject a null is not evidence of equivalence)",
-      "3.9.10 (reporting requirements)"
-    ],
-    "discrepancy": "This PDF's Controlled Perturbation stage (3.6.4 Stage 4) lists regeneration with independent seeds, deduplication, changed partitioning, class balancing and alternative sampling. It does not mention label shuffling, a near-chance expectation, or the caveat that label shuffling is a blunt control. Those three elements are taken from the protocol owner's written D4 instruction of 2026-10-25, which attributes them to the original Dataset Integrity methodology. Before approving, the owner should confirm which document is the source of the D4 label-shuffle section.",
-    "not_derived_from": "The September 2026 EFFECT_DETECTED result. Neither the hypothesis nor the margin was chosen from it, and its per-replicate accuracies were not read while this draft was prepared."
+    "overarching_methodology": {
+      "document": "~/Downloads/31 (1).pdf (outside the repository)",
+      "sha256": "79cb7ca33d9c1fc12ee14873b8db3f40eb636c64ae43079336032cf9742e36c3",
+      "pages": 44,
+      "role": "The overarching audit methodology. It governs this protocol's general statistical rules, listed under sections_applied.",
+      "sections_applied": [
+        "3.6.4 Stage 4-6 (controlled perturbation; comparative evaluation; statistical assessment; inconclusive when criteria are not all met)",
+        "3.9.4 (confidence interval for every primary result, including distinguishing accuracy)",
+        "3.9.6 (hypotheses fixed before results; post hoc analyses exploratory)",
+        "3.9.7 (multiple-comparison control)",
+        "3.9.8 and 3.9.9 Rule III (failure to reject a null is not evidence of equivalence)",
+        "3.9.10 (reporting requirements)"
+      ],
+      "does_not_define": "D4 label shuffling, the near-chance criterion, the blunt-control caveat, or any numerical margin. Its Controlled Perturbation stage (3.6.4 Stage 4) lists regeneration with independent seeds, deduplication, changed partitioning, class balancing and alternative sampling."
+    },
+    "d4_operationalization": {
+      "file": "audit/targets/gohr/preregistrations/sources/d4_planning_notes_2026-08-27.md",
+      "sha256": "0fd2854a49fd0676a24a69cdb5132063ad4c7e2a3bc50f842b1a3ae8c9c3b4c7",
+      "bytes": 31047,
+      "title": "Dataset Integrity — Redesign From First Principles",
+      "date": "2026-08-27, as encoded in the filename; supplied by the protocol owner on 2026-10-25 and archived byte-identical",
+      "earlier_reference": "Earlier drafts referred to this note as 'Pasted markdown(20260827-073650).md'. That the archived file is that note is the owner's attestation (decision planning_source_attestation).",
+      "section": "F. Controlled Perturbations — D4 critique and additions (with table L, row 'Label-shuffle perturbation (D4)')",
+      "section_f_quotes": [
+        "What D4 actually establishes, precisely: that the training pipeline does not produce above-chance accuracy when the label carries no information",
+        "label-shuffle is a blunt instrument — it destroys genuine cryptographic signal and any potential artifact simultaneously, so a clean near-chance result under shuffle is consistent both with \"no leakage exists\" and with \"leakage exists but was symmetric and got diluted along with the real signal.\"",
+        "it does not test specific, targeted bug patterns like generation-order leakage precisely — that's exactly why E's targeted screen is a necessary complement, not a duplicate.",
+        "does the current shuffle implementation touch only the label-to-feature pairing, leaving feature order, partition structure, and everything else byte-for-byte identical? ... this is a \"verify, don't assume\" item",
+        "Table L: Label-shuffle perturbation (D4) | Required, causal/diagnostic | run | accuracy vs. threshold | near-chance under shuffle"
+      ],
+      "operationalized_here": [
+        "label shuffling of the training labels as the D4 controlled perturbation (section F)",
+        "near-chance accuracy under shuffle as the expected diagnostic result (section F; table L)",
+        "the blunt-control limitation; the targeted generation-order/label-leakage screen (section E) as a complementary audit not performed here",
+        "section F's verify-don't-assume item: implemented as test_label_shuffle_end_to_end_permutes_only_the_training_labels"
+      ],
+      "not_in_section_f": [
+        "any numerical near-chance margin; chance_margin is a protocol-owner design choice",
+        "the intact-label baseline-adequacy gate and its floor; added by this protocol",
+        "the exact-binomial TOST procedure for D4. Section D recommends TOST for D3 distributional tests, with delta 'grounded in domain reasoning ... not a round number'; that guidance concerns D3, and the D4 margin is disclosed as a stated practical tolerance rather than a derived quantity",
+        "section F's additional perturbations (partition swap, feature shuffle) and the positive-control calibration (for D3): not implemented by this protocol"
+      ],
+      "status": "D4-specific operationalization, distinct from the overarching methodology PDF; no provision of either is attributed to the other."
+    },
+    "not_derived_from": "The September 2026 EFFECT_DETECTED result. Neither the hypotheses, the margin nor the baseline floor was chosen from it."
   },
-  "relation_to_prior_evidence": "The September 2026 D4 run (audit/dataset/evidence/d4/, config_hash b41cf02a..., outcome EFFECT_DETECTED) is historical evidence under an earlier procedure. That procedure used last-epoch evaluation, no hash-bound selection, unverified label reuse and rule conservative_two_sided_v1. Its outcome refers to a paired difference from baseline, not to near-chance accuracy, and it was not produced under this protocol. None of its results may be relabelled as evidence for this protocol. Its partitions are not on disk and were never audited for overlap. The intermediate draft v2 (directional_iut_v2, paired degradation only) was never approved or run.",
+  "relation_to_prior_evidence": "The September 2026 D4 run (audit/dataset/evidence/d4/, config_hash b41cf02a..., outcome EFFECT_DETECTED) is historical evidence under an earlier procedure: last-epoch evaluation, no hash-bound selection, unverified label reuse, and rule conservative_two_sided_v1. Its outcome refers to a paired difference from baseline, not to near-chance accuracy or baseline adequacy. Its status (EFFECT_DETECTED) is known. Its per-replicate arrays and partitions are not on disk; they were not inspected as new data, and they were never audited for overlap. It was not used to choose the margin, the baseline floor, or any rule. Drafts v2 (directional_iut_v2) and v3 (near_chance_tost_v3) were never approved or run.",
   "question": "Can Gohr's 5-round Speck32/64 training pipeline produce above-chance held-out accuracy when the original feature/label correspondence of its training data is destroyed by permuting the training labels? Expected diagnostic result: near-chance accuracy.",
   "hypothesis": {
-    "primary_H0": "Non-equivalence: for at least one perturbed fit r, p_r <= 0.5 - chance_margin or p_r >= 0.5 + chance_margin.",
-    "primary_H1": "Near-chance equivalence: for every perturbed fit r = 1..k, 0.5 - chance_margin < p_r < 0.5 + chance_margin.",
-    "departure_claim": "Some perturbed fit departs from the band: p_r > 0.5 + chance_margin or p_r < 0.5 - chance_margin. Established only by the Bonferroni departure tests; it decides NOT_SUPPORTED.",
+    "shuffled_H0": "Non-equivalence: for at least one perturbed fit r, p_r <= 0.5 - chance_margin or p_r >= 0.5 + chance_margin.",
+    "shuffled_H1": "Near-chance equivalence: for every perturbed fit r = 1..k, 0.5 - chance_margin < p_r < 0.5 + chance_margin.",
+    "shuffled_departure_claim": "Some perturbed fit departs from the band (p_r > U or p_r < L). Established only by the Bonferroni departure tests.",
+    "baseline_H0": "Inadequacy not excluded: for at least one intact-label baseline fit r, q_r <= baseline_adequacy_threshold.",
+    "baseline_H1": "Adequacy: for every baseline fit r = 1..k, q_r > baseline_adequacy_threshold.",
+    "baseline_inadequacy_claim": "Some baseline fit is below the floor (q_r < t). Established only by the Bonferroni inadequacy tests.",
     "supporting_H0": "For at least one replicate the perturbed model is not less accurate than its paired baseline.",
     "supporting_H1": "For every replicate the perturbed model is less accurate than its paired baseline on the same test rows, by at least effect_threshold.",
-    "direction": "Primary: equivalence (two one-sided tests). Departure: either side, because a below-chance model also uses label information. Supporting: one-sided, perturbed worse than baseline.",
-    "not_a_substitute": "A reduction relative to baseline never establishes near-chance accuracy. For example, 0.70 is far below a 0.93 baseline and far from chance."
+    "direction": "Shuffled: equivalence (two one-sided tests), with departure on either side. Baseline: one-sided, accuracy above the floor. Supporting: one-sided, perturbed worse than baseline.",
+    "not_a_substitute": "A reduction relative to baseline never establishes near-chance accuracy or baseline adequacy. For example, 0.70 is far below a 0.929 baseline and far from chance."
   },
-  "estimand": "Primary: p_r is the accuracy, at threshold 0.5, of perturbed fit r's reloaded selected model over the test-generating distribution, conditional on that model. It is estimated by X_r / n on the fixed test partition, with X_r ~ Binomial(n, p_r) given test rows i.i.d. from the generator, independent of training. Supporting: delta_r = acc(perturbed_r) - acc(baseline_r) = (b_r - c_r) / n on the same test rows. The k fits share one test sample. Their accuracies are not independent test sets and are never pooled; every claim is per fit, combined by IUT or Bonferroni, neither of which needs independence.",
+  "estimand": "p_r and q_r are the accuracies, at threshold 0.5, of the reloaded selected models of perturbed fit r and intact-label baseline fit r, over the test-generating distribution, conditional on each model. They are estimated by X_r / n on the fixed test partition. Sampling: the test partition is one speck.make_train_data(n, 5) call, which draws each label as an independent os.urandom bit and each row's key and plaintexts afresh, so rows are i.i.d. and class counts are not fixed. The partition is generated independently of training and reaches only predict(). Hence, given a model, its correctness indicators are i.i.d. Bernoulli and X_r ~ Binomial(n, p_r) exactly; no stratified procedure is needed. Supporting: delta_r = (b_r - c_r) / n on the same rows. All fits share one test sample. Their outcomes are dependent and are never pooled as if there were k*n independent examples; every claim is per fit, combined by IUT or Bonferroni, neither of which needs independence.",
   "conditions": {
     "baseline": "Model fit on the original training partition (features, labels).",
     "perturbed": "Model fit on the same features with labels permuted by LabelShufflePerturbation using the replicate's audit RNG stream.",
@@ -90,6 +125,7 @@
     "primary_endpoint": {
       "procedure": {
         "estimand": "per perturbed fit: test accuracy p_r of the reloaded selected model, conditional on that model",
+        "sampling_model": "test rows i.i.d. from make_train_data (labels independent urandom bits, class counts not fixed); X_r ~ Binomial(n, p_r) given the model",
         "chance_reference": 0.5,
         "equivalence_test": "exact_binomial_tost_each_one_sided_test_at_alpha",
         "equivalence_interval": "clopper_pearson_two_sided_1_minus_2alpha_strictly_inside_band",
@@ -116,10 +152,58 @@
         "zero_discordant": "p_value_1",
         "practical": "delta_r_at_most_minus_effect_threshold",
         "aggregation": "intersection_union_every_replicate_degrades",
-        "rejection": "p_value_strictly_less_than_level"
+        "rejection": "p_value_strictly_less_than_level",
+        "role": "secondary_supporting_never_gates_the_outcome"
       },
       "rule": "Established iff, for every replicate, P(B<=b | b+c, 1/2) < alpha and delta_r <= -effect_threshold. When b+c = 0 the p-value is 1, so the endpoint is not established.",
       "reported_per_replicate": "b, c, delta_r, one- and two-sided exact McNemar p-values, conditional exact interval for delta_r (given b+c)"
+    },
+    "baseline_adequacy_endpoint": {
+      "procedure": {
+        "estimand": "per intact-label baseline fit: test accuracy q_r of the reloaded selected model, conditional on that model",
+        "sampling_model": "same test rows and binomial model as the near-chance endpoint",
+        "adequacy_test": "exact_one_sided_binomial_h0_q_at_most_threshold_at_alpha",
+        "adequacy_bound": "clopper_pearson_one_sided_1_minus_alpha_lower_bound_strictly_above_threshold",
+        "adequacy_aggregation": "intersection_union_every_baseline_adequate",
+        "inadequacy_test": "exact_one_sided_binomial_h0_q_at_least_threshold_at_alpha_over_k",
+        "inadequacy_aggregation": "bonferroni_any_baseline_inadequate",
+        "rejection": "p_value_strictly_less_than_level",
+        "outcomes": [
+          "PASSED",
+          "FAILED",
+          "INDETERMINATE",
+          "NOT_COMPLETED"
+        ]
+      },
+      "rule": "Per baseline fit r: ADEQUATE iff P(X>=x | t) < alpha, i.e. the one-sided 95% Clopper-Pearson lower bound is strictly greater than t. INADEQUATE iff P(X<=x | t) < alpha/k, i.e. the one-sided 1-alpha/k upper bound is strictly below t. Otherwise INDETERMINATE. Gate: PASSED iff all k are ADEQUATE; FAILED iff any is INADEQUATE; otherwise INDETERMINATE; NOT_COMPLETED if any fit is missing.",
+      "reported_per_fit": "correct count, n, accuracy, both p-values, the one-sided lower bound (level alpha), the one-sided upper bound (level alpha/k), state",
+      "no_selective_reruns": "The k baseline fits are those of the registered seed plan. No fit is re-run, replaced or excluded after its accuracy is seen; a crash resumes only through the verified recovery, and integrity failures end the run as NOT_COMPLETED."
+    },
+    "overall_rule": {
+      "NOT_COMPLETED": "any planned fit missing",
+      "NOT_SUPPORTED": "near-chance endpoint NOT_SUPPORTED",
+      "BASELINE_INADEQUATE": "otherwise, baseline-adequacy gate FAILED",
+      "SUPPORTED": "otherwise, near-chance endpoint SUPPORTED and baseline-adequacy gate PASSED",
+      "INCONCLUSIVE": "otherwise",
+      "paired_degradation": "reported, never gating"
+    },
+    "class_conditional_diagnostics": "Per fit, true-negative rate (label 0) and true-positive rate (label 1) with their counts are reported descriptively only. They are not confirmatory and never change any outcome.",
+    "comparability_to_published_pipeline": {
+      "published_benchmark": "Gohr (CRYPTO 2019), as cited by the protocol owner: 5-round Speck32/64, input difference 0x0040/0000, test accuracy 0.929 on 10^6 test samples, basic pipeline with 10^7 training samples, 10^6 validation samples and 200 epochs. The paper was not available to the agent offline; these figures are as cited.",
+      "matches_repository_code": [
+        "train_5_rounds.py (Gohr upload, commit fba2fd7): train_speck_distinguisher(200, num_rounds=5, depth=10); this protocol uses depth 10 and 200 epochs",
+        "train_nets.make_resnet with reg_param 1e-5; compile(optimizer='adam', loss='mse'); batch size 5000; LearningRateScheduler(cyclic_lr(10, 0.002, 0.0001))",
+        "data: speck.make_train_data(10^7, 5) for training and (10^6, 5) for validation; the test partition is a separate (10^6, 5) call",
+        "selection: Gohr keeps ModelCheckpoint(monitor='val_loss', save_best_only=True); this protocol selects the argmin-val_loss committed epoch, earliest on ties, and reloads it",
+        "evaluation: accuracy at threshold 0.5 on fresh data"
+      ],
+      "differences": [
+        "shuffle=False in fit (Gohr uses the Keras default shuffle=True), chosen for deterministic data order; the rows are i.i.d., but the effect on final accuracy has not been measured",
+        "seeded initialisation per replicate (Gohr's runs were unseeded)",
+        "TensorFlow/Keras 2.15 runtime rather than the original Keras/TF versions",
+        "train_nets.py carries a local seed-control modification (commit 6062a31)"
+      ],
+      "consequence": "The pipeline is close to, but not identical to, the published one, so 0.929 is a reference level, not a guaranteed reproduction. The baseline floor is set below it as an explicit practical tolerance; it is not validated by the paper."
     }
   },
   "decisions": {
@@ -127,17 +211,17 @@
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
       "options": [
-        "near_chance_tost_v3"
+        "near_chance_baseline_gated_v4"
       ],
-      "recommended": "near_chance_tost_v3",
-      "rationale": "Makes near-chance equivalence the primary endpoint, as the D4 question requires. directional_iut_v2 and conservative_two_sided_v1 test only a difference from baseline and cannot establish near-chance accuracy, so this runner refuses them. Their code stays in the engine to reproduce historical evidence."
+      "recommended": "near_chance_baseline_gated_v4",
+      "rationale": "Overall SUPPORTED requires near-chance equivalence of every shuffled fit and adequacy of every intact-label baseline fit. The paired comparison is secondary and non-gating. Paired-only rules (directional_iut_v2, conservative_two_sided_v1) cannot establish near-chance accuracy, and v3 had no baseline gate, so this runner refuses them. Their code stays in the engine to reproduce historical evidence."
     },
     "chance_margin": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
       "units": "accuracy_fraction",
       "recommended": 0.005,
-      "rationale": "delta_chance defines the near-chance band [0.5 - delta, 0.5 + delta] for each perturbed fit's population test accuracy. It is a separate scientific quantity from effect_threshold, which is a minimum paired difference from baseline. The methodology states the qualitative expectation (near chance) but no number, so the value is a human scientific decision. Two bounds can be justified. (1) Floor, from design power and not from outcome data: with n_test = 10^6 and alpha = 0.05, delta >= 0.0025 gives P(all five fits EQUIVALENT | every p_r = 0.5) >= 0.996 by the union bound. delta = 0.002 gives >= 0.907, and delta <= 0.0015 is underpowered (table in operating_characteristics). (2) Ceiling, from the domain: Gohr (CRYPTO 2019, Table 2) reports about 0.514 accuracy for the 8-round Speck32/64 distinguisher, which is used in published key recovery. An artifact of that strength must therefore be outside the band, so delta < 0.014. This anchor was recalled from the paper, not taken from the repository; verify it before approval. Between the bounds the choice is a judgment. 0.005 (half a percentage point) is recommended as a round value. It keeps an 8-round-strength artifact 0.009 (18 standard errors) outside the band, and it still declares equivalence with probability 0.9996 for a fit whose true accuracy is 0.5025. Note that any reproducible advantage is exploitable in principle, given enough data. The band therefore means 'practically equivalent to chance for this pipeline control', not 'cryptanalytically worthless'.",
+      "rationale": "chance_margin fixes the near-chance band [0.5 - delta, 0.5 + delta]; the candidate 0.005 gives [0.495, 0.505], with chance reference 0.5 and alpha 0.05. It is a separate quantity from effect_threshold, which is a minimum paired difference from baseline. It is an explicit practical design choice of the protocol owner. Neither the overarching methodology PDF nor the D4 planning note (section F) prescribes a numerical D4 margin, and Gohr's paper does not either. What the band means for this diagnostic: a label-shuffled fit counts as 'near chance' if its population test accuracy is established to be within half a percentage point of 0.5. That is at most about 1.2% of the published 5-round signal (0.929 - 0.5 = 0.429). So the control asks whether shuffling removes essentially all of the pipeline's advantage, not whether it removes every conceivable trace. A residual advantage larger than 0.005 surviving the shuffle is treated as a practically relevant leak; one inside the band is not ruled out by D4 and remains the province of the targeted leakage screens (section E). The test-set size does not set the margin. n = 10^6 determines precision and the operating characteristics, not what is scientifically acceptable, and the margin was not narrowed because a narrower one would still be powered. The margin must not be selected or altered using any new D4 result, and the historical September D4 result does not determine it. Design-only operating characteristics (n_test = 10^6, alpha = 0.05, k = 5; table below): at 0.005, P(a fit is not EQUIVALENT | p_r = 0.5) = 6.5e-17, so P(all five EQUIVALENT) >= 1 - 3.3e-16 by the union bound; a fit with true accuracy 0.5025 is declared equivalent with probability 0.9996; the size at the band edge is <= 0.05. Any reproducible advantage is exploitable in principle given enough data, so the band does not mean 'cryptanalytically worthless'.",
       "operating_characteristics": {
         "inputs": "n_test = 1000000, alpha = 0.05, k = 5; exact binomial; computed with the engine functions; no D4 outcome data used",
         "columns": [
@@ -146,7 +230,7 @@
           "union lower bound P(all 5 EQUIVALENT | p=0.5)",
           "P(EQUIVALENT | p=0.5+delta/2)",
           "P(EQUIVALENT | p=U) (size, <= alpha)",
-          "P(ABOVE_BAND | p=0.514)",
+          "P(ABOVE_BAND | p=0.51) (illustrative)",
           "P(ABOVE_BAND | p=0.5+2*delta)"
         ],
         "rows": [
@@ -219,7 +303,7 @@
             1.0,
             1.0,
             0.05,
-            1.0,
+            0.9923,
             1.0
           ],
           [
@@ -228,28 +312,34 @@
             1.0,
             1.0,
             0.05,
-            1.0,
+            0.005,
             1.0
           ]
         ],
         "reproduce": "~/.venvs/autond-tf215-audit-20261015T050853Z/bin/python -B -m audit.dataset.tools.d4_near_chance_operating_characteristics"
       }
     },
+    "baseline_adequacy_threshold": {
+      "status": "PENDING_HUMAN_APPROVAL",
+      "value": null,
+      "units": "accuracy_fraction",
+      "recommended": 0.9,
+      "rationale": "The intact-label baseline-adequacy floor t. A near-chance result for the shuffled models is informative only if the same pipeline, with intact labels, does distinguish the classes. Each of the k registered baseline fits is ADEQUATE only if its one-sided 95% exact lower confidence bound on test accuracy is strictly greater than t. The gate passes only if all k are adequate. Candidate 0.90: a proposed reproduction-adequacy threshold. It is not prescribed by Gohr or by the audit methodology. The published 5-round benchmark is 0.929 on 10^6 test samples, as cited by the protocol owner. The floor sits 2.9 percentage points below it, as an explicit practical tolerance for differences between this pipeline and the published one: shuffle=False, seeded initialisation, and the TF 2.15 runtime (fixed_design.comparability_to_published_pipeline), and for seed-to-seed training variation. That variation is NOT measured by the paper's test-set uncertainty: at n = 10^6 the binomial standard error at 0.929 is about 0.00026, which describes one model's test sample, not how much accuracy varies between training runs. No repository evidence measures the seed-to-seed spread of this pipeline, so the 2.9-point tolerance is a judgment, not an estimate. Operating characteristics (design only): with n = 10^6 and alpha = 0.05, a fit is ADEQUATE iff it has at least 900494 correct predictions and INADEQUATE iff at most 899301. P(ADEQUATE | q = 0.929) = 1, P(ADEQUATE | q = 0.902) = 1.000, P(ADEQUATE | q = 0.901) = 0.955, P(ADEQUATE | q = 0.90) = 0.0499 (the size). It was not chosen from the September D4 result or from any new D4 baseline. Weak baselines are never re-run or excluded after their accuracy is seen."
+    },
     "paired_endpoint_role": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
       "options": [
-        "secondary",
-        "co_primary"
+        "secondary"
       ],
       "recommended": "secondary",
-      "rationale": "secondary: the outcome is the primary near-chance outcome. Paired degradation is reported beside it with its own IUT at level alpha and never changes the outcome. Citing both claims as confirmatory has familywise error <= 2*alpha (Bonferroni); cite only the primary, or choose co_primary. co_primary: SUPPORTED requires all k fits EQUIVALENT and paired degradation established for all k replicates. That is an intersection-union test over 2k component tests, each at alpha, so the joint claim has level alpha without adjustment (Berger 1982). Paired degradation that is not established makes the outcome INCONCLUSIVE, never NOT_SUPPORTED, because non-significance is not evidence of no degradation. Trade-off: with secondary, a broken pipeline whose baseline is also at chance would still give primary SUPPORTED. The certificate then shows the paired endpoint as not established, but the outcome does not change. co_primary closes that gap at a small cost in power, since the baseline is expected near 0.93. secondary is recommended because the D4 question asks only about the shuffled condition. co_primary is the safer choice if the outcome must stand alone."
+      "rationale": "The paired McNemar comparison (one-sided exact, perturbed worse, effect_threshold 0.01, IUT over replicates) is reported as a secondary, supporting endpoint and never changes the outcome. It is secondary because the D4 question concerns the shuffled condition: a shuffled model can be much worse than its baseline and still far from chance. The concern that a co-primary role used to address (a baseline that itself shows no signal) is now handled directly by the baseline-adequacy gate, which tests absolute baseline accuracy rather than a difference. The certificate marks the endpoint secondary_non_gating. Citing it as an additional confirmatory claim would raise the familywise error to <= 2*alpha; it is supporting evidence only."
     },
     "alpha": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
       "recommended": 0.05,
-      "rationale": "Level of each TOST one-sided test (so each fit's equivalence is a 1-2*alpha = 90% exact interval inside the band), of the primary IUT, of the Bonferroni departure family (alpha/(2k) per one-sided test), and of the paired IUT. Carried from the existing configuration."
+      "rationale": "alpha = 0.05 is the level of each TOST one-sided test (each fit's equivalence is a 90% exact interval inside the band), the level of each baseline adequacy test (one-sided 95% lower bound), the level of the intersection-union claims (all shuffled fits equivalent; all baselines adequate; both together), and the familywise level of the Bonferroni departure (alpha/(2k) per one-sided test) and inadequacy (alpha/k per test) families. It is also the level of the secondary paired IUT. Carried from the existing configuration."
     },
     "effect_threshold": {
       "status": "PENDING_HUMAN_APPROVAL",
@@ -324,17 +414,29 @@
         "none_required"
       ],
       "recommended": "none_required",
-      "rationale": "Every confirmatory test is exact: binomial tails for the TOST and departure tests, and the conditional binomial for McNemar. Their levels hold given test rows i.i.d. from the generator, independent of training, so no simulation calibration is needed for the error guarantees. test_d4_near_chance.py checks the software against an exact rational-arithmetic reference on small enumerated cases. That is software validation, not scientific calibration."
+      "rationale": "Every confirmatory test is exact: binomial tails for the TOST, departure and baseline tests, and the conditional binomial for McNemar. Their levels hold given i.i.d. test rows from the generator, independent of training, which holds by the generator's construction (estimand). No simulation calibration is needed for the error guarantees. test_d4_near_chance.py checks the software against exact rational-arithmetic references and exact level computations on small enumerated cases. That is software validation, not scientific calibration."
+    },
+    "planning_source_attestation": {
+      "status": "PENDING_HUMAN_APPROVAL",
+      "value": null,
+      "options": [
+        "confirmed_by_protocol_owner"
+      ],
+      "recommended": "confirmed_by_protocol_owner",
+      "rationale": "The planning note is archived at methodology_source.d4_operationalization.file (SHA-256 0fd2854a49fd0676a24a69cdb5132063ad4c7e2a3bc50f842b1a3ae8c9c3b4c7, 31047 bytes), byte-identical to the copy the owner supplied on 2026-10-25, and was read in full. The hash fixes the bytes. It cannot show that this file is the 2026-08-27 planning note referred to earlier: its file timestamp is the 2026-10-25 download. Approving this decision attests that it is, and that section F and the quotes recorded here are the D4 source."
     }
   },
   "outcomes": {
-    "primary": "decision.outcome in {SUPPORTED, NOT_SUPPORTED, INCONCLUSIVE, NOT_COMPLETED}. Only SUPPORTED is a scientific pass; INCONCLUSIVE and NOT_COMPLETED are never reported as passes.",
+    "overall_d4_outcome": "One of SUPPORTED, NOT_SUPPORTED, BASELINE_INADEQUATE, INCONCLUSIVE, NOT_COMPLETED, by fixed_design.overall_rule. Only SUPPORTED is a successful control; INCONCLUSIVE, BASELINE_INADEQUATE and NOT_COMPLETED are never reported as passes. Integrity verification success is reported separately and is not scientific success.",
+    "shuffled_near_chance_endpoint": "SUPPORTED, NOT_SUPPORTED, INCONCLUSIVE or NOT_COMPLETED",
+    "baseline_adequacy_gate": "PASSED, FAILED (a baseline demonstrably below the floor), INDETERMINATE (adequacy not established, inadequacy not established) or NOT_COMPLETED",
+    "paired_degradation_endpoint": "established true/false; secondary_non_gating",
     "reported": [
       "per shuffled fit: correct count, n, accuracy, TOST p-values, 90% Clopper-Pearson interval, departure p-values and interval, state",
-      "per replicate: baseline accuracy, b, c, delta_r, exact McNemar p-values (one- and two-sided), conditional exact interval for delta_r",
-      "supporting endpoint established or not",
-      "descriptive: mean and SD of delta_r, percentile bootstrap CI of mean delta_r",
-      "selected epoch and val_loss per fit; test class counts"
+      "per baseline fit: correct count, n, accuracy, adequacy and inadequacy p-values, one-sided bounds, state",
+      "per replicate: b, c, delta_r, exact McNemar p-values (one- and two-sided), conditional exact interval for delta_r",
+      "per fit, descriptive: true-negative and true-positive rates with counts",
+      "descriptive: mean and SD of delta_r, percentile bootstrap CI of mean delta_r; selected epoch and val_loss per fit; test class counts"
     ]
   },
   "provenance_requirements": [
@@ -344,7 +446,7 @@
     "result/: certificate and run manifest written once, exclusively; manifest binds certificate SHA-256, preflight SHA-256, source identity and run id",
     "verify stage: recomputes every p-value and the decision, re-verifies every fit chain and checkpoint, every perturbation and every partition file",
     "per fit: raw test predictions of the reloaded selected model (fits/predictions/replicate_NN_<condition>.npy), with SHA-256, dtype and shape in the certificate",
-    "verify stage: recounts every fit's correct count and (b, c) from those predictions and the preflight-bound test labels, then recomputes every endpoint statistic and the outcome; it does not re-run the network (see certificate methodology.verifiability)"
+    "verify stage: recounts every fit's correct count, class-conditional counts and (b, c) from those predictions and the preflight-bound test labels, then recomputes every endpoint statistic and the outcome. verify --rerun-models also reloads every selected checkpoint (SHA-256 checked) and requires its thresholded test predictions to equal the persisted ones. Fits are never re-trained (see certificate methodology.verifiability)."
   ],
   "scope_and_limitations": [
     "Label shuffling is a blunt control: it removes genuine signal and label-correlated artifacts together. A near-chance result does not show that no leakage of any form exists.",
@@ -352,7 +454,8 @@
     "A non-chance result shows that the pipeline extracts label information without the original correspondence. It does not identify the mechanism, which needs the targeted checks below.",
     "TensorFlow training is not bitwise deterministic; seeds fix initialization and data order, not every floating-point result.",
     "Hash chains detect corruption and substitution relative to digests held elsewhere; they are not signatures.",
-    "The dataset depends on os.urandom; the claim is about this persisted instance and the generator, not a re-derivable seed."
+    "The dataset depends on os.urandom; the claim is about this persisted instance and the generator, not a re-derivable seed.",
+    "The baseline floor and the near-chance margin are registered practical tolerances; neither is derived from the PDF, the planning notes or the paper."
   ],
   "complementary_audits_not_in_scope": {
     "status": "REQUIRED_SEPARATELY_NOT_PERFORMED_BY_THIS_PROTOCOL",
