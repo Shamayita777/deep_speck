@@ -2,7 +2,14 @@
 
 Protocol: `audit/targets/gohr/preregistrations/d4_gohr_label_shuffle.json`. Rationale: `d4_gohr_label_shuffle.RATIONALE.md`.
 
-Nothing here has been approved. No D4 preflight or production stage has been run under this protocol.
+Nothing here has been approved. No D4 preflight or production stage has been run under this protocol (v3).
+
+**Scientific decisions only you can make** (see RATIONALE §0):
+1. **Source document.** The PDF `~/Downloads/31 (1).pdf` does not contain the label-shuffle / near-chance / blunt-control text. Confirm which document holds the D4 section, and record that in `approval_statement`.
+2. **`chance_margin` (δ).** The near-chance band is [0.5 − δ, 0.5 + δ], with δ a fraction of accuracy. The candidate is 0.005. Justified range: (0.0025, 0.014). The floor comes from design power; the ceiling comes from Gohr's 8-round accuracy of about 0.514, which was **recalled from the paper and must be verified**. The point value inside that range is judgment.
+3. **`paired_endpoint_role`.** `secondary` (recommended) or `co_primary`; trade-off in RATIONALE §0.4.
+
+The September 2026 `EFFECT_DETECTED` result is historical: an earlier procedure and a paired-difference claim, not near-chance. It is not a result of this protocol.
 
 ## A. Decisions to make
 
@@ -10,9 +17,11 @@ For each decision, edit `decisions.<name>` in the JSON: set `"value"` and change
 
 | Decision | Recommended | Options / note |
 |---|---|---|
-| `decision_rule` | `directional_iut_v2` | or `conservative_two_sided_v1` (the September rule) |
-| `alpha` | `0.05` | float |
-| `effect_threshold` | `0.01` | float, a **fraction** of accuracy (0.01 = 1 pp) |
+| `decision_rule` | `near_chance_tost_v3` | single option; the runner refuses paired-only rules |
+| `chance_margin` | `0.005` (candidate, **your scientific decision**) | float in (0, 0.5), a **fraction** of accuracy; must keep `"units": "accuracy_fraction"`; never copied from `effect_threshold` |
+| `paired_endpoint_role` | `secondary` | or `co_primary` |
+| `alpha` | `0.05` | float; TOST level per one-sided test, IUT level, Bonferroni family level (α/(2k) per departure test) |
+| `effect_threshold` | `0.01` | float, a **fraction** of accuracy (0.01 = 1 pp); supporting paired endpoint only |
 | `replicates` | `5` | integer ≥ 2 |
 | `sample_sizes` | `{"train": 10000000, "validation": 1000000, "test": 1000000}` | positive integers |
 | `epochs` | `200` | integer |
@@ -30,7 +39,7 @@ Top-level fields to fill:
 | `approved_by` | your approver identifier |
 | `approved_utc` | `YYYY-MM-DDTHH:MM:SSZ`, at or before the commit time (preflight checks this) |
 | `approval_statement` | your statement of what you approve |
-| `data_examined_before_approval` | what you have seen. At minimum, disclose the September D4 result (EFFECT_DETECTED) and the D0 overlap measurement (on a different dataset) |
+| `data_examined_before_approval` | what you have seen. At minimum, disclose: the September D4 result (EFFECT_DETECTED), including whether you know its shuffled-condition accuracies; the D0 overlap measurement (on a different dataset); and the design-only operating characteristics in RATIONALE §0.5 |
 | `status` | e.g. `APPROVED` (informational) |
 
 The fixed design (`fixed_design`) was carried over from the existing D4 configuration and Gohr's procedure. It is approved as a whole by the top-level approval; `protocol-check` refuses any edit that departs from what the runner implements.
@@ -40,6 +49,11 @@ The fixed design (`fixed_design`) was carried over from the existing D4 configur
 ```bash
 PY=~/.venvs/autond-tf215-audit-20261015T050853Z/bin/python
 P=audit/targets/gohr/preregistrations/d4_gohr_label_shuffle.json
+
+# 0. Current draft: exit 0 with fields listed as pending (--require-approved exits 3 until all are approved)
+$PY -B -m audit.dataset.experiments.d4_gohr_label_shuffle protocol-check --preregistration $P
+# (optional) reproduce the margin operating characteristics; design inputs only
+$PY -B -m audit.dataset.tools.d4_near_chance_operating_characteristics
 
 # 1. After editing: structural check; exit 0 means well-formed and fully approved
 $PY -B -m audit.dataset.experiments.d4_gohr_label_shuffle protocol-check --preregistration $P --require-approved
@@ -78,6 +92,12 @@ $PY -B -m audit.dataset.experiments.d4_gohr_label_shuffle verify --run-dir $RUN
   - any partition file differs from preflight;
   - the sources differ from those recorded at preflight;
   - `$RUN/result` already exists.
-- **Verify** recomputes the decision from (b, c) and the accuracies. It re-verifies every epoch chain and checkpoint, every perturbation sidecar and every partition file, and their bindings to preflight and the certificate.
+- **Verify**:
+  - recounts every fit's correct count and (b, c) from the persisted predictions and the test labels;
+  - recomputes every TOST, departure and McNemar statistic and the outcome from those counts;
+  - refuses any margin, α, rule, role, test n or procedure that differs from the approved design;
+  - re-verifies every epoch chain and checkpoint, every perturbation sidecar and every partition file.
+
+  Exit 0 means integrity is verified. The printed **primary outcome** is the scientific result, and only `SUPPORTED` is a pass. Exit 5 means there is no result (`NOT_COMPLETED`). Verify does not rerun the network.
 
 **Interrupted runs:** if a run stops, rerun step 5 with the same arguments. Uncommitted epochs are quarantined and retrained, and every retry is recorded. An integrity refusal stops the run, and the outcome is NOT_COMPLETED.

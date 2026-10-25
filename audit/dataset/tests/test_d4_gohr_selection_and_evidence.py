@@ -308,7 +308,8 @@ def test_preflight_refuses_the_unapproved_draft(tmp_path):
     assert code == 1 and not (tmp_path / "run").exists()
 
 
-APPROVED = {"decision_rule": "directional_iut_v2", "alpha": 0.05, "effect_threshold": 0.01,
+APPROVED = {"decision_rule": "near_chance_tost_v3", "chance_margin": 0.2, "paired_endpoint_role": "secondary",
+            "alpha": 0.05, "effect_threshold": 0.01,
             "replicates": 2, "sample_sizes": {"train": 512, "validation": 128, "test": 256},
             "epochs": 2, "partition_overlap_policy": "refuse_on_any_cross_partition_feature_row",
             "within_partition_duplicates_policy": "record_only",
@@ -375,6 +376,8 @@ def _bump_val_loss(path):
      "does not match the run manifest"),
     ("fits/perturbations/replicate_01_indices.npy",
      lambda p: p.write_bytes(p.read_bytes()[:-1] + bytes([p.read_bytes()[-1] ^ 1])), "digest"),
+    ("fits/predictions/replicate_02_perturbed.npy",
+     lambda p: p.write_bytes(p.read_bytes()[:-1] + bytes([p.read_bytes()[-1] ^ 1])), "recorded digest"),
 ])
 def test_verify_detects_tampering(completed, tmp_path, target, mutate, match):
     run_dir, _ = completed
@@ -383,6 +386,57 @@ def test_verify_detects_tampering(completed, tmp_path, target, mutate, match):
     mutate(copy / target)
     with pytest.raises(I.IntegrityError, match=match):
         driver.verify_run(copy)
+
+
+def _rewrite_certificate(run_dir, mutate):
+    """Edit the certificate AND re-hash the manifest, so only the design cross-checks can catch it."""
+    path = run_dir / "result" / "d4_certificate.json"
+    certificate = json.loads(path.read_text())
+    mutate(certificate)
+    path.write_text(json.dumps(certificate, indent=2, sort_keys=True))
+    manifest_path = run_dir / "result" / "d4_run_manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["files"]["d4_certificate.json"] = I.sha256_file(path)
+    manifest_path.write_text(json.dumps(manifest))
+
+
+@pytest.mark.parametrize("mutate, match", [
+    (lambda c: c["settings"].update(chance_margin=0.3), "chance_margin differs"),
+    (lambda c: c["settings"].update(alpha=0.1), "alpha differs"),
+    (lambda c: c["settings"].update(paired_endpoint_role="co_primary"), "paired_endpoint_role differs"),
+    (lambda c: c["settings"].update(decision_rule="directional_iut_v2"), "decision_rule differs"),
+    (lambda c: c["settings"].update(test_examples=255), "test sample size"),
+    (lambda c: c["methodology"]["primary_procedure"].update(equivalence_test="one_sided_only"), "procedure"),
+    (lambda c: c["findings"]["replicates"][0].update(perturbed_correct=c["findings"]["replicates"][0]
+                                                     ["perturbed_correct"] + 1), "persisted predictions give"),
+])
+def test_verify_refuses_a_certificate_that_departs_from_the_approved_design(completed, tmp_path, mutate, match):
+    run_dir, _ = completed
+    copy = tmp_path / "copy"
+    shutil.copytree(run_dir, copy)
+    _rewrite_certificate(copy, mutate)
+    with pytest.raises(I.IntegrityError, match=match):
+        driver.verify_run(copy)
+
+
+def test_verify_reports_the_primary_outcome_and_never_calls_a_non_supported_run_a_pass(completed, capsys):
+    run_dir, _ = completed
+    summary = driver.verify_run(run_dir)
+    certificate = json.loads((run_dir / "result" / "d4_certificate.json").read_text())
+    assert summary["integrity"] == "VERIFIED"
+    assert summary["outcome"] == certificate["decision"]["outcome"]
+    assert summary["primary_claim_supported"] is (summary["outcome"] == "SUPPORTED")
+    rows = certificate["findings"]["primary_endpoint"]["replicates"]
+    assert len(rows) == 2 and all("equivalence_interval" in r and "accuracy" in r for r in rows)
+    assert driver.main(["verify", "--run-dir", str(run_dir)]) == 0
+    out = capsys.readouterr().out
+    assert ("NOT a scientific pass" in out) is (summary["outcome"] != "SUPPORTED")
+
+
+def test_verify_without_a_result_is_not_completed(tmp_path, capsys):
+    (tmp_path / "run").mkdir()
+    assert driver.main(["verify", "--run-dir", str(tmp_path / "run")]) == 5
+    assert "NOT_COMPLETED" in capsys.readouterr().out
 
 
 def overlapping_partitions(sizes):

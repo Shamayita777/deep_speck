@@ -1,8 +1,91 @@
 # D4 Gohr label shuffle — design rationale, statistical review, traceability
 
-Companion to `d4_gohr_label_shuffle.json` (protocol `d4-gohr-speck3264-r5-label-shuffle-v2`,
+Companion to `d4_gohr_label_shuffle.json` (protocol `d4-gohr-speck3264-r5-label-shuffle-v3`,
 status **DRAFT, pending human approval**). Approval fields and commands are in
 `d4_gohr_label_shuffle.APPROVAL_SHEET.md`.
+
+## 0. Statistical design correction (v3, 2026-10-25)
+
+### 0.1 Source of the scientific question
+The D4 question is whether the training pipeline can produce **above-chance** accuracy once permuting the training labels has destroyed the original feature/label correspondence. The expected diagnostic result is **near-chance** accuracy. Label shuffling is a **blunt control**: it destroys genuine signal and label-correlated artifacts together, so a clean result does not show that every form of leakage is absent. Targeted generation-order and label-leakage checks are complementary and are **not performed by this protocol** (`complementary_audits_not_in_scope` in the JSON).
+
+**Discrepancy to resolve before approval.** I read the methodology PDF `~/Downloads/31 (1).pdf` (SHA-256 `79cb7ca3…42e36c3`, 44 pages) in full, via macOS PDFKit text extraction. Its Controlled Perturbation stage (§3.6.4 Stage 4) lists five interventions: regenerating with independent seeds, removing duplicates, changing partitioning, balancing classes, and alternative sampling. It does **not** mention label shuffling, the near-chance expectation, or the blunt-control caveat. Those three elements come from your written instruction of 2026-10-25, which attributes them to the original methodology. The PDF does supply the statistical rules applied here:
+- §3.9.4: every primary result, distinguishing accuracy included, gets a confidence interval.
+- §3.9.6: hypotheses are fixed before results.
+- §3.9.7: multiple comparisons are controlled.
+- §3.9.8 and §3.9.9 Rule III: failure to reject a null is never evidence of equivalence.
+- §3.6.4 Stage 6: unmet criteria give an inconclusive finding.
+
+Please confirm which document holds the D4 label-shuffle section.
+
+Neither the hypothesis nor the margin was inferred from the September `EFFECT_DETECTED` result. Its per-replicate accuracies were not read while preparing this draft.
+
+### 0.2 Why the v2 draft was insufficient
+`directional_iut_v2` establishes only that every shuffled fit is worse than its baseline. A shuffled model at 0.70 against a 0.93 baseline satisfies it while being far from chance (`test_worse_than_baseline_but_far_from_chance_does_not_establish_the_primary_claim`). A reduction relative to baseline never substitutes for near-chance evidence. This runner therefore refuses v1 and v2; their code stays in the engine to reproduce historical evidence.
+
+### 0.3 Primary endpoint: near-chance equivalence (rule `near_chance_tost_v3`)
+For perturbed fit r, X_r is the number of correct test predictions of the reloaded selected model, out of n. Conditional on that model, X_r ~ Binomial(n, p_r) **if** the test rows are i.i.d. from the generator and independent of training. That holds by construction here (a separate `make_train_data` call; the test partition reaches only `predict()`). p_r is the model's accuracy over the test-generating distribution.
+
+Chance reference: 0.5. It is the exact accuracy of any label-independent predictor when labels are fair coin flips independent of the features, which is how `speck.make_train_data` documents its labels. The observed test class counts are recorded (`provenance.test_label_counts`); class balance itself is D3's subject.
+
+Band: L = 0.5 − δ, U = 0.5 + δ, where δ = `chance_margin` (a fraction of accuracy; a separate decision from `effect_threshold`).
+
+| Claim per fit | H0 | H1 | Exact test (rejection iff p < level) | Level |
+|---|---|---|---|---|
+| EQUIVALENT | p_r ≤ L or p_r ≥ U | L < p_r < U | TOST: P(X ≥ x \| L) < α **and** P(X ≤ x \| U) < α, which is the same as the 90 % Clopper–Pearson interval lying strictly inside (L, U) | α (Berger & Hsu 1996) |
+| ABOVE_BAND | p_r ≤ U | p_r > U | P(X ≥ x \| U) < α/(2k) | α/(2k) |
+| BELOW_BAND | p_r ≥ L | p_r < L | P(X ≤ x \| L) < α/(2k) | α/(2k) |
+| INDETERMINATE | — | — | none of the above | — |
+
+The departure test is two-sided around the band because a reliably below-chance model also uses label information. A single fit cannot be both EQUIVALENT and departing; this is proved by the tail identities and asserted in code and tests.
+
+**Joint outcome** over the k registered fits (all are required):
+- `SUPPORTED`: all k are EQUIVALENT. This is an intersection-union test: the claim "every p_r is in the band" is rejected-null only if every component rejects, so the level is α with **no** multiplicity adjustment (Berger 1982). No independence between fits is needed.
+- `NOT_SUPPORTED`: some fit is ABOVE_BAND or BELOW_BAND. This is a union over 2k one-sided tests, each at α/(2k), so Bonferroni gives a familywise level of α with no independence needed.
+- `INCONCLUSIVE`: otherwise. The uncertainty establishes neither claim.
+- `NOT_COMPLETED`: any planned fit is missing. A failed run writes no certificate; `verify` exits 5.
+
+Only `SUPPORTED` is a scientific pass. `INCONCLUSIVE` and `NOT_COMPLETED` are never reported as passes (`primary_claim_supported` is false, and `run` and `verify` print "NOT a scientific pass").
+
+**Scope of the claim.** Each statement is about one fitted model, conditional on that model and the shared test sample. The five fits share one test partition, so their accuracies are not five independent test sets and are never pooled. "All five" is a reproducibility statement over these five training seeds. It is not an estimate of the distribution of accuracies over seeds.
+
+### 0.4 Supporting endpoint: paired degradation
+- **Discordance and orientation.** On the same test rows: b = baseline wrong & perturbed right, and c = baseline right & perturbed wrong. Then δ_r = acc_pert − acc_base = (b − c)/n; this identity is checked by the verifier on the full 2×2 table.
+- **Test.** The direction is perturbed worse. The exact conditional McNemar p-value is P(B ≤ b | b + c, ½). Concordant pairs do not enter. When b + c = 0 the p-value is 1, so the endpoint is not established.
+- **Rule.** Established iff every replicate has p < α and δ_r ≤ −`effect_threshold`. This is an IUT at level α. `effect_threshold` (0.01) is used only here.
+- **Interval.** A conditional exact interval for δ_r, given b + c, is reported for description only.
+
+**Role** (decision `paired_endpoint_role`, pending):
+- `secondary`: the outcome is the primary outcome. The paired result is reported beside it at its own level α. Citing both claims as confirmatory has familywise error ≤ 2α.
+- `co_primary`: `SUPPORTED` additionally requires paired degradation. That is an IUT over all 2k component tests at α, so the joint level is α. Paired degradation that is not established gives `INCONCLUSIVE`, never `NOT_SUPPORTED`, because non-significance is not evidence of no degradation.
+
+Trade-off: under `secondary`, a broken pipeline whose baseline is also at chance would still give primary `SUPPORTED`. The certificate shows this but the outcome does not change (`test_at_chance_without_paired_degradation_shows_the_endpoints_are_distinct`). I recommend `secondary` because the D4 question concerns the shuffled condition only. Choose `co_primary` if the outcome must stand alone.
+
+### 0.5 The near-chance margin (`chance_margin`, PENDING)
+The methodology fixes the qualitative expectation but not a number. I propose a **candidate of 0.005** (a fraction of accuracy, i.e. ±0.5 percentage points). It is **not approved**; the status stays `PENDING_HUMAN_APPROVAL`. The justification separates what can be derived from what is judgment:
+- **Floor (design power, no outcome data).** With n_test = 10⁶, α = 0.05 and k = 5, δ ≥ 0.0025 gives P(all five EQUIVALENT | every p_r = 0.5) ≥ 0.996 by the union bound. δ = 0.002 gives ≥ 0.907, and δ ≤ 0.0015 is badly underpowered.
+- **Ceiling (domain).** Gohr (CRYPTO 2019, Table 2) reports about 0.514 accuracy for the 8-round Speck32/64 distinguisher, which is used in published key recovery. An artifact of that strength must fall outside the band, so δ < 0.014. **This figure was recalled from the paper; it is not in the repository. Verify it before approval.**
+- **Within (0.0025, 0.014) the choice is judgment.** 0.005 is a round value. It keeps an 8-round-strength artifact 0.009 (18 SE) outside the band and still declares equivalence with probability 0.9996 at a true p = 0.5025.
+
+Any reproducible advantage is exploitable in principle, given enough data. The band therefore means "practically equivalent to chance for this pipeline control", not "cryptanalytically worthless".
+
+Operating characteristics (exact; `python -m audit.dataset.tools.d4_near_chance_operating_characteristics`; the table is copied into the JSON):
+
+| δ | P(fit EQ \| 0.5) | all-5 ≥ | P(EQ \| 0.5+δ/2) | P(EQ \| U) (size) | P(ABOVE \| 0.514) | P(ABOVE \| 0.5+2δ) |
+|---|---|---|---|---|---|---|
+| 0.001 | 0.277 | 0.000 | 0.172 | 0.041 | 1.000 | 0.282 |
+| 0.0015 | 0.825 | 0.123 | 0.440 | 0.050 | 1.000 | 0.664 |
+| 0.002 | 0.981 | 0.907 | 0.639 | 0.050 | 1.000 | 0.923 |
+| 0.0025 | 0.9992 | 0.996 | 0.804 | 0.050 | 1.000 | 0.992 |
+| 0.003 | 0.99999 | 0.9999 | 0.912 | 0.050 | 1.000 | 0.9997 |
+| 0.005 | 1.000 | 1.000 | 0.9996 | 0.050 | 1.000 | 1.000 |
+| 0.01 | 1.000 | 1.000 | 1.000 | 0.050 | 1.000 | 1.000 |
+
+### 0.6 Verification and what it does not cover
+- **Persisted.** The raw test predictions of every selected model (`fits/predictions/replicate_NN_<condition>.npy`, SHA-256 in the certificate). A resumed fit reuses an existing file only if its thresholded labels agree; otherwise the run is refused.
+- **Recomputed by `verify`.** Every count and (b, c), from those files and the preflight-bound test labels. Then every p-value, interval, state, endpoint result and the outcome, from the integer counts, compared by deep equality with the certificate.
+- **Refused by `verify`.** Any setting that differs from the approved design: margin, α, rule, role, `effect_threshold`, test n, or procedure (sidedness, aggregation, level).
+- **Not covered.** `verify` does **not** rerun the network to confirm that the predictions are what the selected checkpoint outputs; it verifies the checkpoint and prediction digests only. Nor does it check the generator's sampling assumptions (D3).
 
 ## 1. Architecture
 
@@ -60,6 +143,7 @@ The audit runs at preflight on the actual D4 partitions, before any training. Th
 
 | Item | Implementation | Assessment |
 |---|---|---|
+| Primary (v3) | Exact binomial TOST per shuffled fit against [0.5 − δ, 0.5 + δ]; IUT over all k; Bonferroni α/(2k) departure tests | See §0.3. Equivalence is established positively; non-rejection of p = 0.5 is never used. |
 | Paired test | Exact McNemar = binomial on discordant pairs (b, c), per replicate | Exact given independent test rows (independent `make_train_data` draws). Conditional on the fitted pair: it tests these two models, not the training procedure. |
 | Sidedness | v1: two-sided; v2: one-sided (perturbed worse) | H1 is directional. v1 would also count an accuracy *increase* as an effect (`test_directional_rule_rejects_an_improvement_that_two_sided_rule_accepts`). |
 | Multiplicity | v1: Bonferroni α/k and all k must pass; v2: IUT, each at α | Requiring all k to pass is an intersection-union test, so it has level α without Bonferroni. v1 is therefore doubly conservative. |
@@ -69,7 +153,7 @@ The audit runs at preflight on the actual D4 partitions, before any training. Th
 | Failures | Any exception aborts the run; no exclusions or replacements | A partial run is `NOT_COMPLETED`, never a result on fewer replicates. |
 | Calibration | None proposed | The exact test needs no simulation for its level. The synthetic-adapter tests check the software only and are **not** a calibration. |
 
-Both rules are implemented. Which one is confirmatory is decision `decision_rule` (pending). The engine never chooses.
+All three rules are implemented in the engine; this runner accepts only `near_chance_tost_v3` (§0). The rows above for v1 and v2 describe the paired comparison, which v3 keeps as its supporting endpoint (one-sided, IUT, as in v2).
 
 ## 6. Traceability
 
@@ -93,7 +177,8 @@ Both rules are implemented. Which one is confirmatory is decision `decision_rule
 | 14 | `gohr.py` pinned by sealed D0/D3 evidence was modified | `adapters/gohr.py` | Restored byte-for-byte; D4 code moved to `gohr_d4.py` | 19/19 pins match (scripted check); D3 prereg tests pass | PASS |
 | 15 | Decision and p-values trusted as self-reported; no independent verification | engine `evaluate_decision`, `recompute_certificate_decision`; driver `verify_run` | Recompute from (b, c); verify re-checks every artifact | `test_certificate_tampering_is_detected`, `test_verify_detects_tampering` | PASS |
 | 16 | Adapter contract implicit; attribution unchecked | engine `D4Adapter`, `verify_adapter_selection` | Required selection fields checked against condition/replicate/seed/config/data | `test_adapter_without_selection_…`, `test_misattributed_selection_…`, `test_engine_imports_no_target_code` | PASS |
-| 17 | Two-sided test for a directional hypothesis; Bonferroni plus k = 5 bootstrap gate | engine `evaluate_decision` | Both rules implemented; choice left to the prereg | `test_directional_rule_*`, `test_identity_perturbation_yields_no_effect` | **BLOCKED** (human decision `decision_rule`) |
+| 17 | Two-sided test for a directional hypothesis; Bonferroni plus k = 5 bootstrap gate | engine `evaluate_decision` | Superseded by row 26 | `test_directional_rule_*`, `test_identity_perturbation_yields_no_effect` | Superseded |
+| 26 | Primary endpoint tested a reduction relative to baseline, not near-chance accuracy | engine `near_chance_replicate`, `evaluate_near_chance(_decision)`, `evaluate_paired_degradation`, v4 certificate, `recompute_certificate_decision`; driver `check_target_design`, `check_decision_values`, `verify_run`, `recount_from_predictions` | Rule `near_chance_tost_v3` (§0); separate `chance_margin`; paired endpoint kept separately; predictions persisted and recounted | `test_d4_near_chance.py` (63 tests incl. exact rational reference, size, duality), `test_verify_refuses_a_certificate_that_departs_from_the_approved_design[7]`, `test_verify_without_a_result_is_not_completed` | PASS (code); `chance_margin`, `paired_endpoint_role` **BLOCKED** (human) |
 | 18 | Threshold documented as percentage points but compared as a fraction | engine docs, certificate methodology | Documented as a fraction; value unchanged | — (documentation) | PASS |
 | 19 | No D4 preregistration, approval gate or staged workflow | prereg JSON, engine `review_/require_approved_preregistration`, driver stages | Draft + gates; preflight/run refuse until approved, committed and anchored | `test_protocol_check_reports_pending_draft`, `test_preflight_refuses_the_unapproved_draft`, `test_anchored_record_*`, `test_shipped_gohr_draft_is_well_formed_and_entirely_pending` | PASS (code); approval **BLOCKED** (human) |
 | 20 | Test data given to the training adapter | `GohrD4Adapter.__init__` | Refuses test arrays; test bound by digest only | `test_adapter_refuses_test_data` | PASS |

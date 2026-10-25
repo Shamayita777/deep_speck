@@ -33,7 +33,18 @@ run             HUMAN-AUTHORISED PRODUCTION.  Re-verifies the anchored
                 writes run-dir/result/ {d4_certificate.json,
                 d4_run_manifest.json} once, exclusively.  Resumable: fits
                 resume through the adapter's verified recovery.
-verify          Independent post-run verification.  Read-only.
+verify          Independent post-run verification.  Read-only.  Recounts every
+                fit's correct count and McNemar (b, c) from the persisted
+                predictions and the preflight-bound test labels, recomputes
+                every endpoint statistic and the outcome, and checks every
+                setting against the approved design.  Exit 0 = integrity
+                verified (the printed primary outcome may still be
+                INCONCLUSIVE or NOT_SUPPORTED, which is never a pass);
+                exit 5 = no result (NOT_COMPLETED); exit 1 = refused.
+
+Decision rule: near_chance_tost_v3 only.  The primary endpoint is near-chance
+equivalence of every label-shuffled fit; the paired comparison with the
+baseline is a separate endpoint (see the engine and the RATIONALE).
 
 USAGE (from the repository root)
     PY=~/.venvs/autond-tf215-audit-20261015T050853Z/bin/python
@@ -87,6 +98,7 @@ BOOTSTRAP_REPLICATES = 5000
 CONFIDENCE_LEVEL = 0.95
 FEATURE_WIDTH = 64
 INPUT_ENCODING = "raw_bits_uint8_0_1_width64_no_scaling"
+CHANCE_LEVEL = 0.5
 DATASET_ID = "gohr-speck"
 DATASET_VERSION = "original-make-train-data"
 PARTITIONS = ("train", "validation", "test")
@@ -137,6 +149,14 @@ def check_target_design(record: dict) -> list[str]:
         actual = fixed.get(section, {}).get(key)
         if actual != value:
             problems.append(f"fixed_design.{section}.{key} is {actual!r}; this runner implements {value!r}")
+    for section, procedure in (("primary_endpoint", d4.NEAR_CHANCE_PROCEDURE),
+                               ("supporting_endpoint", d4.PAIRED_PROCEDURE)):
+        registered = fixed.get(section, {}).get("procedure")
+        if registered != procedure:
+            problems.append(f"fixed_design.{section}.procedure differs from the implemented "
+                            f"{d4.NEAR_CHANCE_RULE} procedure (estimand, sidedness, aggregation or level)")
+    if fixed.get("primary_endpoint", {}).get("procedure", {}).get("chance_reference") != CHANCE_LEVEL:
+        problems.append(f"fixed_design.primary_endpoint chance reference must be {CHANCE_LEVEL}")
     if record.get("perturbation", {}).get("name") != "label_shuffle":
         problems.append("perturbation.name must be 'label_shuffle'")
     return problems
@@ -160,6 +180,14 @@ def check_decision_values(values: dict) -> list[str]:
         problems.append("decisions.partition_overlap_policy is not implemented")
     if values.get("within_partition_duplicates_policy") not in DUPLICATE_POLICIES:
         problems.append("decisions.within_partition_duplicates_policy is not implemented")
+    if values.get("decision_rule") != d4.NEAR_CHANCE_RULE:
+        problems.append(f"decisions.decision_rule must be {d4.NEAR_CHANCE_RULE}: the registered primary "
+                        "endpoint is near-chance equivalence, which no paired-only rule establishes")
+    margin = values.get("chance_margin")
+    if not (isinstance(margin, float) and 0.0 < margin < CHANCE_LEVEL):
+        problems.append("decisions.chance_margin must be a float in (0, 0.5), a fraction of accuracy")
+    if values.get("paired_endpoint_role") not in d4.PAIRED_ENDPOINT_ROLES:
+        problems.append(f"decisions.paired_endpoint_role must be one of {d4.PAIRED_ENDPOINT_ROLES}")
     return problems
 
 
@@ -185,6 +213,8 @@ def design_of(values: dict, anchor: str) -> dict:
         "num_rounds": NUM_ROUNDS, "depth": DEPTH, "batch_size": BATCH_SIZE,
         "audit_seed": AUDIT_SEED, "bootstrap_replicates": BOOTSTRAP_REPLICATES,
         "confidence_level": CONFIDENCE_LEVEL, "input_encoding": INPUT_ENCODING,
+        "chance_level": CHANCE_LEVEL, "primary_procedure": d4.NEAR_CHANCE_PROCEDURE,
+        "supporting_procedure": d4.PAIRED_PROCEDURE,
         **{k: v for k, v in values.items() if not k.startswith("_")},
     }
 
@@ -408,7 +438,8 @@ def stage_run(args) -> int:
         checkpoint_root=run_dir / "fits", replicates=design["replicates"], audit_seed=AUDIT_SEED,
         effect_threshold=design["effect_threshold"], bootstrap_replicates=BOOTSTRAP_REPLICATES,
         confidence_level=CONFIDENCE_LEVEL, alpha=design["alpha"], run_config_hash=config_hash,
-        decision_rule=design["decision_rule"],
+        decision_rule=design["decision_rule"], chance_margin=design["chance_margin"],
+        paired_endpoint_role=design["paired_endpoint_role"], chance_level=CHANCE_LEVEL,
     )
     preflight_sha = sha256_file(run_dir / "preflight.json")
     certificate = d4.generate_certificate(
@@ -419,6 +450,8 @@ def stage_run(args) -> int:
         audit_seed=AUDIT_SEED, confidence_level=CONFIDENCE_LEVEL, alpha=design["alpha"],
         provenance={"preregistration": preflight["preregistration"], "preflight_sha256": preflight_sha,
                     "run_config_hash": config_hash, "partitions": preflight["partitions"],
+                    "test_label_counts": {"zeros": int(np.sum(np.asarray(test_y) == 0)),
+                                          "ones": int(np.sum(np.asarray(test_y) == 1))},
                     "overlap_audit": preflight["overlap_audit"], "source_identity": identity,
                     "run_id": run_id},
     )
@@ -433,7 +466,9 @@ def stage_run(args) -> int:
         "d4_run_manifest.json": json.dumps(manifest, indent=2, sort_keys=True).encode() + b"\n",
     })
     d4.print_report(result)
-    print(f"D4 RUN COMPLETE: {certificate['decision']['outcome']}  ->  {result_dir}")
+    outcome = certificate["decision"]["outcome"]
+    print(f"D4 RUN COMPLETE. Primary outcome: {outcome}"
+          f"{'' if outcome == 'SUPPORTED' else ' (NOT a scientific pass)'}  ->  {result_dir}")
     return 0
 
 
@@ -463,14 +498,25 @@ def verify_run(run_dir: Path) -> dict:
         raise IntegrityError("Certificate run_config_hash differs from preflight.")
     design = preflight["design"]
     settings = certificate["settings"]
-    for key in ("alpha", "decision_rule", "replicates", "audit_seed", "bootstrap_replicates", "confidence_level"):
-        if settings[key] != design[key]:
+    for key in ("alpha", "decision_rule", "replicates", "audit_seed", "bootstrap_replicates", "confidence_level",
+                "chance_level", "chance_margin", "paired_endpoint_role", "effect_threshold"):
+        if settings.get(key) != design[key]:
             raise IntegrityError(f"Certificate setting {key} differs from the preregistered design.")
-    if certificate["methodology"]["practical_effect_threshold"] != design["effect_threshold"]:
-        raise IntegrityError("Certificate effect threshold differs from the preregistered design.")
+    if settings.get("test_examples") != design["sample_sizes"]["test"] or \
+            settings.get("test_examples") != len(partitions["test"][1]):
+        raise IntegrityError("Certificate test sample size differs from the preregistered design.")
+    methodology = certificate.get("methodology", {})
+    if methodology.get("primary_procedure") != design["primary_procedure"] or \
+            methodology.get("supporting_procedure") != design["supporting_procedure"]:
+        raise IntegrityError("Certificate endpoint procedure (sidedness, aggregation or level) differs from "
+                             "the preregistered design.")
     source_digest = labelled_partition_digest(*partitions["train"])
     if settings["source_train_digest"] != source_digest:
         raise IntegrityError("Certificate training digest differs from the preflight training partition.")
+    test_y = np.asarray(partitions["test"][1])
+    if provenance.get("test_label_counts") != {"zeros": int(np.sum(test_y == 0)), "ones": int(np.sum(test_y == 1))}:
+        raise IntegrityError("Certificate test class counts differ from the test partition.")
+    recount_from_predictions(run_dir, certificate, test_y)
     decision = d4.recompute_certificate_decision(certificate)
 
     validation_digest = labelled_partition_digest(*partitions["validation"])
@@ -516,13 +562,54 @@ def verify_run(run_dir: Path) -> dict:
                                                     "selection record") != selection:
                 raise IntegrityError(f"Replicate {r} {condition}: selection does not match the verified "
                                      "epoch history on disk.")
-    return {"outcome": decision["outcome"], "replicates": len(seeds), "run_id": manifest["run_id"]}
+    return {"integrity": "VERIFIED", "outcome": decision["outcome"],
+            "primary_claim_supported": decision["outcome"] == "SUPPORTED",
+            "primary_outcome": decision["primary"]["outcome"],
+            "supporting_degradation_established": decision["supporting"]["established"],
+            "replicates": len(seeds), "run_id": manifest["run_id"]}
+
+
+def recount_from_predictions(run_dir: Path, certificate: dict, test_labels) -> None:
+    """Recompute every fit's counts from its persisted predictions and the test labels."""
+    directory = run_dir / "fits" / "predictions"
+    expected_files = {row[f"{c}_predictions"].get("file") for row in certificate["findings"]["replicates"]
+                      for c in ("baseline", "perturbed")}
+    present = {p.name for p in directory.iterdir()} if directory.is_dir() else set()
+    if present != expected_files:
+        raise IntegrityError(f"Prediction files differ from the certificate: missing "
+                             f"{sorted(expected_files - present)}, unexpected {sorted(present - expected_files)}.")
+    for row in certificate["findings"]["replicates"]:
+        r = row["replicate"]
+        correct = {}
+        for condition in ("baseline", "perturbed"):
+            entry = row[f"{condition}_predictions"]
+            path = d4.prediction_path(run_dir / "fits", r, condition)
+            if entry.get("file") != path.name or not path.is_file() or sha256_file(path) != entry.get("sha256"):
+                raise IntegrityError(f"Replicate {r} {condition} predictions are missing or do not match "
+                                     "their recorded digest.")
+            predictions = np.load(path)
+            if predictions.dtype.str != entry.get("dtype") or list(predictions.shape) != entry.get("shape"):
+                raise IntegrityError(f"Replicate {r} {condition} predictions have the wrong dtype or shape.")
+            correct[condition] = d4.binary_predictions_to_correctness(predictions, test_labels)
+        b, c, _ = d4.mcnemar_exact_pvalue(correct["baseline"], correct["perturbed"])
+        recounted = {"test_examples": int(len(test_labels)), "baseline_correct": int(correct["baseline"].sum()),
+                     "perturbed_correct": int(correct["perturbed"].sum()), "mcnemar_b": b, "mcnemar_c": c}
+        for key, value in recounted.items():
+            if row.get(key) != value:
+                raise IntegrityError(f"Replicate {r}: certificate {key}={row.get(key)!r} but the persisted "
+                                     f"predictions give {value!r}.")
 
 
 def stage_verify(args) -> int:
+    if not (Path(args.run_dir) / "result").exists():
+        print(json.dumps({"outcome": "NOT_COMPLETED", "primary_claim_supported": False}, indent=2))
+        print(f"NO RESULT: {Path(args.run_dir) / 'result'} does not exist; the run is NOT_COMPLETED.")
+        return 5
     summary = verify_run(Path(args.run_dir))
     print(json.dumps(summary, indent=2))
-    print("ALL CHECKS PASSED (post-run verification; read-only).")
+    print("INTEGRITY CHECKS PASSED (post-run verification; read-only). "
+          f"Primary outcome: {summary['outcome']}"
+          f"{'' if summary['primary_claim_supported'] else ' (NOT a scientific pass)'}.")
     return 0
 
 
@@ -556,6 +643,8 @@ def main(argv=None) -> int:
         return stages[args.stage](args)
     except IntegrityError as exc:
         print(f"REFUSED ({args.stage}): {exc}", file=sys.stderr)
+        if args.stage == "run":
+            print("D4 OUTCOME: NOT_COMPLETED (no result written; not a scientific result).", file=sys.stderr)
         return 1
 
 

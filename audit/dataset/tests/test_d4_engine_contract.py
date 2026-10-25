@@ -110,8 +110,13 @@ def test_identity_perturbation_yields_no_effect(tmp_path, rule):
         def verify(self, x, y, px, py):
             assert np.array_equal(y, py)
 
-    result = run(tmp_path, rule=rule, perturbation=Identity())
+    extra = ({"chance_margin": 0.05, "paired_endpoint_role": "secondary"}
+             if rule == d4.NEAR_CHANCE_RULE else {})
+    result = run(tmp_path, rule=rule, perturbation=Identity(), **extra)
     assert not result.effect_detected
+    if rule == d4.NEAR_CHANCE_RULE:
+        # The signal survives an identity "perturbation", so accuracy is far above the band.
+        assert result.decision["outcome"] == "NOT_SUPPORTED"
 
 
 # ---------------------------------------------------------------- contract violations

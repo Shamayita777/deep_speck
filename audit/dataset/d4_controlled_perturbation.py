@@ -33,6 +33,15 @@ The framework therefore reports:
 - effect-detection decision based on a pre-specified effect size
   and inferential criterion.
 
+Under rule ``near_chance_tost_v3`` the primary endpoint is different: it
+asks whether each label-shuffled fit's test accuracy is practically
+equivalent to chance (exact binomial TOST against a registered band
+[0.5 - margin, 0.5 + margin]).  The paired baseline-vs-perturbed McNemar
+comparison is then a separate supporting (or co-primary) endpoint.  A
+reduction relative to baseline never substitutes for near-chance evidence:
+a shuffled model at 0.70 is far worse than a 0.93 baseline yet far from
+chance.
+
 No result is labelled "statistically significant" merely because
 an effect exceeds a percentage threshold.
 """
@@ -48,7 +57,7 @@ import os
 import numpy as np
 import json
 from pathlib import Path
-from scipy.stats import binomtest
+from scipy.stats import beta, binom, binomtest
 
 from audit.dataset.integrity import (
     IntegrityError,
@@ -169,6 +178,12 @@ class ReplicateResult:
     perturbed_selection: dict = field(default_factory=dict)
     perturbation_record: dict = field(default_factory=dict)
     test_examples: int = 0
+    # Sufficient statistics: correct-prediction counts on the test rows.
+    baseline_correct: int = 0
+    perturbed_correct: int = 0
+    # Persisted raw test predictions of each selected model (file, sha256, dtype, shape).
+    baseline_predictions: dict = field(default_factory=dict)
+    perturbed_predictions: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -611,6 +626,35 @@ def load_verified_perturbation(directory: Path, *, replicate: int, seed: int, pe
     return features, labels, sidecar
 
 
+def prediction_path(checkpoint_root: Path, replicate: int, condition: str) -> Path:
+    return Path(checkpoint_root) / "predictions" / f"replicate_{replicate:02d}_{condition}.npy"
+
+
+def persist_predictions(path: Path, predictions: Any) -> tuple[np.ndarray, dict]:
+    """Write one fit's raw test predictions once; on resume, reuse only an agreeing file.
+
+    A resumed fit is re-predicted.  An existing file is kept (never replaced)
+    only if it yields the same thresholded labels as the fresh predictions;
+    the kept bytes are then the evidence the counts are computed from.
+    """
+    fresh = np.ascontiguousarray(np.asarray(predictions).reshape(-1))
+    path = Path(path)
+    if path.exists():
+        stored = np.load(path)
+        if stored.shape != fresh.shape or not np.array_equal(stored >= 0.5, fresh >= 0.5):
+            raise IntegrityError(f"Persisted predictions {path} disagree with the reloaded model's "
+                                 "predictions. Refusing to resume.")
+        predictions = stored
+    else:
+        buffer = io.BytesIO()
+        np.save(buffer, fresh)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        write_bytes_exclusive(path, buffer.getvalue())
+        predictions = fresh
+    return predictions, {"file": path.name, "sha256": sha256_file(path),
+                         "dtype": predictions.dtype.str, "shape": list(predictions.shape)}
+
+
 def load_completed_state(state_path: Path) -> dict[str, Any] | None:
     if not Path(state_path).exists():
         return None
@@ -622,9 +666,11 @@ def load_completed_state(state_path: Path) -> dict[str, Any] | None:
 # ============================================================
 
 #: ``conservative_two_sided_v1`` is the rule the September 2026 run used.
-#: ``directional_iut_v2`` is a proposed alternative; which applies is a
-#: preregistration decision, never chosen by this module.
-DECISION_RULES = ("conservative_two_sided_v1", "directional_iut_v2")
+#: ``directional_iut_v2`` tests paired degradation only; it never establishes
+#: near-chance accuracy.  ``near_chance_tost_v3`` (below) makes near-chance
+#: equivalence the primary endpoint.  Which applies is a preregistration
+#: decision, never chosen by this module.
+DECISION_RULES = ("conservative_two_sided_v1", "directional_iut_v2", "near_chance_tost_v3")
 
 
 def mcnemar_one_sided_pvalue(b: int, c: int) -> float:
@@ -650,6 +696,8 @@ def evaluate_decision(rows: Sequence[Mapping[str, Any]], *, rule: str, alpha: fl
     """
     if rule not in DECISION_RULES:
         raise ValueError(f"Unknown decision rule {rule!r}; expected one of {DECISION_RULES}.")
+    if rule == NEAR_CHANCE_RULE:
+        raise ValueError(f"{rule} is evaluated by evaluate_near_chance_decision, not evaluate_decision.")
     k = len(rows)
     if k < 2:
         raise ValueError("At least two independent training replicates are required.")
@@ -703,6 +751,183 @@ def mcnemar_exact_pvalue_from_counts(b: int, c: int) -> float:
 
 
 # ============================================================
+# Near-chance primary endpoint (rule near_chance_tost_v3)
+# ============================================================
+#
+# Per perturbed fit r, X_r = number of correct test predictions out of n.
+# Conditional on the fitted model and given test rows drawn i.i.d. from the
+# generator independently of training, X_r ~ Binomial(n, p_r), where p_r is
+# that model's accuracy over the test-generating distribution.  Nothing is
+# pooled across fits: all fits share one test sample, so their X_r are
+# dependent, and every multiplicity argument below holds without independence.
+#
+#   Equivalence (fit r):  H0: p_r <= L or p_r >= U   vs   H1: L < p_r < U,
+#     L = chance - margin, U = chance + margin.  Two exact one-sided tests
+#     (TOST), each at alpha:  P(X >= x | L) < alpha  and  P(X <= x | U) < alpha.
+#     Equivalent to the two-sided 1-2*alpha Clopper-Pearson interval lying
+#     strictly inside (L, U).  Level alpha (Berger & Hsu 1996).
+#   Departure (fit r):  H0: L <= p_r <= U  vs  H1: p_r > U or p_r < L.
+#     Exact one-sided tests, each side at alpha / (2k):
+#     P(X >= x | U) < alpha/(2k)  (above band)  or  P(X <= x | L) < alpha/(2k).
+#   Joint:  SUPPORTED     iff every fit is equivalent (intersection-union
+#                         test: level alpha with no adjustment, Berger 1982);
+#           NOT_SUPPORTED iff some fit departs (Bonferroni over the 2k
+#                         one-sided tests: familywise level alpha);
+#           INCONCLUSIVE  otherwise;  NOT_COMPLETED if any fit is missing.
+#   Equivalence and departure of one fit are mutually exclusive (asserted).
+#
+# Failing to reject p = chance is never used: it is not evidence of
+# equivalence (methodology 3.9.8, 3.9.9 Rule III).
+
+NEAR_CHANCE_RULE = "near_chance_tost_v3"
+PAIRED_ENDPOINT_ROLES = ("secondary", "co_primary")
+PRIMARY_OUTCOMES = ("SUPPORTED", "NOT_SUPPORTED", "INCONCLUSIVE", "NOT_COMPLETED")
+
+#: The registered procedure.  A preregistration's fixed design must equal
+#: these exactly, and certificates record them; any change is a new procedure.
+NEAR_CHANCE_PROCEDURE = {
+    "estimand": "per perturbed fit: test accuracy p_r of the reloaded selected model, conditional on that model",
+    "chance_reference": 0.5,
+    "equivalence_test": "exact_binomial_tost_each_one_sided_test_at_alpha",
+    "equivalence_interval": "clopper_pearson_two_sided_1_minus_2alpha_strictly_inside_band",
+    "equivalence_aggregation": "intersection_union_every_replicate_equivalent",
+    "departure_test": "exact_one_sided_binomial_each_side_at_alpha_over_2k",
+    "departure_aggregation": "bonferroni_any_replicate_departs",
+    "rejection": "p_value_strictly_less_than_level",
+    "outcomes": list(PRIMARY_OUTCOMES),
+}
+PAIRED_PROCEDURE = {
+    "estimand": "per replicate: delta_r = acc(perturbed_r) - acc(baseline_r) = (b - c) / n on the same test rows",
+    "discordance": "b = baseline wrong & perturbed right; c = baseline right & perturbed wrong",
+    "test": "exact_mcnemar_one_sided_h1_perturbed_worse_p_equals_P(B<=b|b+c,0.5)",
+    "zero_discordant": "p_value_1",
+    "practical": "delta_r_at_most_minus_effect_threshold",
+    "aggregation": "intersection_union_every_replicate_degrades",
+    "rejection": "p_value_strictly_less_than_level",
+}
+
+
+def binomial_upper_tail(x: int, n: int, p: float) -> float:
+    """P(X >= x) for X ~ Binomial(n, p)."""
+    return 1.0 if x <= 0 else float(binom.sf(int(x) - 1, int(n), float(p)))
+
+
+def binomial_lower_tail(x: int, n: int, p: float) -> float:
+    """P(X <= x) for X ~ Binomial(n, p)."""
+    return 1.0 if x >= n else float(binom.cdf(int(x), int(n), float(p)))
+
+
+def clopper_pearson(x: int, n: int, tail: float) -> tuple[float, float]:
+    """Exact interval with probability ``tail`` excluded on each side."""
+    lower = 0.0 if x == 0 else float(beta.ppf(tail, x, n - x + 1))
+    upper = 1.0 if x == n else float(beta.ppf(1.0 - tail, x + 1, n - x))
+    return lower, upper
+
+
+def near_chance_replicate(x: int, n: int, *, chance: float, margin: float, alpha: float,
+                          replicates: int) -> dict:
+    """Classify one perturbed fit: EQUIVALENT, ABOVE_BAND, BELOW_BAND or INDETERMINATE."""
+    if not (isinstance(n, int) and n >= 1 and isinstance(x, int) and 0 <= x <= n):
+        raise ValueError(f"Invalid binomial counts x={x!r}, n={n!r}.")
+    low, high = chance - margin, chance + margin
+    departure_level = alpha / (2 * replicates)
+    p_not_below = binomial_upper_tail(x, n, low)    # TOST H01: p <= L
+    p_not_above = binomial_lower_tail(x, n, high)   # TOST H02: p >= U
+    p_above = binomial_upper_tail(x, n, high)       # departure H0: p <= U
+    p_below = binomial_lower_tail(x, n, low)        # departure H0: p >= L
+    equivalent = p_not_below < alpha and p_not_above < alpha
+    above, below = p_above < departure_level, p_below < departure_level
+    if equivalent + above + below > 1:
+        raise AssertionError("Equivalence and departure are mutually exclusive; numerical defect.")
+    state = ("EQUIVALENT" if equivalent else "ABOVE_BAND" if above else
+             "BELOW_BAND" if below else "INDETERMINATE")
+    return {
+        "test_examples": n, "correct": x, "accuracy": x / n, "band": [low, high],
+        "tost_pvalue_h0_at_or_below_lower": p_not_below,
+        "tost_pvalue_h0_at_or_above_upper": p_not_above,
+        "equivalence_level": alpha,
+        "equivalence_interval": list(clopper_pearson(x, n, alpha)),
+        "departure_pvalue_above_band": p_above,
+        "departure_pvalue_below_band": p_below,
+        "departure_level_per_side": departure_level,
+        "departure_interval": list(clopper_pearson(x, n, departure_level)),
+        "state": state,
+    }
+
+
+def evaluate_near_chance(rows: Sequence[Mapping[str, Any]], *, planned_replicates: int, chance: float,
+                         margin: float, alpha: float) -> dict:
+    """Primary endpoint over all planned fits; rows need test_examples, perturbed_correct."""
+    if not 0.0 < margin < min(chance, 1.0 - chance):
+        raise ValueError(f"chance margin {margin!r} must lie strictly inside (0, {min(chance, 1 - chance)}).")
+    if not 0.0 < alpha < 0.5:
+        raise ValueError("alpha must lie in (0, 0.5) for the equivalence test.")
+    if len(rows) != planned_replicates:
+        return {"outcome": "NOT_COMPLETED", "replicates": [],
+                "reason": f"{len(rows)} of {planned_replicates} planned fits are present"}
+    per = [near_chance_replicate(int(r["perturbed_correct"]), int(r["test_examples"]), chance=chance,
+                                 margin=margin, alpha=alpha, replicates=planned_replicates) for r in rows]
+    states = [p["state"] for p in per]
+    if all(s == "EQUIVALENT" for s in states):
+        outcome = "SUPPORTED"
+    elif any(s in ("ABOVE_BAND", "BELOW_BAND") for s in states):
+        outcome = "NOT_SUPPORTED"
+    else:
+        outcome = "INCONCLUSIVE"
+    return {"outcome": outcome, "replicates": per, "chance": chance, "margin": margin, "alpha": alpha}
+
+
+def evaluate_paired_degradation(rows: Sequence[Mapping[str, Any]], *, alpha: float,
+                                effect_threshold: float) -> dict:
+    """Supporting endpoint: every replicate's perturbed model is worse than its baseline."""
+    per = []
+    for r in rows:
+        b, c, n = int(r["mcnemar_b"]), int(r["mcnemar_c"]), int(r["test_examples"])
+        delta = (b - c) / n
+        m = b + c
+        theta = clopper_pearson(b, m, alpha / 2) if m else (0.5, 0.5)
+        p = mcnemar_one_sided_pvalue(b, c)
+        per.append({
+            "mcnemar_b": b, "mcnemar_c": c, "discordant": m, "delta": delta,
+            "one_sided_pvalue": p, "two_sided_pvalue": mcnemar_exact_pvalue_from_counts(b, c),
+            "conditional_delta_interval": [m * (2 * theta[0] - 1) / n, m * (2 * theta[1] - 1) / n],
+            "significant": p < alpha, "practical": delta <= -effect_threshold,
+        })
+    established = bool(per) and all(p["significant"] and p["practical"] for p in per)
+    return {"established": established, "alpha": alpha, "effect_threshold": effect_threshold,
+            "replicates": per}
+
+
+def evaluate_near_chance_decision(rows: Sequence[Mapping[str, Any]], *, planned_replicates: int,
+                                  chance: float, margin: float, alpha: float, effect_threshold: float,
+                                  paired_endpoint_role: str) -> dict:
+    """Decision of rule near_chance_tost_v3; pure, used at run and verify time.
+
+    secondary:  outcome = primary outcome; the paired endpoint is reported
+                beside it at its own level and never changes the outcome.
+    co_primary: SUPPORTED needs primary SUPPORTED and paired degradation
+                established (intersection-union over all 2k component tests,
+                level alpha).  Primary NOT_SUPPORTED gives NOT_SUPPORTED;
+                paired degradation that is not established gives
+                INCONCLUSIVE, because non-significance is not evidence of
+                no degradation.
+    """
+    if paired_endpoint_role not in PAIRED_ENDPOINT_ROLES:
+        raise ValueError(f"paired_endpoint_role must be one of {PAIRED_ENDPOINT_ROLES}.")
+    primary = evaluate_near_chance(rows, planned_replicates=planned_replicates, chance=chance,
+                                   margin=margin, alpha=alpha)
+    if primary["outcome"] == "NOT_COMPLETED":
+        return {"rule": NEAR_CHANCE_RULE, "outcome": "NOT_COMPLETED", "primary_claim_supported": False,
+                "paired_endpoint_role": paired_endpoint_role, "primary": primary, "supporting": None}
+    supporting = evaluate_paired_degradation(rows, alpha=alpha, effect_threshold=effect_threshold)
+    outcome = primary["outcome"]
+    if paired_endpoint_role == "co_primary" and outcome == "SUPPORTED" and not supporting["established"]:
+        outcome = "INCONCLUSIVE"
+    return {"rule": NEAR_CHANCE_RULE, "outcome": outcome, "primary_claim_supported": outcome == "SUPPORTED",
+            "paired_endpoint_role": paired_endpoint_role, "primary": primary, "supporting": supporting}
+
+
+# ============================================================
 # One repeated experiment
 # ============================================================
 
@@ -724,6 +949,9 @@ def run_d4(
     alpha: float = 0.05,
     run_config_hash: str | None = None,
     decision_rule: str = "conservative_two_sided_v1",
+    chance_margin: float | None = None,
+    paired_endpoint_role: str | None = None,
+    chance_level: float = 0.5,
 ) -> D4Result:
     """Execute repeated, paired controlled-perturbation inference.
 
@@ -739,7 +967,19 @@ def run_d4(
     No failed replicate is retried or excluded here: any exception aborts
     the run, and a resumed run must reproduce the identical replicate
     plan.  ``effect_threshold`` is an accuracy difference as a fraction.
+
+    Under ``near_chance_tost_v3``, ``chance_margin`` (the registered
+    near-chance equivalence margin, a fraction of accuracy, separate from
+    ``effect_threshold``) and ``paired_endpoint_role`` are required.
     """
+    if decision_rule == NEAR_CHANCE_RULE:
+        if not (isinstance(chance_margin, float) and 0.0 < chance_margin < min(chance_level, 1 - chance_level)):
+            raise ValueError("near_chance_tost_v3 needs a registered chance_margin in (0, 0.5); "
+                             "it is never defaulted or taken from effect_threshold.")
+        if paired_endpoint_role not in PAIRED_ENDPOINT_ROLES:
+            raise ValueError(f"near_chance_tost_v3 needs paired_endpoint_role in {PAIRED_ENDPOINT_ROLES}.")
+    elif chance_margin is not None or paired_endpoint_role is not None:
+        raise ValueError("chance_margin and paired_endpoint_role apply only to near_chance_tost_v3.")
     if replicates < 2:
         raise ValueError("At least two independent training replicates are required.")
     if effect_threshold < 0:
@@ -776,10 +1016,12 @@ def run_d4(
                 train_digest=labelled_partition_digest(features, labels),
                 run_config_hash=run_config_hash,
             )
-            correct = binary_predictions_to_correctness(adapter.predict(test_features), test_labels)
-            return correct, selection
+            predictions, record = persist_predictions(
+                prediction_path(checkpoint_root, replicate_index, condition), adapter.predict(test_features))
+            correct = binary_predictions_to_correctness(predictions, test_labels)
+            return correct, selection, record
 
-        baseline_correct, baseline_selection = fit(train_features, train_labels, "baseline")
+        baseline_correct, baseline_selection, baseline_predictions = fit(train_features, train_labels, "baseline")
 
         perturbation_directory = checkpoint_root / "perturbations"
         sidecar_path = perturbation_directory / f"replicate_{replicate_index:02d}.perturbation.json"
@@ -812,7 +1054,8 @@ def run_d4(
             )
             perturbed_features, perturbed_labels = fresh_features, fresh_labels
 
-        perturbed_correct, perturbed_selection = fit(perturbed_features, perturbed_labels, "perturbed")
+        perturbed_correct, perturbed_selection, perturbed_predictions = fit(
+            perturbed_features, perturbed_labels, "perturbed")
 
         b, c, p_value = mcnemar_exact_pvalue(baseline_correct, perturbed_correct)
         baseline_score = float(np.mean(baseline_correct))
@@ -833,14 +1076,32 @@ def run_d4(
             perturbed_selection=perturbed_selection,
             perturbation_record=perturbation_record,
             test_examples=int(len(baseline_correct)),
+            baseline_correct=int(np.sum(baseline_correct)),
+            perturbed_correct=int(np.sum(perturbed_correct)),
+            baseline_predictions=baseline_predictions,
+            perturbed_predictions=perturbed_predictions,
         ))
 
     rows = [{"baseline_score": r.baseline_score, "perturbed_score": r.perturbed_score,
-             "mcnemar_b": r.mcnemar_b, "mcnemar_c": r.mcnemar_c} for r in replicate_results]
-    decision = evaluate_decision(rows, rule=decision_rule, alpha=alpha,
-                                 effect_threshold=effect_threshold, audit_seed=audit_seed,
-                                 bootstrap_replicates=bootstrap_replicates,
-                                 confidence_level=confidence_level)
+             "mcnemar_b": r.mcnemar_b, "mcnemar_c": r.mcnemar_c, "test_examples": r.test_examples,
+             "perturbed_correct": r.perturbed_correct} for r in replicate_results]
+    if decision_rule == NEAR_CHANCE_RULE:
+        decision = evaluate_near_chance_decision(
+            rows, planned_replicates=replicates, chance=chance_level, margin=chance_margin, alpha=alpha,
+            effect_threshold=effect_threshold, paired_endpoint_role=paired_endpoint_role)
+        diffs = [r["perturbed_score"] - r["baseline_score"] for r in rows]
+        ci_low, ci_high = bootstrap_mean_ci(
+            diffs, rng=np.random.default_rng(np.random.SeedSequence([audit_seed, 0xD4])),
+            bootstrap_replicates=bootstrap_replicates, confidence_level=confidence_level)
+        decision.update(mean_difference=float(np.mean(diffs)), sd_difference=float(np.std(diffs, ddof=1)),
+                        bootstrap_ci=[ci_low, ci_high], per_test_alpha=alpha,
+                        effect_detected=decision["supporting"]["established"],
+                        inference_supported=decision["primary_claim_supported"])
+    else:
+        decision = evaluate_decision(rows, rule=decision_rule, alpha=alpha,
+                                     effect_threshold=effect_threshold, audit_seed=audit_seed,
+                                     bootstrap_replicates=bootstrap_replicates,
+                                     confidence_level=confidence_level)
     pvalues = [r.mcnemar_pvalue for r in replicate_results]
     return D4Result(
         perturbation=perturbation.name,
@@ -860,6 +1121,7 @@ def run_d4(
         effect_detected=decision["effect_detected"],
         inference_supported=decision["inference_supported"],
         interpretation=(
+            NEAR_CHANCE_INTERPRETATION[decision["outcome"]] if decision_rule == NEAR_CHANCE_RULE else
             "A reproducible performance effect was detected under the specified perturbation; "
             "every pre-specified criterion of the decision rule was satisfied."
             if decision["effect_detected"] else
@@ -870,8 +1132,27 @@ def run_d4(
         settings={"alpha": alpha, "audit_seed": audit_seed, "bootstrap_replicates": bootstrap_replicates,
                   "confidence_level": confidence_level, "decision_rule": decision_rule,
                   "replicates": replicates, "run_config_hash": run_config_hash,
-                  "source_train_digest": source_digest},
+                  "source_train_digest": source_digest,
+                  **({"chance_level": chance_level, "chance_margin": chance_margin,
+                      "paired_endpoint_role": paired_endpoint_role, "effect_threshold": effect_threshold,
+                      "test_examples": int(len(np.asarray(test_labels).reshape(-1)))}
+                     if decision_rule == NEAR_CHANCE_RULE else {})},
     )
+
+
+NEAR_CHANCE_INTERPRETATION = {
+    "SUPPORTED": "Every label-shuffled fit's test accuracy is established, at the registered level, to lie "
+                 "inside the registered near-chance band, conditional on each fitted model and the shared "
+                 "test sample. This is a blunt control: it does not show that no leakage of any form exists.",
+    "NOT_SUPPORTED": "At least one label-shuffled fit's test accuracy is established to lie outside the "
+                     "registered near-chance band (familywise level alpha). The pipeline produced non-chance "
+                     "performance without the original feature/label correspondence; this calls for "
+                     "targeted leakage investigation.",
+    "INCONCLUSIVE": "Neither near-chance equivalence of every label-shuffled fit nor a departure of any fit "
+                    "from the band was established (or, with a co-primary paired endpoint, paired degradation "
+                    "was not established). This is not evidence of near-chance behaviour.",
+    "NOT_COMPLETED": "Not every planned fit completed; no scientific conclusion is drawn.",
+}
 
 
 # ============================================================
@@ -898,6 +1179,11 @@ def generate_certificate(
     post-run verifier checks it against the files on disk.
     """
     decision = result.decision or {}
+    if decision.get("rule") == NEAR_CHANCE_RULE:
+        return _near_chance_certificate(result, dataset_id=dataset_id, dataset_version=dataset_version,
+                                        generation_procedure=generation_procedure,
+                                        generation_parameters=generation_parameters, audit_seed=audit_seed,
+                                        confidence_level=confidence_level, provenance=provenance)
     return {
         "schema_version": "d4-certificate-3",
         "audit": {
@@ -977,13 +1263,181 @@ def generate_certificate(
     }
 
 
+NEAR_CHANCE_CERTIFICATE_SCHEMA = "d4-certificate-4"
+
+#: What a v4 certificate lets a third party check, and what it does not.
+VERIFIABILITY = {
+    "recomputed_from_persisted_evidence": [
+        "per-fit correct counts and McNemar (b, c), from the persisted raw predictions and the test labels",
+        "every p-value, interval, per-fit state, endpoint result and the outcome, from those counts",
+        "the test partition, by its SHA-256 and canonical digest recorded at preflight",
+        "the identity of each selected checkpoint, by SHA-256, and its validation-loss selection history",
+    ],
+    "not_recomputed": [
+        "that the persisted predictions are what the selected checkpoint outputs: verify does not rerun "
+        "the network (that needs TensorFlow and the run machine); it checks the checkpoint digests and the "
+        "prediction digests only",
+        "the data generator's assumptions (i.i.d. rows, fair labels), which are D3's subject",
+    ],
+}
+
+
+def _near_chance_certificate(result: D4Result, *, dataset_id, dataset_version, generation_procedure,
+                             generation_parameters, audit_seed, confidence_level, provenance) -> dict:
+    decision = result.decision
+    settings = dict(result.settings)
+    return {
+        "schema_version": NEAR_CHANCE_CERTIFICATE_SCHEMA,
+        "audit": {
+            "id": "D4", "name": "Controlled Perturbation Audit",
+            "claim": ("Primary: whether every label-shuffled fit's test accuracy is practically equivalent to "
+                      "chance (inside the registered band), conditional on each fitted model and the shared "
+                      "test sample. Supporting: whether every shuffled fit is less accurate than its paired "
+                      "baseline on the same test rows."),
+        },
+        "decision": {
+            "rule": decision["rule"],
+            "outcome": decision["outcome"],
+            "primary_claim_supported": decision["primary_claim_supported"],
+            "paired_endpoint_role": decision["paired_endpoint_role"],
+            "primary_outcome": decision["primary"]["outcome"],
+            "supporting_degradation_established": decision["supporting"]["established"],
+        },
+        "settings": settings,
+        "findings": {
+            "perturbation": result.perturbation,
+            "replicates": [
+                {
+                    "replicate": r.replicate, "seed": r.seed, "test_examples": r.test_examples,
+                    "baseline_correct": r.baseline_correct, "perturbed_correct": r.perturbed_correct,
+                    "baseline_accuracy": r.baseline_score, "perturbed_accuracy": r.perturbed_score,
+                    "accuracy_difference": r.absolute_difference,
+                    "mcnemar_b": r.mcnemar_b, "mcnemar_c": r.mcnemar_c, "mcnemar_pvalue": r.mcnemar_pvalue,
+                    "mcnemar_one_sided_pvalue": mcnemar_one_sided_pvalue(r.mcnemar_b, r.mcnemar_c),
+                    "baseline_selection": r.baseline_selection, "perturbed_selection": r.perturbed_selection,
+                    "perturbation_record": r.perturbation_record,
+                    "baseline_predictions": r.baseline_predictions,
+                    "perturbed_predictions": r.perturbed_predictions,
+                }
+                for r in result.replicates
+            ],
+            "primary_endpoint": decision["primary"],
+            "supporting_endpoint": decision["supporting"],
+            "descriptive": {
+                "mean_baseline_accuracy": result.mean_baseline_score,
+                "mean_perturbed_accuracy": result.mean_perturbed_score,
+                "mean_accuracy_difference": decision["mean_difference"],
+                "sd_accuracy_difference": decision["sd_difference"],
+                "bootstrap_ci_mean_difference": {"confidence_level": confidence_level,
+                                                 "low": decision["bootstrap_ci"][0],
+                                                 "high": decision["bootstrap_ci"][1],
+                                                 "role": "descriptive only; not used by the decision"},
+            },
+        },
+        "methodology": {
+            "primary_procedure": NEAR_CHANCE_PROCEDURE,
+            "supporting_procedure": PAIRED_PROCEDURE,
+            "chance_margin": settings["chance_margin"],
+            "chance_margin_units": "accuracy_fraction",
+            "effect_threshold": settings["effect_threshold"],
+            "alpha": settings["alpha"],
+            "paired_endpoint_role": settings["paired_endpoint_role"],
+            "unit_of_inference": "each fitted model, conditional on it; the k fits share one test sample and "
+                                 "are never pooled or treated as independent test sets",
+            "verifiability": VERIFIABILITY,
+        },
+        "dataset": {"dataset_id": dataset_id, "dataset_version": dataset_version,
+                    "generation_procedure": generation_procedure,
+                    "generation_parameters": dict(generation_parameters)},
+        "reproducibility": {"audit_seed": audit_seed},
+        "provenance": dict(provenance or {}),
+        "interpretation": result.interpretation,
+        "limitations": [
+            "Label shuffling is a blunt control: it removes genuine signal and label-correlated artifacts "
+            "together. Near-chance accuracy does not show that no leakage of any form exists; targeted "
+            "generation-order and label-leakage checks are a separate, complementary audit not performed here.",
+            "Inference is conditional on each fitted model and assumes test rows i.i.d. from the generator, "
+            "independent of training. It is a statement about these k fits, not a population estimate over "
+            "training seeds.",
+            "The chance reference 0.5 assumes labels are fair coin flips independent of the features under "
+            "the generator; the observed test class balance is recorded but not tested here.",
+            "A near-chance result is informative only if the baseline pipeline produces signal; the paired "
+            "endpoint reports this, and gates the outcome only when registered as co-primary.",
+        ],
+    }
+
+
+def _recompute_near_chance(certificate: Mapping[str, Any]) -> dict:
+    settings = certificate.get("settings") or {}
+    methodology = certificate.get("methodology") or {}
+    findings = certificate.get("findings") or {}
+    if methodology.get("primary_procedure") != NEAR_CHANCE_PROCEDURE or \
+            methodology.get("supporting_procedure") != PAIRED_PROCEDURE:
+        raise IntegrityError("Certificate records a procedure other than the implemented near_chance_tost_v3.")
+    for key in ("chance_margin", "effect_threshold", "alpha", "paired_endpoint_role"):
+        if methodology.get(key) != settings.get(key):
+            raise IntegrityError(f"Certificate methodology {key} differs from its settings.")
+    rows = findings.get("replicates") or []
+    k = settings.get("replicates")
+    if len(rows) != k or [r.get("replicate") for r in rows] != list(range(1, len(rows) + 1)):
+        raise IntegrityError(f"Certificate has {len(rows)} replicate rows; settings declare {k}. "
+                             "A missing replicate is not allowed.")
+    n = settings.get("test_examples")
+    for r in rows:
+        counts = [r.get(f) for f in ("test_examples", "baseline_correct", "perturbed_correct", "mcnemar_b",
+                                     "mcnemar_c")]
+        if not all(isinstance(v, int) and not isinstance(v, bool) and v >= 0 for v in counts):
+            raise IntegrityError(f"Replicate {r.get('replicate')}: counts must be non-negative integers.")
+        total, base, pert, b, c = counts
+        if total != n or total < 1:
+            raise IntegrityError(f"Replicate {r['replicate']}: test_examples {total} differs from settings {n}.")
+        both_correct = base - c
+        if not (0 <= both_correct and both_correct + b + c <= total and pert == both_correct + b):
+            raise IntegrityError(f"Replicate {r['replicate']}: counts are not a consistent paired 2x2 table.")
+        if r["baseline_accuracy"] != base / total or r["perturbed_accuracy"] != pert / total:
+            raise IntegrityError(f"Replicate {r['replicate']}: accuracies do not equal counts / n.")
+        if r["accuracy_difference"] != r["perturbed_accuracy"] - r["baseline_accuracy"]:
+            raise IntegrityError(f"Replicate {r['replicate']}: accuracy difference is inconsistent.")
+        if mcnemar_exact_pvalue_from_counts(b, c) != r["mcnemar_pvalue"] or \
+                mcnemar_one_sided_pvalue(b, c) != r["mcnemar_one_sided_pvalue"]:
+            raise IntegrityError(f"Replicate {r['replicate']}: McNemar p-value does not match (b, c).")
+    decision = evaluate_near_chance_decision(
+        [{"test_examples": r["test_examples"], "perturbed_correct": r["perturbed_correct"],
+          "mcnemar_b": r["mcnemar_b"], "mcnemar_c": r["mcnemar_c"]} for r in rows],
+        planned_replicates=k, chance=settings.get("chance_level"), margin=settings.get("chance_margin"),
+        alpha=settings.get("alpha"), effect_threshold=settings.get("effect_threshold"),
+        paired_endpoint_role=settings.get("paired_endpoint_role"))
+    if findings.get("primary_endpoint") != decision["primary"] or \
+            findings.get("supporting_endpoint") != decision["supporting"]:
+        raise IntegrityError("Certificate endpoint statistics do not match the values recomputed from its counts.")
+    recorded = certificate.get("decision") or {}
+    expected = {"rule": decision["rule"], "outcome": decision["outcome"],
+                "primary_claim_supported": decision["primary_claim_supported"],
+                "paired_endpoint_role": decision["paired_endpoint_role"],
+                "primary_outcome": decision["primary"]["outcome"],
+                "supporting_degradation_established": decision["supporting"]["established"]}
+    if recorded != expected:
+        raise IntegrityError(f"Certificate decision {recorded.get('outcome')!r} does not match the "
+                             f"recomputed decision {decision['outcome']!r}.")
+    if certificate.get("interpretation") != NEAR_CHANCE_INTERPRETATION[decision["outcome"]]:
+        raise IntegrityError("Certificate interpretation does not match the recomputed outcome.")
+    return decision
+
+
 def recompute_certificate_decision(certificate: Mapping[str, Any]) -> dict:
     """Independently re-derive the decision from a certificate's replicate rows.
 
     Recomputes every p-value from (b, c) and every difference from the
     accuracies, then applies the recorded rule and settings.  Raises
     IntegrityError if the certificate's decision or statistics disagree.
+    A near_chance_tost_v3 certificate is recomputed from its integer counts.
     """
+    if certificate.get("schema_version") == NEAR_CHANCE_CERTIFICATE_SCHEMA or \
+            (certificate.get("settings") or {}).get("decision_rule") == NEAR_CHANCE_RULE:
+        if certificate.get("schema_version") != NEAR_CHANCE_CERTIFICATE_SCHEMA or \
+                (certificate.get("settings") or {}).get("decision_rule") != NEAR_CHANCE_RULE:
+            raise IntegrityError("Certificate schema and decision rule disagree.")
+        return _recompute_near_chance(certificate)
     settings = certificate.get("settings") or {}
     rows = certificate.get("findings", {}).get("replicates") or []
     if len(rows) != settings.get("replicates"):
@@ -1099,6 +1553,23 @@ def print_report(
     print("Decision")
     print("-" * 72)
 
+    decision = result.decision or {}
+    if decision.get("rule") == NEAR_CHANCE_RULE:
+        primary = decision["primary"]
+        print(f"Rule                          : {NEAR_CHANCE_RULE} "
+              f"(paired endpoint {decision['paired_endpoint_role']})")
+        print(f"Near-chance band              : [{primary['chance'] - primary['margin']}, {primary['chance'] + primary['margin']}]")
+        for r, row in enumerate(primary["replicates"], start=1):
+            print(f"Shuffled fit {r:2d}               : acc={row['accuracy']:.6f} "
+                  f"{100 * (1 - 2 * row['equivalence_level']):.0f}% CP={row['equivalence_interval']} "
+                  f"-> {row['state']}")
+        print(f"Primary endpoint              : {primary['outcome']}")
+        print(f"Paired degradation established: {decision['supporting']['established']}")
+        print(f"OUTCOME                       : {decision['outcome']}")
+        print(f"Interpretation                : {result.interpretation}")
+        print("=" * 72)
+        return
+
     print(
         f"Practical-effect threshold    : "
         f"{result.effect_threshold:.8f}"
@@ -1141,6 +1612,8 @@ REQUIRED_DECISIONS = (
     "decision_rule", "alpha", "effect_threshold", "replicates", "partition_overlap_policy",
     "within_partition_duplicates_policy", "failure_handling", "calibration",
 )
+#: Further decisions a rule needs whenever it is the chosen rule or one of the options.
+RULE_REQUIRED_DECISIONS = {"near_chance_tost_v3": ("chance_margin", "paired_endpoint_role")}
 
 
 def review_preregistration(record: Mapping[str, Any]) -> dict:
@@ -1177,6 +1650,23 @@ def review_preregistration(record: Mapping[str, Any]) -> dict:
         values[name] = entry["value"]
     if "decision_rule" in values and values["decision_rule"] not in DECISION_RULES:
         problems.append(f"decision_rule {values['decision_rule']!r} is not implemented")
+    rule_entry = decisions.get("decision_rule") if isinstance(decisions.get("decision_rule"), Mapping) else {}
+    candidate_rules = set(rule_entry.get("options") or []) | {rule_entry.get("value")}
+    for rule, names in RULE_REQUIRED_DECISIONS.items():
+        if rule in candidate_rules:
+            problems += [f"decision {name!r} is missing (required by {rule})" for name in names
+                         if name not in decisions]
+    margin_entry = decisions.get("chance_margin")
+    if isinstance(margin_entry, Mapping):
+        if margin_entry.get("units") != "accuracy_fraction":
+            problems.append("decision 'chance_margin' must declare units 'accuracy_fraction'")
+        if "chance_margin" in values:
+            margin = values["chance_margin"]
+            if not (isinstance(margin, float) and 0.0 < margin < 0.5):
+                problems.append(f"decisions.chance_margin {margin!r} must be a float in (0, 0.5)")
+    if values.get("decision_rule") == NEAR_CHANCE_RULE and "paired_endpoint_role" in values and \
+            values["paired_endpoint_role"] not in PAIRED_ENDPOINT_ROLES:
+        problems.append(f"decisions.paired_endpoint_role must be one of {PAIRED_ENDPOINT_ROLES}")
     for field_name in ("approval_statement", "data_examined_before_approval", "approved_by", "approved_utc"):
         value = record.get(field_name)
         if value in (None, "", PENDING):

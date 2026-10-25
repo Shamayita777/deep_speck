@@ -1,19 +1,39 @@
 {
   "schema_version": "d4-preregistration-1",
-  "protocol_id": "d4-gohr-speck3264-r5-label-shuffle-v2",
+  "protocol_id": "d4-gohr-speck3264-r5-label-shuffle-v3",
   "status": "DRAFT_PENDING_HUMAN_APPROVAL",
   "approved": false,
   "approved_by": null,
   "approved_utc": null,
   "approval_statement": "PENDING_HUMAN_APPROVAL",
   "data_examined_before_approval": "PENDING_HUMAN_APPROVAL",
-  "relation_to_prior_evidence": "The September 2026 D4 run (audit/dataset/evidence/d4/, config_hash b41cf02a..., outcome EFFECT_DETECTED) used the earlier implementation: last-epoch evaluation, no hash-bound selection, unverified label reuse. It is historical evidence under that procedure, is not confirmatory under this protocol, and none of its results may be relabelled as evidence of this protocol. Its partitions are not on disk and were never audited for overlap.",
-  "question": "Does Gohr's 5-round Speck32/64 neural distinguisher depend on the original feature/label correspondence of its training data?",
-  "hypothesis": {
-    "H1": "Training on randomly permuted labels lowers held-out accuracy relative to training on the original labels, reproducibly across independent training replicates.",
-    "H0": "For at least one replicate, the label-permuted model is not less accurate than the baseline model on the fixed test partition."
+  "methodology_source": {
+    "document": "~/Downloads/31 (1).pdf (outside the repository)",
+    "sha256": "79cb7ca33d9c1fc12ee14873b8db3f40eb636c64ae43079336032cf9742e36c3",
+    "pages": 44,
+    "sections_applied": [
+      "3.6.4 Stage 4-6 (controlled perturbation; comparative evaluation; statistical assessment; inconclusive when criteria are not all met)",
+      "3.9.4 (confidence interval for every primary result, including distinguishing accuracy)",
+      "3.9.6 (hypotheses fixed before results; post hoc analyses exploratory)",
+      "3.9.7 (multiple-comparison control)",
+      "3.9.8 and 3.9.9 Rule III (failure to reject a null is not evidence of equivalence)",
+      "3.9.10 (reporting requirements)"
+    ],
+    "discrepancy": "This PDF's Controlled Perturbation stage (3.6.4 Stage 4) lists regeneration with independent seeds, deduplication, changed partitioning, class balancing and alternative sampling. It does not mention label shuffling, a near-chance expectation, or the caveat that label shuffling is a blunt control. Those three elements are taken from the protocol owner's written D4 instruction of 2026-10-25, which attributes them to the original Dataset Integrity methodology. Before approving, the owner should confirm which document is the source of the D4 label-shuffle section.",
+    "not_derived_from": "The September 2026 EFFECT_DETECTED result. Neither the hypothesis nor the margin was chosen from it, and its per-replicate accuracies were not read while this draft was prepared."
   },
-  "estimand": "Per replicate r: delta_r = acc(perturbed_r) - acc(baseline_r) on the fixed test partition, accuracy at threshold 0.5. Reported also: mean and SD of delta_r over replicates.",
+  "relation_to_prior_evidence": "The September 2026 D4 run (audit/dataset/evidence/d4/, config_hash b41cf02a..., outcome EFFECT_DETECTED) is historical evidence under an earlier procedure. That procedure used last-epoch evaluation, no hash-bound selection, unverified label reuse and rule conservative_two_sided_v1. Its outcome refers to a paired difference from baseline, not to near-chance accuracy, and it was not produced under this protocol. None of its results may be relabelled as evidence for this protocol. Its partitions are not on disk and were never audited for overlap. The intermediate draft v2 (directional_iut_v2, paired degradation only) was never approved or run.",
+  "question": "Can Gohr's 5-round Speck32/64 training pipeline produce above-chance held-out accuracy when the original feature/label correspondence of its training data is destroyed by permuting the training labels? Expected diagnostic result: near-chance accuracy.",
+  "hypothesis": {
+    "primary_H0": "Non-equivalence: for at least one perturbed fit r, p_r <= 0.5 - chance_margin or p_r >= 0.5 + chance_margin.",
+    "primary_H1": "Near-chance equivalence: for every perturbed fit r = 1..k, 0.5 - chance_margin < p_r < 0.5 + chance_margin.",
+    "departure_claim": "Some perturbed fit departs from the band: p_r > 0.5 + chance_margin or p_r < 0.5 - chance_margin. Established only by the Bonferroni departure tests; it decides NOT_SUPPORTED.",
+    "supporting_H0": "For at least one replicate the perturbed model is not less accurate than its paired baseline.",
+    "supporting_H1": "For every replicate the perturbed model is less accurate than its paired baseline on the same test rows, by at least effect_threshold.",
+    "direction": "Primary: equivalence (two one-sided tests). Departure: either side, because a below-chance model also uses label information. Supporting: one-sided, perturbed worse than baseline.",
+    "not_a_substitute": "A reduction relative to baseline never establishes near-chance accuracy. For example, 0.70 is far below a 0.93 baseline and far from chance."
+  },
+  "estimand": "Primary: p_r is the accuracy, at threshold 0.5, of perturbed fit r's reloaded selected model over the test-generating distribution, conditional on that model. It is estimated by X_r / n on the fixed test partition, with X_r ~ Binomial(n, p_r) given test rows i.i.d. from the generator, independent of training. Supporting: delta_r = acc(perturbed_r) - acc(baseline_r) = (b_r - c_r) / n on the same test rows. The k fits share one test sample. Their accuracies are not independent test sets and are never pooled; every claim is per fit, combined by IUT or Bonferroni, neither of which needs independence.",
   "conditions": {
     "baseline": "Model fit on the original training partition (features, labels).",
     "perturbed": "Model fit on the same features with labels permuted by LabelShufflePerturbation using the replicate's audit RNG stream.",
@@ -27,7 +47,14 @@
   },
   "fixed_design": {
     "source": "Carried unchanged from the existing D4 run configuration (audit/dataset/evidence/d4/run_manifest.json) and Gohr's published training procedure; approved as a whole by the top-level approval.",
-    "target": {"cipher": "speck3264", "num_rounds": 5, "input_difference": {"left_word": "0x0040", "right_word": "0x0000"}},
+    "target": {
+      "cipher": "speck3264",
+      "num_rounds": 5,
+      "input_difference": {
+        "left_word": "0x0040",
+        "right_word": "0x0000"
+      }
+    },
     "dataset": {
       "generator": "speck.make_train_data(n, 5)",
       "randomness": "os.urandom (not seedable); partitions are generated once at preflight and persisted, never regenerated",
@@ -35,35 +62,200 @@
       "input_encoding": "raw_bits_uint8_0_1_width64_no_scaling",
       "input_encoding_check": "validated from the actual arrays at preflight and again before run and verify"
     },
-    "model": {"architecture": "train_nets.make_resnet", "depth": 10, "reg_param": 1e-05, "loss": "mse", "optimizer": "adam", "batch_size": 5000, "learning_rate_schedule": "train_nets.cyclic_lr(10, 0.002, 0.0001)", "shuffle": false},
+    "model": {
+      "architecture": "train_nets.make_resnet",
+      "depth": 10,
+      "reg_param": 1e-05,
+      "loss": "mse",
+      "optimizer": "adam",
+      "batch_size": 5000,
+      "learning_rate_schedule": "train_nets.cyclic_lr(10, 0.002, 0.0001)",
+      "shuffle": false
+    },
     "model_selection": {
       "rule": "argmin_val_loss_over_all_committed_epochs_reloaded_ties_earliest",
       "partition": "validation",
       "reload": "The selected epoch checkpoint is reloaded from disk and is the only model used for test predictions."
     },
-    "seeds": {"audit_seed": 0, "model_seed": "per replicate, SeedSequence(audit_seed).spawn(replicates)[r-1].generate_state(1)[0]; identical for the two conditions of a replicate"},
-    "bootstrap": {"replicates": 5000, "confidence_level": 0.95, "role": "descriptive unless the decision rule uses it"},
-    "test_isolation": "The test partition is given only to predict() of selected models; adapters are constructed without test arrays and see only its digest. No test statistic is computed before all fits of all replicates are complete."
+    "seeds": {
+      "audit_seed": 0,
+      "model_seed": "per replicate, SeedSequence(audit_seed).spawn(replicates)[r-1].generate_state(1)[0]; identical for the two conditions of a replicate"
+    },
+    "bootstrap": {
+      "replicates": 5000,
+      "confidence_level": 0.95,
+      "role": "descriptive only; not used by any decision"
+    },
+    "test_isolation": "The test partition is given only to predict() of selected models; adapters are constructed without test arrays and see only its digest. No test statistic is computed before all fits of all replicates are complete.",
+    "primary_endpoint": {
+      "procedure": {
+        "estimand": "per perturbed fit: test accuracy p_r of the reloaded selected model, conditional on that model",
+        "chance_reference": 0.5,
+        "equivalence_test": "exact_binomial_tost_each_one_sided_test_at_alpha",
+        "equivalence_interval": "clopper_pearson_two_sided_1_minus_2alpha_strictly_inside_band",
+        "equivalence_aggregation": "intersection_union_every_replicate_equivalent",
+        "departure_test": "exact_one_sided_binomial_each_side_at_alpha_over_2k",
+        "departure_aggregation": "bonferroni_any_replicate_departs",
+        "rejection": "p_value_strictly_less_than_level",
+        "outcomes": [
+          "SUPPORTED",
+          "NOT_SUPPORTED",
+          "INCONCLUSIVE",
+          "NOT_COMPLETED"
+        ]
+      },
+      "chance_reference_assumptions": "0.5 is the exact accuracy of any predictor independent of the label when labels are fair coin flips, independent of the features, as speck.make_train_data documents (os.urandom bits). The observed test class counts are recorded in the certificate and not tested here; label balance is D3's subject.",
+      "rule": "Per fit r: EQUIVALENT if P(X>=x|L) < alpha and P(X<=x|U) < alpha. ABOVE_BAND if P(X>=x|U) < alpha/(2k). BELOW_BAND if P(X<=x|L) < alpha/(2k). Otherwise INDETERMINATE. Joint: SUPPORTED iff all k are EQUIVALENT; NOT_SUPPORTED iff any is ABOVE_BAND or BELOW_BAND; otherwise INCONCLUSIVE; NOT_COMPLETED if any fit is missing.",
+      "reported_per_fit": "correct count, n, accuracy, both TOST p-values, the 1-2*alpha Clopper-Pearson interval, both departure p-values and the 1-alpha/k Clopper-Pearson interval, state"
+    },
+    "supporting_endpoint": {
+      "procedure": {
+        "estimand": "per replicate: delta_r = acc(perturbed_r) - acc(baseline_r) = (b - c) / n on the same test rows",
+        "discordance": "b = baseline wrong & perturbed right; c = baseline right & perturbed wrong",
+        "test": "exact_mcnemar_one_sided_h1_perturbed_worse_p_equals_P(B<=b|b+c,0.5)",
+        "zero_discordant": "p_value_1",
+        "practical": "delta_r_at_most_minus_effect_threshold",
+        "aggregation": "intersection_union_every_replicate_degrades",
+        "rejection": "p_value_strictly_less_than_level"
+      },
+      "rule": "Established iff, for every replicate, P(B<=b | b+c, 1/2) < alpha and delta_r <= -effect_threshold. When b+c = 0 the p-value is 1, so the endpoint is not established.",
+      "reported_per_replicate": "b, c, delta_r, one- and two-sided exact McNemar p-values, conditional exact interval for delta_r (given b+c)"
+    }
   },
   "decisions": {
     "decision_rule": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
-      "options": ["directional_iut_v2", "conservative_two_sided_v1"],
-      "recommended": "directional_iut_v2",
-      "rationale": "H1 is directional (label shuffling should lower accuracy). conservative_two_sided_v1 (used in September) is two-sided, so an accuracy increase would also count as an effect, and it requires a percentile-bootstrap CI over k replicates to exclude zero; with k=5 that interval has poor coverage. directional_iut_v2 is an intersection-union test: every replicate's exact one-sided McNemar p < alpha AND every replicate's delta <= -effect_threshold. The IUT has level alpha without Bonferroni. The bootstrap CI becomes descriptive."
+      "options": [
+        "near_chance_tost_v3"
+      ],
+      "recommended": "near_chance_tost_v3",
+      "rationale": "Makes near-chance equivalence the primary endpoint, as the D4 question requires. directional_iut_v2 and conservative_two_sided_v1 test only a difference from baseline and cannot establish near-chance accuracy, so this runner refuses them. Their code stays in the engine to reproduce historical evidence."
+    },
+    "chance_margin": {
+      "status": "PENDING_HUMAN_APPROVAL",
+      "value": null,
+      "units": "accuracy_fraction",
+      "recommended": 0.005,
+      "rationale": "delta_chance defines the near-chance band [0.5 - delta, 0.5 + delta] for each perturbed fit's population test accuracy. It is a separate scientific quantity from effect_threshold, which is a minimum paired difference from baseline. The methodology states the qualitative expectation (near chance) but no number, so the value is a human scientific decision. Two bounds can be justified. (1) Floor, from design power and not from outcome data: with n_test = 10^6 and alpha = 0.05, delta >= 0.0025 gives P(all five fits EQUIVALENT | every p_r = 0.5) >= 0.996 by the union bound. delta = 0.002 gives >= 0.907, and delta <= 0.0015 is underpowered (table in operating_characteristics). (2) Ceiling, from the domain: Gohr (CRYPTO 2019, Table 2) reports about 0.514 accuracy for the 8-round Speck32/64 distinguisher, which is used in published key recovery. An artifact of that strength must therefore be outside the band, so delta < 0.014. This anchor was recalled from the paper, not taken from the repository; verify it before approval. Between the bounds the choice is a judgment. 0.005 (half a percentage point) is recommended as a round value. It keeps an 8-round-strength artifact 0.009 (18 standard errors) outside the band, and it still declares equivalence with probability 0.9996 for a fit whose true accuracy is 0.5025. Note that any reproducible advantage is exploitable in principle, given enough data. The band therefore means 'practically equivalent to chance for this pipeline control', not 'cryptanalytically worthless'.",
+      "operating_characteristics": {
+        "inputs": "n_test = 1000000, alpha = 0.05, k = 5; exact binomial; computed with the engine functions; no D4 outcome data used",
+        "columns": [
+          "delta",
+          "P(fit EQUIVALENT | p=0.5)",
+          "union lower bound P(all 5 EQUIVALENT | p=0.5)",
+          "P(EQUIVALENT | p=0.5+delta/2)",
+          "P(EQUIVALENT | p=U) (size, <= alpha)",
+          "P(ABOVE_BAND | p=0.514)",
+          "P(ABOVE_BAND | p=0.5+2*delta)"
+        ],
+        "rows": [
+          [
+            0.001,
+            0.27741,
+            0.0,
+            0.1718,
+            0.0407,
+            1.0,
+            0.282
+          ],
+          [
+            0.0015,
+            0.824582,
+            0.122912,
+            0.4402,
+            0.05,
+            1.0,
+            0.6639
+          ],
+          [
+            0.002,
+            0.981477,
+            0.907387,
+            0.6387,
+            0.05,
+            1.0,
+            0.9226
+          ],
+          [
+            0.0025,
+            0.999206,
+            0.996032,
+            0.8037,
+            0.05,
+            1.0,
+            0.9923
+          ],
+          [
+            0.003,
+            0.999987,
+            0.999933,
+            0.9123,
+            0.05,
+            1.0,
+            0.9997
+          ],
+          [
+            0.004,
+            1.0,
+            1.0,
+            0.9907,
+            0.05,
+            1.0,
+            1.0
+          ],
+          [
+            0.005,
+            1.0,
+            1.0,
+            0.9996,
+            0.05,
+            1.0,
+            1.0
+          ],
+          [
+            0.0075,
+            1.0,
+            1.0,
+            1.0,
+            0.05,
+            1.0,
+            1.0
+          ],
+          [
+            0.01,
+            1.0,
+            1.0,
+            1.0,
+            0.05,
+            1.0,
+            1.0
+          ]
+        ],
+        "reproduce": "~/.venvs/autond-tf215-audit-20261015T050853Z/bin/python -B -m audit.dataset.tools.d4_near_chance_operating_characteristics"
+      }
+    },
+    "paired_endpoint_role": {
+      "status": "PENDING_HUMAN_APPROVAL",
+      "value": null,
+      "options": [
+        "secondary",
+        "co_primary"
+      ],
+      "recommended": "secondary",
+      "rationale": "secondary: the outcome is the primary near-chance outcome. Paired degradation is reported beside it with its own IUT at level alpha and never changes the outcome. Citing both claims as confirmatory has familywise error <= 2*alpha (Bonferroni); cite only the primary, or choose co_primary. co_primary: SUPPORTED requires all k fits EQUIVALENT and paired degradation established for all k replicates. That is an intersection-union test over 2k component tests, each at alpha, so the joint claim has level alpha without adjustment (Berger 1982). Paired degradation that is not established makes the outcome INCONCLUSIVE, never NOT_SUPPORTED, because non-significance is not evidence of no degradation. Trade-off: with secondary, a broken pipeline whose baseline is also at chance would still give primary SUPPORTED. The certificate then shows the paired endpoint as not established, but the outcome does not change. co_primary closes that gap at a small cost in power, since the baseline is expected near 0.93. secondary is recommended because the D4 question asks only about the shuffled condition. co_primary is the safer choice if the outcome must stand alone."
     },
     "alpha": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
       "recommended": 0.05,
-      "rationale": "Carried from the existing configuration. Under directional_iut_v2 it is the per-replicate and overall level; under conservative_two_sided_v1 it is Bonferroni-split over replicates."
+      "rationale": "Level of each TOST one-sided test (so each fit's equivalence is a 1-2*alpha = 90% exact interval inside the band), of the primary IUT, of the Bonferroni departure family (alpha/(2k) per one-sided test), and of the paired IUT. Carried from the existing configuration."
     },
     "effect_threshold": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
       "recommended": 0.01,
-      "rationale": "Carried from the existing configuration: one percentage point of accuracy, as a fraction. Not derived from a validated margin; it is an operational practical-relevance threshold. A label-shuffled model is expected near 0.5 against a baseline near 0.93, so the threshold is far from binding; its role is to stop a statistically significant but negligible difference from counting."
+      "rationale": "Supporting endpoint only: the minimum paired accuracy reduction delta_r <= -effect_threshold, as a fraction (0.01 = one percentage point). It is an operational practical-relevance threshold carried from the existing configuration, not a validated margin. It is never used as the near-chance margin."
     },
     "replicates": {
       "status": "PENDING_HUMAN_APPROVAL",
@@ -74,7 +266,11 @@
     "sample_sizes": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
-      "recommended": {"train": 10000000, "validation": 1000000, "test": 1000000},
+      "recommended": {
+        "train": 10000000,
+        "validation": 1000000,
+        "test": 1000000
+      },
       "rationale": "Carried from the existing configuration and Gohr's 5-round setting."
     },
     "epochs": {
@@ -86,55 +282,84 @@
     "partition_overlap_policy": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
-      "options": ["refuse_on_any_cross_partition_feature_row", "record_only"],
+      "options": [
+        "refuse_on_any_cross_partition_feature_row",
+        "record_only"
+      ],
       "recommended": "refuse_on_any_cross_partition_feature_row",
       "rationale": "Measured at preflight on the actual persisted partitions, before any training. Features are 64-bit rows from os.urandom-keyed encryptions, so expected accidental cross-partition collisions are about n_a*n_b/2^64 (about 5e-7 for train-test), and any shared row signals a generation defect. train-test and validation-test sharing would let fitted or selection-used rows into evaluation; train-validation sharing would bias checkpoint selection. A refusal ends this protocol; the partitions are kept and not regenerated, deduplicated or altered, and any new dataset needs a documented, prospective protocol amendment."
     },
     "within_partition_duplicates_policy": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
-      "options": ["record_only", "refuse_on_any_within_partition_duplicate"],
+      "options": [
+        "record_only",
+        "refuse_on_any_within_partition_duplicate"
+      ],
       "recommended": "record_only",
       "rationale": "A duplicate inside one partition does not cross the fit/selection/evaluation boundary; it is recorded in the evidence with its label-conflict count. It is also astronomically unlikely here, so a non-zero count should be reported as an anomaly in the write-up."
     },
     "label_conflict_reporting": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
-      "options": ["report_separately_non_gating"],
+      "options": [
+        "report_separately_non_gating"
+      ],
       "recommended": "report_separately_non_gating",
       "rationale": "Feature-row overlap and label agreement are checked separately: within each partition, distinct feature rows seen with more than one label; across partitions, shared rows whose labels differ. Under the recommended overlap policy any cross-partition row already refuses, so label conflicts add information but not a separate gate."
     },
     "failure_handling": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
-      "options": ["abort_whole_run_no_exclusions"],
+      "options": [
+        "abort_whole_run_no_exclusions"
+      ],
       "recommended": "abort_whole_run_no_exclusions",
-      "rationale": "No replicate is ever excluded or replaced. A crash may be resumed only through the adapter's verified recovery (uncommitted epochs quarantined and retrained, all retries recorded); any integrity refusal stops the run, and the outcome is then reported as NOT_COMPLETED, never as a result on fewer replicates. Stopping rule: the run ends when all k replicates finish; there is no interim look at test statistics."
+      "rationale": "No replicate is ever excluded or replaced. A crash may be resumed only through the adapter's verified recovery (uncommitted epochs quarantined and retrained, all retries recorded); any integrity refusal stops the run, and the outcome is then NOT_COMPLETED (no certificate; verify exits 5), never as a result on fewer replicates. Stopping rule: the run ends when all k replicates finish; there is no interim look at test statistics."
     },
     "calibration": {
       "status": "PENDING_HUMAN_APPROVAL",
       "value": null,
-      "options": ["none_required"],
+      "options": [
+        "none_required"
+      ],
       "recommended": "none_required",
-      "rationale": "The confirmatory test is an exact binomial McNemar test conditional on each fitted model pair; its level holds exactly given independent test examples (independent make_train_data rows), so no simulation-based calibration is needed for the error guarantee. The synthetic-adapter tests in the repository check the software, not the statistical properties, and are not a calibration."
+      "rationale": "Every confirmatory test is exact: binomial tails for the TOST and departure tests, and the conditional binomial for McNemar. Their levels hold given test rows i.i.d. from the generator, independent of training, so no simulation calibration is needed for the error guarantees. test_d4_near_chance.py checks the software against an exact rational-arithmetic reference on small enumerated cases. That is software validation, not scientific calibration."
     }
   },
   "outcomes": {
-    "primary": "decision.outcome in {EFFECT_DETECTED, NO_REPRODUCIBLE_EFFECT_DETECTED}, or NOT_COMPLETED if the run did not finish all replicates",
-    "secondary": ["per-replicate baseline and perturbed accuracy", "per-replicate exact McNemar b, c and p-values (one- and two-sided)", "mean and SD of delta_r", "percentile bootstrap CI of mean delta (descriptive)", "selected epoch and val_loss per fit"]
+    "primary": "decision.outcome in {SUPPORTED, NOT_SUPPORTED, INCONCLUSIVE, NOT_COMPLETED}. Only SUPPORTED is a scientific pass; INCONCLUSIVE and NOT_COMPLETED are never reported as passes.",
+    "reported": [
+      "per shuffled fit: correct count, n, accuracy, TOST p-values, 90% Clopper-Pearson interval, departure p-values and interval, state",
+      "per replicate: baseline accuracy, b, c, delta_r, exact McNemar p-values (one- and two-sided), conditional exact interval for delta_r",
+      "supporting endpoint established or not",
+      "descriptive: mean and SD of delta_r, percentile bootstrap CI of mean delta_r",
+      "selected epoch and val_loss per fit; test class counts"
+    ]
   },
   "provenance_requirements": [
     "preflight.json: preregistration SHA-256 anchor and commit, source identity, partition files with SHA-256, canonical partition digests, input-encoding check, overlap audit and policy outcome",
     "per fit: hash-chained epoch records, state.json, selected_checkpoint.json with every epoch checkpoint digest and the train/validation/evaluation digests",
     "per replicate: perturbation sidecar binding the perturbed labels to the source training digest",
     "result/: certificate and run manifest written once, exclusively; manifest binds certificate SHA-256, preflight SHA-256, source identity and run id",
-    "verify stage: recomputes every p-value and the decision, re-verifies every fit chain and checkpoint, every perturbation and every partition file"
+    "verify stage: recomputes every p-value and the decision, re-verifies every fit chain and checkpoint, every perturbation and every partition file",
+    "per fit: raw test predictions of the reloaded selected model (fits/predictions/replicate_NN_<condition>.npy), with SHA-256, dtype and shape in the certificate",
+    "verify stage: recounts every fit's correct count and (b, c) from those predictions and the preflight-bound test labels, then recomputes every endpoint statistic and the outcome; it does not re-run the network (see certificate methodology.verifiability)"
   ],
   "scope_and_limitations": [
-    "A label-shuffle effect shows the model depends on the feature/label correspondence; it does not by itself show cryptographic structure was learned.",
-    "McNemar inference is conditional on the fitted models; reproducibility across training randomness is addressed only by requiring every replicate to pass.",
+    "Label shuffling is a blunt control: it removes genuine signal and label-correlated artifacts together. A near-chance result does not show that no leakage of any form exists.",
+    "Inference is conditional on each fitted model and the shared test sample. 'All k' is a statement about these k training seeds, not a population estimate over seeds.",
+    "A non-chance result shows that the pipeline extracts label information without the original correspondence. It does not identify the mechanism, which needs the targeted checks below.",
     "TensorFlow training is not bitwise deterministic; seeds fix initialization and data order, not every floating-point result.",
     "Hash chains detect corruption and substitution relative to digests held elsewhere; they are not signatures.",
     "The dataset depends on os.urandom; the claim is about this persisted instance and the generator, not a re-derivable seed."
-  ]
+  ],
+  "complementary_audits_not_in_scope": {
+    "status": "REQUIRED_SEPARATELY_NOT_PERFORMED_BY_THIS_PROTOCOL",
+    "items": [
+      "targeted generation-order leakage check (e.g. label predictable from row position or generation batch)",
+      "targeted label-leakage check (label recoverable from features or metadata by construction, not by cryptographic signal)"
+    ],
+    "note": "No outcome of this protocol may be reported as covering these checks."
+  }
 }
