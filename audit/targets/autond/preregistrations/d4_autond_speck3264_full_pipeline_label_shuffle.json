@@ -1,0 +1,387 @@
+{
+  "schema_version": "d4-preregistration-1",
+  "protocol_id": "d4-autond-speck3264-single-key-0x400000-staged-dbitnet-full-pipeline-label-shuffle-v2",
+  "status": "APPROVED",
+  "approved": true,
+  "approved_by": "human-approver-01",
+  "approved_utc": "2026-10-29T04:51:38Z",
+  "approval_statement": "This protocol has been approved for use in the AutoND project.",
+  "data_examined_before_approval": "Before approval, I reviewed the proposed decision rules, numerical thresholds, source-provenance record, rationale, approval sheet and reported offline validation results. No v4 preflight, calibration, or production run has occurred, and no v4 outcome data was examined before approval.",
+  "methodology_source": {
+    "overarching_methodology": {
+      "document": "~/Downloads/31 (1).pdf (outside the repository)",
+      "sha256": "79cb7ca33d9c1fc12ee14873b8db3f40eb636c64ae43079336032cf9742e36c3",
+      "role": "Overarching audit methodology; governs the general statistical rules (3.6.4 Stages 4-6, 3.9.4, 3.9.6, 3.9.7, 3.9.8, 3.9.9 Rule III, 3.9.10).",
+      "does_not_define": "D4 label shuffling, a near-chance criterion, a baseline floor or any numerical margin."
+    },
+    "d4_basis": {
+      "control": "label permutation as a null control of a learning pipeline: permuting the training labels destroys the feature/label dependence while keeping features and label marginals, so a pipeline that learns only through that dependence must give chance-level held-out accuracy",
+      "literature": [
+        "M. Ojala and G. C. Garriga, 'Permutation tests for studying classifier performance', Journal of Machine Learning Research 11:1833-1863, 2010 (classifiers trained on label-permuted data as the null distribution of classifier performance)",
+        "C. Zhang, S. Bengio, M. Hardt, B. Recht and O. Vinyals, 'Understanding deep learning requires rethinking generalization', ICLR 2017 (networks trained on randomized labels: held-out accuracy at chance)"
+      ],
+      "operationalization": "Applying this control to AutoND's staged pipeline, and every margin, floor, round list, criterion and sample size below, are design choices of this protocol; none is prescribed by these sources or by the overarching methodology."
+    },
+    "autond_evidence_used_for_design": [
+      "pinned upstream checkout 8d66e0a4: main.make_train_data (sampling); train_nets.train_neural_distinguisher and train_one_round (staged loop, fresh data per round, EPOCHS=10, NUM_SAMPLES=1e7, NUM_VAL_SAMPLES=1e6, BATCHSIZE=5000, stop when max(history['val_acc']) <= ABORT_TRAINING_BELOW_ACC=0.505, next round load_weights of the round's best-val_loss checkpoint); dbitnet.make_model",
+      "audit/targets/autond/evidence/training/ (12 October staged-training bundle, SHA256SUMS verified): rounds 5-9 trained, per-round best val_acc 0.919 / 0.783 / 0.611 / 0.510 / 0.5007, so round 9 is the stopping sentinel and best_round = 8; its README notes that the stop uses the round's best validation accuracy while the saved checkpoint is chosen by val_loss",
+      "audit/targets/autond/preregistrations/autond_ii_v2.py (frozen, approved): published values (polished 0.5144; unpolished 0.5096), MARGIN_FRACTION = 0.10 of the advantage over 0.5"
+    ],
+    "not_derived_from": "No AutoND D4 result exists. Nothing here was chosen from a D4 outcome.",
+    "feasibility_evidence": {
+      "source": "protocol owner, 2026-10-25; NOT recorded in the repository's training bundle files and not independently verified here",
+      "measurement": "the 12 October reproduction trained rounds 5-9 for 10 epochs each in 5,878 s total on Kaggle T4x2 (117.6 s per epoch)",
+      "use": "planning only. It is not a guarantee of future runtime and is not an argument for changing the design.",
+      "planning_estimate": "about 50 epochs per intact-label fit (rounds 5-9) and about 10 per shuffled fit if it stops at its first round: 5 x 60 = 300 epochs, about 9.8 h at the measured rate; at most 5 x 2 x 50 = 500 epochs (about 16.3 h) if no fit stops before the cap",
+      "execution": "audit.dataset.experiments.d4_autond_two_gpu: intact-label baseline worker on GPU 0 and shuffled-label worker on GPU 1, concurrently, one fit at a time each; the unchanged single-owner run stage then evaluates and certifies. A sequential mode exists and is recorded as such. Physical dual-T4 execution is NOT yet tested; it requires the Kaggle runtime."
+    }
+  },
+  "relation_to_prior_evidence": "No AutoND D4 experiment has been run. This protocol does NOT use the AutoND D0 canonical instance: the full pipeline needs a distinct partition for every round from the starting round to the cap, so D4 generates and persists its own partitions at preflight. The 12 October bundle and the autond_ii_v2 published values inform the design only (round list, stopping sentinel, reference accuracies, margin conventions); they are not inferential inputs. Gohr D4's settings and numbers are not reused. Draft v1 of this protocol (never approved or run) fixed stages 5-8 without the stopping rule and compared round-8 accuracy; it is superseded by this full-pipeline design (RATIONALE section 0).",
+  "question": "When the original feature/label correspondence of all its training data is destroyed by permuting the training labels, does AutoND's full staged DBitNet pipeline (SPECK32/64, single-key, 0x400000, stopping rule included) still produce above-chance held-out accuracy at the shared starting round, while the same pipeline with intact labels produces adequate accuracy there? And does the pipeline's own stopping rule behave as registered on both arms (every shuffled fit stops at the starting round, every intact-label fit passes it)? The two parts are co-primary: the protocol's result (autond_overall_outcome) is SUPPORTED only if both hold.",
+  "hypothesis": {
+    "shuffled_H0": "Non-equivalence: for at least one perturbed fit r, p_r <= 0.5 - chance_margin or p_r >= 0.5 + chance_margin.",
+    "shuffled_H1": "Near-chance equivalence: for every perturbed fit r = 1..k, 0.5 - chance_margin < p_r < 0.5 + chance_margin.",
+    "shuffled_departure_claim": "Some perturbed fit departs from the band; established only by the Bonferroni departure tests.",
+    "baseline_H0": "For at least one intact-label baseline fit r, q_r <= baseline_adequacy_threshold.",
+    "baseline_H1": "For every baseline fit r, q_r > baseline_adequacy_threshold.",
+    "baseline_inadequacy_claim": "Some baseline fit is below the floor; established only by the Bonferroni inadequacy tests.",
+    "supporting_H0": "For at least one replicate the perturbed model is not less accurate than its paired baseline.",
+    "supporting_H1": "For every replicate the perturbed model is less accurate than its paired baseline by at least effect_threshold.",
+    "not_a_substitute": "A reduction relative to baseline never establishes near-chance accuracy or baseline adequacy.",
+    "progression_criterion": "Co-primary and not a hypothesis test: every perturbed fit stops at the starting round with no best_round, and every baseline fit passes the starting round (upstream's own point rule on validation maxima). It can only remove SUPPORTED outcomes; it never creates one."
+  },
+  "estimand": "p_r and q_r: the accuracy at threshold 0.5 of the reloaded selected checkpoint of the COMPARISON ROUND (the starting round, the only round every fit trains whatever the stopping rule does) of perturbed and baseline fit r, over that round's test-generating distribution, conditional on the model; estimated by X_r / n on the fixed test partition. Sampling (read from main.make_train_data at the pinned commit): each row draws its own key and plaintext from os.urandom, the label is an independent urandom bit (Y = urandom & 1), and every Y == 0 row is replaced by a uniformly random 64-bit row; rows are i.i.d. and class counts are not fixed, so given a model X_r ~ Binomial(n, p_r) exactly. The test partition is generated independently of training and reaches only predict(). All 2k fits share one test sample; they are never pooled; every claim is per fit, combined by IUT or Bonferroni, neither of which needs independence. Pipeline progression (co-primary, decisions.pipeline_progression_role): per fit, the rounds trained, each round's max val_acc, the stop round and best_round, recomputed from the committed records and judged by fixed_design.pipeline_progression_endpoint.criterion.",
+  "conditions": {
+    "baseline": "The full staged pipeline on the registered rounds' training partitions with their original labels; it stops when upstream's rule stops it.",
+    "perturbed": "The same pipeline on the same features with all rounds' training labels permuted (one permutation over the round-major concatenation); it stops when upstream's rule stops it, which is expected at its first round.",
+    "pairing": "Both fits of a replicate use the same seed, rounds, validation partitions (true labels), procedure and stopping rule; only the training labels differ. Both are evaluated on the same comparison-round test rows."
+  },
+  "perturbation": {
+    "name": "label_shuffle",
+    "construction": "indices = rng.permutation(n_train_total) over the round-major concatenation of all registered rounds' training rows (little-endian int64), rng = default_rng(SeedSequence(audit_seed).spawn(replicates)[r-1]); perturbed_labels[i] = train_labels[indices[i]]; features unchanged.",
+    "scope": "One permutation across all registered rounds: labels are destroyed within and across rounds, so no round can carry genuine signal into the next. Per-round class counts move by O(sqrt(n)); all labels are fair bits.",
+    "definition_check": "LabelShufflePerturbation.verify: features byte-identical; labels same length, dtype and multiset.",
+    "persistence": "Only the permutation indices are persisted; they are verified (bijection, digest, regenerated plan, bound to training-data and label digests, condition, replicate, seed, audit seed) before any reuse."
+  },
+  "fixed_design": {
+    "target": {
+      "cipher": "speck3264",
+      "scenario": "single-key",
+      "delta_plain_hex": "0x400000",
+      "delta_key_hex": "0x0",
+      "audited_pipeline": "train_nets.train_neural_distinguisher with model_name='dbitnet' (as run by main.trainNeuralDistinguishers), stopping rule included"
+    },
+    "upstream": {
+      "commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+      "source_digests": {
+        "main.py": "52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665",
+        "optimizer.py": "2d58e4fd94973040e1ead21166b188527b6935d499a7a818a3c613ac4888d505",
+        "train_nets.py": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e",
+        "dbitnet.py": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+        "gohrnet.py": "324c3768e19a6230dbedbe0446f54c6139d72f5dc642f5cfb60a8fa9a9ea1d56",
+        "ciphers/speck3264.py": "fd4a04be7fb632cea422338e6ae8446e421049649944f9dab87cc05e0e5ca9fe"
+      },
+      "binding": "AutoNDDatasetAdapter verifies commit and digests BEFORE import and re-checks what was bound after; dbitnet must resolve inside the checkout"
+    },
+    "dataset": {
+      "generator": "main.make_train_data(encrypt, 32, 64, n, round, delta_plain, 0)",
+      "randomness": "os.urandom (not seedable); generated once at preflight and persisted",
+      "partitions": "one train_rRR and one validation_rRR partition per registered round (starting_round .. max_round), distinct for every round as upstream's fresh data per round; one test partition at the comparison round",
+      "layout": "train persisted as the round-major concatenation with recorded round rows and per-round digests",
+      "input_encoding": "raw_bits_uint8_0_1_width64_hstack_C0_C1_no_scaling",
+      "input_encoding_check": "validated from the arrays at preflight and again before run and verify"
+    },
+    "training_procedure": {
+      "loop": "from starting_round: fit epochs_per_round epochs on the round's training partition, validating on its validation partition; compute the round's max val_acc over its epochs; stop if it is <= stop_threshold, otherwise continue with the next round",
+      "stop_threshold": 0.505,
+      "stop_rule_source": "train_nets.ABORT_TRAINING_BELOW_ACC at the pinned commit; checked against the bound module at run time",
+      "stop_metric": "max(history['val_acc']) of the round (not the val_acc of the selected checkpoint), exactly as upstream",
+      "carry_over": "round r+1 starts with the weights of round r's selected (min val_loss) checkpoint and the optimizer state of round r's last epoch, as upstream's load_weights on its persistent model",
+      "comparison_round": "starting_round",
+      "comparison_round_reason": "the only round every fit trains whatever the stopping rule does; a shuffled pipeline is expected to stop there",
+      "cap": "a fit that passes max_round has status cap_reached (reported); upstream has no cap",
+      "implication_for_the_perturbed_arm": "a shuffled fit whose first round has max val_acc <= 0.505 stops there with best_round None; its round-1 selected checkpoint is still the one evaluated at the comparison round",
+      "departures_from_upstream": [
+        "data generated once at preflight and shared by the paired fits and all replicates (upstream draws fresh data per call); each round still has its own distinct partition",
+        "TensorFlow seeded per fit and per (round, starting epoch); upstream is unseeded",
+        "every epoch checkpoint persisted and hash-chained (upstream keeps only the best per round)",
+        "a registered cap max_round bounds a fit that never stops"
+      ]
+    },
+    "model": {
+      "architecture": "dbitnet",
+      "builder": "dbitnet.make_model(2 * plain_bits) = make_model(64)",
+      "optimizer": "Adam(amsgrad=True)",
+      "loss": "mse",
+      "metrics": [
+        "acc"
+      ],
+      "batch_size": 5000,
+      "shuffle": true
+    },
+    "model_selection": {
+      "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+      "partition": "validation (per round, true labels)",
+      "reload": "The comparison round's selected checkpoint is reloaded from disk and is the only model used for test predictions (batch 5000)."
+    },
+    "seeds": {
+      "audit_seed": 0,
+      "model_seed": "per replicate, SeedSequence(audit_seed).spawn(replicates)[r-1].generate_state(1)[0]; identical for both conditions of a replicate",
+      "tensorflow": "tf.keras.utils.set_random_seed(SeedSequence([model_seed, stage_round, initial_epoch]))"
+    },
+    "bootstrap": {
+      "replicates": 5000,
+      "confidence_level": 0.95,
+      "role": "descriptive only; not used by any decision"
+    },
+    "test_isolation": "The test partition is given only to predict() of reloaded selected models; adapters are constructed without test arrays and see only its digest; validation partitions are used for checkpoint selection only. No test statistic is computed before all fits are complete.",
+    "primary_endpoint": {
+      "procedure": {
+        "estimand": "per perturbed fit: test accuracy p_r of the reloaded selected model, conditional on that model",
+        "sampling_model": "test rows i.i.d. from make_train_data (labels independent urandom bits, class counts not fixed); X_r ~ Binomial(n, p_r) given the model",
+        "chance_reference": 0.5,
+        "equivalence_test": "exact_binomial_tost_each_one_sided_test_at_alpha",
+        "equivalence_interval": "clopper_pearson_two_sided_1_minus_2alpha_strictly_inside_band",
+        "equivalence_aggregation": "intersection_union_every_replicate_equivalent",
+        "departure_test": "exact_one_sided_binomial_each_side_at_alpha_over_2k",
+        "departure_aggregation": "bonferroni_any_replicate_departs",
+        "rejection": "p_value_strictly_less_than_level",
+        "outcomes": [
+          "SUPPORTED",
+          "NOT_SUPPORTED",
+          "INCONCLUSIVE",
+          "NOT_COMPLETED"
+        ]
+      }
+    },
+    "baseline_adequacy_endpoint": {
+      "procedure": {
+        "estimand": "per intact-label baseline fit: test accuracy q_r of the reloaded selected model, conditional on that model",
+        "sampling_model": "same test rows and binomial model as the near-chance endpoint",
+        "adequacy_test": "exact_one_sided_binomial_h0_q_at_most_threshold_at_alpha",
+        "adequacy_bound": "clopper_pearson_one_sided_1_minus_alpha_lower_bound_strictly_above_threshold",
+        "adequacy_aggregation": "intersection_union_every_baseline_adequate",
+        "inadequacy_test": "exact_one_sided_binomial_h0_q_at_least_threshold_at_alpha_over_k",
+        "inadequacy_aggregation": "bonferroni_any_baseline_inadequate",
+        "rejection": "p_value_strictly_less_than_level",
+        "outcomes": [
+          "PASSED",
+          "FAILED",
+          "INDETERMINATE",
+          "NOT_COMPLETED"
+        ]
+      },
+      "no_selective_reruns": "No baseline is re-run, replaced or excluded after its accuracy is seen."
+    },
+    "supporting_endpoint": {
+      "procedure": {
+        "estimand": "per replicate: delta_r = acc(perturbed_r) - acc(baseline_r) = (b - c) / n on the same test rows",
+        "discordance": "b = baseline wrong & perturbed right; c = baseline right & perturbed wrong",
+        "test": "exact_mcnemar_one_sided_h1_perturbed_worse_p_equals_P(B<=b|b+c,0.5)",
+        "zero_discordant": "p_value_1",
+        "practical": "delta_r_at_most_minus_effect_threshold",
+        "aggregation": "intersection_union_every_replicate_degrades",
+        "rejection": "p_value_strictly_less_than_level",
+        "role": "secondary_supporting_never_gates_the_outcome"
+      }
+    },
+    "overall_rule": {
+      "NOT_COMPLETED": "any planned fit missing",
+      "NOT_SUPPORTED": "near-chance endpoint NOT_SUPPORTED",
+      "BASELINE_INADEQUATE": "otherwise, baseline-adequacy gate FAILED",
+      "SUPPORTED": "otherwise, near-chance endpoint SUPPORTED and baseline-adequacy gate PASSED",
+      "INCONCLUSIVE": "otherwise",
+      "paired_degradation": "reported, never gating"
+    },
+    "class_conditional_diagnostics": "TNR/TPR with counts per fit; descriptive only.",
+    "comparability_to_published_pipeline": {
+      "reference": "12 October staged reproduction (one run): per-round best val_acc 0.919 (round 5), 0.783, 0.611, 0.510, 0.5007 (round 9, the stopping sentinel); round-8 test mean 0.5097 vs unpolished Table 6 0.5096 (paper PDF digest UNVERIFIED in this repository). The polished checkpoint (0.5144, polish_nets.py) is a different artifact and not the D4 target.",
+      "consequence": "The comparison round's reference is a VALIDATION maximum from one run (0.919); test accuracy and seed-to-seed spread at round 5 are unmeasured."
+    },
+    "pipeline_progression_endpoint": {
+      "role": "co_primary (decisions.pipeline_progression_role): gates autond_overall_outcome",
+      "reported": "per fit: status, rounds trained, per-round max val_acc, stop round, best_round, best val_acc; counts of shuffled fits stopping at the first round and with no best_round; baseline best and stop rounds; fits reaching the cap",
+      "recomputation": "from the committed (round, epoch) records alone; verify refuses a certificate whose progression differs, and refuses a fit that trained past a stop or stopped early",
+      "criterion": "every perturbed fit stops at the starting round with no best_round, and every baseline fit passes at least its starting round (best_round is not None)",
+      "outcome_under_co_primary": "autond_overall_outcome = PROGRESSION_NOT_CONFIRMED when the engine outcome is SUPPORTED and the criterion is unmet; otherwise the engine outcome",
+      "error_control": "the progression component has no error control; under co_primary it can only remove SUPPORTED outcomes, so the joint SUPPORTED claim keeps the engine's level alpha",
+      "operating_characteristics": "Design only. A shuffled fit at chance (p = 0.5) has a round-5 validation accuracy above 0.505 in any of its 10 epochs (n_val = 10^6 each) with probability at most 7.5e-23 (union bound over exact binomial tails), so the criterion costs no measurable power when the near-chance hypothesis holds; it removes SUPPORTED only when a shuffled fit learns enough for the pipeline itself to continue. A baseline that passes the 0.90 gate fails the criterion only if its round-5 validation maximum is <= 0.505 while its test accuracy exceeds 0.90.",
+      "not_required": "The criterion does not require intact-label fits to reach the round-9 sentinel. Round 8 cleared the stop by 0.0054 in the single reference run and its seed spread is unmeasured, so such a requirement would test reproduction of the late-round frontier, not label dependence. Each baseline's stop round and best_round are reported."
+    }
+  },
+  "decisions": {
+    "decision_rule": {
+      "status": "APPROVED",
+      "value": "near_chance_baseline_gated_v4",
+      "recommended": "near_chance_baseline_gated_v4",
+      "options": [
+        "near_chance_baseline_gated_v4"
+      ],
+      "rationale": "Overall SUPPORTED requires near-chance equivalence of every shuffled fit and adequacy of every intact-label baseline; the paired comparison is secondary. Same engine rule as Gohr D4; its statistical assumptions were re-checked for AutoND's generator (estimand)."
+    },
+    "chance_margin": {
+      "status": "APPROVED",
+      "value": 0.005,
+      "recommended": 0.005,
+      "units": "accuracy_fraction",
+      "rationale": "Band [0.5 - delta, 0.5 + delta] for each shuffled fit's comparison-round test accuracy. Candidate 0.005 (band [0.495, 0.505]): the pipeline's OWN definition of a round that has not learned (ABORT_TRAINING_BELOW_ACC = 0.505, i.e. an advantage of at most 0.005), applied here to test accuracy with an exact equivalence test instead of upstream's point comparison on a validation maximum. It is a design choice, not prescribed by the PDF, the D4 literature (methodology_source.d4_basis) or the AutoND paper. Alternatives considered: 10% of the round-5 advantage (0.10 x 0.419 = 0.042), the autond_ii_v2 convention, which would accept a shuffled model at 0.54 and is too permissive for a null-model check; 0.0025 (half the pipeline's threshold). Design-only operating characteristics at n_test = 10^6, alpha 0.05, k = 5: delta 0.005 gives P(fit EQUIVALENT | p = 0.5) = 1 - 6.5e-17 and 0.9996 at p = 0.5025, size 0.050; delta 0.0025 gives a union lower bound of 0.996 for all five at p = 0.5. Not taken from any D4 result."
+    },
+    "baseline_adequacy_threshold": {
+      "status": "APPROVED",
+      "value": 0.9,
+      "recommended": 0.9,
+      "units": "accuracy_fraction",
+      "rationale": "Floor t for every intact-label baseline's comparison-round test accuracy (one-sided 95% exact Clopper-Pearson lower bound strictly above t). Selected: 0.90. Why not 0.505: with chance_margin 0.005 the near-chance band ends at 0.505, so a 0.505 floor would let SUPPORTED stand for a baseline at about 0.506 and a shuffled fit at about 0.504; the control would then show only that two near-chance models are near chance, and the paired endpoint, which is secondary, would not prevent it. What 0.90 secures: every adequate baseline has an advantage over chance of at least 0.40, so the band admits at most 0.005 / 0.40 = 1.25% of the intact pipeline's advantage surviving the shuffle. This is the interpretation of the approved Gohr D4 protocol (floor 0.90 at round 5, margin 0.005), so the framework applies one D4 criterion across targets. What 0.90 is not: it is not a published AutoND test benchmark and not a reproduction-fidelity claim (AutoND reproduction is assessed separately, autond_ii_v2). It is a protocol-owner tolerance 1.9 points below the single reference run's round-5 VALIDATION maximum 0.919 (epoch 10, which is also that round's min-val_loss epoch, the checkpoint this protocol's selection rule picks). Round-5 test accuracy and seed-to-seed spread are unmeasured, so the tolerance is a judgment, not an estimate. Accepted in advance: a baseline demonstrably below 0.90 makes the outcome BASELINE_INADEQUATE, and one whose bound straddles 0.90 makes it INCONCLUSIVE; neither is a pass, and no baseline is re-run, replaced or excluded after its accuracy is seen. Operating characteristics (design only; n_test = 10^6, alpha = 0.05): ADEQUATE iff at least 900494 correct; P(ADEQUATE | q) = 0.050 at 0.900, 0.955 at 0.901, 1 - 2e-7 at 0.902 and 1.000 at 0.919. Not taken from any D4 result."
+    },
+    "paired_endpoint_role": {
+      "status": "APPROVED",
+      "value": "secondary",
+      "recommended": "secondary",
+      "options": [
+        "secondary"
+      ],
+      "rationale": "Secondary, non-gating; reported only."
+    },
+    "pipeline_progression_role": {
+      "status": "APPROVED",
+      "value": "co_primary",
+      "options": [
+        "reported_non_gating",
+        "co_primary"
+      ],
+      "recommended": "co_primary",
+      "rationale": "Selected: co_primary. The audited object is the full staged pipeline, stopping rule included, so the claim covers the pipeline's own decision on the shuffled data, not only one round's accuracy. autond_overall_outcome is SUPPORTED only if the engine outcome is SUPPORTED AND fixed_design.pipeline_progression_endpoint.criterion holds; an engine SUPPORTED with the criterion unmet becomes PROGRESSION_NOT_CONFIRMED, which is not a pass; every other engine outcome passes through unchanged. Error control: the criterion is an additional requirement on the SUPPORTED event, so under any null P(SUPPORTED) is at most the engine's and the joint claim keeps level alpha. The criterion itself is upstream's point rule (a round's max val_acc <= 0.505), not a hypothesis test, so PROGRESSION_NOT_CONFIRMED is a descriptive failure, reported with the per-round validation maxima. Power cost: negligible when the near-chance hypothesis holds (fixed_design.pipeline_progression_endpoint.operating_characteristics). Alternative not chosen: reported_non_gating, which keeps the outcome purely error-controlled but leaves the pipeline's stopping behaviour outside the claim."
+    },
+    "alpha": {
+      "status": "APPROVED",
+      "value": 0.05,
+      "recommended": 0.05,
+      "rationale": "Level of each TOST one-sided test, each baseline adequacy test, the IUT claims, and the familywise level of the Bonferroni departure (alpha/(2k)) and inadequacy (alpha/k) families; also the secondary paired IUT. Same value as Gohr D4 and autond_ii_v2."
+    },
+    "effect_threshold": {
+      "status": "APPROVED",
+      "value": 0.01,
+      "recommended": 0.01,
+      "rationale": "Secondary paired endpoint only: delta_r <= -effect_threshold at the comparison round. Candidate 0.01, about 2.4% of the round-5 reference advantage (0.419); the expected paired difference if the shuffled arm is at chance is about -0.42. Never used as the near-chance margin."
+    },
+    "replicates": {
+      "status": "APPROVED",
+      "value": 5,
+      "recommended": 5,
+      "rationale": "Independent full-pipeline training replicates per condition; 'all k' concerns these k seeds, not a population over seeds."
+    },
+    "sample_sizes": {
+      "status": "APPROVED",
+      "value": {
+        "train_per_round": 10000000,
+        "validation_per_round": 1000000,
+        "test": 1000000
+      },
+      "recommended": {
+        "train_per_round": 10000000,
+        "validation_per_round": 1000000,
+        "test": 1000000
+      },
+      "rationale": "train_per_round and validation_per_round follow upstream (NUM_SAMPLES = 10^7, NUM_VAL_SAMPLES = 10^6) for every registered round. test = 10^6 at the comparison round, the size of each of upstream's evaluation sets; the candidate margin is well powered at this size (chance_margin)."
+    },
+    "starting_round": {
+      "status": "APPROVED",
+      "value": 5,
+      "recommended": 5,
+      "rationale": "First round of every fit and the comparison round. Candidate 5: the starting round of the project's only provenance-bound staged run. Upstream would use max(1, highest_round - 1) from its optimizer search, and the repository records disagreeing highest rounds (R1 search 5; README prose 7; its log 6), so this is a design choice."
+    },
+    "max_round": {
+      "status": "APPROVED",
+      "value": 9,
+      "recommended": 9,
+      "rationale": "Registered cap. Candidate 9: the round-9 stopping sentinel of the 12 October run (best val_acc 0.5007 <= 0.505), so intact-label baselines attempt round 9 exactly as that run did. A fit that passes round 9 is recorded as cap_reached; no further data exist for it."
+    },
+    "epochs_per_round": {
+      "status": "APPROVED",
+      "value": 10,
+      "recommended": 10,
+      "rationale": "Upstream EPOCHS = 10; the 12 October run used 10 per round."
+    },
+    "partition_overlap_policy": {
+      "status": "APPROVED",
+      "value": "refuse_on_any_cross_partition_feature_row",
+      "recommended": "refuse_on_any_cross_partition_feature_row",
+      "options": [
+        "refuse_on_any_cross_partition_feature_row",
+        "record_only"
+      ],
+      "rationale": "Any shared feature row between any two persisted partitions (all stages, validation and test) signals a generation defect (rows are random 64-bit values). A refusal ends the protocol; data are kept, not regenerated."
+    },
+    "within_partition_duplicates_policy": {
+      "status": "APPROVED",
+      "value": "record_only",
+      "recommended": "record_only",
+      "options": [
+        "record_only",
+        "refuse_on_any_within_partition_duplicate"
+      ],
+      "rationale": "A within-partition duplicate does not cross the fit/selection/evaluation boundary; recorded with its label-conflict count."
+    },
+    "label_conflict_reporting": {
+      "status": "APPROVED",
+      "value": "report_separately_non_gating",
+      "recommended": "report_separately_non_gating",
+      "options": [
+        "report_separately_non_gating"
+      ],
+      "rationale": "Reported separately, non-gating."
+    },
+    "failure_handling": {
+      "status": "APPROVED",
+      "value": "abort_whole_run_no_exclusions",
+      "recommended": "abort_whole_run_no_exclusions",
+      "options": [
+        "abort_whole_run_no_exclusions"
+      ],
+      "rationale": "No replicate is excluded or replaced. A crash resumes only through the adapter's verified recovery (uncommitted steps quarantined and retrained, retries recorded); any integrity refusal stops the run and the outcome is NOT_COMPLETED (no certificate; verify exits 5)."
+    },
+    "calibration": {
+      "status": "APPROVED",
+      "value": "none_required",
+      "recommended": "none_required",
+      "options": [
+        "none_required"
+      ],
+      "rationale": "Every confirmatory test is exact given i.i.d. test rows (verified from main.make_train_data). The AutoND D4 tests check software only and are not a calibration."
+    }
+  },
+  "outcomes": {
+    "overall_d4_outcome": "SUPPORTED, NOT_SUPPORTED, BASELINE_INADEQUATE, INCONCLUSIVE or NOT_COMPLETED by fixed_design.overall_rule; only SUPPORTED is a successful control; integrity verification is reported separately.",
+    "shuffled_near_chance_endpoint": "SUPPORTED, NOT_SUPPORTED, INCONCLUSIVE or NOT_COMPLETED",
+    "baseline_adequacy_gate": "PASSED, FAILED (demonstrably below the floor), INDETERMINATE or NOT_COMPLETED",
+    "paired_degradation_endpoint": "established true/false; secondary_non_gating",
+    "pipeline_progression": "certificate.autond_pipeline_progression (recomputed); gating, because pipeline_progression_role = co_primary",
+    "autond_overall_outcome": "certificate.autond_decision.autond_overall_outcome: the scientific result of this protocol; the engine outcome, except that an engine SUPPORTED with the progression criterion unmet becomes PROGRESSION_NOT_CONFIRMED; SUPPORTED is the only pass"
+  },
+  "provenance_requirements": [
+    "preflight.json: preregistration anchor and commit, repository source identity, upstream identity (commit and digests of what was bound), partition files with SHA-256 and canonical digests (train with per-round rows and digests), input-encoding check, overlap audit and policy outcome",
+    "per fit: hash-chained (round, epoch) records across every trained round, including val_acc for the stopping rule, state.json, selected_checkpoint.json with every trained round's selection and the recomputed progression and every checkpoint digest, train/stage/validation/evaluation digests and the model description",
+    "per replicate: verified permutation indices and sidecar",
+    "per fit: raw comparison-round test predictions with SHA-256 in the certificate",
+    "result/: certificate and manifest written once, exclusively",
+    "verify: recounts every count from the predictions, recomputes every statistic and the outcome, re-verifies every chain, checkpoint, perturbation and partition file, and the identity of every fit; --rerun-models reloads every selected checkpoint and requires identical thresholded predictions"
+  ],
+  "scope_and_limitations": [
+    "Label shuffling is a blunt control: a near-chance result does not show that no leakage exists. Targeted generation-order and label-leakage screens are complementary and not performed here.",
+    "The audited object is the full staged pipeline with its stopping rule on persisted per-round data; the declared departures are listed in fixed_design.training_procedure. The confirmatory comparison is at the starting round; later-round accuracy is not tested (no later-round test partitions), and the stopping progression enters the outcome only through the registered co-primary criterion, which is upstream's point rule on validation maxima and has no error control of its own (it can only remove SUPPORTED).",
+    "Inference is conditional on each fitted model; 'all k' concerns these k seeds.",
+    "TensorFlow training is not bitwise deterministic; retries are recorded, not hidden.",
+    "Resume: a fit with N committed steps resumes at step N+1 from the committed checkpoint (weights and optimizer state); finished fits are verified and never retrained. The Keras shuffle order and other RNG state are not checkpointed, so a resumed trajectory is NOT bit-identical to an uninterrupted one; every quarantine-and-retrain is recorded in retries.",
+    "Hash chains detect corruption and substitution relative to digests held elsewhere; they are not signatures.",
+    "The dataset depends on os.urandom; the claim concerns this persisted instance and the generator.",
+    "Memory: preflight holds every round's partitions and their .npy bytes (about 5.6x10^7 rows at the candidate sizes; several GB); run holds the 5x10^7-row training array.",
+    "Execution: the two-GPU scheduler (audit.dataset.experiments.d4_autond_two_gpu) changes scheduling only. Physical dual-T4 execution has not been tested; it requires the Kaggle runtime."
+  ],
+  "complementary_audits_not_in_scope": {
+    "status": "REQUIRED_SEPARATELY_NOT_PERFORMED_BY_THIS_PROTOCOL",
+    "items": [
+      "targeted generation-order leakage check",
+      "targeted label-leakage check"
+    ]
+  }
+}
