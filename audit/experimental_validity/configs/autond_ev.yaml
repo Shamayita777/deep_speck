@@ -1,0 +1,70 @@
+# AutoND Experimental Validity: the single configuration for all four AutoND EV experiments.
+# Loaded and checked by autond/baseline.py; see docs/autond_ev.md.
+#
+# UNSPECIFIED_REQUIRES_APPROVAL marks a decision that is not yet made. Calibration refuses while any
+# placeholder remains in representation / decisions / calibration, so epsilon and the target effect are
+# frozen BEFORE any pilot data exist; production additionally refuses while any remains in `production`.
+schema: autond-ev-config-1
+
+# Must equal autond.baseline.FROZEN_PROTOCOL: upstream train_nets for DBitNet, one stage at round 5.
+protocol:
+  cipher: speck3264
+  scenario: single-key
+  delta_plain_hex: "0x400000"
+  rounds: 5
+  upstream_commit: 8d66e0a43a9e6fbbb3624d68296c1b77aa2da779
+  architecture: dbitnet
+  builder: dbitnet.make_model(64)
+  optimizer: Adam(amsgrad=True)
+  loss: mse
+  metrics: [acc]
+  epochs: 10
+  batch_size: 5000
+  shuffle: true
+  train_size: 10000000
+  val_size: 1000000
+  confirmatory_test_size: 1000000
+  evaluation: final_epoch_weights
+
+# H-EV-AUTOND-REPRESENTATION condition B: one permutation of the 16 bit positions within each of the four
+# 16-bit ciphertext words, from gohr.representation. Seed 999 realises the same permutation frozen for the
+# Gohr experiment, so the two targets are perturbed identically.
+representation:
+  family: candidate1_within_word_bit_permutation
+  generation_seed: 999
+  expected_sha256: d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427
+
+decisions:
+  alpha: 0.05                   # EV statistical plan: both Holm families
+  target_power: 0.80            # EV statistical plan
+  power_simulations: 50000      # EV statistical plan
+  sigma_bound: upper95          # production is sized on the one-sided 95% upper bound of sigma_Delta
+  practical_threshold: UNSPECIFIED_REQUIRES_APPROVAL             # epsilon, absolute confirmatory accuracy
+  practical_threshold_justification: UNSPECIFIED_REQUIRES_APPROVAL
+  target_effect: UNSPECIFIED_REQUIRES_APPROVAL                   # must exceed epsilon
+  target_effect_justification: UNSPECIFIED_REQUIRES_APPROVAL
+
+# Pilot pairs per paired hypothesis (non-evidentiary; estimates sigma_Delta only). minimum_valid = units:
+# any failed pair means the pilot is re-planned, never analysed on a reduced denominator.
+calibration:
+  H-EV-AUTOND-TRAIN-ORDER: {units: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 91000}
+  H-EV-AUTOND-REPRESENTATION: {units: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 92000}
+
+production:
+  EV-AUTOND-BASELINE: {units: UNSPECIFIED_REQUIRES_APPROVAL, minimum_valid: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 1000}
+  EV-AUTOND-NOISE: {units: UNSPECIFIED_REQUIRES_APPROVAL, minimum_valid: UNSPECIFIED_REQUIRES_APPROVAL, seed: 2000}
+  H-EV-AUTOND-TRAIN-ORDER: {units: UNSPECIFIED_REQUIRES_APPROVAL, minimum_valid: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 3000}
+  H-EV-AUTOND-REPRESENTATION: {units: UNSPECIFIED_REQUIRES_APPROVAL, minimum_valid: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 4000}
+  # Written by `autond.runner plan-power`; declare its SHA-256 and required_n here before production.
+  power_plan:
+    path: results/autond/calibration/power_plan.json
+    sha256: UNSPECIFIED_REQUIRES_APPROVAL
+    required_n: UNSPECIFIED_REQUIRES_APPROVAL
+
+# Pipeline check only: reduced sizes, never evidentiary, excluded from every design hash.
+smoke:
+  protocol: {train_size: 512, val_size: 128, confirmatory_test_size: 1024, epochs: 1, batch_size: 64}
+  EV-AUTOND-BASELINE: {units: 3, base_seed: 81000}
+  EV-AUTOND-NOISE: {units: 3, seed: 82000}
+  H-EV-AUTOND-TRAIN-ORDER: {units: 3, base_seed: 83000}
+  H-EV-AUTOND-REPRESENTATION: {units: 3, base_seed: 84000}
