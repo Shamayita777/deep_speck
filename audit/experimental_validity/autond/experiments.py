@@ -1,12 +1,14 @@
 """
 The four AutoND EV experiments, run by one orchestration loop over framework primitives.
 
-    EV-AUTOND-BASELINE          descriptive; fresh dataset and fresh model seed per replicate
-    EV-AUTOND-NOISE             descriptive; one persisted dataset, one seed, identical reruns
+    EV-AUTOND-BASELINE          descriptive; fresh train/validation/test data and fresh model seed per
+                                replicate, so its spread is end-to-end and includes test-set sampling
+    EV-AUTOND-NOISE             descriptive; one persisted dataset, one seed, identical reruns: execution
+                                variability only
     H-EV-AUTOND-TRAIN-ORDER     paired; shuffle=True (A) vs shuffle=False (B): example ORDER only,
                                 not label shuffling and not D4
-    H-EV-AUTOND-REPRESENTATION  paired; original encoding (A) vs the frozen Candidate-1 within-word
-                                bit permutation (B) on train, validation and test features alike
+    H-EV-AUTOND-REPRESENTATION  paired; original encoding (A) vs the frozen within-word bit permutation
+                                (B, autond.representation) on train, validation and test features alike
 
 Paired differences are B - A. Within a pair both arms use the same persisted dataset and the same
 seed, and the realised initial-weight hashes must be identical or the pair is refused. Per unit:
@@ -47,7 +49,7 @@ from framework.replication import ReplicateSet
 from framework.resumability import ResumeLedger, ResumeViolation, RunState
 from framework.seeds import statistics_rng
 from framework.statistics import descriptive_statistics, paired_analysis
-from gohr.representation import Candidate1Permutation, apply_candidate1, generate_candidate1_permutation
+from autond import representation as REP
 
 FAMILY_ID = "ev_autond_primary_family_v1"
 EQUIVALENCE_FAMILY_ID = "ev_autond_equivalence_family_v1"
@@ -83,11 +85,15 @@ class Spec:
 ORIGINAL = Arm("original", shuffle=True, permuted=False)
 SPECS = {s.experiment_id: s for s in (
     Spec("EV-AUTOND-BASELINE", "replicate", False, False, (ORIGINAL,), 51,
-         "Replicate-to-replicate variability of the round-5 AutoND DBitNet protocol across independent "
-         "training runs (fresh dataset and fresh model seed per replicate)."),
+         "End-to-end replicate-to-replicate variability of the round-5 AutoND DBitNet protocol: every replicate "
+         "draws fresh training, validation and confirmatory-test data and a fresh model seed, so the spread "
+         "includes test-set sampling as well as training variability.",
+         what_changed="fresh training, validation and test data and a fresh model seed per replicate"),
     Spec("EV-AUTOND-NOISE", "rerun", True, True, (ORIGINAL,), 52,
-         "Execution variability of the round-5 AutoND DBitNet protocol: identical persisted data, identical "
-         "seed (verified identical initial weights) and identical configuration, rerun."),
+         "Execution variability of the round-5 AutoND DBitNet protocol: identical persisted training, "
+         "validation and test data, identical seed (verified identical initial weights) and identical "
+         "configuration, rerun. Measures nondeterminism of execution only (e.g. GPU kernels).",
+         what_changed="nothing: identical data, seed and configuration on every rerun"),
     Spec("H-EV-AUTOND-TRAIN-ORDER", "pair", False, False,
          (Arm("condition_a", shuffle=True, permuted=False), Arm("condition_b", shuffle=False, permuted=False)), 53,
          "Under the round-5 AutoND DBitNet protocol, whether training-example ordering (Keras per-epoch "
@@ -109,7 +115,7 @@ SPECS = {s.experiment_id: s for s in (
          "DBitNet's dilated convolutions relate input positions at fixed distances; if the natural alignment of "
          "corresponding bits across the four ciphertext words, rather than information in the ciphertext pair, "
          "drives performance, scrambling bit positions within each word should materially reduce accuracy.",
-         "representation: original encoding -> Candidate-1 within-word bit permutation",
+         "representation: original encoding -> frozen within-word bit permutation (autond.representation)",
          {"supported": "The information-preserving permutation changed confirmatory accuracy materially: the result "
                        "depends on the tested encoding under this architecture and protocol. It does not show that "
                        "the ciphertext lacks information recoverable another way.",
@@ -120,14 +126,12 @@ SPECS = {s.experiment_id: s for s in (
 )}
 
 
-def frozen_permutation(config: dict) -> Candidate1Permutation:
-    """The Candidate-1 permutation, regenerated from its declared seed and bound to its declared hash."""
-    rep = config["representation"]
-    permutation = generate_candidate1_permutation(np.random.default_rng(rep["generation_seed"]))
-    if permutation.hash != rep["expected_sha256"]:
-        raise ConfigError(f"permutation from seed {rep['generation_seed']} has hash {permutation.hash}, "
-                          f"not the declared {rep['expected_sha256']}")
-    return permutation
+def frozen_permutation(config: dict) -> REP.WordPermutation:
+    """The representation permutation, regenerated from its declared seed and bound to its declared hash."""
+    try:
+        return REP.frozen(config)
+    except ValueError as exc:
+        raise ConfigError(str(exc)) from None
 
 
 def practical_significance(config: dict) -> PracticalSignificance:
@@ -159,8 +163,7 @@ def definition(spec: Spec, plan: dict, config: dict) -> Experiment:
         rationale="AutoND counterpart of the EV experiment of the same role.", factors=factors,
         conditions=[Condition(a.condition_id, f"shuffle={a.shuffle}, permuted={a.permuted}",
                               {"shuffle": a.shuffle, "permuted": a.permuted}) for a in spec.arms],
-        controls=["dataset (per unit)", "model seed (per unit)", "round 5", "DBitNet", "Adam(amsgrad=True)",
-                  "MSE", "epochs", "batch size", "software environment"],
+        controls=_controls(spec),
         independent_variable=factors[0].name if factors else None, dependent_variable="confirmatory_test_accuracy",
         unit_of_replication=(_pairing(spec).describe_unit() if spec.paired
                              else f"one independently trained model ({spec.unit})"),
@@ -169,6 +172,18 @@ def definition(spec: Spec, plan: dict, config: dict) -> Experiment:
         pairing=_pairing(spec) if spec.paired else None,
         practical_significance=practical_significance(config) if spec.paired else PracticalSignificance(None, False),
         multiplicity_family=FAMILY_ID if spec.paired else None)
+
+
+def _controls(spec: Spec) -> list[str]:
+    """What is held fixed: never the dataset or seed of EV-AUTOND-BASELINE, which vary by design."""
+    fixed = ["round 5", "DBitNet", "Adam(amsgrad=True)", "MSE", "epochs", "batch size", "software environment"]
+    if spec.paired:
+        other = "input representation (original)" if not any(a.permuted for a in spec.arms) else "shuffle=True"
+        return ["dataset (shared by both arms of a pair)", "model seed (shared by both arms of a pair)", other] + fixed
+    if spec.shared_data:
+        return ["dataset (one for every rerun)", "model seed (one for every rerun)", "shuffle=True",
+                "input representation (original)"] + fixed
+    return ["shuffle=True", "input representation (original)"] + fixed
 
 
 def _pairing(spec: Spec) -> PairingDeclaration:
@@ -186,14 +201,14 @@ def _write_json(path: Path, payload: Any) -> None:
     os.replace(tmp, path)
 
 
-def _arm_partitions(parts: dict, arm: Arm, permutation: Optional[Candidate1Permutation]) -> dict:
+def _arm_partitions(parts: dict, arm: Arm, permutation: Optional[REP.WordPermutation]) -> dict:
     if not arm.permuted:
         return parts
-    return {role: A.Partition(apply_candidate1(p.X, permutation), p.Y) for role, p in parts.items()}
+    return {role: A.Partition(permutation.apply(p.X), p.Y) for role, p in parts.items()}
 
 
 def _load_firewall(path: Path, spec: Spec, unit_hash: str, plan: dict, config: dict,
-                   permutation: Optional[Candidate1Permutation]) -> TestSetFirewall:
+                   permutation: Optional[REP.WordPermutation]) -> TestSetFirewall:
     permutation_hash = permutation.hash if any(a.permuted for a in spec.arms) else None
     if path.is_file():
         firewall = TestSetFirewall.load(path)
@@ -211,13 +226,13 @@ def _load_firewall(path: Path, spec: Spec, unit_hash: str, plan: dict, config: d
 
 
 def run_experiment(experiment_id: str, *, config: dict, mode: str, output_dir: Path, binding,
-                   permutation: Optional[Candidate1Permutation] = None, provenance: Optional[dict] = None) -> dict:
+                   permutation: Optional[REP.WordPermutation] = None, provenance: Optional[dict] = None) -> dict:
     """Run (or resume) every unit of one experiment in one tier and return its certificate."""
     spec = SPECS[experiment_id]
     plan = run_plan(config, experiment_id, mode)
     if any(a.permuted for a in spec.arms) and (permutation is None
                                                or permutation.hash != frozen_permutation(config).hash):
-        raise ConfigError(f"{experiment_id} requires the frozen Candidate-1 permutation")
+        raise ConfigError(f"{experiment_id} requires the frozen representation permutation")
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     experiment_hash = config_hash({"tier": tier_hash(config, mode), "experiment": experiment_id, "mode": mode})
@@ -288,7 +303,8 @@ def run_experiment(experiment_id: str, *, config: dict, mode: str, output_dir: P
                 model_path = output_dir / "models" / f"{unit_id}_{arm.condition_id}.keras"
                 model_path.parent.mkdir(parents=True, exist_ok=True)
                 model.save(model_path)
-                rec["final_model_sha256"] = sha256_file(model_path)
+                rec["final_model_sha256"] = sha256_file(model_path)      # the archive, incl. save-time metadata
+                rec["final_weight_sha256"] = A.weights_sha256(model)     # the trained weights themselves
         results[unit_id] = {"status": "valid" if valid else "failed", "arms": [rec for *_, rec in arms]}
         _write_json(results_path, results)
         ledger.record_state(RunState(experiment_id, unit_id, "complete" if valid else "failed",
@@ -349,6 +365,10 @@ def _certificate(spec, plan, config, mode, results, output_dir, experiment_hash,
     elif sufficient:
         statistics_block = descriptive_statistics(first.valid_metric_array(), rng=rng).to_dict()
         values = {"accuracy": first.valid_metric_array().tolist()}
+        if not spec.shared_data:
+            # each replicate has its own test set, so this much of the spread is test-set sampling alone
+            m = statistics_block["mean"]
+            statistics_block["test_set_sampling_sd_at_mean"] = float(np.sqrt(m * (1 - m) / plan["sizes"]["test"]))
     else:
         values = {"accuracy": first.valid_metric_array().tolist()}
 

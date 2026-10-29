@@ -9,10 +9,10 @@ AutoND EV entry point (separate from Gohr's scripts/run_ev.py).
 
 Run from audit/experimental_validity. Calibration and production refuse unless every gate passes:
 no unresolved decision for that tier, the production power plan matches the design, every EV/AutoND
-source file is committed and clean, the AutoND pin verifies before import, and the frozen
-Candidate-1 permutation validates on real AutoND data. Without --confirm-execute a calibration or
-production `run` is a dry run. Each (mode, experiment) owns its own output directory, bound to its
-mode and held by a single-writer lock.
+source file is committed and clean, TensorFlow/Keras are the supported 2.15 line, the AutoND pin
+verifies before import, and the frozen representation permutation validates on real AutoND data.
+Without --confirm-execute a calibration or production `run` is a dry run. Each (mode, experiment)
+owns its own output directory, bound to its mode and held by a single-writer lock.
 """
 
 from __future__ import annotations
@@ -34,12 +34,11 @@ from autond.baseline import EXPERIMENT_IDS, PRIMARY_FAMILY, check_config, load_c
 RESULTS = EV_ROOT / "results" / "autond"
 SOURCES = (
     *(f"audit/experimental_validity/autond/{f}" for f in ("__init__.py", "adapter.py", "baseline.py", "experiments.py",
-                                                          "runner.py")),
+                                                          "representation.py", "runner.py")),
     *(f"audit/experimental_validity/framework/{f}" for f in (
         "certificate.py", "confidence_intervals.py", "effect_sizes.py", "experiment.py", "failures.py", "firewall.py",
         "manifest.py", "multiplicity.py", "power.py", "provenance.py", "replication.py", "resumability.py", "seeds.py",
         "statistics.py", "validation.py")),
-    "audit/experimental_validity/gohr/representation.py",
     "audit/experimental_validity/scripts/analyze_ev_calibration.py",
     "audit/experimental_validity/configs/autond_ev.yaml",
     "audit/dataset/adapters/autond.py", "audit/dataset/experiments/d0_autond_canonical.py",
@@ -100,12 +99,10 @@ def gates(config: dict, mode: str, binding=None) -> dict:
             raise Refused(f"sources are not committed and clean at HEAD: {dirty}")
         provenance["source_identity"] = identity
     if binding is not None:
-        from gohr.representation import run_full_validation
-
         X, Y = binding.generate_partition(2000)
-        validation = run_full_validation(X, Y, E.frozen_permutation(config))
+        validation = E.REP.validate(X, Y, E.frozen_permutation(config), config["representation"]["generation_seed"])
         if not validation["all_passed"]:
-            raise Refused(f"Candidate-1 permutation failed validation on AutoND data: {validation}")
+            raise Refused(f"the frozen representation permutation failed validation on AutoND data: {validation}")
         provenance |= {"representation_validation": validation,
                        "upstream": {"commit": binding.expected_upstream_commit,
                                     "bound_source_digests": binding.source_digests}}
@@ -121,6 +118,7 @@ def _experiments(selection: str, mode: str) -> list[str]:
 
 
 def cmd_run(args, config) -> int:
+    A.require_supported_environment()
     gates(config, args.mode)
     binding = A.bind(args.autond_root)
     provenance = gates(config, args.mode, binding)
@@ -213,6 +211,7 @@ def main(argv=None) -> int:
     config = load_config(Path(args.config)) if args.config else load_config()
     try:
         if args.command == "preflight":
+            A.require_supported_environment()
             gates(config, args.mode)
             provenance = gates(config, args.mode, A.bind(args.autond_root))
             print(f"PREFLIGHT PASSED for {args.mode}: {len(provenance['source_identity']['files'])} sources clean at "

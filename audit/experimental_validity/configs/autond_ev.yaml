@@ -26,9 +26,9 @@ protocol:
   confirmatory_test_size: 1000000
   evaluation: final_epoch_weights
 
-# H-EV-AUTOND-REPRESENTATION condition B: one permutation of the 16 bit positions within each of the four
-# 16-bit ciphertext words, from gohr.representation. Seed 999 realises the same permutation frozen for the
-# Gohr experiment, so the two targets are perturbed identically.
+# H-EV-AUTOND-REPRESENTATION condition B (autond/representation.py): one permutation of the 16 bit positions
+# within each of the four 16-bit ciphertext words (C0 left, C0 right, C1 left, C1 right), word order kept.
+# Seed 999 realises the mapping with the SHA-256 below, the same mapping frozen for the Gohr experiment.
 representation:
   family: candidate1_within_word_bit_permutation
   generation_seed: 999

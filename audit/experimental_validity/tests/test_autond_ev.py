@@ -1,9 +1,12 @@
 """
-AutoND Experimental Validity tests. Every run here is tiny and NON-EVIDENTIARY.
+AutoND Experimental Validity tests that run in the shared pytest process: configuration gates, the
+representation transform on synthetic data, the environment gate, statistics, family correction and
+power planning. Nothing here binds AutoND, imports TensorFlow models or seeds Keras.
 
-The pipeline tests bind the pinned AutoND checkout and use its real generator and DBitNet on CPU; set
-AUTOND_ROOT if the checkout is not at ~/Documents/AutoND-upstream (SKIPPED IS NOT PASSED). Run in the
-pinned TensorFlow 2.15 environment with the repository root importable.
+Everything that does is in tests/autond_tf_cases.py, run in a child process by
+test_tensorflow_cases_pass_in_an_isolated_process: tf.keras.utils.set_random_seed leaves process-wide
+Keras seeding state that would otherwise change later Gohr tests' same-seed initialisation. Set
+AUTOND_ROOT if the checkout is not at ~/Documents/AutoND-upstream (SKIPPED IS NOT PASSED).
 """
 
 from __future__ import annotations
@@ -11,24 +14,24 @@ from __future__ import annotations
 import copy
 import json
 import os
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
+from autond import adapter as A
+from autond import baseline as B
+from autond import experiments as E
+from autond import representation as REP
+from autond import runner as R
+from framework.certificate import DecisionState, NonConfirmatoryEvidenceError, decide_final
+from framework.multiplicity import holm_correction
+from framework.power import simulate_joint_primary_family
+from framework.seeds import statistics_rng
 
-from autond import adapter as A  # noqa: E402
-from autond import baseline as B  # noqa: E402
-from autond import experiments as E  # noqa: E402
-from autond import runner as R  # noqa: E402
-from framework.certificate import DecisionState, NonConfirmatoryEvidenceError, decide_final  # noqa: E402
-from framework.firewall import FirewallViolation  # noqa: E402
-from framework.multiplicity import holm_correction  # noqa: E402
-from framework.power import simulate_joint_primary_family  # noqa: E402
-from framework.resumability import ResumeViolation  # noqa: E402
-from framework.seeds import statistics_rng  # noqa: E402
-from gohr.representation import apply_candidate1, invert_candidate1, run_full_validation  # noqa: E402
+CASES = Path(__file__).with_name("autond_tf_cases.py")
 
 
 def _root():
@@ -56,87 +59,103 @@ def filled(**decisions):
     return config
 
 
-@pytest.fixture(scope="module", autouse=True)
-def _restore_keras_seed_state():
-    """Leave the process as found. tf.keras.utils.set_random_seed (the AutoND seeding) installs a thread-local
-    Keras seed generator that every later initialiser draws from; the Gohr tests sharing this pytest process
-    seed only Python, NumPy and TensorFlow, so without this their same-seed models would differ."""
-    try:
-        from keras.src import backend
-    except ImportError:
-        backend = None
-    state = getattr(backend, "_SEED_GENERATOR", None)      # Keras 2 only
-    if state is None:
-        yield
-        return
-    sentinel = object()
-    saved = getattr(state, "generator", sentinel)
-    yield
-    if saved is sentinel:
-        if hasattr(state, "generator"):
-            del state.generator
-    else:
-        state.generator = saved
-
-
-@pytest.fixture(scope="module")
-def binding():
-    if ROOT is None:
-        pytest.skip("pinned AutoND checkout not found; SKIPPED IS NOT PASSED")
-    return A.bind(ROOT)
-
-
-@pytest.fixture(scope="module")
-def smoke(tmp_path_factory):
-    """One tiny end-to-end smoke run of all four experiments plus the family step, through the entry point."""
-    if ROOT is None:
-        pytest.skip("pinned AutoND checkout not found; SKIPPED IS NOT PASSED")
-    root = tmp_path_factory.mktemp("smoke")
-    assert R.main(["run", "--mode", "smoke", "--experiment", "all", "--autond-root", ROOT,
-                   "--output-root", str(root)]) == 0
-    return {e: json.loads((root / "smoke" / e / "certificate.json").read_text()) for e in B.EXPERIMENT_IDS} | {
-        "_root": root, "_family": json.loads((root / "smoke" / "family_certificate.json").read_text())}
-
-
-def tiny(experiment, binding, out, config=None, mode="smoke", units=2):
-    config = copy.deepcopy(config or B.load_config())
-    config["smoke"][experiment]["units"] = units
-    return E.run_experiment(experiment, config=config, mode=mode, output_dir=out, binding=binding,
-                            permutation=E.frozen_permutation(config))
-
-
-# ============================================================ pin, data, model
+# ============================================================ process isolation
 
 
 @needs_checkout
-@pytest.mark.parametrize("change, message", [("commit", "revision"), ("digest", "pin mismatch")])
-def test_a_wrong_pin_is_refused_before_import(change, message, monkeypatch):
-    from audit.dataset.adapters.autond import SourceBindingError
-    from audit.dataset.experiments import d0_autond_canonical as C
-
-    pin = copy.deepcopy(C.AUTOND_SOURCE_PIN)
-    if change == "commit":
-        pin["upstream_commit"] = "0" * 40
-    else:
-        pin["source_digests"]["dbitnet.py"] = "f" * 64
-    monkeypatch.setattr(C, "AUTOND_SOURCE_PIN", pin)
-    with pytest.raises(SourceBindingError, match=message):
-        A.bind(ROOT)
+def test_tensorflow_cases_pass_in_an_isolated_process():
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join(p for p in (str(A.REPOSITORY_ROOT), env.get("PYTHONPATH")) if p)
+    out = subprocess.run([sys.executable, "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rs", str(CASES)],
+                         cwd=CASES.parents[1], env=env, capture_output=True, text=True, timeout=3600)
+    summary = [line for line in out.stdout.splitlines() if " passed" in line or " failed" in line or " error" in line]
+    report = out.stdout[-6000:] + out.stderr[-2000:]
+    assert out.returncode == 0 and summary, report
+    assert "failed" not in summary[-1] and "error" not in summary[-1] and "skipped" not in summary[-1], report
+    print(f"isolated AutoND TensorFlow cases: {summary[-1]}")
 
 
-def test_real_generator_and_dbitnet_follow_the_upstream_protocol(binding, monkeypatch):
-    X, Y = binding.generate_partition(256)
-    A.validate_partition(X, Y, 256)
-    assert X.shape == (256, 64) and X.dtype == np.uint8 and set(np.unique(Y)) <= {0, 1}
-    a, b, c = A.build_model(binding, 7), A.build_model(binding, 7), A.build_model(binding, 8)
-    assert A.weights_sha256(a) == A.weights_sha256(b) != A.weights_sha256(c)
-    assert a.input_shape == (None, 64, 1) and a.loss == "mse"
-    assert type(a.optimizer).__name__ == "Adam" and a.optimizer.get_config()["amsgrad"] is True
-    fake = type(A)("dbitnet")
-    fake.__file__ = "/elsewhere/dbitnet.py"
-    monkeypatch.setitem(__import__("sys").modules, "dbitnet", fake)
-    with pytest.raises(A.AutoNDBindingError, match="outside"):
-        A.pinned_module(binding, "dbitnet")
+def test_importing_autond_loads_neither_tensorflow_nor_autond_modules():
+    code = ("import sys, autond.runner, autond.experiments, autond.representation\n"
+            "bad = [m for m in ('tensorflow', 'keras', 'dbitnet', 'train_nets', 'main', 'gohr', "
+            "'gohr.representation') if m in sys.modules]\nprint(bad); sys.exit(1 if bad else 0)")
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join(p for p in (str(CASES.parents[1]), env.get("PYTHONPATH")) if p)
+    out = subprocess.run([sys.executable, "-B", "-c", code], cwd=CASES.parents[1], env=env,
+                         capture_output=True, text=True)
+    assert out.returncode == 0, out.stdout + out.stderr
+
+
+# ============================================================ environment gate
+
+
+@pytest.mark.parametrize("versions", [{"tensorflow": "2.18.0", "keras": "3.6.0"},
+                                      {"tensorflow": "2.15.1", "keras": "3.6.0"},
+                                      {"tensorflow": None, "keras": "2.15.0"}])
+def test_an_unsupported_tensorflow_or_keras_is_refused_before_anything_is_imported(versions, monkeypatch, tmp_path):
+    from importlib import metadata
+
+    def version(name):
+        value = versions["keras"] if name == "keras" else versions["tensorflow"] if name == "tensorflow" else None
+        if value is None:
+            raise metadata.PackageNotFoundError(name)
+        return value
+    monkeypatch.setattr(metadata, "version", version)
+    with pytest.raises(A.AutoNDBindingError, match="TensorFlow 2.15 with Keras 2.15"):
+        A.bind(tmp_path / "no-checkout")
+    out = tmp_path / "smoke-out"
+    assert R.main(["run", "--mode", "smoke", "--autond-root", str(tmp_path), "--output-root", str(out)]) == 2
+    assert not out.exists()
+
+
+def test_the_supported_environment_is_accepted():
+    found = A.require_supported_environment()
+    assert found["tensorflow"].startswith("2.15.") and found["keras"].startswith("2.15.")
+
+
+# ============================================================ representation (synthetic data; no Gohr code)
+
+
+def test_the_frozen_permutation_reproduces_the_declared_hash_and_a_different_one_is_refused():
+    config = B.load_config()
+    permutation = E.frozen_permutation(config)
+    assert permutation.hash == config["representation"]["expected_sha256"] == REP.generate(999).hash
+    config["representation"]["generation_seed"] = 1000
+    with pytest.raises(B.ConfigError, match="not the declared"):
+        E.frozen_permutation(config)
+
+
+def test_the_mapping_moves_bits_only_within_their_word_in_the_declared_direction():
+    permutation = REP.generate(999)
+    columns = np.arange(64, dtype=np.int64)[None, :]          # each column carries its own index
+    moved = permutation.apply(columns)[0]
+    for w in range(4):
+        for j in range(16):
+            assert moved[16 * w + j] == 16 * w + permutation.mapping[w, j]      # destination j <- source mapping[w, j]
+    assert np.array_equal(permutation.invert(permutation.apply(columns)), columns)
+
+
+def test_invariants_and_refusals_on_synthetic_bits(tmp_path):
+    rng = np.random.default_rng(3)
+    X, Y = rng.integers(0, 2, (500, 64)).astype(np.uint8), rng.integers(0, 2, 500).astype(np.uint8)
+    report = REP.validate(X, Y, REP.generate(999), 999)
+    assert report["all_passed"] and all(report[k] for k in ("bijection", "round_trip", "content_preserved",
+                                                           "labels_unchanged", "deterministic"))
+    assert REP.validate(X, Y, REP.generate(999), 998)["deterministic"] is False      # a different seed is detected
+    for mapping, message in ((np.zeros((4, 16), np.int64), "C0_left is not a bijection"),
+                             (np.tile(np.arange(16), (3, 1)), "shape"), (np.tile(np.arange(16.0), (4, 1)), "integer")):
+        with pytest.raises(ValueError, match=message):
+            REP.WordPermutation(mapping)
+    with pytest.raises(ValueError, match="shape"):
+        REP.generate(999).apply(X[:, :63])
+    path = tmp_path / "permutation.json"
+    REP.generate(999).save(path)
+    assert REP.WordPermutation.load(path).hash == REP.generate(999).hash
+    record = json.loads(path.read_text())
+    record["mapping"][0][0], record["mapping"][0][1] = record["mapping"][0][1], record["mapping"][0][0]
+    path.write_text(json.dumps(record))
+    with pytest.raises(ValueError, match="recorded SHA-256"):
+        REP.WordPermutation.load(path)
 
 
 @pytest.mark.parametrize("X, Y", [(np.zeros((8, 63), np.uint8), np.zeros(8, np.uint8)),
@@ -145,156 +164,6 @@ def test_real_generator_and_dbitnet_follow_the_upstream_protocol(binding, monkey
 def test_invalid_partitions_are_refused(X, Y):
     with pytest.raises(A.AutoNDBindingError):
         A.validate_partition(X, Y, 8)
-
-
-# ============================================================ representation
-
-
-def test_the_frozen_permutation_is_bound_and_a_different_one_refused():
-    config = B.load_config()
-    assert E.frozen_permutation(config).hash == config["representation"]["expected_sha256"]
-    config["representation"]["generation_seed"] = 1000
-    with pytest.raises(B.ConfigError, match="not the declared"):
-        E.frozen_permutation(config)
-
-
-def test_representation_invariants_on_real_autond_data(binding):
-    X, Y = binding.generate_partition(2000)
-    permutation = E.frozen_permutation(B.load_config())
-    report = run_full_validation(X, Y, permutation)
-    assert report["all_passed"] and report["bijection"] and report["round_trip"] and report["labels_unchanged"]
-    Xp = apply_candidate1(X, permutation)
-    assert not np.array_equal(Xp, X) and np.array_equal(invert_candidate1(Xp, permutation), X)
-    for w in range(4):          # bits never leave their 16-bit word
-        assert np.array_equal(np.sort(Xp[:, 16 * w:16 * (w + 1)], axis=1), np.sort(X[:, 16 * w:16 * (w + 1)], axis=1))
-
-
-# ============================================================ end to end and pairing (smoke, real)
-
-
-def test_tiny_end_to_end_smoke_is_non_evidentiary(smoke):
-    for e in B.EXPERIMENT_IDS:
-        cert = smoke[e]
-        assert cert["run_mode"] == "smoke" and cert["non_evidentiary"] is True and cert["is_evidentiary"] is False
-        assert cert["sufficiency_summary"]["valid_replicates"] == 3 and "manifest" in cert
-    assert smoke["_family"]["non_evidentiary"] is True and set(smoke["_family"]["decisions"]) == set(B.PRIMARY_FAMILY)
-    with pytest.raises(NonConfirmatoryEvidenceError):
-        E.apply_family_correction({h: smoke[h] for h in B.PRIMARY_FAMILY})
-
-
-def test_pairs_share_persisted_data_and_verified_initial_weights(smoke):
-    for h in B.PRIMARY_FAMILY:
-        for unit in smoke[h]["replication"]["raw_replicate_results"]:
-            a, b = unit["arms"]
-            assert a["dataset_sha256"] == b["dataset_sha256"]
-            assert a["initial_weight_sha256"] == b["initial_weight_sha256"]
-            assert a["model_seed"] == b["model_seed"]
-    order = smoke[H1]["replication"]["raw_replicate_results"][0]["arms"]
-    assert [a["shuffle"] for a in order] == [True, False] and order[0]["input_sha256"] == order[1]["input_sha256"]
-    rep = smoke[H2]["replication"]["raw_replicate_results"][0]["arms"]
-    assert rep[0]["input_sha256"]["test"] != rep[1]["input_sha256"]["test"]
-    assert rep[1]["permutation_sha256"] == B.load_config()["representation"]["expected_sha256"]
-
-
-def test_the_representation_arm_sees_exactly_the_permuted_persisted_data(smoke):
-    directory = smoke["_root"] / "smoke" / H2
-    with np.load(directory / "datasets" / "pair000.npz") as data:
-        X, Y = data["test_X"], data["test_Y"]
-    arm_b = smoke[H2]["replication"]["raw_replicate_results"][0]["arms"][1]
-    expected = A.Partition(apply_candidate1(X, E.frozen_permutation(B.load_config())), Y).sha256
-    assert arm_b["input_sha256"]["test"] == expected and arm_b["dataset_sha256"]["test"] == A.Partition(X, Y).sha256
-
-
-def test_noise_reruns_share_data_and_weights_and_baseline_replicates_do_not(smoke):
-    noise = smoke["EV-AUTOND-NOISE"]["replication"]["raw_replicate_results"]
-    assert len({u["arms"][0]["dataset_sha256"]["train"] for u in noise}) == 1
-    assert len({u["arms"][0]["initial_weight_sha256"] for u in noise}) == 1
-    base = smoke["EV-AUTOND-BASELINE"]["replication"]["raw_replicate_results"]
-    assert len({u["arms"][0]["dataset_sha256"]["train"] for u in base}) == 3
-    assert len({u["arms"][0]["initial_weight_sha256"] for u in base}) == 3
-
-
-def test_paired_firewall_consumes_each_slot_once(smoke):
-    fw = smoke[H2]["firewall"]
-    assert fw["frozen"] and len(fw["sealed_dataset_hashes"]) == 3 and len(fw["consumed_evaluation_keys"]) == 6
-    assert fw["freeze_record"]["frozen_permutation_hash"] == B.load_config()["representation"]["expected_sha256"]
-
-
-@needs_checkout
-def test_a_pair_whose_initial_weights_differ_is_refused(binding, tmp_path, monkeypatch):
-    build, calls = A.build_model, []
-
-    def mismatched(binding_, seed):
-        calls.append(seed)
-        return build(binding_, seed + len(calls) % 2)
-    monkeypatch.setattr(A, "build_model", mismatched)
-    with pytest.raises(RuntimeError, match="different realised initial weights"):
-        tiny(H1, binding, tmp_path / "r", units=1)
-
-
-# ============================================================ resumability and isolation (real, tiny)
-
-
-@needs_checkout
-def test_resume_reuses_results_and_data_and_refuses_a_changed_configuration(binding, tmp_path, monkeypatch):
-    out = tmp_path / "r"
-    first = tiny(H1, binding, out)
-    stamp = (out / "datasets" / "pair000.npz").stat().st_mtime_ns
-    monkeypatch.setattr(A, "train", lambda *a, **k: pytest.fail("a completed pair must not be retrained"))
-    again = tiny(H1, binding, out)
-    assert again["raw_paired_values"] == first["raw_paired_values"]
-    assert (out / "datasets" / "pair000.npz").stat().st_mtime_ns == stamp
-    assert any('"event": "resume"' in line for line in (out / "resume_ledger.jsonl").read_text().splitlines())
-    changed = B.load_config()
-    changed["smoke"]["protocol"]["epochs"] = 2
-    with pytest.raises(ResumeViolation):
-        tiny(H1, binding, out, config=changed)
-
-
-@needs_checkout
-def test_an_interrupted_unit_is_rerun_on_its_persisted_data(binding, tmp_path, monkeypatch):
-    out, train, calls = tmp_path / "r", A.train, []
-
-    def interrupt_second_pair(*args, **kwargs):
-        calls.append(1)
-        if len(calls) == 3:
-            raise KeyboardInterrupt
-        return train(*args, **kwargs)
-    monkeypatch.setattr(A, "train", interrupt_second_pair)
-    with pytest.raises(KeyboardInterrupt):
-        tiny(H2, binding, out)
-    recorded = json.loads((out / "datasets" / "pair001.json").read_text())["sha256"]
-    monkeypatch.setattr(A, "train", train)
-    cert = tiny(H2, binding, out)
-    assert cert["sufficiency_summary"]["valid_replicates"] == 2
-    assert cert["replication"]["raw_replicate_results"][1]["arms"][0]["dataset_sha256"] == recorded
-
-
-@needs_checkout
-def test_consumed_but_unrecorded_confirmatory_data_are_never_evaluated_again(binding, tmp_path, monkeypatch):
-    out = tmp_path / "r"
-    monkeypatch.setattr(A, "accuracy", lambda *a: (_ for _ in ()).throw(KeyboardInterrupt))
-    with pytest.raises(KeyboardInterrupt):
-        tiny(H1, binding, out, units=1)
-    monkeypatch.undo()
-    with pytest.raises(FirewallViolation, match="consumed"):
-        tiny(H1, binding, out, units=1)
-
-
-@needs_checkout
-def test_a_failed_unit_stays_failed_and_counts_against_the_minimum(binding, tmp_path, monkeypatch):
-    from framework.failures import FailureReason
-
-    out, train, calls = tmp_path / "r", A.train, []
-
-    def nan_first(*args, **kwargs):
-        calls.append(1)
-        return A.TrainingOutcome(FailureReason.NAN, {}) if len(calls) == 1 else train(*args, **kwargs)
-    monkeypatch.setattr(A, "train", nan_first)
-    cert = tiny("EV-AUTOND-BASELINE", binding, out)
-    assert cert["sufficiency_summary"]["failed_replicates"] == 1 and cert["sufficient"] is False
-    monkeypatch.setattr(A, "train", lambda *a, **k: pytest.fail("a failed unit must not be re-run"))
-    assert tiny("EV-AUTOND-BASELINE", binding, out)["sufficiency_summary"]["failed_replicates"] == 1
 
 
 def test_output_directories_are_bound_to_one_mode_and_one_writer(tmp_path):
@@ -349,19 +218,6 @@ def test_hash_scopes_bind_each_tier_to_what_was_frozen_before_it():
     assert B.design_hash(config) == design and B.production_hash(config) != production
     config["decisions"]["practical_threshold"] = 0.005
     assert B.design_hash(config) != design
-
-
-@needs_checkout
-def test_calibration_requires_clean_committed_sources_and_confirmation(binding, monkeypatch, tmp_path):
-    config = filled()
-    monkeypatch.setattr(R, "load_config", lambda *a: config)
-    monkeypatch.setattr(R, "RESULTS", tmp_path / "results")
-    dirty = {"git_head": "x", "files": {"audit/experimental_validity/autond/experiments.py": {"clean_at_head": False}}}
-    monkeypatch.setattr(R, "source_identity", lambda: dirty)
-    assert R.main(["run", "--mode", "calibration", "--autond-root", ROOT]) == 2
-    monkeypatch.setattr(R, "source_identity", lambda: {"git_head": "x", "files": {}})
-    assert R.main(["run", "--mode", "calibration", "--autond-root", ROOT]) == 0     # dry run
-    assert not (tmp_path / "results").exists()
 
 
 # ============================================================ statistics, family correction, power

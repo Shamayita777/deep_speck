@@ -20,7 +20,11 @@ Upstream `train_nets` for DBitNet, for one stage at round 5: `dbitnet.make_model
 
 D5's approval does not cover any of this.
 
-The representation arm uses `gohr.representation`'s Candidate-1 permutation with seed 999, which is the permutation frozen for Gohr. AutoND's 64 input bits are the same four 16-bit words, MSB-first, in the same order, so the transform means the same thing on both targets. Before every calibration or production run, bijectivity, round trip, per-word content preservation, unchanged labels and determinism are checked on real AutoND data.
+AutoND's 64 input columns, from the pinned source, are four 16-bit words, MSB first: C0 left, C0 right, C1 left, C1 right (`ciphers/speck3264.py` `convert_to_binary` and `encrypt`, `main.py` `make_train_data`). `tests/autond_tf_cases.py` checks this against the generator's own encrypt calls.
+
+The representation arm (`autond/representation.py`, no Gohr code) permutes the bit positions within each word, keeping the word order. It uses seed 999, which realises the same mapping that was frozen for Gohr (SHA-256 `d7f9dd38…d427`). Before every calibration or production run, bijectivity, round trip, per-word content preservation, unchanged labels and determinism are checked on real AutoND data.
+
+EV-AUTOND-BASELINE draws fresh training, validation and test data per replicate. Its spread is therefore end-to-end and includes test-set sampling; the certificate also reports the binomial test-set SD at the mean. EV-AUTOND-NOISE holds data, seed and configuration fixed, so it measures execution nondeterminism only.
 
 ## Statistics and decisions
 
@@ -65,12 +69,12 @@ The target effect must exceed ε. At a true effect equal to ε, P(SUPPORTED) sta
 4. Production units and `minimum_valid` for all four experiments, with the paired minimum ≥ the power plan's `required_n`.
 5. The power plan's SHA-256 and `required_n`, after `plan-power`.
 
-The seeds, the Candidate-1 permutation and the inherited α = 0.05, 80 % power, 50 000 simulations and σ upper bound are proposed in the config; review them with the rest.
+The seeds, the within-word permutation and the inherited α = 0.05, 80 % power, 50 000 simulations and σ upper bound are proposed in the config; review them with the rest.
 
 ## Commands (from `audit/experimental_validity`, pinned Python 3.11 / TF 2.15.1 with PyYAML, repository root importable)
 
 ```bash
-python -B -m pytest -q -p no:cacheprovider tests/test_autond_ev.py              # tiny, non-evidentiary
+python -B -m pytest -q -p no:cacheprovider tests/test_autond_ev.py              # tiny, non-evidentiary; runs tests/autond_tf_cases.py in a child process
 python -B -m autond.runner run --mode smoke --experiment all                     # pipeline check
 python -B -m autond.runner preflight --mode calibration                          # gates only
 python -B -m autond.runner --gpu 0 run --mode calibration --experiment H-EV-AUTOND-TRAIN-ORDER --confirm-execute

@@ -34,8 +34,36 @@ class AutoNDBindingError(RuntimeError):
     pass
 
 
+#: The pinned dbitnet.make_model applies tf.subtract to its Keras Input, which Keras 3 rejects.
+SUPPORTED = {"tensorflow": "2.15.", "keras": "2.15."}
+TENSORFLOW_DISTRIBUTIONS = ("tensorflow", "tensorflow-cpu", "tensorflow-macos", "tensorflow-intel")
+
+
+def require_supported_environment() -> dict:
+    """Refuse, before AutoND or TensorFlow is imported, unless TensorFlow and Keras are 2.15.x."""
+    from importlib import metadata
+
+    def version(names):
+        for name in names:
+            try:
+                return metadata.version(name)
+            except metadata.PackageNotFoundError:
+                continue
+        return None
+
+    found = {"tensorflow": version(TENSORFLOW_DISTRIBUTIONS), "keras": version(("keras",))}
+    bad = {k: v for k, v in found.items() if v is None or not v.startswith(SUPPORTED[k])}
+    if bad:
+        raise AutoNDBindingError(
+            f"unsupported environment {found}: the pinned AutoND DBitNet needs TensorFlow 2.15 with Keras 2.15 "
+            "(e.g. tensorflow==2.15.1 keras==2.15.0); Keras 3 rejects its tf.subtract on the model input")
+    return found
+
+
 def bind(autond_root) -> Any:
-    """The pinned AutoND binding; refuses before import on any commit or digest mismatch."""
+    """The pinned AutoND binding; refuses on an unsupported TensorFlow/Keras and, before import, on any
+    commit or digest mismatch."""
+    require_supported_environment()
     from audit.dataset.adapters.autond import AutoNDDatasetAdapter
     from audit.dataset.experiments.d0_autond_canonical import AUTOND_SOURCE_PIN
 
