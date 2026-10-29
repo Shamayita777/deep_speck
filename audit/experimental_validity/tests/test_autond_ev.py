@@ -23,6 +23,7 @@ import pytest
 
 from autond import adapter as A
 from autond import baseline as B
+from autond import calibration as C
 from autond import experiments as E
 from autond import representation as REP
 from autond import runner as R
@@ -284,7 +285,7 @@ def test_a_target_effect_at_the_margin_cannot_power_supported():
 
 
 def _variance(config, sigma=0.004):
-    return {"artifact": E.VARIANCE_ARTIFACT, "design_hash": B.design_hash(config),
+    return {"artifact": C.VARIANCE_ARTIFACT, "design_hash": B.design_hash(config),
             "sigma_Delta_upper_95": {H1: sigma, H2: sigma}}
 
 
@@ -324,6 +325,43 @@ def test_production_requires_the_declared_power_plan_and_enough_pairs(tmp_path, 
     assert "differs from the SHA-256" in E.check_power_plan(config)[0]
 
 
+# Lower 5% points of chi-square (standard published tables), fixed here rather than computed by SciPy.
+CHI2_LOWER_5_PERCENT = {1: 0.00393214, 4: 0.710723, 9: 3.325113, 11: 4.574813, 19: 10.117013, 29: 17.708366}
+
+
+@pytest.mark.parametrize("df", sorted(CHI2_LOWER_5_PERCENT))
+def test_sigma_bound_matches_the_tabulated_chi_square_formula(df):
+    expected = 0.004 * np.sqrt(df / CHI2_LOWER_5_PERCENT[df])
+    assert C.sigma_upper_confidence_bound(0.004, df + 1) == pytest.approx(expected, rel=2e-6)
+
+
+def test_sigma_bound_reference_factors_and_shape():
+    assert C.sigma_upper_confidence_bound(1.0, 10) == pytest.approx(1.645198, abs=2e-6)       # sqrt(9/3.325113)
+    assert C.sigma_upper_confidence_bound(1.0, 2) == pytest.approx(15.9472, abs=2e-4)         # sqrt(1/0.00393214)
+    assert C.sigma_upper_confidence_bound(2.5, 12) == pytest.approx(2.5 * C.sigma_upper_confidence_bound(1.0, 12))
+    factors = [C.sigma_upper_confidence_bound(1.0, n) for n in (2, 3, 5, 10, 20, 50, 200)]
+    assert all(f > 1 for f in factors) and factors == sorted(factors, reverse=True)           # tighter with more pairs
+    assert C.sigma_upper_confidence_bound(0.0, 10) == 0.0
+    assert C.sigma_upper_confidence_bound(1.0, np.int64(10)) == C.sigma_upper_confidence_bound(1.0, 10)
+    assert C.SIGMA_UCL_LEVEL == 0.95
+
+
+def test_sigma_bound_covers_the_true_sigma_95_percent_of_the_time():
+    rng = np.random.default_rng(20261029)
+    for n in (5, 12):
+        samples = rng.normal(0.0, 1.0, size=(40_000, n))
+        bounds = np.array([C.sigma_upper_confidence_bound(float(s), n) for s in samples.std(axis=1, ddof=1)])
+        assert abs(np.mean(bounds >= 1.0) - 0.95) < 0.006          # one-sided: P(sigma <= bound) = 0.95
+
+
+@pytest.mark.parametrize("sd, n, level", [(1.0, 1, 0.95), (1.0, 0, 0.95), (1.0, True, 0.95), (1.0, 2.0, 0.95),
+                                          (-0.1, 10, 0.95), (float("nan"), 10, 0.95), (float("inf"), 10, 0.95),
+                                          (True, 10, 0.95), ("0.1", 10, 0.95), (1.0, 10, 0.0), (1.0, 10, 1.0)])
+def test_sigma_bound_refuses_invalid_input(sd, n, level):
+    with pytest.raises(ValueError):
+        C.sigma_upper_confidence_bound(sd, n, level)
+
+
 def test_calibration_variance_uses_only_matching_calibration_certificates(tmp_path):
     config = filled()
     paths = {}
@@ -334,18 +372,23 @@ def test_calibration_variance_uses_only_matching_calibration_certificates(tmp_pa
         paths[h] = tmp_path / f"{h}.json"
         paths[h].write_text(json.dumps(cert))
     base = json.loads(paths[H1].read_text())
-    artifact = E.calibration_variance(list(paths.values()), config)
+    artifact = C.calibration_variance(list(paths.values()), config)
     assert set(artifact["inputs"]) == set(B.PRIMARY_FAMILY) and "mean" not in json.dumps(artifact)
     sd = float(np.std(np.array([0.001, -0.002, 0.003]), ddof=1))
     assert artifact["inputs"][H1]["sigma_Delta"] == pytest.approx(sd)
-    assert artifact["sigma_Delta_upper_95"][H1] > sd
+    assert artifact["sigma_Delta_upper_95"][H1] == pytest.approx(sd * np.sqrt(2 / 0.102587), rel=2e-5)   # df = 2
+    assert artifact["artifact"] == "autond-ev-calibration-variance-1" and artifact["non_evidentiary"] is True
+    assert set(artifact) == {"artifact", "non_evidentiary", "design_hash", "generated_at_utc", "inputs",
+                             "sigma_Delta_upper_95", "prohibition"}
+    assert set(artifact["inputs"][H1]) == {"certificate", "certificate_sha256", "n_valid", "sigma_Delta",
+                                           "sigma_Delta_upper_95"}
     production = {"run_mode": "production", "calibration": False, "non_evidentiary": False}
     for bad, message in ((production, "not a calibration"),
                          ({"design_hash": "other"}, "different design")):
         paths[H1].write_text(json.dumps(base | bad))
         with pytest.raises(ValueError, match=message):
-            E.calibration_variance(list(paths.values()), config)
+            C.calibration_variance(list(paths.values()), config)
     paths[H1].write_text(json.dumps(base))
     config["calibration"][H1]["units"] = 4
     with pytest.raises(ValueError, match="different design"):     # the plan is part of the design hash
-        E.calibration_variance(list(paths.values()), config)
+        C.calibration_variance(list(paths.values()), config)

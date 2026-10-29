@@ -50,10 +50,10 @@ from framework.resumability import ResumeLedger, ResumeViolation, RunState
 from framework.seeds import statistics_rng
 from framework.statistics import descriptive_statistics, paired_analysis
 from autond import representation as REP
+from autond.calibration import VARIANCE_ARTIFACT
 
 FAMILY_ID = "ev_autond_primary_family_v1"
 EQUIVALENCE_FAMILY_ID = "ev_autond_equivalence_family_v1"
-VARIANCE_ARTIFACT = "autond-ev-calibration-variance-1"
 POWER_PLAN_ARTIFACT = "autond-ev-power-plan-1"
 
 
@@ -491,39 +491,7 @@ def apply_family_correction(certificates: dict[str, dict]) -> dict:
     return holm_family(certificates) | {"non_evidentiary": False, "run_mode": "production"}
 
 
-# ============================================================ calibration variance and power
-
-
-def calibration_variance(paths: list[Path], config: dict) -> dict:
-    """sigma_Delta and its one-sided 95% upper bound per paired hypothesis. No mean, CI, p or decision."""
-    from scripts.analyze_ev_calibration import sigma_upper_confidence_bound
-
-    entries = {}
-    for path in map(Path, paths):
-        cert = json.loads(path.read_text())
-        if (cert.get("run_mode"), cert.get("calibration"), cert.get("non_evidentiary")) != ("calibration", True, True):
-            raise ValueError(f"{path}: not a calibration certificate; confirmatory data never enter planning")
-        h = cert.get("experiment_id")
-        if h not in PRIMARY_FAMILY or h in entries:
-            raise ValueError(f"{path}: unexpected or duplicate hypothesis {h!r}")
-        if cert.get("design_hash") != design_hash(config):
-            raise ValueError(f"{path}: produced under a different design (protocol, decisions or calibration plan)")
-        a, b = (np.asarray(cert["raw_paired_values"][k], dtype=float) for k in ("condition_a", "condition_b"))
-        n = len(a)
-        if n != config["calibration"][h]["units"] or len(b) != n:
-            raise ValueError(f"{path}: {n} valid pairs; the calibration plan is exactly "
-                             f"{config['calibration'][h]['units']}")
-        sd = float(np.std(b - a, ddof=1))
-        if not (np.isfinite(sd) and sd > 0):
-            raise ValueError(f"{path}: degenerate paired-difference SD {sd}")
-        entries[h] = {"certificate": str(path), "certificate_sha256": sha256_file(path), "n_valid": n,
-                      "sigma_Delta": sd, "sigma_Delta_upper_95": sigma_upper_confidence_bound(sd, n)}
-    if set(entries) != set(PRIMARY_FAMILY):
-        raise ValueError(f"calibration certificates are needed for both of {PRIMARY_FAMILY}")
-    return {"artifact": VARIANCE_ARTIFACT, "non_evidentiary": True, "design_hash": design_hash(config),
-            "generated_at_utc": utc_timestamp(), "inputs": entries,
-            "sigma_Delta_upper_95": {h: e["sigma_Delta_upper_95"] for h, e in entries.items()},
-            "prohibition": "sizes the production design only; never chooses or validates epsilon or the target effect"}
+# ============================================================ power (calibration variance: autond.calibration)
 
 
 #: (true effect of TRAIN-ORDER, true effect of REPRESENTATION), in units of the target effect.

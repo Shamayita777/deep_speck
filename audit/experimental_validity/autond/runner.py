@@ -28,18 +28,18 @@ if str(EV_ROOT) not in sys.path:
     sys.path.insert(0, str(EV_ROOT))
 
 from autond import adapter as A  # noqa: E402
+from autond import calibration as C  # noqa: E402
 from autond import experiments as E  # noqa: E402
 from autond.baseline import EXPERIMENT_IDS, PRIMARY_FAMILY, check_config, load_config  # noqa: E402
 
 RESULTS = EV_ROOT / "results" / "autond"
 SOURCES = (
-    *(f"audit/experimental_validity/autond/{f}" for f in ("__init__.py", "adapter.py", "baseline.py", "experiments.py",
-                                                          "representation.py", "runner.py")),
+    *(f"audit/experimental_validity/autond/{f}" for f in ("__init__.py", "adapter.py", "baseline.py", "calibration.py",
+                                                          "experiments.py", "representation.py", "runner.py")),
     *(f"audit/experimental_validity/framework/{f}" for f in (
         "certificate.py", "confidence_intervals.py", "effect_sizes.py", "experiment.py", "failures.py", "firewall.py",
         "manifest.py", "multiplicity.py", "power.py", "provenance.py", "replication.py", "resumability.py", "seeds.py",
         "statistics.py", "validation.py")),
-    "audit/experimental_validity/scripts/analyze_ev_calibration.py",
     "audit/experimental_validity/configs/autond_ev.yaml",
     "audit/dataset/adapters/autond.py", "audit/dataset/experiments/d0_autond_canonical.py",
     "audit/dataset/integrity.py",
@@ -151,7 +151,7 @@ def cmd_run(args, config) -> int:
 
 def cmd_analyze(args, config) -> int:
     paths = args.certificates or [output_dir("calibration", h) / "certificate.json" for h in PRIMARY_FAMILY]
-    artifact = E.calibration_variance(paths, config)
+    artifact = C.calibration_variance(paths, config)
     out = Path(args.output or RESULTS / "calibration" / "variance.json")
     out.write_text(json.dumps(artifact, indent=2, sort_keys=True))
     print(f"wrote {out}: sigma_Delta_upper_95={artifact['sigma_Delta_upper_95']}")
