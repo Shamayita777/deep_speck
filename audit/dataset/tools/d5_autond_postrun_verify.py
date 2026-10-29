@@ -1,5 +1,5 @@
 """
-AutoND D5 target-level verification: independent checkpoint re-evaluation and certification.
+AutoND D5 post-run verification: provenance, independent checkpoint re-evaluation and certification.
 
 The generic D5 engine (audit.dataset.d5_training_data_scaling, schema 2.1) records per-condition
 test metrics in state.json but does not bind checkpoint BYTES to a stored digest.  This module is a
@@ -7,6 +7,9 @@ separate, target-level safeguard; it does not change or claim to fix the engine'
 
 What it adds, for one completed run directory:
 
+* approval and source provenance re-derived from git: the preregistration at the recorded commit must
+  hash to the recorded anchor and be approved with the run's values, and every recorded source digest must
+  be its committed content at the recorded HEAD;
 * a target evaluation log, written by the driver at the moment the engine evaluates each condition,
   that records the SHA-256 of that condition's final checkpoint (``latest.keras``);
 * an independent pass that re-verifies every persisted dataset through the engine's own loaders,
@@ -391,7 +394,7 @@ def provenance_problems(claim: Mapping[str, Any]) -> list[str]:
     clean, its recorded digest must be its content at the recorded HEAD, and that HEAD must contain the
     preregistration commit.
     """
-    from audit.targets.autond.d5 import training_data_scaling as D
+    from audit.dataset.experiments import d5_autond_training_data_scaling as D
 
     root = repository_root()
     problems: list[str] = []

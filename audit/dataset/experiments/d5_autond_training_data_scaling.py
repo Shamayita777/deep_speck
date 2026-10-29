@@ -25,11 +25,18 @@ What this driver adds, without touching any of those modules:
     * data checks on every generated partition (shape, dtype, value set, row count, class counts) and an
       exact train/test overlap audit before training, under the registered policy;
     * a target evaluation log binding each condition's final checkpoint SHA-256 at evaluation time;
-    * independent verification and a certificate (see .verification).
+    * independent verification and a certificate (audit.dataset.tools.d5_autond_postrun_verify).
 
 NOT reproduced, by design (see the preregistration): AutoND's staged multi-round pipeline, its validation
 data, its min-val_loss checkpoint selection and its stopping rule.  The engine fits without validation data
 and evaluates the final-epoch model.  This is a fixed round-5 scaling experiment, not full-pipeline scaling.
+
+Usage (repository root; a NEW run directory every time; not alongside D4 on the same GPU):
+    python -B -m audit.dataset.experiments.d5_autond_training_data_scaling protocol-check --require-approved
+    python -B -m audit.dataset.experiments.d5_autond_training_data_scaling run --preregistration-sha256 <anchor> \\
+        --run-dir <new dir> --autond-root <AutoND checkout> --confirm RUN_AUTOND_D5_PRODUCTION
+    python -B -m audit.dataset.experiments.d5_autond_training_data_scaling verify --run-dir <run dir>
+Exit codes: 0 verified, 2 refused before anything was created, 3 not verified, 4 not completed (run preserved).
 """
 
 from __future__ import annotations
@@ -55,7 +62,7 @@ from audit.dataset.integrity import (
     verify_anchored_committed_record,
     write_json_exclusive,
 )
-from audit.targets.autond.d5 import verification as V
+from audit.dataset.tools import d5_autond_postrun_verify as V
 
 # ============================================================
 # Fixed design (must equal the preregistration's fixed_design)
@@ -87,9 +94,8 @@ SOURCE_PATHS = (
     "audit/dataset/integrity.py",
     "audit/dataset/adapters/autond.py",
     "audit/dataset/experiments/d0_autond_canonical.py",
-    "audit/targets/autond/d5/__init__.py",
-    "audit/targets/autond/d5/training_data_scaling.py",
-    "audit/targets/autond/d5/verification.py",
+    "audit/dataset/experiments/d5_autond_training_data_scaling.py",
+    "audit/dataset/tools/d5_autond_postrun_verify.py",
 )
 
 DATASET_REPLAY_REASON = (
