@@ -1,0 +1,297 @@
+{
+  "schema_version": "d5-autond-preregistration-1",
+  "protocol_id": "d5-autond-speck3264-single-key-0x400000-r5-dbitnet-training-data-scaling-v1",
+  "status": "APPROVED",
+  "approved": true,
+  "approved_by": "human-approver-01",
+  "approved_utc": "2026-10-29T09:17:53Z",
+  "approval_statement": "Protocol approved for execution.",
+  "data_examined_before_approval": "Prior reference-run information was examined before formal preregistration approval, including a previously observed round-5 reference accuracy of approximately 0.92. This information is treated as prior reference evidence, not as a result of the confirmatory D5 training-data-scaling experiment. The confirmatory D5 outcomes have not been examined before approval. The protocol's hypotheses, training-set sizes, replicate count, statistical tests, significance threshold, practical-effect threshold, and failure-handling rules must be finalized before the confirmatory experiment is executed.",
+  "question": "Under a fixed AutoND round-5 training protocol (pinned DBitNet, Adam(amsgrad=True), MSE, batch 5000, a fixed epoch budget, final-epoch model, no validation-based selection or stopping), how does training-set size affect held-out distinguishing accuracy on SPECK32/64, single-key, delta 0x400000?",
+  "estimand": "Per training size n: mean over independent replicates of the final-epoch held-out accuracy of the pinned DBitNet trained for the registered epoch budget on the first n rows of a replicate's independent round-5 dataset; contrasts are within-replicate differences against the smallest size.",
+  "training_policy": "Fixed-EPOCH policy: every size is trained for the same number of epochs at batch 5000, so a size-n condition receives epochs * ceil(n / 5000) optimizer updates (2.5M: 5,000; 10M: 20,000 at 10 epochs). The estimand is performance under this policy; dataset size and training compute vary together and are not separated.",
+  "hypotheses": {
+    "primary_family": "For each comparison size n in the registered grid above the smallest size n0: H0_n: the mean within-replicate accuracy difference acc(n) - acc(n0) equals 0; H1_n: it differs from 0 (two-sided). Confirmatory. Tested by the engine's paired t-test over replicates with Holm step-down correction across the family at alpha.",
+    "secondary": "The replicate-wise OLS slope of accuracy on log10(n): descriptive estimate of the scaling trend over the tested grid only (engine 'scaling' section). Not a law and not extrapolated.",
+    "not_hypotheses": "No equivalence hypothesis is tested; a non-significant contrast is inconclusive."
+  },
+  "experimental_unit": "The replicate: one independently generated maximum-size dataset (os.urandom) with its own model-initialisation / training RNG seed. Within a replicate the size conditions are nested prefixes of that dataset trained from the SAME initialisation seed, i.e. paired, not independent. All conditions are evaluated on ONE fixed test set; test examples are not replicates and inference is conditional on that test set.",
+  "fixed_design": {
+    "target": {
+      "cipher": "speck3264",
+      "scenario": "single-key",
+      "delta_plain_hex": "0x400000",
+      "delta_key_hex": "0x0",
+      "num_rounds": 5,
+      "feature_width": 64,
+      "representation": "np.hstack([C0, C1]) of 32-bit ciphertext bit vectors, uint8 values {0,1} (verified in the pinned main.make_train_data and by the adapter)"
+    },
+    "upstream": {
+      "commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+      "source_digests": {
+        "main.py": "52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665",
+        "optimizer.py": "2d58e4fd94973040e1ead21166b188527b6935d499a7a818a3c613ac4888d505",
+        "train_nets.py": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e",
+        "dbitnet.py": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+        "gohrnet.py": "324c3768e19a6230dbedbe0446f54c6139d72f5dc642f5cfb60a8fa9a9ea1d56",
+        "ciphers/speck3264.py": "fd4a04be7fb632cea422338e6ae8446e421049649944f9dab87cc05e0e5ca9fe"
+      },
+      "binding": "AutoNDDatasetAdapter: commit and every import-graph digest checked BEFORE import; foreign or shadowing modules refused; digests of the files actually bound recorded"
+    },
+    "engine": {
+      "module": "audit.dataset.d5_training_data_scaling",
+      "schema_version": "2.1",
+      "modified": false
+    },
+    "model": {
+      "architecture": "dbitnet",
+      "builder": "dbitnet.make_model(64)",
+      "optimizer": "Adam(amsgrad=True)",
+      "loss": "mse",
+      "metrics": [
+        "acc"
+      ],
+      "shuffle": true,
+      "learning_rate_schedule": null
+    },
+    "training": {
+      "validation_data": null,
+      "model_selection": "final_epoch_model",
+      "stopping_rule": null,
+      "initialization": "tf.keras.utils.set_random_seed(replicate_seed) immediately before building"
+    },
+    "evaluation": {
+      "metric": "binary accuracy at threshold 0.5 (Keras 'acc' with MSE loss) and test MSE, on the fixed test set, final-epoch model",
+      "engine_evaluation": "model.evaluate(test_x, test_y, batch_size=batch_size)",
+      "independent_reevaluation": "reload latest.keras (compile=False), predict in batches of 5000, recount correct predictions (p > 0.5) and MSE"
+    },
+    "seeds": {
+      "replicate_seeds": "numpy SeedSequence(audit_seed).spawn(replicates)[r-1].generate_state(1, uint32)[0] (engine)",
+      "use": "model_initialization_and_training_RNG_stream (tf.keras.utils.set_random_seed before building the model; also seeds Keras' shuffle order) and the audit's own RNG stream; NOT dataset generation (os.urandom).",
+      "dataset": "os.urandom; not seedable"
+    },
+    "departures_from_upstream": [
+      "single round (5) instead of AutoND's staged multi-round loop; no load_weights from an earlier round",
+      "no validation data, no ModelCheckpoint(monitor='val_loss'), final-epoch model instead of the min-val_loss checkpoint; no stopping rule",
+      "datasets persisted once per replicate and prefixes reused, instead of fresh data per call",
+      "TensorFlow seeded per replicate (upstream is unseeded); GPU kernels remain nondeterministic"
+    ]
+  },
+  "statistical_plan": {
+    "primary_analysis": "Engine, unmodified: per contrast n vs n0, paired differences over replicates; two-sided paired t-test (SciPy t distribution); Holm step-down at alpha over the family; 95% percentile-bootstrap CI of the mean difference (bootstrap_replicates resamples, seed audit_seed+991).",
+    "registered_supplementary": "Target, computed from the same observations: 95% paired-t CI of each mean difference (CI of record for small k, since a percentile bootstrap under-covers at k near 12); 95% t CI of each size's mean accuracy; effect sizes: mean difference in accuracy points, relative to the baseline mean, and Cohen's d_z; exact Wilcoxon signed-rank p (sensitivity to non-normality); Shapiro-Wilk on paired differences (diagnostic, low power).",
+    "classification": "Per contrast: SIGNIFICANT_AND_PRACTICALLY_MEANINGFUL if Holm-adjusted p < alpha and the practical rule holds; SIGNIFICANT_BELOW_PRACTICAL_THRESHOLD if significant only; NOT_SIGNIFICANT_INCONCLUSIVE otherwise (never equivalence; 3.9.8, 3.9.9 Rule III).",
+    "assumptions": [
+      "paired differences across replicates are independent (independent datasets and seeds) and approximately normal for the t-test; the Wilcoxon test and Shapiro-Wilk are reported as checks",
+      "the fixed test set is shared: all conditions' accuracies carry the same test-set sampling error, so contrasts are conditional on it; the binomial test-set SE at each mean is reported",
+      "nested prefixes are not independent datasets"
+    ],
+    "exploratory": [
+      "test-loss contrasts",
+      "monotone-curve counts",
+      "slope bootstrap CI",
+      "any analysis not listed here"
+    ],
+    "dependency_gate": "SciPy must be importable before any file is created (the engine's no-SciPy fallback is a normal approximation that is anti-conservative at small k: t=2.5, df=11 gives p=0.0295 under t but 0.0124 under the fallback).",
+    "design_resolution": {
+      "basis": "two-sided paired t, 80% power, df = k-1; computed with SciPy noncentral t; no pilot estimate of the SD of paired differences (sigma_d) exists, so resolution is stated in units of sigma_d",
+      "minimum_detectable_d_z": {
+        "k=5": [
+          2.292,
+          1.682
+        ],
+        "k=8": [
+          1.451,
+          1.157
+        ],
+        "k=10": [
+          1.224,
+          0.997
+        ],
+        "k=12": [
+          1.078,
+          0.889
+        ],
+        "k=15": [
+          0.933,
+          0.779
+        ],
+        "k=20": [
+          0.784,
+          0.661
+        ]
+      },
+      "columns": "[at alpha/3 (Holm's first, strictest step), at alpha]",
+      "consequence": "With k=12 a contrast is detectable with 80% power when |mean difference| >= about 1.08 sigma_d (worst Holm step). If sigma_d is large relative to the practical threshold, a null result is inconclusive (3.9.8)."
+    }
+  },
+  "integrity": {
+    "datasets": "engine schema 2.1: file and logical SHA-256 of every replicate dataset, every nested prefix and the fixed test set, re-verified on load; never regenerated",
+    "data_checks": "every generated partition refused unless shape (n,64), uint8, values {0,1}, labels (n,) uint8 {0,1}, exact row count; class counts and an exact binomial p recorded (descriptive); exact within-partition duplicates and train/test feature-row overlap audited before training (registered policies)",
+    "run_directory": "new or empty only, claimed by an exclusive run_claim.json; never resumed; an interrupted run is preserved and reported and a new run directory and run id are used",
+    "checkpoints": "SHA-256 of each condition's final latest.keras recorded at evaluation time in target_evaluation_log.jsonl; final verification re-hashes, reloads and re-evaluates every checkpoint and compares with the engine's metrics within verification_tolerance",
+    "certificate": "result/d5_autond_certificate.json: engine-generated result and target verification in separate sections; VERIFIED only if every condition, hash and check is present and consistent",
+    "binding": "the run claim records the preregistration anchor and commit, the source identity of every driver and engine file (all must be clean at HEAD), the upstream commit and the digests of the bound files, and the software environment"
+  },
+  "decisions": {
+    "training_sizes": {
+      "status": "APPROVED",
+      "value": [2500000, 5000000, 7500000, 10000000],
+      "recommended": [2500000, 5000000, 7500000, 10000000],
+      "units": "examples",
+      "rationale": "Four nested training-prefix sizes; the smallest is the baseline for all primary contrasts."
+    },
+    "replicates": {
+      "status": "APPROVED",
+      "value": 12,
+      "recommended": 12,
+      "rationale": "Independent replicate datasets/seeds. 12 is the proposed target; see statistical_plan.design_resolution. Compute: 10 epochs over 25e6 examples per replicate (2.5+5+7.5+10 M), about 25 'one-epoch-on-10M' units per replicate, about 300 for k=12."
+    },
+    "epochs": {
+      "status": "APPROVED",
+      "value": 10,
+      "recommended": 10,
+      "rationale": "Fixed epoch budget; equals the pinned train_nets.EPOCHS. Final-epoch model is evaluated."
+    },
+    "batch_size": {
+      "status": "APPROVED",
+      "value": 5000,
+      "recommended": 5000,
+      "rationale": "Equals the pinned train_nets.BATCHSIZE."
+    },
+    "test_samples": {
+      "status": "APPROVED",
+      "value": 1000000,
+      "recommended": 1000000,
+      "units": "examples",
+      "rationale": "Fixed held-out test set size at round 5; binomial SE about 0.0003 at accuracy 0.92."
+    },
+    "alpha": {
+      "status": "APPROVED",
+      "value": 0.05,
+      "recommended": 0.05,
+      "options": [
+        0.05
+      ],
+      "rationale": "Family-wise level for the Holm-corrected primary family. Fixed at 0.05 because the engine's Holm level is hard-coded."
+    },
+    "bootstrap_replicates": {
+      "status": "APPROVED",
+      "value": 5000,
+      "recommended": 5000,
+      "rationale": "Engine bootstrap resamples (descriptive CIs)."
+    },
+    "audit_seed": {
+      "status": "APPROVED",
+      "value": 0,
+      "recommended": 0,
+      "rationale": "Engine audit seed: spawns the replicate seeds and seeds the bootstrap. Does not control data."
+    },
+    "primary_analysis": {
+      "status": "APPROVED",
+      "value": "engine_paired_t_holm_vs_smallest_size",
+      "recommended": "engine_paired_t_holm_vs_smallest_size",
+      "options": [
+        "engine_paired_t_holm_vs_smallest_size"
+      ],
+      "rationale": "The engine's analysis is the confirmatory test; target statistics are supplementary."
+    },
+    "practical_effect_threshold": {
+      "status": "APPROVED",
+      "value": 0.005,
+      "recommended": null,
+      "units": "accuracy_fraction",
+      "rationale": "Smallest mean accuracy difference regarded as practically meaningful (3.6.4 Stage 6 condition 2; 3.9.5). No source fixes it; the protocol owner must choose it before execution. Considerations: the binomial test-set SE is about 0.0003; the round-5 reference accuracy is about 0.92 (single run, validation); candidate values sometimes used are 0.001, 0.0025, 0.005, 0.01."
+    },
+    "practical_effect_rule": {
+      "status": "APPROVED",
+      "value": "t_interval_excludes_threshold_band",
+      "recommended": null,
+      "options": [
+        "point_estimate_at_least_threshold",
+        "t_interval_excludes_threshold_band"
+      ],
+      "rationale": "How the threshold is applied to a significant contrast: the point estimate |mean| >= threshold, or the stricter rule that the 95% paired-t interval lies entirely beyond +-threshold."
+    },
+    "partition_overlap_policy": {
+      "status": "APPROVED",
+      "value": "refuse_on_any_train_test_feature_row",
+      "recommended": "refuse_on_any_train_test_feature_row",
+      "options": [
+        "refuse_on_any_train_test_feature_row",
+        "record_only"
+      ],
+      "rationale": "A training row equal to a test row signals a generation defect (rows are random 64-bit vectors); refuse, keep the data, end the run."
+    },
+    "within_partition_duplicates_policy": {
+      "status": "APPROVED",
+      "value": "record_only",
+      "recommended": "record_only",
+      "options": [
+        "record_only",
+        "refuse_on_any_within_partition_duplicate"
+      ],
+      "rationale": "Within-partition duplicates do not cross the train/test boundary; recorded with their count."
+    },
+    "failure_handling": {
+      "status": "APPROVED",
+      "value": "no_resume_new_run_directory_no_exclusions",
+      "recommended": "no_resume_new_run_directory_no_exclusions",
+      "options": [
+        "no_resume_new_run_directory_no_exclusions"
+      ],
+      "rationale": "No replicate or condition is excluded, replaced or resumed. Any failure leaves the run NOT_COMPLETED and preserved; a new run uses a new directory and run id, and every started run is reported."
+    },
+    "verification_tolerance": {
+      "status": "APPROVED",
+      "value": {
+        "accuracy_abs": 1e-05,
+        "loss_abs": 1e-05
+      },
+      "recommended": {
+        "accuracy_abs": 1e-05,
+        "loss_abs": 1e-05
+      },
+      "rationale": "Maximum absolute difference between the engine's recorded and the independently recomputed accuracy and MSE. 1e-5 accuracy is 10 of 10^6 test examples, allowing float32 accumulation and GPU nondeterminism at the 0.5 threshold; anything larger fails verification."
+    }
+  },
+  "outcomes": {
+    "engine": "result/engine_certificate.json (unmodified engine output)",
+    "target": "result/d5_autond_certificate.json status VERIFIED or NOT_VERIFIED; run_failure.json and outcome NOT_COMPLETED if the run did not finish",
+    "per_contrast": [
+      "SIGNIFICANT_AND_PRACTICALLY_MEANINGFUL",
+      "SIGNIFICANT_BELOW_PRACTICAL_THRESHOLD",
+      "NOT_SIGNIFICANT_INCONCLUSIVE"
+    ]
+  },
+  "scope_and_limitations": [
+    "Fixed round-5, fixed-budget scaling of the final-epoch DBitNet; not a full-pipeline (staged, validation-selected, stopping-rule) scaling experiment.",
+    "Fixed-epoch policy: larger sizes receive proportionally more optimizer updates (epochs * n / batch). The contrasts estimate the effect of training-set size under this policy, with data and compute confounded; they do not isolate data from compute. A compute-matched design would be a different, separately approved protocol.",
+    "Conditional on the fixed test set, round 5, delta 0x400000, the epoch budget, batch size, optimizer, seeds policy, pinned commit and environment; no generalisation beyond them.",
+    "Nested prefixes are paired conditions, not independent datasets; the replicate is the unit.",
+    "The scaling slope is descriptive over the tested grid; no law and no extrapolation.",
+    "A positive trend does not establish cryptographic learning; a non-significant contrast does not establish equivalence.",
+    "Exact-duplicate and overlap audits detect identical rows only; their absence does not prove statistical independence.",
+    "Datasets are not replayable from a seed (os.urandom); the persisted arrays and hashes are the reproducibility object.",
+    "GPU training is not bit-deterministic; re-training reproduces the procedure, not identical weights.",
+    "Cross-replicate exact-duplicate overlap is not audited."
+  ],
+  "claim_scope": {
+    "estimand": "Per training size n: mean over independent replicates of the final-epoch held-out accuracy of the pinned DBitNet trained for the registered epoch budget on the first n rows of a replicate's independent round-5 dataset; contrasts are within-replicate differences against the smallest size.",
+    "training_policy": "Fixed-EPOCH policy: every size is trained for the same number of epochs at batch 5000, so a size-n condition receives epochs * ceil(n / 5000) optimizer updates (2.5M: 5,000; 10M: 20,000 at 10 epochs). The estimand is performance under this policy; dataset size and training compute vary together and are not separated.",
+    "conditional_on": [
+      "this fixed test set (inference is conditional on it)",
+      "round 5, delta 0x400000, single-key",
+      "the registered epoch budget, batch size, optimizer and final-epoch selection",
+      "the pinned upstream commit and this software environment"
+    ],
+    "does_not_establish": [
+      "a universal or extrapolable scaling law",
+      "cryptographic learning",
+      "behaviour of AutoND's staged full pipeline, its validation-based selection or stopping rule",
+      "equivalence between sizes from a non-significant contrast",
+      "an effect of dataset size independent of training compute (updates scale with n)",
+      "statistical independence from the absence of exact duplicates"
+    ]
+  }
+}
