@@ -39,16 +39,29 @@ decisions:
   target_power: 0.80            # EV statistical plan
   power_simulations: 50000      # EV statistical plan
   sigma_bound: upper95          # production is sized on the one-sided 95% upper bound of sigma_Delta
-  practical_threshold: UNSPECIFIED_REQUIRES_APPROVAL             # epsilon, absolute confirmatory accuracy
-  practical_threshold_justification: UNSPECIFIED_REQUIRES_APPROVAL
-  target_effect: UNSPECIFIED_REQUIRES_APPROVAL                   # must exceed epsilon
-  target_effect_justification: UNSPECIFIED_REQUIRES_APPROVAL
+  practical_threshold: 0.01     # epsilon, absolute confirmatory accuracy
+  practical_threshold_justification: >-
+    The practical-effect margin is one percentage point of absolute held-out accuracy. It follows the
+    audit-wide margin previously adopted for II-4, using the same accuracy metric. This is a prospective
+    methodological judgment, not a universal literature-derived threshold, and is not based on calibration
+    variability or observed EV outcomes.
+  target_effect: 0.02           # common to both primary hypotheses; must exceed epsilon
+  target_effect_justification: >-
+    The prospective power-planning alternative is a two-percentage-point absolute accuracy difference. This is
+    twice the practical-effect margin and leaves one percentage point between the target effect and the
+    equivalence boundary. The design targets 80% power for this prespecified alternative under the complete
+    registered decision procedure. This value is a planning assumption, not an expected or observed AutoND
+    result. Effects between the practical margin and this target may still result in inconclusive conclusions.
 
 # Pilot pairs per paired hypothesis (non-evidentiary; estimates sigma_Delta only). minimum_valid = units:
 # any failed pair means the pilot is re-planned, never analysed on a reduced denominator.
+# 10 matched pairs per hypothesis is an operational calibration budget, not a claim of a universally
+# sufficient sample size; production is sized on the one-sided 95% upper bound of sigma_Delta to allow for
+# the pilot's imprecision. Each pair has two arms, which use the same persisted data and verified identical
+# initial weights.
 calibration:
-  H-EV-AUTOND-TRAIN-ORDER: {units: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 91000}
-  H-EV-AUTOND-REPRESENTATION: {units: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 92000}
+  H-EV-AUTOND-TRAIN-ORDER: {units: 10, base_seed: 91000}
+  H-EV-AUTOND-REPRESENTATION: {units: 10, base_seed: 92000}
 
 production:
   EV-AUTOND-BASELINE: {units: UNSPECIFIED_REQUIRES_APPROVAL, minimum_valid: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 1000}

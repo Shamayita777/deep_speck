@@ -181,12 +181,16 @@ def test_output_directories_are_bound_to_one_mode_and_one_writer(tmp_path):
 # ============================================================ configuration gates
 
 
-def test_the_shipped_config_is_frozen_except_for_the_pending_decisions():
+def test_the_shipped_config_freezes_calibration_and_leaves_production_open():
     config = B.load_config()
     assert config["protocol"] == B.FROZEN_PROTOCOL and B.check_config(config, "smoke") == []
-    pending = B.check_config(config, "calibration")
-    assert len(pending) == 1 and "decisions.practical_threshold" in pending[0] and "calibration." in pending[0]
-    assert "production.power_plan.sha256" in B.check_config(config, "production")[0]
+    assert B.check_config(config, "calibration") == []
+    d = config["decisions"]
+    assert (d["practical_threshold"], d["target_effect"]) == (0.01, 0.02)
+    assert all(config["calibration"][h]["units"] == 10 for h in B.PRIMARY_FAMILY)
+    pending = B.check_config(config, "production")
+    assert len(pending) == 1 and "production.power_plan.sha256" in pending[0]
+    assert all(f"production.{e}.units" in pending[0] for e in B.EXPERIMENT_IDS)
 
 
 def test_production_refuses_through_the_entry_point_while_decisions_are_pending(tmp_path, capsys):
