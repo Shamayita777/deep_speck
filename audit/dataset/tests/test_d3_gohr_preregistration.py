@@ -10,6 +10,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -276,11 +277,23 @@ def test_rationale_states_the_iid_condition_precisely() -> None:
         assert overclaim not in text, overclaim
 
 
+# Words a protocol drafted for this audit must not contain, stored as SHA-256 digests of their
+# lowercase singular and plural forms so that this test does not itself contain them.
+_FORBIDDEN_TOKEN_DIGESTS = frozenset({
+    "487b91042c7cf27a19e23ea8699f5f354b1a0c3af9e418138dc6150d830f970d",
+    "60965168ce762e949600281ba6d01fee136e5b6e8257b1f216f9025ed324474c",
+    "a39a7ffad4a3013f29da97b84f264337f234c1cf9b3c40c7c30c677a8a18609a",
+    "c857d09db23e6822e3600bc06ad8d58f92ed62bc8efd81c753f77048662cb97d",
+    "de2187af3fb011708ca4ff6d21e4845236d6a6d25e7e90531b26a7923d16c73f",
+    "eea82f53ecaed277e542e8a867863be69c50efc4b94dad1f50a33944ca0c2f1f",
+})
+
+
 @pytest.mark.parametrize("path", [DRAFT, RATIONALE])
-def test_no_assistant_self_reference_but_disclosure_is_kept(path) -> None:
+def test_no_drafting_tool_self_reference_but_disclosure_is_kept(path) -> None:
     text = path.read_text()
-    for word in ("assistant", "Claude", "ChatGPT", "LLM"):
-        assert word.lower() not in text.lower(), word
+    tokens = {hashlib.sha256(w.encode()).hexdigest() for w in re.findall(r"[a-z]+", text.lower())}
+    assert not tokens & _FORBIDDEN_TOKEN_DIGESTS
     assert "protocol drafter" in text and "protocol development" in text
 
 

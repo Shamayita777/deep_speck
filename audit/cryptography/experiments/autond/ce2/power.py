@@ -1,0 +1,312 @@
+"""
+AutoND CE2 power: scenario-based sensitivity analysis of the complete decision rule.
+
+What this is. For assumed run-level effects, the probability that the preregistered procedure
+(exact two-sided sign test, then Holm over two one-sided control-separation sign tests) returns
+SUPPORTED. The true effect, and the dependence between the published-model and twin-model
+coefficients, are unknown, so every number is conditional on a stated scenario. It is not a
+guarantee of power, and no exploratory coefficient from the published model is used.
+
+Run-level model (``simulate_joint_power``), in units of se = 1/sqrt(N - 1):
+
+    rho_primary,i = delta + e_p,i
+    rho_perm,i    = e_q,i,                     corr(e_p, e_q) = perm_error_corr
+    rho_twin,i    = twin_ratio * delta + e_t,i, corr(e_p, e_t) = twin_error_corr
+
+with (e_p, e_q, e_t) jointly standard normal. Each estimate carries its Monte Carlo standard
+error and a Clopper-Pearson 95% interval.
+
+Checking the model (``pipeline_faithful_check``). The Gaussian model assumes that the Spearman
+coefficient of N pairs with the real, heavily tied, discrete target has variance (N - 1)^-1 and is
+close to normal, under the null and under small alternatives. The check simulates the actual
+estimator (average ranks, no jitter) on the real model-free target vector, with synthetic scores
+``score = lam * standardised(target) + noise``, and reports N * var(rho_hat), the skewness, and the
+agreement between the simulated sign probability and Phi(mean / sd). The scores are synthetic and
+model-free; nothing from the published model enters. It also counts exact zeros: of rho_hat, of the
+permuted-target coefficient computed from the same synthetic scores, and of the paired difference
+|rho_hat| - |rho_perm|. It cannot estimate the zero frequency of the published model or of the twin.
+
+Zero ties (``zero_tie_sensitivity``). The Gaussian model is continuous: it assigns probability 0 to
+an exact zero run-level coefficient and to an exact zero paired control difference, so every
+simulated run enters every sign test. The sign tests remove exact zeros. This section reports, by
+exact arithmetic, the primary test's power conditional on the effective sample size
+n_effective <= n_runs, and, by simulation, the joint power when a fixed number of the 20 primary
+coefficients are exactly zero (such a run leaves the primary denominator, and in the control tests
+contributes D = -|rho_c| < 0), and when a fixed number of paired differences D_perm, D_twin or both
+are exactly zero (such a run leaves that control test's denominator). The probability that a real
+run gives an exact zero coefficient or difference is not known; the counts are scenarios.
+
+Intervals. ``clopper_pearson`` is exact for n <= 2000 and a continuity-corrected normal tail
+inversion above; every simulated power estimate (n_sim = 50,000) uses the approximate branch, and
+each output records its method in ``ci95_method``.
+"""
+
+from __future__ import annotations
+
+import math
+
+import numpy as np
+
+from .analysis import average_ranks, binom_cdf
+
+
+def _rejection_counts_two_sided(n: int, alpha: float) -> int:
+    for k in range((n + 1) // 2, n + 1):
+        if min(1.0, 2.0 * binom_cdf(n - k, n)) <= alpha:
+            return k
+    return n + 1
+
+
+def primary_power_exact(n: int, p_positive: float, alpha: float) -> float:
+    k = _rejection_counts_two_sided(n, alpha)
+    pmf = [math.comb(n, i) * p_positive ** i * (1 - p_positive) ** (n - i) for i in range(n + 1)]
+    return float(sum(pmf[i] for i in range(n + 1) if i >= k or i <= n - k))
+
+
+def _log_comb(n: int, i: int) -> float:
+    return math.lgamma(n + 1) - math.lgamma(i + 1) - math.lgamma(n - i + 1)
+
+
+def clopper_pearson(k: int, n: int, level: float = 0.95) -> tuple[float, float]:
+    """Two-sided binomial interval by bisection on the binomial tail (no SciPy).
+
+    Two branches, chosen by n alone:
+    * n <= 2000: exact Clopper-Pearson inversion; the binomial tail is summed term by term (in log
+      space, because math.comb(n, i) exceeds the float range above n of about 1030);
+    * n > 2000: NOT exact Clopper-Pearson. The tail is replaced by a continuity-corrected normal
+      approximation, Pr[X >= k] ~ Phi((n p - k + 0.5) / sqrt(n p (1 - p))), and that approximate tail
+      is inverted. Every power estimate (all n_sim = 50,000 in the reports) uses this branch.
+    ``_estimate`` records which branch produced each interval in ``ci95_method``."""
+    a = (1 - level) / 2
+
+    def tail_ge(p, k):     # Pr[X >= k]
+        if k <= 0:
+            return 1.0
+        # log-space terms: math.comb(n, i) exceeds the float range for n above about 1030
+        lo_terms = sum(math.exp(_log_comb(n, i) + i * math.log(p) + (n - i) * math.log1p(-p))
+                       for i in range(k)) if n <= 2000 else None
+        if lo_terms is not None:
+            return 1.0 - lo_terms
+        # normal approximation with continuity correction for large n (Monte Carlo counts)
+        mu, sd = n * p, math.sqrt(max(n * p * (1 - p), 1e-300))
+        return 0.5 * math.erfc((k - 0.5 - mu) / (sd * math.sqrt(2)))
+
+    def solve(f, target):
+        lo, hi = 0.0, 1.0
+        for _ in range(80):
+            mid = (lo + hi) / 2
+            if f(mid) < target:
+                lo = mid
+            else:
+                hi = mid
+        return (lo + hi) / 2
+
+    lower = 0.0 if k == 0 else solve(lambda p: tail_ge(p, k), a)
+    # upper bound: Pr[X <= k; p] = a, i.e. the increasing Pr[X >= k + 1; p] = 1 - a
+    upper = 1.0 if k == n else solve(lambda p: tail_ge(p, k + 1), 1 - a)
+    return lower, upper
+
+
+def _estimate(hits: np.ndarray) -> dict:
+    n, k = int(hits.size), int(hits.sum())
+    p = k / n
+    lo, hi = clopper_pearson(k, n)
+    return {"estimate": p, "mc_se": math.sqrt(p * (1 - p) / n), "ci95": [lo, hi], "n_sim": n,
+            "ci95_method": CI_METHOD_EXACT if n <= 2000 else CI_METHOD_NORMAL}
+
+
+CI_METHOD_EXACT = "Clopper-Pearson"
+CI_METHOD_NORMAL = "binomial tail inversion with a continuity-corrected normal tail (n_sim > 2000)"
+
+
+def simulate_joint_power(*, n_runs: int, delta: float, twin_ratio: float, twin_error_corr: float,
+                         alpha: float, n_sim: int, seed: int, perm_error_corr: float = 0.0,
+                         n_zero_primary: int = 0, n_zero_diff_perm: int = 0, n_zero_diff_twin: int = 0) -> dict:
+    """Scenarios, not estimates: ``n_zero_primary`` runs have rho_primary exactly 0 (runs 0..k-1);
+    ``n_zero_diff_perm`` runs (the first ones) have D_perm = |rho_primary| - |rho_perm| exactly 0;
+    ``n_zero_diff_twin`` runs (the last ones, disjoint from the permuted ones when the counts allow)
+    have D_twin exactly 0. A zero difference is removed from that control test's denominator."""
+    rng = np.random.Generator(np.random.PCG64(seed))
+    cov = np.array([[1.0, perm_error_corr, twin_error_corr],
+                    [perm_error_corr, 1.0, 0.0],
+                    [twin_error_corr, 0.0, 1.0]])
+    L = np.linalg.cholesky(cov)
+    e = rng.standard_normal((n_sim, n_runs, 3)) @ L.T
+    rp, rq, rt = delta + e[..., 0], e[..., 1], twin_ratio * delta + e[..., 2]
+    if n_zero_primary:
+        rp[:, :n_zero_primary] = 0.0
+    n_eff = n_runs - n_zero_primary
+    k_hi = _rejection_counts_two_sided(n_eff, alpha)
+    pos = (rp > 0).sum(axis=1)
+    stage1 = (pos >= k_hi) | (pos <= n_eff - k_hi) if n_eff else np.zeros(n_sim, dtype=bool)
+    if n_zero_diff_perm:
+        rq[:, :n_zero_diff_perm] = rp[:, :n_zero_diff_perm]
+    if n_zero_diff_twin:
+        rt[:, n_runs - n_zero_diff_twin:] = rp[:, n_runs - n_zero_diff_twin:]
+    # upper tail Pr[X >= k], X ~ Binomial(m, 1/2), for every effective size m; m = 0 (untestable) -> 1
+    tail = np.array([[1.0 - binom_cdf(k - 1, m) for k in range(n_runs + 1)] for m in range(n_runs + 1)])
+
+    def control_p(rc):
+        a, b = np.abs(rp), np.abs(rc)
+        pos, m = (a > b).sum(axis=1), (a != b).sum(axis=1)
+        return tail[m, pos], m
+
+    p1, m_perm = control_p(rq)
+    p2, m_twin = control_p(rt)
+    lo, hi = np.minimum(p1, p2), np.maximum(p1, p2)
+    holm_both = (lo <= alpha / 2) & (hi <= alpha)
+    return {"n_runs": n_runs, "delta_se_units": delta, "twin_ratio": twin_ratio,
+            "twin_error_corr": twin_error_corr, "perm_error_corr": perm_error_corr,
+            "sign_probability": float(0.5 * math.erfc(-delta / math.sqrt(2))),
+            "power_primary": _estimate(stage1), "power_supported": _estimate(stage1 & holm_both),
+            "seed": seed, **({"n_zero_primary": n_zero_primary, "n_effective_primary": n_eff}
+                             if n_zero_primary else {}),
+            **({"n_zero_diff_perm": n_zero_diff_perm, "n_zero_diff_twin": n_zero_diff_twin,
+                "n_effective_perm": sorted({int(x) for x in m_perm}),
+                "n_effective_twin": sorted({int(x) for x in m_twin})}
+               if n_zero_diff_perm or n_zero_diff_twin else {})}
+
+
+def power_analysis(*, alpha: float = 0.05, n_sim: int = 50_000, seed: int = 20261030) -> dict:
+    sign_probs = (0.65, 0.70, 0.75, 0.80, 0.85)
+    primary = {str(n): {str(p): primary_power_exact(n, p, alpha) for p in sign_probs}
+               for n in (10, 15, 20, 25, 30, 40)}
+    joint, i = [], 0
+    for n_runs in (10, 20, 30):
+        for twin_ratio in (0.0, 0.25, 0.5, 0.75):
+            for corr in (-0.5, 0.0, 0.5, 0.9):
+                for d in (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0):
+                    joint.append(simulate_joint_power(n_runs=n_runs, delta=d, twin_ratio=twin_ratio,
+                                                      twin_error_corr=corr, alpha=alpha, n_sim=n_sim,
+                                                      seed=seed + i))
+                    i += 1
+    perm_dep = [simulate_joint_power(n_runs=20, delta=d, twin_ratio=0.25, twin_error_corr=0.5,
+                                     perm_error_corr=c, alpha=alpha, n_sim=n_sim, seed=seed + 10_000 + j)
+                for j, (d, c) in enumerate((d, c) for d in (2.0, 3.0) for c in (-0.3, 0.0, 0.3))]
+    return {"nature": "scenario-based sensitivity analysis; conditional on the stated run-level model",
+            "alpha": alpha, "primary_exact_power": primary, "joint_power_simulation": joint,
+            "permutation_dependence_sensitivity": perm_dep,
+            "smallest_attainable_two_sided_p": {str(n): 2.0 / 2 ** n for n in (10, 15, 20, 25, 30, 40)},
+            "rejection_threshold_positive_runs": {str(n): _rejection_counts_two_sided(n, alpha)
+                                                   for n in (10, 15, 20, 25, 30, 40)},
+            "zero_tie_sensitivity": zero_tie_sensitivity(alpha=alpha, n_sim=n_sim, seed=seed + 20_000)}
+
+
+def zero_tie_sensitivity(*, alpha: float = 0.05, n_runs: int = 20, n_sim: int = 50_000,
+                         seed: int = 20261030 + 20_000) -> dict:
+    """How exact-zero coefficients, removed from the sign-test denominator, change the power."""
+    sign_probs = (0.65, 0.70, 0.75, 0.80, 0.85)
+    effective = range(n_runs, 4, -1)
+    min_primary = next(n for n in range(1, n_runs + 1) if 2.0 / 2 ** n <= alpha)
+    min_control_first = next(n for n in range(1, n_runs + 1) if 1.0 / 2 ** n <= alpha / 2)
+    joint, i = [], 0
+    for twin_ratio in (0.0, 0.25, 0.5):
+        for corr in (0.0, 0.5):
+            for d in (2.0, 2.5, 3.0, 4.0):
+                for k in (1, 2, 3):
+                    joint.append(simulate_joint_power(n_runs=n_runs, delta=d, twin_ratio=twin_ratio,
+                                                      twin_error_corr=corr, alpha=alpha, n_sim=n_sim,
+                                                      seed=seed + i, n_zero_primary=k))
+                    i += 1
+    control, j = [], 0
+    for twin_ratio in (0.0, 0.25, 0.5):
+        for corr in (0.0, 0.5):
+            for d in (2.0, 2.5, 3.0, 4.0):
+                for kp, kt in ((1, 0), (2, 0), (3, 0), (0, 1), (0, 2), (0, 3), (1, 1), (2, 2), (3, 3)):
+                    control.append(simulate_joint_power(n_runs=n_runs, delta=d, twin_ratio=twin_ratio,
+                                                        twin_error_corr=corr, alpha=alpha, n_sim=n_sim,
+                                                        seed=seed + 1_000 + j, n_zero_diff_perm=kp,
+                                                        n_zero_diff_twin=kt))
+                    j += 1
+    return {
+        "nature": ("exact conditional power and fixed-count simulation scenarios; the probability of an exact "
+                   "zero run-level coefficient or an exact zero paired difference for the published model or "
+                   "the twin is not known, and no scenario estimates it"),
+        "gaussian_model_zero_probability": ("0: the joint Gaussian model has no point mass at 0 for rho or for "
+                                            "D_c, so every simulated run enters every sign test"),
+        "primary_exact_power_by_n_effective": {
+            str(n): {"rejection_threshold": _rejection_counts_two_sided(n, alpha),
+                     "smallest_attainable_two_sided_p": 2.0 / 2 ** n,
+                     "power": {str(p): primary_power_exact(n, p, alpha) for p in sign_probs}}
+            for n in effective},
+        "smallest_n_effective_that_can_reject": {
+            "primary_two_sided": min_primary,
+            "control_one_sided_first_holm_step_alpha_over_2": min_control_first},
+        "joint_power_with_exact_zero_primary_runs": joint,
+        "joint_power_with_exact_zero_control_differences": control,
+        "control_difference_scenarios": ("k_perm runs (the first) with D_perm = 0 and k_twin runs (the last, "
+                                          "disjoint) with D_twin = 0; separately (k, 0), (0, k) and jointly "
+                                          "(k, k); the primary coefficients are untouched, so the primary test "
+                                          "keeps n_effective = 20"),
+        "zero_primary_run_in_control_tests": ("a run with rho_primary = 0 exactly and a nonzero control "
+                                              "coefficient has D_c = -|rho_c| < 0: it is a negative sign in "
+                                              "that control test, not a tie"),
+    }
+
+
+def required_delta(results: list, *, n_runs: int, twin_ratio: float, twin_error_corr: float,
+                   target: float = 0.90) -> float | None:
+    """Smallest simulated delta (se units) whose power_supported lower 95% bound reaches target."""
+    rows = sorted((r for r in results if r["n_runs"] == n_runs and r["twin_ratio"] == twin_ratio
+                   and r["twin_error_corr"] == twin_error_corr and r["perm_error_corr"] == 0.0),
+                  key=lambda r: r["delta_se_units"])
+    for r in rows:
+        if r["power_supported"]["ci95"][0] >= target:
+            return r["delta_se_units"]
+    return None
+
+
+# ----------------------------------------------------------- pipeline-faithful check
+
+
+def _spearman_fast(score: np.ndarray, rt_centred: np.ndarray, rt_norm: float) -> float:
+    rs = average_ranks(score)
+    rs -= rs.mean()
+    return float(rs @ rt_centred) / math.sqrt(float(rs @ rs)) / rt_norm
+
+
+def pipeline_faithful_check(target: np.ndarray, *, n: int, lambdas=(0.0, 0.002, 0.005), n_sim: int = 400,
+                            seed: int = 20261031) -> dict:
+    """Simulate the actual Spearman estimator on the real discrete target (subsampled to n)."""
+    rng = np.random.Generator(np.random.PCG64(seed))
+    rng_perm = np.random.Generator(np.random.PCG64([seed, 1]))   # separate stream: rho draws as before
+    t = np.asarray(target, dtype=np.float64)
+    out = {"n": n, "n_sim": n_sim, "seed": seed, "target_source": "model-free genuine-pair trajectories",
+           "score_model": "lam * standardised(target) + N(0, 1) noise (synthetic, model-free)",
+           "zero_counts": ("exact float zeros of rho_hat, of the permuted-target rho from the same synthetic "
+                           "scores, and of |rho_hat| - |rho_perm|; synthetic scores only, so these say nothing "
+                           "about the zero frequency of the published model or the twin"), "rows": []}
+    for lam in lambdas:
+        rhos, rperm = np.empty(n_sim), np.empty(n_sim)
+        for s in range(n_sim):
+            tt = t[rng.integers(0, t.size, n)]
+            z = (tt - tt.mean()) / tt.std()
+            score = lam * z + rng.standard_normal(n)
+            rt = average_ranks(tt)
+            rt -= rt.mean()
+            norm = math.sqrt(float(rt @ rt))
+            rhos[s] = _spearman_fast(score, rt, norm)
+            rperm[s] = _spearman_fast(score, rt[rng_perm.permutation(n)], norm)
+        m, sd = float(rhos.mean()), float(rhos.std(ddof=1))
+        skew = float(np.mean(((rhos - m) / sd) ** 3))
+        out["rows"].append({
+            "lambda": lam, "mean_rho": m, "sd_rho": sd, "n_minus_1_times_var": (n - 1) * sd * sd,
+            "n_minus_1_times_var_mc_se": (n - 1) * sd * sd * math.sqrt(2.0 / (n_sim - 1)),
+            "skewness": skew, "simulated_sign_probability": float(np.mean(rhos > 0)),
+            "gaussian_sign_probability": float(0.5 * math.erfc(-(m / sd) / math.sqrt(2))),
+            "delta_se_units": m * math.sqrt(n - 1),
+            "n_exact_zero_rho": int(np.sum(rhos == 0)),
+            "n_exact_zero_rho_permuted": int(np.sum(rperm == 0)),
+            "n_exact_zero_paired_difference_permuted": int(np.sum(np.abs(rhos) - np.abs(rperm) == 0)),
+            "exact_zero_rho_upper95_per_replication": _upper95_zero(int(np.sum(rhos == 0)), n_sim),
+            "exact_zero_rho_upper95_method": ("exact one-sided Clopper-Pearson, 1 - 0.05^(1/n_sim) for zero "
+                                              "events" if int(np.sum(rhos == 0)) == 0 else
+                                              "exact Clopper-Pearson, upper limit of the two-sided 90% interval")})
+    return out
+
+
+def _upper95_zero(k: int, n: int) -> float:
+    """One-sided 95% upper Clopper-Pearson bound on a per-replication frequency."""
+    if k == 0:
+        return 1.0 - 0.05 ** (1.0 / n)
+    return clopper_pearson(k, n, level=0.90)[1]

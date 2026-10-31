@@ -229,7 +229,7 @@ All three rules are implemented in the engine; this runner accepts only `near_ch
 
 ## 6. Traceability
 
-**The original "nine fixes" list could not be recovered.** I searched the repository, its history and every local Claude Code transcript under `~/.claude/projects/-Users-oishimoitra/`. The only transcript mentioning the D4 code (`e9599995…`) contains no such list, and every other "nine" refers to nine D3 test files. The list was therefore made in a conversation not stored on this machine. The table below lists every defect recoverable from history, diffs, reviews and code; no item is invented to reach nine.
+**The original "nine fixes" list could not be recovered.** I searched the repository, its history and every local session transcript on this machine. The only transcript mentioning the D4 code (`e9599995…`) contains no such list, and every other "nine" refers to nine D3 test files. The list was therefore made in a conversation not stored on this machine. The table below lists every defect recoverable from history, diffs, reviews and code; no item is invented to reach nine.
 
 | # | Defect / requirement | File / function | Change | Regression test(s) | Result |
 |---|---|---|---|---|---|

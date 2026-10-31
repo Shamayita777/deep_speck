@@ -1,0 +1,714 @@
+"""
+Independent verifier for an AutoND CE2 output directory.
+
+    python -m audit.cryptography.experiments.autond.ce2.verify <output_dir>
+           [--skip-model-recompute] [--preflight-word8] [--preregistration P] [--upstream U]
+
+What it recomputes, with its own code (it imports nothing from the CE2 runner, analysis, theory,
+adapter or design modules, nor from ``core.evidence``):
+
+* journal: sequence, previous-hash chain, schema, experiment id; replay of every run's transitions
+  against its own copy of the permitted state machine; the record caches must equal the replay;
+  every committed artifact token must have an intent; every committed hash must match its file;
+  every file under a run directory must be committed, the record cache, or quarantined with an event;
+* SPECK32/64 round function and key schedule, ciphertexts, trajectory differences;
+  xdp+ by a transfer-matrix product (a third derivation, distinct from both production paths);
+* the published checkpoint's strict binding (own HDF5 comparison) and both weight hashes;
+* model input bits and their content hash;
+* model scores (with the pinned upstream DBitNet builder and the same TensorFlow: this shows
+  inference is reproducible, it is not an independent implementation of the network);
+* ranks, Spearman's rho, exact sign tests in rational arithmetic, Holm, the order-statistic
+  interval and the decision rule, computed FROM THE RECOMPUTED SCORES;
+* gates C and D at word sizes 4 and 6 (8 with ``--preflight-word8``): transfer matrix against literal
+  operand enumeration; recorded 16-bit transitions are re-checked with the transfer matrix only.
+
+Numerical policy (design ``verification.numerical_policy``): stored scores are compared with the
+recomputed ones (bitwise, max abs difference, rank vectors, tie structure). PASS requires the
+recomputed rho to equal the stored-score rho to 1e-12 for every run, or else every decision-relevant
+sign (rho_primary,i and D_c,i) and the recomputed decision to be identical, which is reported as
+DECISION_INVARIANT_NUMERICAL_DIFFERENCE. Any sign or decision difference FAILS.
+
+The verifier never modifies evidence; ``main`` writes one new ``verification_<utc>.json``.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib
+import json
+import math
+import sys
+from datetime import datetime, timezone
+from fractions import Fraction
+from pathlib import Path
+
+import numpy as np
+
+CRYPTO_ROOT = Path(__file__).resolve().parents[3]
+CHECKPOINT_RELPATH = "model_weights/speck3264_single-key_0x400000_round8_polished.h5"
+PREREG_RELPATH = "experiments/autond/ce2/preregistration/preregistration.json"
+M16 = 0xFFFF
+GENESIS = "0" * 64
+JOURNAL_SCHEMA = "core-journal-2"
+TERMINAL = {"VALID", "EXCLUDED", "FAILED"}
+PERMITTED = {"NOT_STARTED": {"DATA_GENERATED", "FAILED"}, "DATA_GENERATED": {"DATA_VERIFIED", "FAILED"},
+             "DATA_VERIFIED": {"CONTROLS_EVALUATED", "FAILED"},
+             "CONTROLS_EVALUATED": {"EVIDENCE_WRITTEN", "FAILED"},
+             "EVIDENCE_WRITTEN": {"VALID", "EXCLUDED", "FAILED"}}
+ARTIFACT_OF = {"DATA_GENERATED": "data.npz", "CONTROLS_EVALUATED": "outputs.npz",
+               "EVIDENCE_WRITTEN": "measurement.json"}
+CONTROLS = ("permuted_target", "untrained_twin")
+
+
+class Findings:
+    def __init__(self):
+        self.checks, self.failures = [], []
+
+    def check(self, name: str, ok: bool, detail=None):
+        self.checks.append({"check": name, "ok": bool(ok), "detail": detail})
+        if not ok:
+            self.failures.append(name)
+        return bool(ok)
+
+
+def sha256_file(p) -> str:
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for c in iter(lambda: f.read(1 << 20), b""):
+            h.update(c)
+    return h.hexdigest()
+
+
+def canonical_sha256(obj) -> str:
+    return hashlib.sha256(json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+                                     allow_nan=False).encode("ascii")).hexdigest()
+
+
+def content_hash(arrays: dict) -> str:
+    h = hashlib.sha256()
+    for name in sorted(arrays):
+        a = np.ascontiguousarray(arrays[name])
+        h.update(name.encode())
+        h.update(str(a.dtype).encode())
+        h.update(str(a.shape).encode())
+        h.update(a.tobytes())
+    return h.hexdigest()
+
+
+def npz(p) -> dict:
+    with np.load(p, allow_pickle=False) as z:
+        return {k: z[k] for k in z.files}
+
+
+# ---------------------------------------------------------------- SPECK
+
+
+def _ror(x, r):
+    return ((x >> r) | (x << (16 - r))) & M16
+
+
+def _rol(x, r):
+    return ((x << r) | (x >> (16 - r))) & M16
+
+
+def _round(x, y, k):
+    x = ((_ror(x, 7) + y) & M16) ^ k
+    y = _rol(y, 2) ^ x
+    return x, y
+
+
+def _schedule(kw: np.ndarray, rounds: int) -> list:
+    kw = kw.astype(np.int64)
+    ks = [kw[:, 3]]
+    ell = [kw[:, 2], kw[:, 1], kw[:, 0]]
+    for i in range(rounds - 1):
+        l_new, k_new = _round(ell[i % 3], ks[i], i)
+        ell[i % 3] = l_new
+        ks.append(k_new)
+    return ks
+
+
+def _trajectory(kw, p, rounds):
+    ks = _schedule(kw, rounds)
+    x, y = p[:, 0].astype(np.int64), p[:, 1].astype(np.int64)
+    xs, ys = [x], [y]
+    for r in range(rounds):
+        x, y = _round(x, y, ks[r])
+        xs.append(x)
+        ys.append(y)
+    return np.stack(xs, 1), np.stack(ys, 1)
+
+
+def _words_to_bits(words: np.ndarray) -> np.ndarray:
+    w = words.astype(np.int64)
+    shifts = np.arange(15, -1, -1)
+    return np.concatenate([((w[:, j:j + 1] >> shifts) & 1) for j in range(w.shape[1])], 1).astype(np.uint8)
+
+
+# ----------------------------------------------------------- xdp+ (transfer)
+
+
+def _transfer_matrices() -> np.ndarray:
+    M = np.zeros((8, 4, 4), dtype=np.int64)
+    for t in range(8):
+        a, b, g = (t >> 2) & 1, (t >> 1) & 1, t & 1
+        for i in range(4):
+            c, cp = i >> 1, i & 1
+            for xb in (0, 1):
+                for yb in (0, 1):
+                    xq, yq = xb ^ a, yb ^ b
+                    if ((xb ^ yb ^ c) ^ (xq ^ yq ^ cp)) != g:
+                        continue
+                    j = 2 * ((xb + yb + c) >> 1) + ((xq + yq + cp) >> 1)
+                    M[t, i, j] += 1
+    return M
+
+
+_M = _transfer_matrices()
+
+
+def xdp_count(a, b, g, n=16) -> np.ndarray:
+    """Number of operand pairs (x, y) with (x+y) ^ ((x^a)+(y^b)) = g, by transfer-matrix product."""
+    a, b, g = (np.asarray(v, dtype=np.int64) for v in (a, b, g))
+    v = np.zeros(a.shape + (4,), dtype=np.int64)
+    v[..., 0] = 1
+    for i in range(n):
+        t = 4 * ((a >> i) & 1) + 2 * ((b >> i) & 1) + ((g >> i) & 1)
+        v = np.einsum("...i,...ij->...j", v, _M[t])
+    return v.sum(-1)
+
+
+def xdp_weight(a, b, g, n=16) -> np.ndarray:
+    count = xdp_count(a, b, g, n)
+    w = np.full(count.shape, -1, dtype=np.int64)
+    pos = count > 0
+    e = np.zeros_like(count)
+    e[pos] = np.round(np.log2(count[pos].astype(np.float64))).astype(np.int64)
+    if np.any(pos & (np.left_shift(np.ones_like(count), e) != count)):
+        raise ArithmeticError("non-dyadic count")
+    w[pos] = 2 * n - e[pos]
+    return w
+
+
+def literal_counts(n: int) -> np.ndarray:
+    """counts[a, b, g] over all n-bit operand pairs, by direct enumeration."""
+    size, mask = 1 << n, (1 << n) - 1
+    x, y = np.meshgrid(np.arange(size, dtype=np.int64), np.arange(size, dtype=np.int64), indexing="ij")
+    x, y = x.ravel(), y.ravel()
+    s = (x + y) & mask
+    out = np.zeros((size, size, size), dtype=np.int64)
+    for a in range(size):
+        xa = x ^ a
+        for b in range(size):
+            g = s ^ ((xa + (y ^ b)) & mask)
+            out[a, b] = np.bincount(g, minlength=size)
+    return out
+
+
+def recompute_gates(n: int) -> dict:
+    size = 1 << n
+    lit = literal_counts(n)
+    a, b, g = np.meshgrid(np.arange(size), np.arange(size), np.arange(size), indexing="ij")
+    tm = xdp_count(a.ravel(), b.ravel(), g.ravel(), n).reshape(size, size, size)
+    return {"word_size": n, "triples": size ** 3, "possible": int(np.count_nonzero(lit)),
+            "expected_possible_4_7_pow": 4 * 7 ** (n - 1), "transfer_equals_literal": bool(np.array_equal(lit, tm)),
+            "row_sums_are_4_pow_n": bool(np.all(lit.sum(axis=2) == size * size))}
+
+
+# ------------------------------------------------------------- statistics
+
+
+def ranks(v) -> np.ndarray:
+    u, inv, cnt = np.unique(np.asarray(v, dtype=np.float64), return_inverse=True, return_counts=True)
+    before = np.concatenate(([0], np.cumsum(cnt)[:-1]))
+    return (before + (cnt + 1) / 2.0)[inv]
+
+
+def tie_structure(v) -> list:
+    _, cnt = np.unique(np.asarray(v), return_counts=True)
+    return sorted(cnt.tolist())
+
+
+def rho(x, y):
+    x, y = np.asarray(x, dtype=np.float64), np.asarray(y, dtype=np.float64)
+    if x.size < 3 or not (np.all(np.isfinite(x)) and np.all(np.isfinite(y))) or np.ptp(x) == 0 or np.ptp(y) == 0:
+        return None
+    rx, ry = ranks(x), ranks(y)
+    rx, ry = rx - rx.mean(), ry - ry.mean()
+    return float(np.dot(rx, ry) / math.sqrt(np.dot(rx, rx) * np.dot(ry, ry)))
+
+
+def _tail_le(k, n):
+    return Fraction(sum(math.comb(n, i) for i in range(0, k + 1)), 2 ** n) if k >= 0 else Fraction(0)
+
+
+def sign_two_sided(v):
+    pos, neg = sum(1 for x in v if x > 0), sum(1 for x in v if x < 0)
+    n = pos + neg
+    return pos, neg, (1.0 if n == 0 else float(min(Fraction(1), 2 * _tail_le(min(pos, neg), n))))
+
+
+def sign_greater(v):
+    pos, neg = sum(1 for x in v if x > 0), sum(1 for x in v if x < 0)
+    n = pos + neg
+    return pos, neg, (1.0 if n == 0 else float(1 - _tail_le(pos - 1, n)))
+
+
+def holm_two(p: dict, alpha: float) -> dict:
+    (k1, p1), (k2, p2) = sorted(p.items(), key=lambda kv: (kv[1], kv[0]))
+    r1 = p1 <= alpha / 2
+    r2 = r1 and p2 <= alpha
+    return {k1: {"adjusted": min(1.0, 2 * p1), "rejected": r1},
+            k2: {"adjusted": min(1.0, max(2 * p1, p2)), "rejected": r2}}
+
+
+def order_ci(v, level=0.95):
+    x = sorted(v)
+    n = len(x)
+    k = 0
+    while k + 1 <= n and _tail_le(k, n) <= Fraction(1 - level).limit_denominator(10 ** 6) / 2:
+        k += 1
+    return None if k == 0 else (x[k - 1], x[n - k])
+
+
+def decide(rhos: dict, *, statuses: dict, n_runs: int, min_valid: int, alpha: float, precheck_ok: bool) -> dict:
+    """The preregistered decision rule, from run-level coefficients."""
+    out = {"n_valid": len(rhos)}
+    if not precheck_ok:
+        return {**out, "decision": "PRECHECK_FAILED"}
+    if len([s for s in statuses.values() if s in TERMINAL]) != n_runs or len(rhos) < min_valid:
+        return {**out, "decision": "INCONCLUSIVE"}
+    ids = sorted(rhos)
+    prim = [rhos[k]["primary"] for k in ids]
+    pos, neg, p = sign_two_sided(prim)
+    out["primary"] = {"pos": pos, "neg": neg, "p": p, "median": float(np.median(prim)), "ci": order_ci(prim)}
+    if p > alpha:
+        return {**out, "decision": "INCONCLUSIVE"}
+    ps, tests = {}, {}
+    for c in CONTROLS:
+        d = [abs(rhos[k]["primary"]) - abs(rhos[k][c]) for k in ids]
+        cp, cn, cpv = sign_greater(d)
+        tests[c] = {"pos": cp, "neg": cn, "p": cpv}
+        ps[c] = cpv
+    h = holm_two(ps, alpha)
+    out.update(controls=tests, holm=h)
+    out["decision"] = "SUPPORTED" if all(h[c]["rejected"] for c in h) else "ASSOCIATION_OBSERVED_CONTROL_UNRESOLVED"
+    return out
+
+
+# ----------------------------------------------------------------- upstream
+
+
+def load_upstream(root: Path, f: Findings):
+    """Hash-check and import the pinned upstream without leaving it on sys.path or in sys.modules."""
+    expected = json.loads((CRYPTO_ROOT / "upstream_sha256.json").read_text())
+    bad = [rel for rel, h in expected.items() if not (root / rel).is_file() or sha256_file(root / rel) != h]
+    f.check("upstream_sources_match_pinned_hashes", not bad, bad)
+    if bad:
+        return None
+    top = ("main", "train_nets", "dbitnet", "gohrnet", "optimizer", "eval_nets", "polish_nets", "ciphers")
+    is_up = lambda k: k.split(".", 1)[0] in top
+    aside = {k: sys.modules.pop(k) for k in list(sys.modules) if is_up(k)}
+    path, flag = list(sys.path), sys.dont_write_bytecode
+    sys.path.insert(0, str(root))
+    sys.dont_write_bytecode = True
+    mods = {}
+    try:
+        mods["cipher"] = importlib.import_module("ciphers.speck3264")
+        mods["dbitnet"] = importlib.import_module("dbitnet")
+    finally:
+        for k in [k for k in list(sys.modules) if is_up(k)]:
+            del sys.modules[k]
+        sys.modules.update(aside)
+        sys.path[:] = path
+        sys.dont_write_bytecode = flag
+    f.check("upstream_modules_resolve_inside_pinned_root",
+            all(root.resolve() in Path(m.__file__).resolve().parents for m in mods.values()))
+    return mods
+
+
+def weights_hash(model) -> str:
+    h = hashlib.sha256()
+    for v in model.weights:
+        a = np.ascontiguousarray(v.numpy())
+        h.update(str(a.dtype).encode())
+        h.update(str(a.shape).encode())
+        h.update(a.tobytes())
+    return h.hexdigest()
+
+
+def strict_matches_hdf5(model, path) -> bool:
+    import h5py
+    layers = [l for l in model.layers if l.weights]
+    with h5py.File(path, "r") as fh:
+        groups = []
+        for nm in fh.attrs["layer_names"]:
+            nm = nm.decode() if isinstance(nm, bytes) else nm
+            wn = [w.decode() if isinstance(w, bytes) else w for w in fh[nm].attrs["weight_names"]]
+            if wn:
+                groups.append([fh[nm][w][()] for w in wn])
+        if len(groups) != len(layers):
+            return False
+        for layer, arrays in zip(layers, groups):
+            if len(layer.weights) != len(arrays):
+                return False
+            if not all(v.shape == a.shape and np.array_equal(v.numpy(), a) for v, a in zip(layer.weights, arrays)):
+                return False
+    return True
+
+
+# ----------------------------------------------------------------- journal
+
+
+def verify_journal(out: Path, man: dict, f: Findings) -> dict:
+    """Chain, replay and record/artifact reconciliation. Returns {run_id: replayed record}."""
+    lines = (out / "journal.jsonl").read_bytes()
+    f.check("journal_ends_with_complete_line", lines.endswith(b"\n"))
+    raw = lines.splitlines()
+    entries, prev, chain = [], GENESIS, []
+    for i, ln in enumerate(raw):
+        e = json.loads(ln)
+        if e.get("seq") != i:
+            chain.append(f"seq {e.get('seq')} at line {i}")
+        if e.get("prev_sha256") != prev:
+            chain.append(f"prev hash at line {i}")
+        if e.get("experiment_id") != man["experiment_id"] or e.get("schema") != JOURNAL_SCHEMA:
+            chain.append(f"experiment id or schema at line {i}")
+        prev = hashlib.sha256(ln).hexdigest()
+        entries.append(e)
+    f.check("journal_chain_sequence_and_identity", not chain, chain[:10])
+    init = [e for e in entries if e["event"] == "initialised"]
+    f.check("run_manifest_hash_matches_initialised_event",
+            len(init) == 1 and init[0].get("run_manifest_sha256") == sha256_file(out / "run_manifest.json"))
+    ids = set(man["run_ids"])
+    intents = {}
+    replay = {rid: {"state": "NOT_STARTED", "fields": {}, "history": [], "seq": None} for rid in ids}
+    problems = []
+    for e in entries:
+        rid = e.get("run_id")
+        if rid is not None and rid not in ids:
+            problems.append(f"seq {e['seq']}: unknown run {rid}")
+            continue
+        if e["event"] == "artifact_intent":
+            intents[(rid, e["token"])] = e["artifact"]
+        elif e["event"] == "run_transition":
+            r = replay[rid]
+            frm, to = e.get("from"), e.get("to")
+            if frm != r["state"]:
+                problems.append(f"seq {e['seq']}: {rid} transition from {frm} but replayed state is {r['state']}")
+            elif r["state"] in TERMINAL:
+                problems.append(f"seq {e['seq']}: {rid} leaves terminal state {r['state']}")
+            elif to not in PERMITTED.get(frm, ()):
+                problems.append(f"seq {e['seq']}: {rid} {frm} -> {to} not permitted")
+            r["fields"].update(e.get("fields", {}))
+            r["state"] = to
+            r["history"].append({"state": to, "seq": e["seq"], "utc": e["utc"]})
+            r["seq"] = e["seq"]
+            art = ARTIFACT_OF.get(to)
+            if art:
+                key = art.split(".")[0]
+                tok, sha = e["fields"].get(f"{key}_token"), e["fields"].get(f"{key}_sha256")
+                if intents.get((rid, tok)) != art:
+                    problems.append(f"seq {e['seq']}: {rid} commits {art} without a matching artifact_intent")
+                p = out / "runs" / rid / art
+                if not p.is_file() or sha256_file(p) != sha:
+                    problems.append(f"{rid}: committed {art} missing or hash differs")
+    f.check("journal_replay_state_machine_and_commits", not problems, problems[:10])
+    quarantined = {}
+    for e in entries:
+        if e["event"] == "artifact_quarantined":
+            quarantined[e["destination"]] = e["sha256"]
+    q_bad = []
+    for rid in ids:
+        rdir = out / "runs" / rid
+        if not rdir.exists():
+            continue
+        committed = {ARTIFACT_OF[h["state"]] for h in replay[rid]["history"] if h["state"] in ARTIFACT_OF}
+        for p in sorted(rdir.rglob("*")):
+            if not p.is_file():
+                continue
+            rel = p.relative_to(out).as_posix()
+            if p.parent == rdir and (p.name in committed or p.name == "record.json"):
+                continue
+            if p.parent.name == "quarantine" and quarantined.get(rel) == sha256_file(p):
+                continue
+            q_bad.append(rel)
+    f.check("every_run_file_committed_cached_or_quarantined", not q_bad, q_bad[:10])
+    rec_bad = []
+    for rid in ids:
+        r = replay[rid]
+        p = out / "runs" / rid / "record.json"
+        if r["seq"] is None:
+            if p.exists():
+                rec_bad.append(f"{rid}: record.json exists without any journal transition")
+            continue
+        if not p.exists():
+            rec_bad.append(f"{rid}: record.json missing")
+            continue
+        cached = json.loads(p.read_text())
+        expect = {**r["fields"], "state": r["state"], "history": r["history"], "journal_seq": r["seq"],
+                  "run_id": rid}
+        diff = sorted(k for k in set(expect) | (set(cached) - {"schema"}) if cached.get(k) != expect.get(k))
+        if diff:
+            rec_bad.append(f"{rid}: record.json differs from the journal in {diff[:6]}")
+    f.check("record_caches_equal_journal_replay", not rec_bad, rec_bad[:10])
+    return {rid: {**r["fields"], "state": r["state"]} for rid, r in replay.items()}
+
+
+# --------------------------------------------------------------------- main
+
+
+def verify(out: Path, *, prereg_path: Path | None = None, upstream: Path | None = None,
+           recompute_models: bool = True, preflight_word8: bool = False) -> dict:
+    out = Path(out)
+    f = Findings()
+    man = json.loads((out / "run_manifest.json").read_text())
+    prereg_path = Path(prereg_path or (CRYPTO_ROOT / PREREG_RELPATH))
+    prereg = json.loads(prereg_path.read_text())
+    design = prereg["design"]
+    dh = canonical_sha256(design)
+    f.check("preregistration_design_hash", dh == prereg["design_sha256"] == man["design_sha256"],
+            {"recomputed": dh, "preregistration": prereg["design_sha256"], "manifest": man["design_sha256"]})
+    f.check("hypothesis_direction_matches_preregistration",
+            man.get("hypothesis_direction") == design.get("hypothesis", {}).get("direction") == "TWO_SIDED")
+    if man["mode"] == "production":
+        rec = man.get("preregistration") or {}
+        f.check("preregistration_file_hash_matches_manifest", sha256_file(prereg_path) == rec.get("sha256"))
+        a = prereg.get("approval") or {}
+        f.check("preregistration_approved", a.get("status") == "APPROVED" and a.get("approved_design_sha256") == dh
+                and bool(a.get("approved_by")) and bool(a.get("approved_utc")))
+    cert_path = out / "certificate.json"
+    cert = json.loads(cert_path.read_text()) if cert_path.exists() else None
+    f.check("certificate_present", cert is not None)
+    if cert:
+        listed = cert["evidence_manifest"]
+        mism = [p for p, h in listed.items() if not (out / p).is_file() or sha256_file(out / p) != h]
+        present = {p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file()
+                   and p.name != "certificate.json" and not p.name.startswith("verification_")
+                   and ".staging" not in p.parts}
+        f.check("evidence_manifest_hashes", not mism, mism)
+        f.check("no_unlisted_evidence_files", present == set(listed), sorted(present ^ set(listed)))
+        f.check("certificate_design_and_hypothesis", cert.get("design_sha256") == dh
+                and cert.get("hypothesis_direction") == "TWO_SIDED")
+    records = verify_journal(out, man, f)
+    f.check("preflight_hash_matches_manifest", sha256_file(out / "preflight.json") == man["preflight_sha256"])
+    pre = json.loads((out / "preflight.json").read_text())
+
+    # preflight scope: independently re-executed gates
+    gates = pre.get("mathematical_gates", {})
+    recorded_c = {g["word_size"]: g for g in gates.get("C", [])}
+    sizes = [4, 6] + ([8] if preflight_word8 else [])
+    regated = []
+    for n in sizes:
+        r = recompute_gates(n)
+        regated.append(r)
+        ok = r["transfer_equals_literal"] and r["row_sums_are_4_pow_n"] and r["possible"] == r["expected_possible_4_7_pow"]
+        if n in recorded_c:
+            ok = ok and recorded_c[n]["possible_transitions"] == r["possible"] and \
+                recorded_c[n]["transitions_checked"] == r["triples"] and recorded_c[n]["passed"]
+        f.check(f"preflight_gate_CD_word{n}_independently_recomputed", ok, r)
+    rows16 = [row for g in gates.get("D", []) if g.get("word_size") == 16 for row in g.get("transitions", [])]
+    if rows16:
+        w = xdp_weight([r["alpha"] for r in rows16], [r["beta"] for r in rows16], [r["gamma"] for r in rows16])
+        f.check("preflight_word16_rows_agree_with_transfer_matrix",
+                all(int(w[i]) == r["literal"] == r["lm"] == r["automaton"] for i, r in enumerate(rows16)),
+                {"rows": len(rows16), "note": "transfer matrix only; the 2^32 literal enumeration is not re-run"})
+
+    root = Path(upstream or man["upstream_root"])
+    mods = load_upstream(root, f)
+    ck = root / CHECKPOINT_RELPATH
+    f.check("published_checkpoint_sha256", ck.is_file() and sha256_file(ck) == design["reference"]["checkpoint_sha256"])
+    rounds = design["cipher"]["rounds"]
+    dxw = int(design["cipher"]["input_difference_words"]["x"], 16)
+    dyw = int(design["cipher"]["input_difference_words"]["y"], 16)
+    policy = design["verification"]["numerical_policy"]
+
+    models = None
+    if recompute_models and mods is not None and man.get("untrained_twin"):
+        pub = mods["dbitnet"].make_model(64)
+        pub.load_weights(str(ck))
+        f.check("published_model_strict_hdf5_binding", strict_matches_hdf5(pub, ck))
+        twin = mods["dbitnet"].make_model(64)
+        twin.load_weights(str(out / man["untrained_twin"]["file"]))
+        f.check("untrained_twin_weights_hash", weights_hash(twin) == man["untrained_twin"]["weights_sha256"])
+        models = {"published": pub, "twin": twin, "published_hash": weights_hash(pub), "twin_hash": weights_hash(twin)}
+    if man.get("untrained_twin"):
+        f.check("untrained_twin_file_hash",
+                sha256_file(out / man["untrained_twin"]["file"]) == man["untrained_twin"]["file_sha256"])
+
+    def predict(model, X):
+        return np.asarray(model.predict(X, batch_size=5000, verbose=0), dtype=np.float32).ravel()
+
+    # behavioural binding
+    if (out / "behavioural.json").exists():
+        beh = json.loads((out / "behavioural.json").read_text())
+        f.check("behavioural_hash_matches_manifest", sha256_file(out / "behavioural.json") == man["behavioural_sha256"])
+        bz = npz(out / beh["file"])
+        Y, s = bz["labels"], bz["score"]
+        nb = int(Y.size)
+
+        def wilson(k):
+            z, p = 1.6448536269514722, k / nb
+            return (p + z * z / (2 * nb) - z * math.sqrt(p * (1 - p) / nb + z * z / (4 * nb * nb))) / (1 + z * z / nb)
+        k = int(np.sum((s > 0.5).astype(np.uint8) == Y))
+        f.check("behavioural_accuracy_recomputed", k == beh["n_correct"] and abs(wilson(k) - beh["wilson_one_sided_95_lower"]) < 1e-12)
+        kt = int(np.sum((bz["twin_score"] > 0.5).astype(np.uint8) == Y))
+        f.check("behavioural_twin_diagnostic_recomputed", kt == beh["twin_diagnostic"]["n_correct"])
+        f.check("behavioural_balanced", int(Y.sum()) == beh["n_genuine"] == nb // 2 and nb == beh["n"])
+        f.check("behavioural_pass_flag_consistent", beh["passed"] == (wilson(k) > 0.5 and all(beh["checks"].values())))
+        xs0, ys0 = _trajectory(bz["key_words"], bz["pt0"], rounds)
+        xs1, ys1 = _trajectory(bz["key_words"], bz["pt1"], rounds)
+        f.check("behavioural_genuine_ciphertexts",
+                np.array_equal(np.stack([xs0[:, -1], ys0[:, -1]], 1), bz["c0"]) and
+                np.array_equal(np.stack([xs1[:, -1], ys1[:, -1]], 1), bz["c1"]) and
+                bool(np.all((bz["pt0"][:, 0] ^ bz["pt1"][:, 0]) == dxw) and np.all((bz["pt0"][:, 1] ^ bz["pt1"][:, 1]) == dyw)))
+        Xg = np.hstack([_words_to_bits(bz["c0"]), _words_to_bits(bz["c1"])])
+        Xr = np.unpackbits(bz["random_inputs_packed"], axis=1)[:, :64]
+        X = np.concatenate([Xg, Xr])[bz["order"]]
+        exp_order = np.random.Generator(np.random.PCG64(design["behavioural_binding"]["shuffle_seed"])).permutation(nb)
+        f.check("behavioural_shuffle_reproduced", np.array_equal(exp_order, bz["order"]))
+        f.check("behavioural_labels_reproduced",
+                np.array_equal(np.concatenate([np.ones(Xg.shape[0], np.uint8), np.zeros(Xr.shape[0], np.uint8)])[bz["order"]], Y))
+        if models:
+            d = float(np.max(np.abs(predict(models["published"], X) - s)))
+            f.check("behavioural_scores_recomputed", d <= policy["score_report_threshold_abs"], {"max_abs_diff": d})
+        del bz, X
+
+    # runs
+    perm_base = design["controls"]["permuted_target"]["permutation_seed_base"]
+    rho_recomputed, rho_stored, statuses, numerics = {}, {}, {}, {}
+    for i, rid in enumerate(man["run_ids"]):
+        rec = records[rid]
+        statuses[rid] = rec["state"]
+        if rec["state"] not in ("VALID", "EXCLUDED"):
+            continue
+        rd = out / "runs" / rid
+        D = npz(rd / "data.npz")
+        f.check(f"{rid}:pair_count", D["target"].shape[0] == man["sizes"]["pairs_per_run"])
+        f.check(f"{rid}:data_content_hash", content_hash(D) == rec.get("data_content_sha256"))
+        f.check(f"{rid}:input_difference", bool(np.all((D["pt0"][:, 0] ^ D["pt1"][:, 0]) == dxw) and
+                                                np.all((D["pt0"][:, 1] ^ D["pt1"][:, 1]) == dyw)))
+        xs0, ys0 = _trajectory(D["key_words"], D["pt0"], rounds)
+        xs1, ys1 = _trajectory(D["key_words"], D["pt1"], rounds)
+        f.check(f"{rid}:ciphertexts_own_cipher",
+                np.array_equal(np.stack([xs0[:, -1], ys0[:, -1]], 1), D["c0"]) and
+                np.array_equal(np.stack([xs1[:, -1], ys1[:, -1]], 1), D["c1"]))
+        if mods is not None:
+            kb = _words_to_bits(D["key_words"])
+            f.check(f"{rid}:ciphertexts_upstream_encrypt",
+                    np.array_equal(mods["cipher"].encrypt(_words_to_bits(D["pt0"]), kb, rounds), _words_to_bits(D["c0"])) and
+                    np.array_equal(mods["cipher"].encrypt(_words_to_bits(D["pt1"]), kb, rounds), _words_to_bits(D["c1"])))
+        dx, dy = xs0 ^ xs1, ys0 ^ ys1
+        f.check(f"{rid}:trajectory_differences", np.array_equal(dx, D["dx"]) and np.array_equal(dy, D["dy"]))
+        w = np.stack([xdp_weight(_ror(dx[:, r], 7), dy[:, r], dx[:, r + 1]) for r in range(rounds)], 1)
+        f.check(f"{rid}:factors_positive_and_equal", bool(np.all(w >= 0)) and np.array_equal(w, D["weights"]))
+        t = -w.sum(1)
+        f.check(f"{rid}:target", np.array_equal(t, D["target"]))
+        X = np.hstack([_words_to_bits(D["c0"]), _words_to_bits(D["c1"])])
+        f.check(f"{rid}:model_input_sha256", content_hash({"X": X}) == rec.get("model_input_sha256"))
+        O = npz(rd / "outputs.npz")
+        perm = np.random.Generator(np.random.PCG64(perm_base + i)).permutation(t.shape[0])
+        f.check(f"{rid}:permutation", np.array_equal(perm, O["permutation"]))
+        tf_ = t.astype(np.float64)
+        stored = {"primary": rho(O["score_published"], tf_), "permuted_target": rho(O["score_published"], tf_[perm]),
+                  "untrained_twin": rho(O["score_twin"], tf_)}
+        if models:
+            f.check(f"{rid}:published_weights_sha256", rec.get("published_weights_sha256") == models["published_hash"])
+            f.check(f"{rid}:twin_weights_sha256", rec.get("twin_weights_sha256") == models["twin_hash"])
+            sp, st = predict(models["published"], X), predict(models["twin"], X)
+            num = {}
+            for role, new, old in (("published", sp, O["score_published"]), ("twin", st, O["score_twin"])):
+                num[role] = {"bitwise_equal": bool(np.array_equal(new.view(np.uint32), old.view(np.uint32))),
+                             "max_abs_diff": float(np.max(np.abs(new - old))),
+                             "ranks_equal": bool(np.array_equal(ranks(new), ranks(old))),
+                             "tie_structure_equal": tie_structure(new) == tie_structure(old)}
+            numerics[rid] = num
+            current = {"primary": rho(sp, tf_), "permuted_target": rho(sp, tf_[perm]), "untrained_twin": rho(st, tf_)}
+        else:
+            current = stored
+        undefined = [c for c, v in current.items() if v is None]
+        if rec["state"] == "EXCLUDED":
+            f.check(f"{rid}:exclusion_justified", bool(undefined), undefined)
+            continue
+        f.check(f"{rid}:rho_from_stored_scores_equals_record",
+                all(stored[c] is not None and abs(stored[c] - rec["rho"][c]) < 1e-12 for c in stored),
+                {"stored": stored, "recorded": rec["rho"]})
+        if undefined:
+            f.check(f"{rid}:rho_defined_on_recomputed_scores", False, undefined)
+            continue
+        rho_recomputed[rid], rho_stored[rid] = current, stored
+
+    # analysis and decision, from recomputed scores
+    if cert:
+        a = cert["analysis"]
+        alpha = design["statistics"]["alpha"]
+        f.check("run_states_match_certificate", statuses == cert["run_states"])
+        kw = dict(statuses=statuses, n_runs=man["sizes"]["n_runs"], min_valid=man["sizes"]["min_valid_runs"],
+                  alpha=alpha, precheck_ok=cert["decision"] != "PRECHECK_FAILED")
+        mine = decide(rho_recomputed, **kw)
+        from_stored = decide(rho_stored, **kw)
+        f.check("n_valid", mine["n_valid"] == a["n_valid"])
+        f.check("decision_recomputed_from_recomputed_scores", mine["decision"] == cert["decision"],
+                {"recomputed": mine["decision"], "certificate": cert["decision"]})
+        if "primary" in mine and "primary" in a:
+            p = mine["primary"]
+            f.check("primary_sign_test", (p["pos"], p["neg"]) == (a["primary"]["n_positive"], a["primary"]["n_negative"])
+                    and abs(p["p"] - a["primary"]["p_value"]) < 1e-15, p)
+            ci, rc = p["ci"], a["primary"]["median_ci"]
+            f.check("median_order_statistic_ci", (ci is None and not rc["available"]) or
+                    (ci is not None and rc["available"] and abs(ci[0] - rc["lower"]) < 1e-12 and abs(ci[1] - rc["upper"]) < 1e-12))
+            f.check("median", abs(p["median"] - a["primary"]["summary"]["median"]) < 1e-12)
+        for c in mine.get("controls", {}):
+            t_, rec_c = mine["controls"][c], a[f"control_{c}"]["separation_test"]
+            f.check(f"control_{c}_sign_test", (t_["pos"], t_["neg"]) == (rec_c["n_positive"], rec_c["n_negative"])
+                    and abs(t_["p"] - rec_c["p_value"]) < 1e-15)
+            h = mine["holm"][c]
+            f.check(f"control_{c}_holm", h["rejected"] == a[f"control_{c}"]["holm"]["rejected"]
+                    and abs(h["adjusted"] - a[f"control_{c}"]["holm"]["holm_adjusted_p"]) < 1e-15)
+        # numerical reproducibility policy
+        exact = all(abs(rho_recomputed[r][c] - rho_stored[r][c]) < 1e-12 for r in rho_recomputed for c in rho_stored[r])
+        signs_same = all(np.sign(rho_recomputed[r]["primary"]) == np.sign(rho_stored[r]["primary"]) and
+                         all(np.sign(abs(rho_recomputed[r]["primary"]) - abs(rho_recomputed[r][c])) ==
+                             np.sign(abs(rho_stored[r]["primary"]) - abs(rho_stored[r][c])) for c in CONTROLS)
+                         for r in rho_recomputed)
+        status = ("EXACT" if exact else "DECISION_INVARIANT_NUMERICAL_DIFFERENCE"
+                  if signs_same and mine["decision"] == from_stored["decision"] else "DECISION_RELEVANT_DIFFERENCE")
+        f.check("numerical_reproducibility_policy", status != "DECISION_RELEVANT_DIFFERENCE",
+                {"status": status, "per_run": numerics})
+    else:
+        status = None
+
+    return {"verifier": "audit/cryptography/experiments/autond/ce2/verify.py", "output_dir": str(out),
+            "utc": datetime.now(timezone.utc).isoformat(), "mode": man["mode"],
+            "model_scores_recomputed": bool(models),
+            "inference_from": "recomputed scores" if models else "stored scores (models not recomputed)",
+            "numerical_status": status, "preflight_gates_recomputed": regated,
+            "certificate_sha256": sha256_file(cert_path) if cert else None,
+            "n_checks": len(f.checks), "failures": f.failures, "passed": not f.failures, "checks": f.checks}
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="Independent verification of an AutoND CE2 output directory")
+    ap.add_argument("output_dir", type=Path)
+    ap.add_argument("--preregistration", type=Path, default=None)
+    ap.add_argument("--upstream", type=Path, default=None)
+    ap.add_argument("--skip-model-recompute", action="store_true")
+    ap.add_argument("--preflight-word8", action="store_true")
+    args = ap.parse_args(argv)
+    rep = verify(args.output_dir, prereg_path=args.preregistration, upstream=args.upstream,
+                 recompute_models=not args.skip_model_recompute, preflight_word8=args.preflight_word8)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    path = args.output_dir / f"verification_{stamp}.json"
+    if path.exists():
+        raise SystemExit(f"{path} exists; refusing to overwrite")
+    path.write_text(json.dumps(rep, indent=1, default=str) + "\n")
+    print(f"{'VERIFIED' if rep['passed'] else 'VERIFICATION FAILED'}: {rep['n_checks']} checks, "
+          f"{len(rep['failures'])} failures -> {path}")
+    for name in rep["failures"]:
+        print(f"  FAILED {name}")
+    return 0 if rep["passed"] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

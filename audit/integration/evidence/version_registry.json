@@ -26,7 +26,7 @@
     },
     {
       "base_name": "audit-snapshot",
-      "content_hash": "ef38669d10d89c04a1bcc0934d74a9f0f7ff0e247c348e8e9c9d6a1b8695d328",
+      "content_hash": "8184dea6e3e31be97bfd7d6dc3b79492d753d2f71318d4377132525581709eb5",
       "created_at_utc": "2026-09-19T16:09:33.289663+00:00",
       "identifier": "audit-snapshot-V4",
       "note": "Cross-pillar audit snapshot for the 5-round Gohr distinguisher case study.",

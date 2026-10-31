@@ -1,0 +1,20 @@
+{
+ "purpose": "non-evidentiary computational benchmark; no correlation computed; data discarded",
+ "env": {
+  "python": "3.11.14",
+  "platform": "macOS-13.5-arm64-arm-64bit",
+  "machine": "arm64",
+  "cpu_count": 8,
+  "numpy": "1.26.4",
+  "tensorflow": "2.15.1",
+  "gpus": []
+ },
+ "generate_and_gates_EF_s": 29.441810369491577,
+ "gates_ok": true,
+ "published_inference_s": 17.503467082977295,
+ "twin_inference_s": 17.409559965133667,
+ "save_data_s": 2.9722509384155273,
+ "data_npz_bytes": 53688769,
+ "outputs_npz_bytes": 7953045,
+ "pairs": 1000000
+}

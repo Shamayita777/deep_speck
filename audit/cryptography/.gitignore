@@ -1,0 +1,13 @@
+# Scoped to audit/cryptography (the repository-root .gitignore is unchanged).
+# Generated caches and operating-system / sync metadata must never enter a research artifact.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+._*
+__MACOSX/
+# iCloud placeholders for files evicted from local storage (".name.icloud")
+.*.icloud
+# staging files of the core.evidence commit protocol (never evidence by themselves)
+.staging/
+.*.tmp-*

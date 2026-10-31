@@ -1,0 +1,465 @@
+"""
+AutoND CE2 adapter: theory consistency of the published SPECK32/64 round-8 DBitNet.
+
+Implements the framework `CryptographicAdapter` CE2 surface so that the unchanged framework
+`TheoryConsistencyTest` can measure each run. Everything AutoND-specific lives here:
+
+* the pinned upstream source (hash-verified against `upstream_sha256.json` before import, and every
+  imported module checked to resolve inside the pinned root);
+* the published checkpoint, hash-verified before loading and strictly verified after loading;
+* genuine-pair generation with the construction of upstream `main.make_train_data`;
+* trajectory reconstruction with upstream `expand_key` / `enc_one_round` (gates E and F).
+
+Each framework measurement uses an adapter *view* bound to one immutable `FrozenRunData` and one
+condition (primary, permuted_target, untrained_twin). `generate_theory_dataset()` returns that same
+object on every call and its content hash is re-checked, so all three conditions of a run measure the
+identical dataset. Model scores are computed once per model per run and shared.
+
+Operations outside CE2 raise `AutoNDCE2ScopeError`; no placeholder is ever returned.
+The CE1 adapter (`adapters/autond.py`) is not used or modified.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import importlib
+import json
+import os
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Callable
+
+import numpy as np
+
+from ..frozen_design_autond_ce2 import (DESIGN, PUBLISHED_CHECKPOINT_RELPATH,
+                                         PUBLISHED_CHECKPOINT_SHA256)
+from ..experiments.ce2 import autond_theory as theory
+from ..experiments.ce2.autond_ce2 import UndefinedCorrelation, spearman, within_run_p_value
+from ..results import CorrelationStatistic
+from .base import CryptographicAdapter
+
+CRYPTO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_UPSTREAM = CRYPTO_ROOT / "autond_ce1" / "AutoND-upstream"
+UPSTREAM_HASHES = CRYPTO_ROOT / "upstream_sha256.json"
+PREDICT_BATCH = 5000
+
+
+class AutoNDCE2Error(RuntimeError):
+    pass
+
+
+class AutoNDCE2ScopeError(NotImplementedError):
+    pass
+
+
+def sha256_file(path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def content_sha256(arrays: dict) -> str:
+    """Hash of named arrays: name, dtype, shape and C-order bytes, in sorted name order."""
+    h = hashlib.sha256()
+    for name in sorted(arrays):
+        a = np.ascontiguousarray(arrays[name])
+        h.update(name.encode())
+        h.update(str(a.dtype).encode())
+        h.update(str(a.shape).encode())
+        h.update(a.tobytes())
+    return h.hexdigest()
+
+
+def resolve_upstream(root=None) -> Path:
+    return Path(root or os.environ.get("AUTOND_UPSTREAM") or DEFAULT_UPSTREAM).resolve()
+
+
+def verify_upstream(root) -> dict:
+    root = Path(root)
+    expected = json.loads(UPSTREAM_HASHES.read_text())
+    files = {}
+    for rel, exp in sorted(expected.items()):
+        p = root / rel
+        obs = sha256_file(p) if p.is_file() else None
+        files[rel] = {"expected": exp, "observed": obs, "ok": obs == exp}
+    rec = {"root": str(root), "hash_file": str(UPSTREAM_HASHES),
+           "hash_file_sha256": sha256_file(UPSTREAM_HASHES), "files": files,
+           "all_verified": all(f["ok"] for f in files.values()) and
+           files.get(PUBLISHED_CHECKPOINT_RELPATH, {}).get("expected") == PUBLISHED_CHECKPOINT_SHA256}
+    return rec
+
+
+class Upstream:
+    """The pinned AutoND source, imported only after its hashes verify."""
+
+    def __init__(self, root=None):
+        self.root = resolve_upstream(root)
+        self.verification = verify_upstream(self.root)
+        if not self.verification["all_verified"]:
+            bad = [k for k, v in self.verification["files"].items() if not v["ok"]]
+            raise AutoNDCE2Error(f"pinned upstream verification failed for {bad} under {self.root}")
+        if str(self.root) not in sys.path:
+            sys.path.insert(0, str(self.root))
+        self.cipher = self._import("ciphers.speck3264")
+        self.dbitnet = self._import("dbitnet")
+        self._main = None
+
+    def _import(self, name: str):
+        # never write bytecode caches into the pinned (read-only) upstream directory
+        flag, sys.dont_write_bytecode = sys.dont_write_bytecode, True
+        try:
+            mod = importlib.import_module(name)
+        finally:
+            sys.dont_write_bytecode = flag
+        f = Path(mod.__file__).resolve()
+        if self.root not in f.parents:
+            raise AutoNDCE2Error(f"module {name!r} resolved to {f}, outside the pinned upstream {self.root}")
+        return mod
+
+    @property
+    def main(self):
+        if self._main is None:
+            self._main = self._import("main")
+        return self._main
+
+    @property
+    def checkpoint(self) -> Path:
+        return self.root / PUBLISHED_CHECKPOINT_RELPATH
+
+    def delta_bits(self) -> np.ndarray:
+        bits = self.main.integer_to_binary_array(int(DESIGN["cipher"]["input_difference"], 16),
+                                                 self.cipher.plain_bits)
+        return bits
+
+    def delta_words(self) -> tuple[int, int]:
+        w = self.cipher.convert_from_binary(self.delta_bits())
+        return int(w[0, 0]), int(w[0, 1])
+
+
+# ------------------------------------------------------------------ run data
+
+
+@dataclass(frozen=True)
+class FrozenRunData:
+    """Immutable genuine-pair dataset of one run. Arrays are read-only; the hash is fixed at creation."""
+    arrays: dict
+    sha256: str = field(default="")
+
+    @classmethod
+    def create(cls, arrays: dict) -> "FrozenRunData":
+        frozen = {}
+        for k, v in arrays.items():
+            a = np.array(v, copy=True)
+            a.setflags(write=False)
+            frozen[k] = a
+        return cls(arrays=frozen, sha256=content_sha256(frozen))
+
+    def verify(self) -> None:
+        if content_sha256(self.arrays) != self.sha256:
+            raise AutoNDCE2Error("run dataset content hash changed")
+
+    def __getitem__(self, key):
+        return self.arrays[key]
+
+    @property
+    def n(self) -> int:
+        return int(self.arrays["target"].shape[0])
+
+
+def model_input(up: Upstream, c0: np.ndarray, c1: np.ndarray) -> np.ndarray:
+    """Upstream model input: hstack of convert_to_binary([x, y]) for C0 and C1 (64 uint8 bits)."""
+    conv = up.cipher.convert_to_binary
+    return np.hstack([conv([c0[:, 0], c0[:, 1]]), conv([c1[:, 0], c1[:, 1]])])
+
+
+def generate_genuine_pairs(up: Upstream, n: int, *, rounds: int | None = None,
+                           randbytes: Callable[[int], bytes] = os.urandom) -> dict:
+    """Genuine pairs with the construction of upstream make_train_data (Y = 1 class), plus the
+    reconstructed trajectory and gate E/F evidence. Returns plain arrays and a gate record."""
+    c = up.cipher
+    rounds = rounds or DESIGN["cipher"]["rounds"]
+    keys0 = (np.frombuffer(randbytes(n * c.key_bits), dtype=np.uint8) & 1).reshape(n, c.key_bits)
+    pt0 = (np.frombuffer(randbytes(n * c.plain_bits), dtype=np.uint8) & 1).reshape(n, c.plain_bits)
+    keys1 = keys0 ^ 0
+    pt1 = pt0 ^ up.delta_bits()
+    C0 = c.encrypt(pt0, keys0, rounds)
+    C1 = c.encrypt(pt1, keys1, rounds)
+    arrays = {
+        "key_words": c.convert_from_binary(keys0),
+        "pt0": c.convert_from_binary(pt0), "pt1": c.convert_from_binary(pt1),
+        "c0": c.convert_from_binary(C0), "c1": c.convert_from_binary(C1),
+    }
+    traj, gates = trajectory_and_weights(up, arrays, rounds)
+    arrays.update(traj)
+    if not np.array_equal(model_input(up, arrays["c0"], arrays["c1"]), np.hstack([C0, C1])):
+        gates["F"]["checks"]["model_input_equals_upstream_hstack"] = False
+        gates["F"]["passed"] = False
+    else:
+        gates["F"]["checks"]["model_input_equals_upstream_hstack"] = True
+    return {"arrays": arrays, "gates": gates}
+
+
+def trajectory_and_weights(up: Upstream, a: dict, rounds: int) -> tuple[dict, dict]:
+    """Reconstruct both trajectories with upstream expand_key / enc_one_round and compute the
+    per-round factors by the closed form and the automaton (gates E and F)."""
+    c = up.cipher
+    n = a["pt0"].shape[0]
+    ks = c.expand_key(a["key_words"].T, rounds)
+    x0, y0 = a["pt0"][:, 0].copy(), a["pt0"][:, 1].copy()
+    x1, y1 = a["pt1"][:, 0].copy(), a["pt1"][:, 1].copy()
+    dx = np.zeros((n, rounds + 1), dtype=np.uint16)
+    dy = np.zeros((n, rounds + 1), dtype=np.uint16)
+    dx[:, 0], dy[:, 0] = x0 ^ x1, y0 ^ y1
+    mask = (1 << c.word_size) - 1
+    add_ok = np.ones(n, dtype=bool)
+    lin_ok = np.ones(n, dtype=bool)
+    for r in range(rounds):
+        s0 = (c.ror(x0, c.ALPHA()).astype(np.int64) + y0) & mask
+        s1 = (c.ror(x1, c.ALPHA()).astype(np.int64) + y1) & mask
+        x0, y0 = c.enc_one_round((x0, y0), ks[r])
+        x1, y1 = c.enc_one_round((x1, y1), ks[r])
+        dx[:, r + 1], dy[:, r + 1] = x0 ^ x1, y0 ^ y1
+        add_ok &= (s0 ^ s1) == dx[:, r + 1]
+        lin_ok &= (c.rol(dy[:, r], c.BETA()) ^ dx[:, r + 1]) == dy[:, r + 1]
+    final_ok = (np.array_equal(np.stack([x0, y0], 1), a["c0"]) and
+                np.array_equal(np.stack([x1, y1], 1), a["c1"]))
+    dxw, dyw = up.delta_words()
+    init_ok = bool(np.all(dx[:, 0] == dxw) and np.all(dy[:, 0] == dyw))
+
+    w = c.word_size
+    alpha = c.ror(dx[:, :-1], c.ALPHA()).astype(np.int64)
+    beta = dy[:, :-1].astype(np.int64)
+    gamma = dx[:, 1:].astype(np.int64)
+    lm = np.stack([theory.lm_weight(alpha[:, r], beta[:, r], gamma[:, r], w) for r in range(rounds)], 1)
+    au = np.stack([theory.weight_from_count(theory.carry_count(alpha[:, r], beta[:, r], gamma[:, r], w), w)
+                   for r in range(rounds)], 1)
+    e_equal = bool(np.array_equal(lm, au))
+    e_positive = bool(np.all(lm >= 0))
+    gates = {
+        "E": {"passed": e_equal and e_positive, "lm_equals_automaton": e_equal,
+              "all_factors_positive": e_positive, "n_mismatch": int(np.count_nonzero(lm != au)),
+              "n_impossible": int(np.count_nonzero(lm < 0))},
+        "F": {"passed": final_ok and init_ok and bool(add_ok.all()) and bool(lin_ok.all()),
+              "checks": {"final_state_equals_upstream_encrypt": final_ok, "initial_difference": init_ok,
+                         "addition_output_difference_is_next_dx": bool(add_ok.all()),
+                         "dy_linear_layer": bool(lin_ok.all())}},
+    }
+    target = theory.log2_target(lm) if e_positive else np.zeros(n, dtype=np.int64)
+    return ({"dx": dx, "dy": dy, "weights": lm.astype(np.uint8) if e_positive else lm.astype(np.int16),
+             "target": target.astype(np.int16)}, gates)
+
+
+def random_pairs_input(n: int, randbytes: Callable[[int], bytes] = os.urandom) -> np.ndarray:
+    """Upstream negative class: 64 uniform input bits per sample."""
+    return (np.frombuffer(randbytes(n * 64), dtype=np.uint8) & 1).reshape(n, 64)
+
+
+# ------------------------------------------------------------------- models
+
+
+def weights_sha256(model) -> str:
+    """Hash of all weight arrays in model order (dtype, shape, bytes). Keras variable names are
+    excluded because they depend on how many models the process has built."""
+    h = hashlib.sha256()
+    for v in model.weights:
+        a = np.ascontiguousarray(v.numpy())
+        h.update(str(a.dtype).encode())
+        h.update(str(a.shape).encode())
+        h.update(a.tobytes())
+    return h.hexdigest()
+
+
+def architecture(model) -> dict:
+    return {"layers": len(model.layers),
+            "weight_bearing_layers": len([l for l in model.layers if l.weights]),
+            "params_total": int(model.count_params()),
+            "params_trainable": int(sum(int(np.prod(v.shape)) for v in model.trainable_weights)),
+            "params_non_trainable": int(sum(int(np.prod(v.shape)) for v in model.non_trainable_weights)),
+            "input_shape": list(model.input_shape), "output_shape": list(model.output_shape)}
+
+
+def load_published_model(up: Upstream):
+    """Hash-verify, build upstream DBitNet, load, and strictly verify every weight array."""
+    import h5py
+    path = up.checkpoint
+    observed = sha256_file(path)
+    if observed != PUBLISHED_CHECKPOINT_SHA256:
+        raise AutoNDCE2Error(f"published checkpoint SHA-256 {observed} != {PUBLISHED_CHECKPOINT_SHA256}")
+    model = up.dbitnet.make_model(2 * up.cipher.plain_bits)
+    model.load_weights(str(path))
+    wl = [l for l in model.layers if l.weights]
+    with h5py.File(path, "r") as f:
+        names = [x.decode() if isinstance(x, bytes) else x for x in f.attrs["layer_names"]]
+        groups = []
+        for nm in names:
+            wn = [x.decode() if isinstance(x, bytes) else x for x in f[nm].attrs["weight_names"]]
+            if wn:
+                groups.append((nm, wn))
+        n_arrays = sum(len(g[1]) for g in groups)
+        mismatched = []
+        if len(groups) != len(wl):
+            mismatched.append(f"{len(groups)} weight groups in file vs {len(wl)} weight-bearing layers")
+        for layer, (nm, wn) in zip(wl, groups):
+            if len(layer.weights) != len(wn):
+                mismatched.append(f"{layer.name}: {len(layer.weights)} vs {len(wn)} arrays")
+                continue
+            for v, w in zip(layer.weights, wn):
+                ref = f[nm][w][()]
+                if tuple(v.shape) != ref.shape or not np.array_equal(v.numpy(), ref):
+                    mismatched.append(f"{layer.name}/{v.name} != {nm}/{w}")
+        keras_version = f.attrs.get("keras_version")
+    arch = architecture(model)
+    arch["hdf5_weight_arrays"] = n_arrays
+    expected = DESIGN["reference"]["observed_architecture"]
+    arch_diff = {k: (arch.get(k), v) for k, v in expected.items() if arch.get(k) != v}
+    binding = {"checkpoint": str(path), "sha256": observed, "sha256_verified": True,
+               "hdf5_keras_version": keras_version.decode() if isinstance(keras_version, bytes) else keras_version,
+               "strict_load": {"weight_groups_in_file": len(groups), "weight_arrays_in_file": n_arrays,
+                               "all_arrays_bit_identical": not mismatched, "mismatches": mismatched},
+               "architecture": arch, "architecture_matches_design": not arch_diff,
+               "architecture_differences": {k: {"observed": o, "design": e} for k, (o, e) in arch_diff.items()},
+               "weights_sha256": weights_sha256(model)}
+    if mismatched or arch_diff:
+        raise AutoNDCE2Error(f"published model binding failed: {json.dumps(binding, default=str)}")
+    return model, binding
+
+
+def build_untrained_twin(up: Upstream, seed: int):
+    import tensorflow as tf
+    tf.keras.utils.set_random_seed(seed)
+    return up.dbitnet.make_model(2 * up.cipher.plain_bits)
+
+
+def load_untrained_twin(up: Upstream, path, expected_weights_sha256: str):
+    model = up.dbitnet.make_model(2 * up.cipher.plain_bits)
+    model.load_weights(str(path))
+    got = weights_sha256(model)
+    if got != expected_weights_sha256:
+        raise AutoNDCE2Error(f"untrained twin weights hash {got} != recorded {expected_weights_sha256}")
+    return model
+
+
+def predict(model, X: np.ndarray) -> np.ndarray:
+    """Upstream inference: model.predict (Keras inference mode, training=False), batch 5000."""
+    return np.asarray(model.predict(X, batch_size=PREDICT_BATCH, verbose=0), dtype=np.float32).ravel()
+
+
+def inference_mode_check(model, X: np.ndarray) -> dict:
+    a = predict(model, X)
+    b = np.asarray(model(X.astype(np.float32), training=False), dtype=np.float32).ravel()
+    return {"n": int(X.shape[0]), "finite": bool(np.all(np.isfinite(a))),
+            "predict_vs_call_training_false_max_abs_diff": float(np.max(np.abs(a - b))),
+            "min": float(a.min()), "max": float(a.max())}
+
+
+# --------------------------------------------------------- framework adapter
+
+
+@dataclass
+class RunContext:
+    """Everything one run's three framework measurements share."""
+    data: FrozenRunData
+    published_model: Any
+    twin_model: Any
+    permutation: np.ndarray
+    model_input: np.ndarray
+    scores: dict = field(default_factory=dict)
+    calls: list = field(default_factory=list)
+
+    def score(self, role: str) -> np.ndarray:
+        if role not in self.scores:
+            model = self.published_model if role == "published" else self.twin_model
+            s = predict(model, self.model_input)
+            s.setflags(write=False)
+            self.scores[role] = s
+        return self.scores[role]
+
+
+class AutoNDCE2Adapter(CryptographicAdapter):
+    """Framework adapter view of one run under one condition."""
+
+    _ROLES = {"primary": "published", "permuted_target": "published", "untrained_twin": "twin"}
+
+    def __init__(self, context: RunContext, condition: str):
+        if condition not in self._ROLES:
+            raise ValueError(f"unknown CE2 condition {condition!r}")
+        self.context = context
+        self.condition = condition
+
+    def _log(self, method: str):
+        self.context.calls.append({"condition": self.condition, "method": method,
+                                   "dataset_sha256": self.context.data.sha256})
+
+    # -- CE2 surface
+    def load(self, path: str | None = None) -> Any:
+        if path is not None:
+            raise AutoNDCE2Error("the CE2 adapter loads only its bound, hash-verified models")
+        self._log("load")
+        return (self.context.published_model if self._ROLES[self.condition] == "published"
+                else self.context.twin_model)
+
+    def generate_theory_dataset(self) -> FrozenRunData:
+        self.context.data.verify()
+        self._log("generate_theory_dataset")
+        return self.context.data
+
+    def compute_theoretical_reference(self, dataset: FrozenRunData) -> np.ndarray:
+        self._check_dataset(dataset)
+        self._log("compute_theoretical_reference")
+        t = dataset["target"].astype(np.float64)
+        if self.condition == "permuted_target":
+            t = t[self.context.permutation]
+        t.setflags(write=False)
+        return t
+
+    def compute_model_predictions(self, model: Any, dataset: FrozenRunData) -> np.ndarray:
+        self._check_dataset(dataset)
+        role = self._ROLES[self.condition]
+        expected = self.context.published_model if role == "published" else self.context.twin_model
+        if model is not expected:
+            raise AutoNDCE2Error("compute_model_predictions received a model not bound to this condition")
+        self._log("compute_model_predictions")
+        return self.context.score(role)
+
+    def compute_theory_consistency(self, theoretical_reference, model_predictions) -> CorrelationStatistic:
+        self._log("compute_theory_consistency")
+        rho = spearman(np.asarray(model_predictions), np.asarray(theoretical_reference))  # raises UndefinedCorrelation
+        n = int(np.asarray(model_predictions).size)
+        return CorrelationStatistic(statistic=rho, p_value=within_run_p_value(rho, n), n=n)
+
+    def _check_dataset(self, dataset):
+        if dataset is not self.context.data:
+            raise AutoNDCE2Error("a measurement received a dataset other than the run's frozen dataset")
+        dataset.verify()
+
+    # -- outside CE2
+    def _scope(self, method):
+        raise AutoNDCE2ScopeError(f"{method}() is outside the AutoND CE2 scope; no value is returned")
+
+    def generate_baseline_dataset(self): self._scope("generate_baseline_dataset")
+    def generate_signal_destroyed_dataset(self): self._scope("generate_signal_destroyed_dataset")
+    def train(self, *a, **k): self._scope("train")
+    def evaluate(self, *a, **k): self._scope("evaluate")
+    def save(self, *a, **k): self._scope("save")
+    def generate_representation_tasks(self): self._scope("generate_representation_tasks")
+    def generate_primary_representation_task(self): self._scope("generate_primary_representation_task")
+    def generate_calibration_representation_task(self): self._scope("generate_calibration_representation_task")
+    def generate_intervention_tasks(self): self._scope("generate_intervention_tasks")
+    def extract_representations(self, *a, **k): self._scope("extract_representations")
+    def select_intervenable_samples(self, *a, **k): self._scope("select_intervenable_samples")
+    def apply_structural_intervention(self, *a, **k): self._scope("apply_structural_intervention")
+    def apply_control_intervention(self, *a, **k): self._scope("apply_control_intervention")
+    def compute_intervention_magnitude(self, *a, **k): self._scope("compute_intervention_magnitude")
+    def provide_control_model(self): self._scope("provide_control_model")
+
+    @property
+    def name(self) -> str:
+        return f"AutoND-CE2[{self.condition}]"
+
+    @property
+    def description(self) -> str:
+        return ("Published AutoND SPECK32/64 round-8 DBitNet against the trajectory-derived Markov "
+                "characteristic probability estimate")

@@ -114,7 +114,7 @@ Native statuses shown as `-` under *Normalized* were deliberately NOT coerced in
 Snapshot component bindings (each document bound to the snapshot by content hash):
 
 - `pillar_interpretation` -> `pillar_interpretation.json` (029dabb3adc90250...)
-- `evidence_ledger` -> `evidence_ledger.json` (5035345260cf8b3a...)
+- `evidence_ledger` -> `evidence_ledger.json` (f2c1d3cd97566df1...)
 - `artifact_index` -> `artifact_index.json` (4a6e660ce5495b26...)
 - `decision` -> `decision.json` (2bd5a1ed0289c5e0...)
 

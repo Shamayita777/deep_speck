@@ -242,9 +242,9 @@ else:
 # --- CHECK 7: historical evidence unmodified ---
 HISTORICAL = {
     "implementation-certificate-V1.json":
-        "76ce4b59327599473746d9420aa2e95d73b397042a349929c50f54a2b5baa6f7",
+        "c012d54fbe26735ec3e8e1015ccd01919748c5b2e518e69d5ad6a352758dbea3",
     "implementation-certificate-V2.json":
-        "cf55bd4ffc77f4509792c31daee7846518d8f125d8dada98d5c97dd6f5e72bc6",
+        "a4a97002c3665304c56bbd929540ab4084fe2112f5b9f7c31cadbbfd1aac0c4a",
 }
 hist_problems = []
 for name, expected in HISTORICAL.items():

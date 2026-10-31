@@ -1,0 +1,342 @@
+"""
+AutoND CE2 run-level measurement, inference and decision.
+
+Statistical unit: one independent evaluation run (a fresh set of genuine difference-bearing pairs).
+The pairs inside a run estimate that run's Spearman coefficient; they are never treated as
+replicates in the confirmatory inference.
+
+Procedure (hierarchical, familywise alpha):
+  Stage 1  exact two-sided sign test over the nonzero run-level primary coefficients.
+  Stage 2  only if Stage 1 rejects: for each control c, D_i = |rho_primary,i| - |rho_c,i|, exact
+           one-sided sign test (H1: Pr[D > 0] > 1/2), Holm across the two control tests.
+Serial gatekeeping (Stage 2 is tested only after Stage 1 rejects at alpha, and Holm controls the
+Stage 2 family at alpha) bounds the familywise error rate of the whole procedure by alpha.
+
+Exact arithmetic is used for every confirmatory p-value; SciPy is not used.
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+
+import numpy as np
+
+SUPPORTED = "SUPPORTED"
+ASSOCIATION_OBSERVED_CONTROL_UNRESOLVED = "ASSOCIATION_OBSERVED_CONTROL_UNRESOLVED"
+INCONCLUSIVE = "INCONCLUSIVE"
+PRECHECK_FAILED = "PRECHECK_FAILED"
+DECISIONS = (SUPPORTED, ASSOCIATION_OBSERVED_CONTROL_UNRESOLVED, INCONCLUSIVE, PRECHECK_FAILED)
+
+CONDITIONS = ("primary", "permuted_target", "untrained_twin")
+CONTROLS = ("permuted_target", "untrained_twin")
+
+
+class UndefinedCorrelation(RuntimeError):
+    """Spearman's coefficient is undefined. Deliberately not a ValueError, so a caller that maps
+    ValueError to a numeric score cannot turn an undefined correlation into 0.0."""
+
+
+# --------------------------------------------------------------------- run level
+
+
+def average_ranks(v: np.ndarray) -> np.ndarray:
+    """Ranks 1..n with ties given their average rank."""
+    v = np.asarray(v)
+    order = np.argsort(v, kind="mergesort")
+    sv = v[order]
+    boundary = np.concatenate(([True], sv[1:] != sv[:-1]))
+    group = np.cumsum(boundary) - 1
+    starts = np.flatnonzero(boundary)
+    ends = np.concatenate((starts[1:], [v.size]))
+    avg = (starts + ends + 1) / 2.0
+    ranks = np.empty(v.size, dtype=np.float64)
+    ranks[order] = avg[group]
+    return ranks
+
+
+def tie_profile(v: np.ndarray) -> dict:
+    _, counts = np.unique(np.asarray(v), return_counts=True)
+    return {"n": int(np.asarray(v).size), "n_unique": int(counts.size),
+            "largest_tie_group": int(counts.max()) if counts.size else 0,
+            "n_in_tie_groups": int(counts[counts > 1].sum())}
+
+
+def definedness(score: np.ndarray, target: np.ndarray) -> str | None:
+    """Reason the coefficient is undefined, or None if it is defined."""
+    score, target = np.asarray(score), np.asarray(target)
+    if score.shape != target.shape or score.ndim != 1:
+        return "shape mismatch"
+    if score.size < 3:
+        return "fewer than 3 pairs"
+    if not np.all(np.isfinite(score)):
+        return "non-finite model output"
+    if not np.all(np.isfinite(target)):
+        return "non-finite target"
+    if np.all(score == score[0]):
+        return "constant model output"
+    if np.all(target == target[0]):
+        return "constant target"
+    return None
+
+
+def spearman(score: np.ndarray, target: np.ndarray) -> float:
+    """Spearman's rho with average ranks (no jitter). Raises UndefinedCorrelation."""
+    reason = definedness(score, target)
+    if reason:
+        raise UndefinedCorrelation(reason)
+    rx = average_ranks(np.asarray(score, dtype=np.float64))
+    ry = average_ranks(np.asarray(target, dtype=np.float64))
+    rx -= rx.mean()
+    ry -= ry.mean()
+    den = math.sqrt(float(rx @ rx) * float(ry @ ry))
+    rho = float(rx @ ry) / den if den > 0 else float("nan")
+    if not math.isfinite(rho):
+        raise UndefinedCorrelation("non-finite coefficient")
+    return rho
+
+
+def within_run_p_value(rho: float, n: int) -> float:
+    """Descriptive within-run two-sided p-value (normal approximation to the t statistic).
+    It describes association inside one run only and never enters the confirmatory inference."""
+    if abs(rho) >= 1.0:
+        return 0.0
+    t = rho * math.sqrt((n - 2) / (1.0 - rho * rho))
+    return math.erfc(abs(t) / math.sqrt(2.0))
+
+
+# --------------------------------------------------------------- exact inference
+
+
+def binom_cdf(k: int, n: int) -> float:
+    """Pr[X <= k] for X ~ Binomial(n, 1/2), exact rational arithmetic."""
+    if k < 0:
+        return 0.0
+    k = min(k, n)
+    return sum(math.comb(n, i) for i in range(k + 1)) / 2 ** n
+
+
+def sign_test_two_sided(values) -> dict:
+    """Exact two-sided sign test; zeros are ties, removed and counted. p = min(1, 2 * smaller tail)."""
+    v = np.asarray(values, dtype=np.float64)
+    pos, neg = int(np.sum(v > 0)), int(np.sum(v < 0))
+    n = pos + neg
+    p = 1.0 if n == 0 else min(1.0, 2.0 * binom_cdf(min(pos, neg), n))
+    return {"test": "exact two-sided binomial sign test", "n_positive": pos, "n_negative": neg,
+            "n_zero_ties_removed": int(v.size - n), "n_effective": n, "p_value": p}
+
+
+def sign_test_one_sided_greater(values) -> dict:
+    """Exact one-sided sign test of H1: Pr[value > 0] > 1/2; zeros removed and counted."""
+    v = np.asarray(values, dtype=np.float64)
+    pos, neg = int(np.sum(v > 0)), int(np.sum(v < 0))
+    n = pos + neg
+    p = 1.0 if n == 0 else 1.0 - binom_cdf(pos - 1, n)
+    return {"test": "exact one-sided binomial sign test (H1: Pr[D > 0] > 1/2)", "n_positive": pos,
+            "n_negative": neg, "n_zero_ties_removed": int(v.size - n), "n_effective": n, "p_value": p}
+
+
+def holm(p_values: dict, alpha: float) -> dict:
+    """Holm step-down; returns adjusted p-values and rejections keyed like the input."""
+    items = sorted(p_values.items(), key=lambda kv: (kv[1], kv[0]))
+    m = len(items)
+    out, running, stop = {}, 0.0, False
+    for i, (key, p) in enumerate(items):
+        adj = min(1.0, max(running, (m - i) * p))
+        running = adj
+        reject = (not stop) and p <= alpha / (m - i)
+        stop = stop or not reject
+        out[key] = {"p_value": p, "holm_adjusted_p": adj, "threshold": alpha / (m - i), "rejected": reject}
+    return out
+
+
+def median_order_statistic_ci(values, level: float = 0.95) -> dict:
+    """Distribution-free CI for the median: [x_(k), x_(n-k+1)] with the largest k such that
+    Pr[Binomial(n, 1/2) <= k - 1] <= (1 - level) / 2. Reports the exact coverage achieved."""
+    x = np.sort(np.asarray(values, dtype=np.float64))
+    n = x.size
+    tail = (1.0 - level) / 2.0
+    k = 0
+    while k + 1 <= n and binom_cdf(k, n) <= tail:
+        k += 1
+    if k == 0:
+        return {"method": "order statistic", "n": int(n), "available": False,
+                "reason": f"n = {n} is too small for a {level:.0%} order-statistic interval"}
+    return {"method": "order statistic", "n": int(n), "available": True, "lower_rank": k,
+            "upper_rank": n - k + 1, "lower": float(x[k - 1]), "upper": float(x[n - k]),
+            "exact_coverage": 1.0 - 2.0 * binom_cdf(k - 1, n)}
+
+
+def run_bootstrap_median_ci(values, *, n_resamples: int, seed: int, level: float = 0.95) -> dict:
+    """Sensitivity only: percentile bootstrap of the median, resampling whole runs."""
+    x = np.asarray(values, dtype=np.float64)
+    rng = np.random.Generator(np.random.PCG64(seed))
+    idx = rng.integers(0, x.size, size=(n_resamples, x.size))
+    med = np.median(x[idx], axis=1)
+    lo, hi = np.quantile(med, [(1 - level) / 2, 1 - (1 - level) / 2])
+    return {"method": "percentile bootstrap over whole runs (sensitivity only)", "n_resamples": n_resamples,
+            "seed": seed, "rng": "numpy PCG64", "lower": float(lo), "upper": float(hi)}
+
+
+def describe(values) -> dict:
+    x = np.asarray(values, dtype=np.float64)
+    q1, med, q3 = np.quantile(x, [0.25, 0.5, 0.75])
+    return {"n": int(x.size), "median": float(med), "q1": float(q1), "q3": float(q3),
+            "min": float(x.min()), "max": float(x.max()), "mean": float(x.mean())}
+
+
+# ------------------------------------------------------------------- decision
+
+
+@dataclass(frozen=True)
+class RunOutcome:
+    run_id: str
+    status: str                 # VALID | EXCLUDED | FAILED
+    rho: dict                   # condition -> float, for VALID runs
+    reason: str | None = None
+
+
+def analyse(outcomes: list[RunOutcome], *, alpha: float, min_valid_runs: int, n_planned: int,
+            bootstrap_resamples: int, bootstrap_seed: int, precheck_ok: bool = True,
+            precheck_reason: str | None = None) -> dict:
+    """Primary inference, control separation and the decision category, from run outcomes only."""
+    valid = [o for o in outcomes if o.status == "VALID"]
+    not_valid = [{"run_id": o.run_id, "status": o.status, "reason": o.reason}
+                 for o in outcomes if o.status != "VALID"]
+    out = {"n_planned": n_planned, "n_recorded": len(outcomes), "n_valid": len(valid),
+           "not_valid": not_valid, "alpha": alpha, "min_valid_runs": min_valid_runs}
+    if not precheck_ok:
+        out.update(decision=PRECHECK_FAILED, decision_reason=precheck_reason)
+        return out
+    if len(outcomes) != n_planned:
+        out.update(decision=INCONCLUSIVE,
+                   decision_reason=f"{len(outcomes)} of {n_planned} planned runs have a terminal record")
+        return out
+    rho = {c: [o.rho[c] for o in valid] for c in CONDITIONS}
+    out["run_level_rho"] = {c: dict(zip([o.run_id for o in valid], rho[c])) for c in CONDITIONS}
+    if len(valid) < min_valid_runs:
+        out.update(decision=INCONCLUSIVE,
+                   decision_reason=f"{len(valid)} valid runs; the frozen minimum is {min_valid_runs}")
+        return out
+    primary = sign_test_two_sided(rho["primary"])
+    out["primary"] = {**primary, "summary": describe(rho["primary"]),
+                      "median_ci": median_order_statistic_ci(rho["primary"]),
+                      "bootstrap_sensitivity": run_bootstrap_median_ci(
+                          rho["primary"], n_resamples=bootstrap_resamples, seed=bootstrap_seed),
+                      "rejected": primary["p_value"] <= alpha}
+    for c in CONTROLS:
+        out[f"control_{c}"] = {"summary": describe(rho[c])}
+    if not out["primary"]["rejected"]:
+        out.update(decision=INCONCLUSIVE, decision_reason=(
+            "primary sign test not significant; this is not evidence that the association is zero"))
+        return out
+    diffs = {c: np.abs(rho["primary"]) - np.abs(rho[c]) for c in CONTROLS}
+    tests = {c: sign_test_one_sided_greater(diffs[c]) for c in CONTROLS}
+    adj = holm({c: tests[c]["p_value"] for c in CONTROLS}, alpha)
+    for c in CONTROLS:
+        out[f"control_{c}"].update(paired_difference=describe(diffs[c]), separation_test=tests[c],
+                                   holm=adj[c])
+    if all(adj[c]["rejected"] for c in CONTROLS):
+        out.update(decision=SUPPORTED, decision_reason=(
+            "primary association significant and both Holm-adjusted control-separation tests rejected"))
+    else:
+        failed = [c for c in CONTROLS if not adj[c]["rejected"]]
+        out.update(decision=ASSOCIATION_OBSERVED_CONTROL_UNRESOLVED, decision_reason=(
+            f"primary association significant; separation not established for {failed}"))
+    return out
+
+
+# ------------------------------------------------------------------ secondary
+
+
+def secondary_descriptives(weights: np.ndarray, score: np.ndarray) -> dict:
+    """Descriptive only. Factors are latent trajectory-derived quantities."""
+    w = np.asarray(weights, dtype=np.int64)
+    out = {"role": "descriptive secondary analysis; never confirmatory",
+           "per_round_weight_distribution": {}}
+    for r in range(w.shape[1]):
+        vals, counts = np.unique(w[:, r], return_counts=True)
+        out["per_round_weight_distribution"][f"round_{r + 1}"] = {
+            "weights": vals.tolist(), "counts": counts.tolist(), "mean_log2_contribution": float(-w[:, r].mean())}
+    for name, t in (("last_round_factor_log2", -w[:, -1]), ("first_seven_rounds_log2", -w[:, :-1].sum(axis=1))):
+        try:
+            out[name] = {"rho": spearman(score, t)}
+        except UndefinedCorrelation as exc:
+            out[name] = {"rho": None, "undefined": str(exc)}
+    return out
+
+
+# ---------------------------------------------------------------- power analysis
+
+
+def _rejection_counts_two_sided(n: int, alpha: float) -> int:
+    """Smallest k_hi with two-sided p <= alpha when positives = k_hi (symmetric region)."""
+    for k in range((n + 1) // 2, n + 1):
+        if min(1.0, 2.0 * binom_cdf(n - k, n)) <= alpha:
+            return k
+    return n + 1
+
+
+def primary_power_exact(n: int, p_positive: float, alpha: float) -> float:
+    """Exact power of the two-sided sign test with n nonzero runs and Pr[rho_i > 0] = p_positive."""
+    k = _rejection_counts_two_sided(n, alpha)
+    pmf = [math.comb(n, i) * p_positive ** i * (1 - p_positive) ** (n - i) for i in range(n + 1)]
+    return float(sum(pmf[i] for i in range(n + 1) if i >= k or i <= n - k))
+
+
+def simulate_joint_power(*, n_runs: int, delta: float, twin_ratio: float, twin_error_corr: float,
+                         alpha: float, n_sim: int, seed: int) -> dict:
+    """Monte Carlo of the complete hierarchical rule.
+
+    Effects are in units of the within-run standard error of Spearman's rho under independence,
+    se = 1 / sqrt(N - 1) (the exact permutation standard error, valid with ties). Per run:
+      rho_primary ~ N(delta, 1), rho_perm ~ N(0, 1) independent of rho_primary,
+      rho_twin ~ N(twin_ratio * delta, 1) with error correlation twin_error_corr to rho_primary.
+    """
+    rng = np.random.Generator(np.random.PCG64(seed))
+    e_p = rng.standard_normal((n_sim, n_runs))
+    e_perm = rng.standard_normal((n_sim, n_runs))
+    e_t = twin_error_corr * e_p + math.sqrt(1 - twin_error_corr ** 2) * rng.standard_normal((n_sim, n_runs))
+    rp, rperm, rt = delta + e_p, e_perm, twin_ratio * delta + e_t
+    k_hi = _rejection_counts_two_sided(n_runs, alpha)
+    pos = (rp > 0).sum(axis=1)
+    stage1 = (pos >= k_hi) | (pos <= n_runs - k_hi)
+
+    def one_sided_p(d):
+        npos = (d > 0).sum(axis=1)
+        tail = np.array([1.0 - binom_cdf(k - 1, n_runs) for k in range(n_runs + 1)])
+        return tail[npos]
+
+    p1, p2 = one_sided_p(np.abs(rp) - np.abs(rperm)), one_sided_p(np.abs(rp) - np.abs(rt))
+    lo, hi = np.minimum(p1, p2), np.maximum(p1, p2)
+    holm_both = (lo <= alpha / 2) & (hi <= alpha)
+    return {"n_runs": n_runs, "delta_se_units": delta, "twin_ratio": twin_ratio,
+            "twin_error_corr": twin_error_corr,
+            "sign_probability": float(0.5 * math.erfc(-delta / math.sqrt(2))),
+            "q_permuted": float(np.mean(np.abs(rp) > np.abs(rperm))),
+            "q_twin": float(np.mean(np.abs(rp) > np.abs(rt))),
+            "power_primary": float(stage1.mean()),
+            "power_supported": float((stage1 & holm_both).mean()),
+            "n_sim": n_sim, "seed": seed}
+
+
+def power_analysis(*, alpha: float = 0.05, n_sim: int = 50_000, seed: int = 20261030) -> dict:
+    """Effect-agnostic sensitivity analysis; uses no data from the published model."""
+    sign_probs = (0.65, 0.70, 0.75, 0.80, 0.85)
+    primary = {str(n): {str(p): primary_power_exact(n, p, alpha) for p in sign_probs}
+               for n in (10, 15, 20, 25, 30, 40)}
+    deltas = (0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0)
+    joint = []
+    i = 0
+    for n_runs in (10, 20, 30):
+        for twin_ratio in (0.0, 0.25, 0.5):
+            for corr in (0.0, 0.5):
+                for d in deltas:
+                    joint.append(simulate_joint_power(n_runs=n_runs, delta=d, twin_ratio=twin_ratio,
+                                                      twin_error_corr=corr, alpha=alpha, n_sim=n_sim,
+                                                      seed=seed + i))
+                    i += 1
+    return {"alpha": alpha, "primary_exact_power": primary, "joint_power_simulation": joint,
+            "smallest_attainable_two_sided_p": {str(n): 2.0 / 2 ** n for n in (10, 15, 20, 25, 30, 40)},
+            "rejection_threshold_positive_runs": {str(n): _rejection_counts_two_sided(n, alpha)
+                                                   for n in (10, 15, 20, 25, 30, 40)}}

@@ -22,10 +22,10 @@ your implementation against the authors' as two arms of a controlled
 experiment. An implementation that has absorbed the original's design
 cannot disagree with it in an informative way.
 
-**The assistant that wrote this brief is disqualified from implementing
-it.** It has read the released `optimizer.py`, including the internals of
-its search function. Anything it wrote would be a paraphrase of code it
-has seen, and a reviewer would be right to discount it. That is the only
+**The author of this brief is disqualified from implementing
+it.** The author has read the released `optimizer.py`, including the
+internals of its search function. Anything the author wrote would be a
+paraphrase of code already seen, and a reviewer would be right to discount it. That is the only
 reason this is being delegated, and it is stated here so the limitation
 is on the record rather than implied.
 
@@ -66,7 +66,7 @@ and you must say so immediately rather than continue.
    inside someone else's project.
 2. Read any **other** implementation of this algorithm: a reimplementation,
    a blog post containing its code, a notebook, a thesis appendix, a
-   StackOverflow answer quoting it, an LLM-generated version.
+   StackOverflow answer quoting it, a generated or paraphrased version.
 3. Search the web for the algorithm's *implementation*. (Looking up
    standard background — what a differential is, how a genetic algorithm
    works, a NumPy API — is fine and expected.)

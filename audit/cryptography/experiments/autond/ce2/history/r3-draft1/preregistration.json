@@ -1,0 +1,313 @@
+{
+ "approval": {
+  "approved_by": null,
+  "approved_design_sha256": null,
+  "approved_utc": null,
+  "status": "PENDING_REVIEW"
+ },
+ "design": {
+  "behavioural_binding": {
+   "accuracy_rule": "prediction 1 iff score > 0.5 (upstream eval_nets / keras binary_accuracy)",
+   "checks": [
+    "exact label balance n/2 : n/2",
+    "genuine ciphertexts recomputed by upstream encrypt",
+    "model input equals upstream hstack encoding",
+    "all scores finite",
+    "shuffle reproduced from shuffle_seed"
+   ],
+   "dataset": "fresh balanced mixed set: n/2 genuine pairs (CE2 sampling) and n/2 random pairs whose 64 input bits are uniform (upstream negative class), shuffled by PCG64(shuffle_seed)",
+   "diagnostics": "the untrained twin's accuracy and Wilson interval on the same shuffled set are recorded; they are not a gate",
+   "interrupted_initialisation": "an initialisation that does not complete (no run_manifest.json) is abandoned and never resumed; production restarts in a new directory and the abandoned directory is retained and reported",
+   "interval": "one-sided 95% Wilson lower bound, z = 1.6448536269514722",
+   "n": 1000000,
+   "note": "an independent CE2 model-binding validation, not the first measurement of this checkpoint and not a matched replication of the published ~0.5144; it does not alter AutoND CE1",
+   "requirement": "lower bound > 0.5",
+   "scope": "binds the checkpoint and the input pipeline behaviourally; it is not evidence that the model learned differential cryptanalysis",
+   "shuffle_seed": 20261102
+  },
+  "cipher": {
+   "input_difference": "0x400000",
+   "input_difference_encoding": "main.integer_to_binary_array(0x400000, 32), most significant bit first; convert_from_binary maps bits 0-15 to word x (left, rotated by ALPHA) and bits 16-31 to word y",
+   "input_difference_words": {
+    "x": "0x0040",
+    "y": "0x0000"
+   },
+   "model_input": "np.hstack([convert_to_binary([x0, y0]), convert_to_binary([x1, y1])]): 64 uint8 bits [C0 x, C0 y, C1 x, C1 y], each word most significant bit first",
+   "name": "speck3264",
+   "rotation_alpha": 7,
+   "rotation_beta": 2,
+   "round_function": "upstream ciphers/speck3264.py enc_one_round, key schedule expand_key",
+   "rounds": 8,
+   "word_size": 16
+  },
+  "conduct": {
+   "interim": "no interim analysis",
+   "resume": "the journal is authoritative; terminal states (VALID, EXCLUDED, FAILED) are never left; an interrupted run continues from its last committed transition; an artifact without a committed transition is quarantined (retained, hashed, journalled, never analysed) and its step re-executed; a committed artifact that is missing or altered makes the run FAILED",
+   "smoke": "non-evidentiary, separate autond_ce2_smoke_* directory, never merged",
+   "stopping": "all planned runs are executed; no early stop"
+  },
+  "controls": {
+   "permuted_target": {
+    "definition": "the same published-model scores against target[perm], perm = numpy.random.Generator(PCG64(permutation_seed_base + run_index)).permutation(n)",
+    "permutation_seed_base": 7100000,
+    "property": "exact marginal distribution and ties of the target are preserved"
+   },
+   "role": "negative-control diagnostics; neither establishes causal use or an internal representation",
+   "same_dataset": "all three conditions read one immutable run dataset; its content hash is checked per call",
+   "untrained_twin": {
+    "definition": "one untrained DBitNet from dbitnet.make_model(64) after tf.keras.utils.set_random_seed(twin_seed), created once at initialisation, weights saved and hashed, reloaded and hash-checked for every run, never trained",
+    "twin_seed": 20261031
+   }
+  },
+  "decision": {
+   "ASSOCIATION_OBSERVED_CONTROL_UNRESOLVED": "primary rejects; at least one control test does not",
+   "INCONCLUSIVE": "primary not significant, fewer than min_valid_runs valid runs, or an evidence check fails; never evidence of zero association",
+   "PRECHECK_FAILED": "reference, runtime, behavioural or mathematical gate failed before analysis",
+   "SUPPORTED": "primary rejects and both Holm-adjusted control tests reject"
+  },
+  "design_version": "AutoND-CE2-frozen-design-2026-10-r3",
+  "estimand": {
+   "descriptive": "The individual run-level Spearman coefficients, their median, interquartile range, and magnitude distribution are also reported descriptively. These summaries do not replace the primary sign-probability estimand.",
+   "not_the_estimand": "the test is not a test of full-distribution symmetry of rho_i and not a direct test that E[rho_i] = 0",
+   "per_run_statistic": "rho_i, the Spearman rank correlation between the published model's sigmoid score and the trajectory-derived log2 Markov characteristic proxy over the genuine pairs of run i; it is the observation from which the sign enters the primary test, not itself the primary estimand",
+   "primary": "The primary inferential estimand is p_+ = Pr(rho_i > 0 | rho_i != 0, run i is valid), the probability of a positive, nonzero run-level Spearman association across independent evaluation runs generated under the frozen sampling protocol, for the specified published AutoND checkpoint."
+  },
+  "evidence_schema": {
+   "certificate": "autond-ce2-certificate-2",
+   "journal": "journal.jsonl, schema core-journal-2: continuous seq, experiment_id, prev_sha256; run transitions carry from/to state and the committed fields",
+   "quarantine": "runs/<id>/quarantine/: uncommitted artifacts, each with an artifact_quarantined event",
+   "run_data": "runs/<id>/data.npz: key_words (n,4) uint16, pt0/pt1 (n,2) uint16, c0/c1 (n,2) uint16, dx/dy (n,9) uint16, weights (n,8) uint8, target (n,) int16",
+   "run_outputs": "runs/<id>/outputs.npz: score_published, score_twin (n,) float32, permutation (n,) int64",
+   "run_record": "runs/<id>/record.json, a cache materialised from the journal; measurement.json (committed artifact)"
+  },
+  "exclusion": {
+   "EXCLUDED": "a run whose primary or either control coefficient is undefined (non-finite array, constant score, constant target, non-finite rho); recorded with its reason, never scored as 0",
+   "FAILED": "a run whose gate fails or whose execution raises; retained with its partial artifacts",
+   "replacement": "none; no reserve runs",
+   "zero_coefficient": "a defined coefficient equal to 0 is not undefined: the run is VALID, counts in n_valid, and is a tie in the sign tests; it is never EXCLUDED and never given an arbitrary value"
+  },
+  "experiment_id": "AUTOND-CE2-THEORY-CONSISTENCY",
+  "hypothesis": {
+   "direction": "TWO_SIDED",
+   "h0": "Among valid independent evaluation runs with a defined, nonzero primary Spearman coefficient, the probability that rho_i is positive is one half: Pr(rho_i > 0 | rho_i != 0, run i is valid) = 1/2.",
+   "h1": "Among valid independent evaluation runs with a defined, nonzero primary Spearman coefficient, the probability that rho_i is positive differs from one half: Pr(rho_i > 0 | rho_i != 0, run i is valid) != 1/2. No direction is prespecified.",
+   "measurement": "core.theory_consistency.TheoryConsistencyMeasurement(HypothesisDirection.TWO_SIDED)"
+  },
+  "mathematical_gates": {
+   "A": "Lipmaa-Moriai closed form with exact integer weights",
+   "B": "carry-pair automaton with exact integer path counts, sharing no code with A",
+   "C": {
+    "coverage": "exhaustive over all (alpha, beta, gamma); A == B",
+    "word_sizes": [
+     4,
+     6,
+     8
+    ]
+   },
+   "D": {
+    "requirement": "literal operand-pair counts == A == B",
+    "word16": "every round transition of the first pair of the preflight corpus, by literal 2^32 enumeration",
+    "word_sizes_exhaustive_literal": [
+     4,
+     6,
+     8
+    ]
+   },
+   "E": "every production sample and round: A == B exactly and xdp+ > 0",
+   "F": "every production sample: trajectory from upstream enc_one_round reproduces upstream encrypt bit for bit; initial difference equals delta; per round the modular-addition output difference equals the next left-word difference and dy_r = ROL2(dy_{r-1}) ^ dx_r",
+   "failure": "any gate failure makes the preflight PRECHECK_FAILED or the run FAILED",
+   "preflight_corpus_pairs": 4096
+  },
+  "population": "genuine difference-bearing pairs only; no random-class sample enters the CE2 correlations",
+  "reference": {
+   "builder": "dbitnet.make_model(64)",
+   "case_study": "AutoND (Bellini et al., IACR ePrint 2022/1467), Crypto-TII/AutoND",
+   "checkpoint_relpath": "model_weights/speck3264_single-key_0x400000_round8_polished.h5",
+   "checkpoint_sha256": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+   "loading": "Keras load_weights on the weights-only HDF5 file, then strict verification that every weight array of every weight-bearing layer equals the corresponding HDF5 dataset bit for bit, in order, with no unused dataset",
+   "not_used": "no AutoND CE1 arm, warm start or checkpoint is used anywhere in CE2",
+   "observed_architecture": {
+    "hdf5_weight_arrays": 68,
+    "input_shape": [
+     null,
+     64,
+     1
+    ],
+    "layers": 34,
+    "output_shape": [
+     null,
+     1
+    ],
+    "params_non_trainable": 2048,
+    "params_total": 298113,
+    "params_trainable": 296065,
+    "weight_bearing_layers": 23
+   },
+   "observed_architecture_note": "298113 is the total parameter count; 2048 of these are BatchNormalization moving statistics",
+   "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+   "upstream_hash_file": "audit/cryptography/upstream_sha256.json"
+  },
+  "references": [
+   "Bellini et al., A Cipher-Agnostic Neural Training Pipeline with Automated Finding of Good Input Differences, IACR ePrint 2022/1467; https://github.com/Crypto-TII/AutoND",
+   "Lipmaa and Moriai, Efficient Algorithms for Computing Differential Properties of Addition, FSE 2001, doi:10.1007/3-540-45473-X_28",
+   "Beyne and Rijmen, Differential Cryptanalysis in the Fixed-Key Model, CRYPTO 2022, IACR ePrint 2022/837"
+  ],
+  "research_question": "Across independent evaluation runs, does the run-level Spearman association between the published AutoND SPECK32/64 eight-round DBitNet's output scores and the trajectory-derived Markov-model single-characteristic probability proxy exhibit a systematic imbalance between positive and negative nonzero coefficients?",
+  "revision": {
+   "changes": [
+    "hypothesis.h0 / h1: r2 wrote the null as 'the run-level population Spearman rho is distributed symmetrically about 0'. The implemented exact sign test removes zero coefficients and tests only the conditional sign probability p_+ = Pr(rho_i > 0 | rho_i != 0, run i is valid); it neither requires nor establishes symmetry of the full rho distribution, and it is not a test that E[rho_i] = 0. The null and alternative now state p_+ = 1/2 and p_+ != 1/2",
+    "estimand: r2 named the run-level population Spearman correlation itself; r3 names p_+ as the primary inferential estimand, rho_i as the per-run statistic, and the median, IQR and magnitude distribution of rho_i as descriptive summaries that do not replace p_+",
+    "research_question: r2 asked whether the score is 'statistically associated' with the proxy; r3 asks whether the run-level coefficients show a systematic imbalance between positive and negative nonzero values, which is what the primary test can establish",
+    "statistics.primary_test, statistics.control_tests and exclusion: the null and alternative of each test are written in full; the zero policy (a defined zero is a VALID run and a tie, excluded from the denominator and counted) is distinguished from the undefined policy (EXCLUDED); n_valid and n_effective are reported separately",
+    "statistics.power: the Gaussian assumptions (no exact zeros) are stated, the zero-tie sensitivity is added, and the power evidence file is bound by hash",
+    "runs.status and statistics.power.status: PROPOSED_PENDING_APPROVAL -> FROZEN; values unchanged"
+   ],
+   "computational_procedure_changed": false,
+   "history": [
+    {
+     "archive": "experiments/autond/ce2/history/r1/ (SHA256SUMS)",
+     "design_sha256": "7245d152087931cc5e0a65e05957b298a7c98e81cf4c275800f39b25579c06b1",
+     "design_version": "AutoND-CE2-frozen-design-2026-10-r1",
+     "status": "never approved; no production run; exploratory smoke runs only"
+    },
+    {
+     "archive": "experiments/autond/ce2/history/r2/ (SHA256SUMS)",
+     "changes_from_r1": [
+      "verification: inference is recomputed from verifier-recomputed model scores, not from stored scores; score agreement is assessed on ranks and on the signs that the confirmatory tests use, not by an elementwise tolerance alone",
+      "evidence: the hash-chained journal is authoritative; run records are materialised from it; artifacts are committed by intent / staged write / hash / atomic promote / transition; uncommitted artifacts are quarantined and retained, never analysed",
+      "hypothesis: recorded explicitly as TWO_SIDED; measured with core.theory_consistency instead of the legacy framework test that encodes a positive hypothesis and maps undefined to 0.0",
+      "within-run p-values: explicit UNDERFLOW and DEGENERATE states instead of 0.0",
+      "behavioural binding: the untrained twin's accuracy on the same set is recorded as a diagnostic (not a gate); an interrupted initialisation is abandoned and never resumed",
+      "power: described as a scenario-based sensitivity analysis with Monte Carlo error, validated against a pipeline-faithful simulation; not a power guarantee",
+      "paths: experiment relocated to audit/cryptography/experiments/autond/ce2/"
+     ],
+     "design_sha256": "ef3d764a8350e01a68fdcacf2fb38a15fd5622bfc8665f20e0e71df3f2ba4ba5",
+     "design_version": "AutoND-CE2-frozen-design-2026-10-r2",
+     "status": "never approved; no confirmatory production run; exploratory smoke runs only"
+    }
+   ],
+   "inferential_specification_changed": true,
+   "interpretation_note": "The computation is unchanged, so any dataset would give the same p-values and the same decision under r2 and r3. What a rejection means is corrected: it supports p_+ != 1/2 (an imbalance of nonzero signs across runs); it is not a statement about E[rho_i], nor about the shape of the rho_i distribution beyond its sign balance. A non-rejection supports neither symmetry nor zero association.",
+   "kind": "inferential-specification clarification",
+   "scientific_parameters_changed": false,
+   "supersedes": {
+    "archive": "experiments/autond/ce2/history/r2/ (SHA256SUMS)",
+    "design_sha256": "ef3d764a8350e01a68fdcacf2fb38a15fd5622bfc8665f20e0e71df3f2ba4ba5",
+    "design_version": "AutoND-CE2-frozen-design-2026-10-r2",
+    "status": "never approved; no confirmatory production run; exploratory smoke runs only"
+   },
+   "unchanged": "numerical parameters, run and pair counts, behavioural binding, sampling rules, target construction, score definition, checkpoint and upstream identity, alpha, the primary and control test procedures and their implementation, control definitions, Holm, serial gatekeeping, exclusion rule, no early stopping and no reserve runs"
+  },
+  "runs": {
+   "min_valid_runs": 20,
+   "n_runs": 20,
+   "pairs_per_run": 1000000,
+   "reserve_runs": 0,
+   "run_ids": "run_00 .. run_19",
+   "status": "FROZEN"
+  },
+  "runtime": {
+   "keras": "2.15.0",
+   "note": "pandas is required because upstream train_nets (imported by main) imports it",
+   "numpy": "1.26.4",
+   "pandas": "2.2.2",
+   "python": "3.11",
+   "scipy": "1.11.4",
+   "tensorflow": "2.15.1"
+  },
+  "sampling": {
+   "key": "an independent uniform 64-bit master key per pair, shared by both members of the pair",
+   "plaintext": "an independent uniform 32-bit plaintext P0 per pair; P1 = P0 XOR delta",
+   "reproducibility": "datasets are not seed-replayable; reproducibility rests on the retained raw arrays and their hashes. Seeds govern only the untrained twin, the target permutation and the bootstrap",
+   "source": "os.urandom, one byte per bit masked with & 1, exactly as upstream main.make_train_data",
+   "upstream_semantics": "identical construction to the genuine (Y = 1) class of main.make_train_data: per-sample keys0, keys1 = keys0 ^ 0, pt1 = pt0 ^ delta_state, C = hstack(C0, C1)"
+  },
+  "score": {
+   "definition": "sigmoid output of model.predict(X, batch_size=5000) in Keras inference mode, float32",
+   "orientation": "label 1 = genuine pair (upstream convention); a larger score means 'more genuine'",
+   "transformation": "none (identity); Spearman's coefficient is invariant to monotone transforms"
+  },
+  "statistics": {
+   "alpha": 0.05,
+   "control_tests": {
+    "gate": "tested only if the primary test rejects (serial gatekeeping)",
+    "h0": "Pr(D_i,c > 0 | D_i,c != 0) = 1/2, for each control c",
+    "h1": "Pr(D_i,c > 0 | D_i,c != 0) > 1/2, for each control c",
+    "multiplicity": "Holm across the two control tests at alpha",
+    "p_value": "upper binomial tail Pr[X >= n_positive], X ~ Binomial(n_effective, 1/2)",
+    "statistic": "D_i = |rho_primary,i| - |rho_control,i|",
+    "test": "exact one-sided sign test, H1: Pr[D_i > 0] > 1/2; zeros removed and counted",
+    "zero_primary_run": "a VALID run with rho_primary,i = 0 and rho_c,i != 0 has D_i,c = -|rho_c,i| < 0 and counts as a negative sign in that control test",
+    "zeros": "a paired difference D_i,c = 0 is a tie: excluded from that control test's denominator and counted as n_zero_ties_removed; the run stays VALID"
+   },
+   "effect_size": "median run-level rho, IQR, min, max, sign counts",
+   "familywise": "primary at alpha, then Holm over the two control tests at alpha; FWER of the procedure <= alpha",
+   "median_ci": "distribution-free order-statistic interval (ranks 6 and 15 for 20 runs; exact coverage reported)",
+   "power": {
+    "assumptions": [
+     "the Gaussian scenarios are continuous: they assume every run-level coefficient and every paired control difference is nonzero, so n_effective = n_runs in every simulated test",
+     "the zero-tie sensitivity reports exact primary power conditional on n_effective < 20 and simulated joint power with 1-3 runs whose rho_primary is exactly 0; the probability of an exact zero for the published model or the twin is unknown",
+     "the pipeline-faithful check simulates the Spearman estimator on the real discrete target with synthetic model-free scores; it checks variance, skewness, sign probability and exact-zero counts of that estimator, not the joint published-model / twin / permutation production process",
+     "the 90% target is not reached uniformly: it depends on the unknown effect, the twin's share of the association and the twin-primary error correlation; no exploratory coefficient informs any scenario"
+    ],
+    "evidence": {
+     "path": "experiments/autond/ce2/validation/r3/power.json",
+     "sha256": "a23355fd92d20bd8234ef0b18a5fb1408d3e8f84ed9aacb6121cabeb852e18ea"
+    },
+    "nature": "scenario-based sensitivity analysis of the complete decision rule under stated Gaussian run-level models; Monte Carlo standard errors reported; the Gaussian model is checked against a pipeline-faithful simulation with the real discrete target; NOT a guarantee of power for the unknown true effect",
+    "report": "experiments/autond/ce2/docs/POWER_ANALYSIS.md",
+    "status": "FROZEN",
+    "target_joint_power": 0.9
+   },
+   "primary_endpoint": "rho_i = Spearman(score, T) per valid run, average ranks, no jitter",
+   "primary_endpoint_role": "rho_i is the per-run statistic; p_+ = Pr(rho_i > 0 | rho_i != 0, run i is valid) is the primary across-run inferential estimand",
+   "primary_test": {
+    "h0": "Pr(rho_i > 0 | rho_i != 0, run i is valid) = 1/2",
+    "h1": "Pr(rho_i > 0 | rho_i != 0, run i is valid) != 1/2",
+    "name": "exact two-sided binomial sign test over nonzero run-level rho_i",
+    "p_value": "min(1, 2 * smaller binomial tail)",
+    "reported_counts": "n_valid (valid runs), n_effective (nonzero rho_i entering the test), n_positive, n_negative, n_zero_ties_removed; n_effective = n_valid - n_zero_ties_removed and can be below 20 when all 20 runs are valid",
+    "zero_definition": "rho_i == 0.0 exactly in float64; any nonzero value, however small, has a sign",
+    "zeros": "A defined run-level coefficient rho_i = 0 is a tie. It remains a VALID run, is excluded from the sign-test denominator, and is counted explicitly as n_zero_ties_removed. It is never converted to a positive or negative sign."
+   },
+   "secondary": [
+    "last-round factor log2 alone",
+    "sum of rounds 1-7 log2 factors",
+    "per-round weight distributions"
+   ],
+   "secondary_role": "descriptive; latent trajectory-derived quantities; not input-visible components",
+   "sensitivity": {
+    "method": "percentile bootstrap of the median over whole runs",
+    "n_resamples": 10000,
+    "seed": 20261101
+   },
+   "unit": "independent evaluation run",
+   "within_run_p": "descriptive only, never confirmatory; t approximation with explicit UNDERFLOW (log10 reported) and DEGENERATE (|rho| = 1) states, never 0.0"
+  },
+  "study_type": "observational association study; supports no causal claim",
+  "target": {
+   "factor": "xdp+(alpha_r, beta_r -> gamma_r) = 2^-k_r over uniform 16-bit operands",
+   "interpretation": "a proxy relying on Markov/independence assumptions about intermediate propagation; NOT the exact fixed-key characteristic probability (round keys are schedule-derived, Beyne-Rijmen CRYPTO 2022), NOT the differential probability of the full cipher, NOT an unconditional bound, and NOT a measurement of what the network learned",
+   "invalid": "any observed factor equal to zero is an implementation error: the run FAILS, no epsilon",
+   "name": "trajectory-derived Markov characteristic probability estimate",
+   "per_round": "alpha_r = ROR7(dx_{r-1}), beta_r = dy_{r-1}, gamma_r = dx_r, from the realized states of both encryptions; the round key cancels in the XOR difference",
+   "terminology": "Markov-model single-characteristic probability proxy",
+   "value": "T = sum_{r=1..8} log2 xdp+ = -sum_r k_r (exact integer; larger = more probable)"
+  },
+  "verification": {
+   "independence": "imports nothing from the CE2 runner, analysis, theory, adapter or design modules, nor from core.evidence; own journal replay and state machine, own word/bit conversion, round function and key schedule, own transfer-matrix xdp+, own ranks, exact tests, Holm and decision rule, own strict checkpoint comparison and weight hashing",
+   "inference_from": "verifier-recomputed scores (stored scores are compared, never used for inference)",
+   "numerical_policy": {
+    "acceptance": "PASS if every run's recomputed rho agrees with the stored-score rho to 1e-12, or if it differs but every decision-relevant sign and the recomputed decision are identical (reported as DECISION_INVARIANT_NUMERICAL_DIFFERENCE); FAIL if any sign or the decision differs",
+    "decision_relevance": "the confirmatory tests use only sign(rho_primary,i) and sign(D_c,i); the verifier recomputes both from its own scores",
+    "score_comparison": "report bitwise equality, max absolute difference, rank-vector equality and tie-structure equality per run and model",
+    "score_report_threshold_abs": 0.0001
+   },
+   "preflight_recomputation": "gates C and D are independently re-executed by the verifier at word sizes 4 and 6 (transfer matrix vs literal enumeration) and optionally 8; the 16-bit literal checks and the encoding check are recorded, not re-executed",
+   "shared_with_producer": "the pinned upstream DBitNet builder and TensorFlow/Keras inference are shared: recomputed scores establish reproducibility of inference, not an independent implementation of the network",
+   "verifier": "audit/cryptography/experiments/autond/ce2/verify.py"
+  }
+ },
+ "design_sha256": "7e69ce6ccb0425dd496820e91dc990a15c23a239800b0a9382a18b621667ce0c",
+ "schema": "autond-ce2-preregistration-1"
+}

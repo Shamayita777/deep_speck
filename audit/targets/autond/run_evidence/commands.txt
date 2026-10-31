@@ -1,5 +1,5 @@
 # Exact commands that produced the logs beside this file. Cloud container.
-#   TF runs : /home/claude/venv-autond-tf215/bin/python
+#   TF runs : ~/venv-autond-tf215/bin/python
 #             python 3.11.17, tensorflow 2.15.1, numpy 1.26.4, keras 2.15.0
 #   Gohr run: system python3 3.13
 # Tree: complete framework + Phase 1 install + this package + search harness

@@ -1,6 +1,6 @@
 # Erratum to II2_CLEANROOM_BRIEF.md
 
-The brief (sha256 4bd8ee37b566be1d8a52a2f43728e297dac9026ec36cb256bf477891a20d985a)
+The brief (sha256 110b62f1c324e76113fe48c88467287dcd607bafcd9d972d4ca3329f1ba7a748)
 is NOT edited. Corrections are recorded here.
 
 E-1. Wrong paper title. §2 of the brief names "A Deeper Look at

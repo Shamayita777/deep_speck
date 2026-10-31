@@ -1,0 +1,110 @@
+{
+ "behavioural_binding": {
+  "accuracy": 0.5079,
+  "checks": {
+   "generation_gates_passed": true,
+   "label_balance_exact": true,
+   "scores_finite": true
+  },
+  "n": 20000,
+  "note": "an independent CE2 model-binding validation, not the first measurement of this checkpoint and not a matched replication of the published ~0.5144; it does not alter AutoND CE1",
+  "passed": true,
+  "scope": "binds the checkpoint and the input pipeline behaviourally; it is not evidence that the model learned differential cryptanalysis",
+  "sha256": "5631dd80f3731373f4d6373aa938b0a4cc65a80ab8513b01994bdf063d1e23d9",
+  "twin_diagnostic": {
+   "accuracy": 0.4975,
+   "n_correct": 9950,
+   "role": "diagnostic only, not a gate",
+   "wilson_one_sided_95_lower": 0.49168536836540866
+  },
+  "wilson_one_sided_95_lower": 0.5020846147751699
+ },
+ "certificate_sha256": "098b4fcf731bb24dc1151d48c3c83269b5c5b6ec5b37554d058e95bd1a8fa6ef",
+ "decision": "INCONCLUSIVE",
+ "decision_reason": "primary sign test not significant; this is not evidence that the association is zero",
+ "design_sha256": "ef3d764a8350e01a68fdcacf2fb38a15fd5622bfc8665f20e0e71df3f2ba4ba5",
+ "disclosure": "these exploratory coefficients were seen during development; they did not and must not inform any design choice",
+ "label": "EXPLORATORY_NOT_CONFIRMATORY",
+ "observed_primary_rho_disclosed": {
+  "run_00": 0.07954560696726473,
+  "run_01": 0.06988103218782551,
+  "run_02": 0.09309837018000461
+ },
+ "output_dir_retained": false,
+ "output_dir_was": "$TMPDIR/repair/smoke_r2/autond_ce2_smoke_20261031T051727Z",
+ "purpose": "r2 integration check of runner, journal, verifier and CLI; not evidence about the hypothesis",
+ "run_states": {
+  "run_00": "VALID",
+  "run_01": "VALID",
+  "run_02": "VALID"
+ },
+ "sizes": {
+  "behavioural_n": 20000,
+  "bootstrap_resamples": 1000,
+  "min_valid_runs": 3,
+  "n_runs": 3,
+  "pairs_per_run": 4096
+ },
+ "verifications": [
+  {
+   "failures": [],
+   "inference_from": "recomputed scores",
+   "model_scores_recomputed": true,
+   "n_checks": 77,
+   "numerical_status": "EXACT",
+   "passed": true,
+   "preflight_gates_recomputed": [
+    {
+     "expected_possible_4_7_pow": 1372,
+     "possible": 1372,
+     "row_sums_are_4_pow_n": true,
+     "transfer_equals_literal": true,
+     "triples": 4096,
+     "word_size": 4
+    },
+    {
+     "expected_possible_4_7_pow": 67228,
+     "possible": 67228,
+     "row_sums_are_4_pow_n": true,
+     "transfer_equals_literal": true,
+     "triples": 262144,
+     "word_size": 6
+    }
+   ]
+  },
+  {
+   "failures": [],
+   "inference_from": "recomputed scores",
+   "model_scores_recomputed": true,
+   "n_checks": 78,
+   "numerical_status": "EXACT",
+   "passed": true,
+   "preflight_gates_recomputed": [
+    {
+     "expected_possible_4_7_pow": 1372,
+     "possible": 1372,
+     "row_sums_are_4_pow_n": true,
+     "transfer_equals_literal": true,
+     "triples": 4096,
+     "word_size": 4
+    },
+    {
+     "expected_possible_4_7_pow": 67228,
+     "possible": 67228,
+     "row_sums_are_4_pow_n": true,
+     "transfer_equals_literal": true,
+     "triples": 262144,
+     "word_size": 6
+    },
+    {
+     "expected_possible_4_7_pow": 3294172,
+     "possible": 3294172,
+     "row_sums_are_4_pow_n": true,
+     "transfer_equals_literal": true,
+     "triples": 16777216,
+     "word_size": 8
+    }
+   ]
+  }
+ ]
+}

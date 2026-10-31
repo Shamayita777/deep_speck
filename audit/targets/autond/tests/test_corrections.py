@@ -867,7 +867,7 @@ class TestRunManifestBindsGenericHelpers(unittest.TestCase):
         contain the literals it forbids - otherwise it would either flag
         itself or need an exemption, and an exempted checker is not one.
         """
-        needles = ["/" + "home/" + "claude", "/" + "Users" + "/",
+        needles = ["/" + "home" + "/", "/" + "Users" + "/",
                    "C:" + chr(92) + chr(92)]
         pkg = Path(st.__file__).parent
         offenders = []

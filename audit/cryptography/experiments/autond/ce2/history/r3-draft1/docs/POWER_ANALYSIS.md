@@ -1,0 +1,207 @@
+# AutoND CE2: power, as a scenario-based sensitivity analysis (design r3)
+
+**This is not a guarantee of power.** It is a scenario-based sensitivity analysis, conditional on its
+assumptions. Every number below is the probability that the complete preregistered procedure returns
+SUPPORTED (or, where stated, that the primary test rejects) *under a stated model* of the run-level
+coefficients. The true effect is unknown, and so is the dependence between the published-model and
+untrained-twin coefficients. No coefficient observed on the published model was used. The 90% target
+is **not** reached uniformly: whether it is reached depends on the effect, on the twin's share of the
+association and on the twin-primary error correlation (section 3).
+
+Source: `validation/r3/power.json` (SHA-256 `a23355fd...`, bound in `DESIGN["statistics"]["power"]`),
+produced by `--power` on 2026-10-31 under r3. Code: `power.py`. 50,000 Monte Carlo replications per
+simulated scenario; each estimate carries its Monte Carlo standard error and a 95% interval.
+- **Reproduced, not new:** the joint-power grid, the permutation-dependence rows and the exact primary
+  power tables are seeded. The r3 run reproduces `validation/r2/power.json` exactly (tested).
+- **New under r3:** the zero-tie sensitivity (section 5) and the zero counts of the pipeline-faithful
+  check (section 4). The pipeline-faithful check uses fresh `os.urandom` targets, so its r3 numbers
+  are a new sample, not a reproduction of r2.
+
+## 1. Procedure simulated
+
+Per scenario, 20 (or 10, 30) runs:
+1. an exact two-sided sign test of H0: p_+ = 1/2, with p_+ = Pr(rho_i > 0 | rho_i != 0, run i is valid);
+2. only if step 1 rejects at alpha = 0.05, two exact one-sided sign tests of
+   H0,c: Pr(D_i,c > 0 | D_i,c != 0) = 1/2 against "> 1/2", D_i,c = |rho_primary,i| - |rho_c,i|, for the
+   permuted target and the twin, with Holm at alpha.
+
+This is the analysis in `analysis.py`. `tests/test_theory_statistics.py` checks that it agrees with the
+verifier's independent decision rule on 200 random cases.
+
+## 2. Run-level model and its assumptions
+
+Effects are in units of se = (N - 1)^-1/2. At N = 10^6, one unit is a rho of 0.001.
+
+    rho_primary = delta + e_p
+    rho_perm    = e_q,                  corr(e_p, e_q) in {-0.3, 0, 0.3}
+    rho_twin    = twin_ratio * delta + e_t,  twin_ratio in {0, 0.25, 0.5, 0.75}, corr(e_p, e_t) in {-0.5, 0, 0.5, 0.9}
+
+**Assumptions.**
+- The errors are jointly Gaussian. The model is continuous, so it assigns probability 0 to an exact zero
+  run-level coefficient and to an exact zero paired control difference. Every simulated run therefore
+  enters every sign test: n_effective = n_runs. The real analysis removes exact zeros; section 5 shows
+  what that costs.
+- Runs are independent and identically distributed.
+- The variance of rho_hat is (N - 1)^-1 under every scenario (checked in section 4, under the null and
+  small synthetic alternatives only).
+
+## 3. Smallest simulated effect whose Monte Carlo lower 95% bound for P(SUPPORTED) is at least 0.90
+
+The grid of delta is {0.5, 1, 1.5, 2, 2.5, 3, 4}. "none" means no value up to delta = 4 reaches the bound.
+
+| runs | twin_ratio | corr -0.5 | corr 0 | corr 0.5 | corr 0.9 |
+|---|---|---|---|---|---|
+| 10 | 0 | 3.0 | 3.0 | 3.0 | 4.0 |
+| 10 | 0.25 | 4.0 | 4.0 | 3.0 | 3.0 |
+| 10 | 0.5 | none | none | 4.0 | 3.0 |
+| 10 | 0.75 | none | none | none | 4.0 |
+| **20** | 0 | 2.5 | 2.5 | 2.0 | 2.5 |
+| **20** | 0.25 | 2.5 | 2.5 | 2.0 | 2.0 |
+| **20** | 0.5 | 4.0 | 3.0 | 2.5 | 2.0 |
+| **20** | 0.75 | none | none | 4.0 | 2.5 |
+| 30 | 0 | 2.0 | 2.0 | 2.0 | 2.0 |
+| 30 | 0.25 | 2.0 | 2.0 | 2.0 | 2.0 |
+| 30 | 0.5 | 2.5 | 2.5 | 2.0 | 2.0 |
+| 30 | 0.75 | none | 4.0 | 3.0 | 2.0 |
+
+**Dependence of the permuted control** (20 runs, twin_ratio 0.25, twin corr 0.5): at delta = 2,
+P(SUPPORTED) is 0.917, 0.912 and 0.915 for perm corr -0.3, 0 and 0.3. At delta = 3 it is 1.000 in all
+three. Each estimate has a Monte Carlo SE of about 0.0013.
+
+
+**Correction to r1 (kept from r2).** r1 stated that 20 runs give about 90% joint power at |rho| of about
+0.0020-0.0028. That holds for twin_ratio <= 0.25, and at twin_ratio 0.5 only when the twin's errors are
+positively correlated with the primary's (corr >= 0.5).
+- If the untrained twin shares half the association and its errors are uncorrelated or negatively
+  correlated with the primary's, the requirement rises to delta = 3-4, i.e. |rho| of about
+  0.003-0.004.
+- If it shares three quarters, 20 runs may not reach 90% at any effect up to delta = 4.
+- The run count is frozen at 20 in r3. It was not changed to improve these numbers.
+
+## 4. Is the Gaussian run-level model adequate? (pipeline-faithful check)
+
+The model assumes that, for the real CE2 target (an integer with heavy ties), Spearman's rho of N pairs
+has variance (N - 1)^-1 and is close to normal. The check simulates the actual estimator (average ranks,
+no jitter) on the real model-free target of 200,000 freshly generated genuine pairs, subsampled to
+N = 50,000, with synthetic scores `lam * standardised(target) + N(0, 1)` and 400 replications per row.
+Under r3 it also computes, from the same synthetic scores, the permuted-target coefficient, and counts
+exact zeros.
+
+**r3 run (`validation/r3/power.json`, new sample):**
+
+| lam | mean rho | (N-1) var(rho) | Monte Carlo SE | skewness | P(rho > 0), simulated | P(rho > 0), Gaussian | exact zeros: rho / rho_perm / D_perm |
+|---|---|---|---|---|---|---|---|
+| 0 | 0.0002 | 1.040 | 0.074 | 0.12 | 0.525 | 0.518 | 0 / 0 / 0 of 400 |
+| 0.002 | 0.0019 | 1.146 | 0.081 | 0.13 | 0.645 | 0.653 | 0 / 0 / 0 of 400 |
+| 0.005 | 0.0046 | 1.028 | 0.073 | -0.11 | 0.873 | 0.847 | 0 / 0 / 0 of 400 |
+
+**r2 run (`validation/r2/power.json`, reused, unchanged):**
+
+| lam | mean rho | (N-1) var(rho) | Monte Carlo SE | skewness | P(rho > 0), simulated | P(rho > 0), Gaussian |
+|---|---|---|---|---|---|---|
+| 0 | -0.0001 | 0.943 | 0.067 | -0.02 | 0.508 | 0.487 |
+| 0.002 | 0.0018 | 1.126 | 0.080 | 0.34 | 0.633 | 0.647 |
+| 0.005 | 0.0047 | 1.100 | 0.078 | 0.03 | 0.860 | 0.843 |
+
+**Reading.**
+- Under the null, the variance agrees with (N - 1)^-1 in both runs (0.94 and 1.04, each within about
+  one Monte Carlo SE of 1).
+- Under small alternatives the four values are 1.13 and 1.10 (r2) and 1.15 and 1.03 (r3): 3-15% above 1,
+  each within about 1.8 SE. This is not resolved. If real, the required delta grows by up to about 7%.
+- Simulated and Gaussian sign probabilities agree within about 1.5 Monte Carlo SE (SE about 0.017-0.025
+  per row).
+- The r2 skewness of 0.34 at lam = 0.002 (2.8 SE) was not reproduced in r3 (0.13, about 1 SE). It is
+  consistent with Monte Carlo noise; it is not explained.
+- No exact zero occurred in 1,200 synthetic replications. The one-sided 95% upper bound is 0.0075 per
+  replication for each row (0.0025 pooled). **This bounds the synthetic-score estimator only.**
+
+**Limits.**
+- N is 5 x 10^4, not 10^6.
+- The score model is synthetic. The real published-model and twin scores (float32 sigmoid outputs, with
+  their own tie structure) have a different joint structure, which cannot be simulated without the
+  models. The check validates properties of the Spearman estimator with the real target. It does not
+  validate the joint published-model / twin / permutation model of section 2.
+- The twin-primary dependence (corr) is therefore empirically unknown, and the table spans it.
+
+## 5. Zero ties (new in r3)
+
+The sign tests remove exact zeros. A defined rho_i = 0 keeps the run VALID (it counts in n_valid) but
+removes it from the primary denominator, so n_effective can be below 20 even when all 20 runs are valid.
+In a control test, a zero paired difference D_i,c = 0 is removed in the same way. A run with
+rho_primary,i = 0 and a nonzero control coefficient has D_i,c = -|rho_c,i| < 0: it counts *against*
+separation.
+
+**Exact primary power conditional on n_effective** (no simulation; P(reject) for sign probability p_+;
+the threshold is the number of same-sign coefficients needed):
+
+| n_effective | threshold | p_+ = 0.65 | 0.70 | 0.75 | 0.80 | 0.85 |
+|---|---|---|---|---|---|---|
+| 20 | 15 | 0.246 | 0.416 | 0.617 | 0.804 | 0.933 |
+| 19 | 15 | 0.150 | 0.282 | 0.465 | 0.673 | 0.856 |
+| 18 | 14 | 0.189 | 0.333 | 0.519 | 0.716 | 0.879 |
+| 17 | 13 | 0.235 | 0.389 | 0.574 | 0.758 | 0.901 |
+| 16 | 13 | 0.134 | 0.246 | 0.405 | 0.598 | 0.790 |
+| 15 | 12 | 0.173 | 0.297 | 0.461 | 0.648 | 0.823 |
+| 14 | 12 | 0.084 | 0.161 | 0.281 | 0.448 | 0.648 |
+
+Power is not monotone in n_effective, because the discrete binomial test's attained size jumps
+(19 needs the same 15 as 20). Below n_effective = 6 the primary test cannot reject at alpha = 0.05
+(smallest p = 2/2^5 = 0.0625). The first Holm step of a control test needs n_effective >= 6 as well.
+
+**Joint power when k of the 20 primary coefficients are exactly 0** (simulated, 50,000 replications,
+Monte Carlo SE <= 0.0023; k = 0 is the section 3 grid):
+
+| twin_ratio | twin corr | delta | k = 0 | k = 1 | k = 2 | k = 3 |
+|---|---|---|---|---|---|---|
+| 0 | 0 | 2.0 | 0.896 | 0.780 | 0.596 | 0.362 |
+| 0 | 0 | 2.5 | 0.995 | 0.981 | 0.926 | 0.780 |
+| 0 | 0 | 3.0 | 1.000 | 0.999 | 0.995 | 0.967 |
+| 0 | 0.5 | 2.0 | 0.903 | 0.791 | 0.615 | 0.380 |
+| 0 | 0.5 | 2.5 | 0.994 | 0.975 | 0.921 | 0.770 |
+| 0.25 | 0 | 2.0 | 0.849 | 0.714 | 0.516 | 0.289 |
+| 0.25 | 0 | 2.5 | 0.985 | 0.952 | 0.865 | 0.677 |
+| 0.25 | 0 | 3.0 | 0.999 | 0.995 | 0.978 | 0.910 |
+| 0.25 | 0.5 | 2.0 | 0.912 | 0.808 | 0.636 | 0.393 |
+| 0.25 | 0.5 | 2.5 | 0.997 | 0.983 | 0.940 | 0.811 |
+| 0.5 | 0 | 3.0 | 0.942 | 0.871 | 0.741 | 0.539 |
+| 0.5 | 0 | 4.0 | 0.996 | 0.985 | 0.951 | 0.857 |
+| 0.5 | 0.5 | 2.5 | 0.975 | 0.929 | 0.819 | 0.614 |
+| 0.5 | 0.5 | 3.0 | 0.998 | 0.991 | 0.963 | 0.873 |
+
+(The full grid, including delta = 4 for every row, is in `power.json`.) A fixed k is a scenario, not an
+estimate. Under the Gaussian model of section 2 the k-zero runs are forced: the model has no mechanism
+that produces them.
+
+**What remains unknown.** The probability that a real run gives an exact float64 zero for rho_primary,
+for a control coefficient, or for a paired difference D_i,c. It depends on the joint tie structure of
+the real published-model and twin scores with the target at N = 10^6, which no simulation here
+reproduces. The synthetic check found none in 1,200 replications at N = 5 x 10^4. That is not evidence
+about the real models. The production analysis reports n_zero_ties_removed and n_effective for every
+test, so any zero tie will be visible.
+
+## 6. What is established and what is not
+
+- **Established:**
+  - The decision procedure has size at most alpha under the null (tested).
+  - Power is monotone in delta and decreases as the twin shares more of the association (tested).
+  - The Monte Carlo error of every simulated number above is small (SE <= 0.0023).
+  - The exact conditional power of the primary test for every n_effective from 20 down to 5.
+- **Not established:**
+  - the true effect;
+  - the twin's share of the association;
+  - the twin-primary error correlation;
+  - whether the variance under the real alternative matches the model at N = 10^6;
+  - the probability of exact zero coefficients or differences for the real models (section 5).
+
+None of these may be estimated from the exploratory coefficients (section 7).
+
+## 7. Exploratory coefficients already seen (disclosed, not used)
+
+Development checks computed the real model's coefficient on small samples:
+- r1: 4,096 pairs gave primary 0.105, permuted -0.005 and twin 0.020; a separate smoke run gave 0.077;
+- r2 smoke (3 x 4,096 pairs, `validation/r2/exploratory_smoke_summary.json`): primary 0.080, 0.070 and
+  0.093.
+
+No smoke run was performed under r3. These coefficients were not used to choose any size, threshold or
+scenario, and must not be. They are noisy small-sample estimates on a population the confirmatory runs
+resample.

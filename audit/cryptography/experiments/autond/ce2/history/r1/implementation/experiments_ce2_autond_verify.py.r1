@@ -1,0 +1,456 @@
+"""
+Independent verifier for an AutoND CE2 output directory.
+
+Recomputes every recorded quantity from the retained raw evidence and the preregistration, and
+compares it with what the runner recorded. It deliberately imports nothing from the CE2 runner, the
+CE2 analysis module, the CE2 theory module or the CE2 adapter:
+
+* word/bit conversion, the SPECK32/64 round function and key schedule are re-implemented here;
+  ciphertexts are additionally recomputed with the pinned upstream `encrypt`;
+* xdp+ is recomputed with a transfer-matrix product over the carry pair (a different derivation
+  from both the closed form and the stateful automaton used in production);
+* ranks, Spearman's coefficient, exact sign tests (rational arithmetic), Holm, the order-statistic
+  interval and the decision rule are re-implemented here;
+* model and twin scores are optionally recomputed with the pinned upstream DBitNet.
+
+A discrepancy is a verification failure. The verifier never modifies evidence; it writes one new
+`verification_<utc>.json` report.
+
+    python -m audit.cryptography.experiments.ce2.autond_verify <output_dir> [--skip-model-recompute]
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib
+import json
+import math
+import sys
+from datetime import datetime, timezone
+from fractions import Fraction
+from pathlib import Path
+
+import numpy as np
+
+CRYPTO_ROOT = Path(__file__).resolve().parents[2]
+CHECKPOINT_RELPATH = "model_weights/speck3264_single-key_0x400000_round8_polished.h5"
+M16 = 0xFFFF
+
+
+class Findings:
+    def __init__(self):
+        self.checks, self.failures = [], []
+
+    def check(self, name: str, ok: bool, detail=None):
+        self.checks.append({"check": name, "ok": bool(ok), "detail": detail})
+        if not ok:
+            self.failures.append(name)
+
+
+def sha256_file(p) -> str:
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for c in iter(lambda: f.read(1 << 20), b""):
+            h.update(c)
+    return h.hexdigest()
+
+
+def canonical_sha256(obj) -> str:
+    return hashlib.sha256(json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+                                     allow_nan=False).encode("ascii")).hexdigest()
+
+
+def npz(p) -> dict:
+    with np.load(p, allow_pickle=False) as z:
+        return {k: z[k] for k in z.files}
+
+
+# ---------------------------------------------------------------- SPECK
+
+
+def _ror(x, r):
+    return ((x >> r) | (x << (16 - r))) & M16
+
+
+def _rol(x, r):
+    return ((x << r) | (x >> (16 - r))) & M16
+
+
+def _round(x, y, k):
+    x = ((_ror(x, 7) + y) & M16) ^ k
+    y = _rol(y, 2) ^ x
+    return x, y
+
+
+def _schedule(kw: np.ndarray, rounds: int) -> list:
+    """SPECK32/64 key schedule; kw columns are the master-key words in upstream bit order."""
+    kw = kw.astype(np.int64)
+    ks = [kw[:, 3]]
+    ell = [kw[:, 2], kw[:, 1], kw[:, 0]]
+    for i in range(rounds - 1):
+        l_new, k_new = _round(ell[i % 3], ks[i], i)
+        ell[i % 3] = l_new
+        ks.append(k_new)
+    return ks
+
+
+def _trajectory(kw, p, rounds):
+    ks = _schedule(kw, rounds)
+    x, y = p[:, 0].astype(np.int64), p[:, 1].astype(np.int64)
+    xs, ys = [x], [y]
+    for r in range(rounds):
+        x, y = _round(x, y, ks[r])
+        xs.append(x)
+        ys.append(y)
+    return np.stack(xs, 1), np.stack(ys, 1)
+
+
+def _words_to_bits(words: np.ndarray) -> np.ndarray:
+    w = words.astype(np.int64)
+    shifts = np.arange(15, -1, -1)
+    return np.concatenate([((w[:, j:j + 1] >> shifts) & 1) for j in range(w.shape[1])], 1).astype(np.uint8)
+
+
+# ----------------------------------------------------------- xdp+ (transfer)
+
+
+def _transfer_matrices() -> np.ndarray:
+    """M[t, i, j]: operand-bit choices taking carry pair i to j for bit triple t = 4a + 2b + g."""
+    M = np.zeros((8, 4, 4), dtype=np.int64)
+    for t in range(8):
+        a, b, g = (t >> 2) & 1, (t >> 1) & 1, t & 1
+        for i in range(4):
+            c, cp = i >> 1, i & 1
+            for xb in (0, 1):
+                for yb in (0, 1):
+                    xq, yq = xb ^ a, yb ^ b
+                    if ((xb ^ yb ^ c) ^ (xq ^ yq ^ cp)) != g:
+                        continue
+                    j = 2 * ((xb + yb + c) >> 1) + ((xq + yq + cp) >> 1)
+                    M[t, i, j] += 1
+    return M
+
+
+_M = _transfer_matrices()
+
+
+def xdp_weight(a, b, g, n=16) -> np.ndarray:
+    a, b, g = (np.asarray(v, dtype=np.int64) for v in (a, b, g))
+    v = np.zeros(a.shape + (4,), dtype=np.int64)
+    v[..., 0] = 1
+    for i in range(n):
+        t = 4 * ((a >> i) & 1) + 2 * ((b >> i) & 1) + ((g >> i) & 1)
+        v = np.einsum("...i,...ij->...j", v, _M[t])
+    count = v.sum(-1)
+    w = np.full(count.shape, -1, dtype=np.int64)
+    pos = count > 0
+    e = np.zeros_like(count)
+    e[pos] = np.round(np.log2(count[pos].astype(np.float64))).astype(np.int64)
+    if np.any(pos & (np.left_shift(np.ones_like(count), e) != count)):
+        raise ArithmeticError("non-dyadic count")
+    w[pos] = 2 * n - e[pos]
+    return w
+
+
+# ------------------------------------------------------------- statistics
+
+
+def ranks(v) -> np.ndarray:
+    u, inv, cnt = np.unique(np.asarray(v, dtype=np.float64), return_inverse=True, return_counts=True)
+    before = np.concatenate(([0], np.cumsum(cnt)[:-1]))
+    return (before + (cnt + 1) / 2.0)[inv]
+
+
+def rho(x, y):
+    x, y = np.asarray(x, dtype=np.float64), np.asarray(y, dtype=np.float64)
+    if x.size < 3 or not (np.all(np.isfinite(x)) and np.all(np.isfinite(y))) or np.ptp(x) == 0 or np.ptp(y) == 0:
+        return None
+    rx, ry = ranks(x), ranks(y)
+    rx, ry = rx - rx.mean(), ry - ry.mean()
+    return float(np.dot(rx, ry) / math.sqrt(np.dot(rx, rx) * np.dot(ry, ry)))
+
+
+def _tail_le(k, n):
+    return Fraction(sum(math.comb(n, i) for i in range(0, k + 1)), 2 ** n) if k >= 0 else Fraction(0)
+
+
+def sign_two_sided(v):
+    pos, neg = sum(1 for x in v if x > 0), sum(1 for x in v if x < 0)
+    n = pos + neg
+    return pos, neg, (1.0 if n == 0 else float(min(Fraction(1), 2 * _tail_le(min(pos, neg), n))))
+
+
+def sign_greater(v):
+    pos, neg = sum(1 for x in v if x > 0), sum(1 for x in v if x < 0)
+    n = pos + neg
+    return pos, neg, (1.0 if n == 0 else float(1 - _tail_le(pos - 1, n)))
+
+
+def holm_two(p: dict, alpha: float) -> dict:
+    (k1, p1), (k2, p2) = sorted(p.items(), key=lambda kv: (kv[1], kv[0]))
+    r1 = p1 <= alpha / 2
+    r2 = r1 and p2 <= alpha
+    return {k1: {"adjusted": min(1.0, 2 * p1), "rejected": r1},
+            k2: {"adjusted": min(1.0, max(2 * p1, p2)), "rejected": r2}}
+
+
+def order_ci(v, level=0.95):
+    x = sorted(v)
+    n = len(x)
+    k = 0
+    while k + 1 <= n and _tail_le(k, n) <= Fraction(1 - level).limit_denominator(10 ** 6) / 2:
+        k += 1
+    return None if k == 0 else (x[k - 1], x[n - k])
+
+
+# ----------------------------------------------------------------- upstream
+
+
+def _import_no_bytecode(name: str):
+    """Import an upstream module without writing caches into the pinned upstream directory."""
+    flag, sys.dont_write_bytecode = sys.dont_write_bytecode, True
+    try:
+        return importlib.import_module(name)
+    finally:
+        sys.dont_write_bytecode = flag
+
+
+def load_upstream(root: Path, f: Findings):
+    expected = json.loads((CRYPTO_ROOT / "upstream_sha256.json").read_text())
+    bad = [rel for rel, h in expected.items() if not (root / rel).is_file() or sha256_file(root / rel) != h]
+    f.check("upstream_sources_match_pinned_hashes", not bad, bad)
+    if bad:
+        return None
+    if str(root) not in sys.path:
+        sys.path.insert(0, str(root))
+    mod = _import_no_bytecode("ciphers.speck3264")
+    f.check("upstream_cipher_resolves_inside_pinned_root", root.resolve() in Path(mod.__file__).resolve().parents)
+    return mod
+
+
+# --------------------------------------------------------------------- main
+
+
+def verify(out: Path, *, prereg_path: Path | None = None, upstream: Path | None = None,
+           recompute_models: bool = True) -> dict:
+    out = Path(out)
+    f = Findings()
+    man = json.loads((out / "run_manifest.json").read_text())
+    prereg_path = prereg_path or (CRYPTO_ROOT / "autond_ce2" / "preregistration.json")
+    prereg = json.loads(Path(prereg_path).read_text())
+    design = prereg["design"]
+    dh = canonical_sha256(design)
+    f.check("preregistration_design_hash", dh == prereg["design_sha256"] == man["design_sha256"],
+            {"recomputed": dh, "preregistration": prereg["design_sha256"], "manifest": man["design_sha256"]})
+    if man["mode"] == "production":
+        rec = man.get("preregistration") or {}
+        f.check("preregistration_file_hash_matches_manifest", sha256_file(prereg_path) == rec.get("sha256"))
+        f.check("preregistration_approved",
+                prereg.get("approval", {}).get("status") == "APPROVED" and
+                prereg["approval"].get("approved_design_sha256") == dh)
+    cert_path = out / "certificate.json"
+    cert = json.loads(cert_path.read_text()) if cert_path.exists() else None
+    f.check("certificate_present", cert is not None)
+
+    # evidence manifest and journal chain
+    if cert:
+        listed = cert["evidence_manifest"]
+        mism = [p for p, h in listed.items() if not (out / p).is_file() or sha256_file(out / p) != h]
+        present = {p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file()
+                   and not p.name.startswith(".") and p.name != "certificate.json"
+                   and not p.name.startswith("verification_")}
+        f.check("evidence_manifest_hashes", not mism, mism)
+        f.check("no_unlisted_evidence_files", present == set(listed), sorted(present ^ set(listed)))
+    lines = (out / "journal.jsonl").read_bytes().splitlines()
+    prev, chain_ok = "0" * 64, True
+    for ln in lines:
+        chain_ok &= json.loads(ln)["prev_sha256"] == prev
+        prev = hashlib.sha256(ln).hexdigest()
+    f.check("journal_hash_chain", chain_ok, {"entries": len(lines)})
+    f.check("preflight_hash_matches_manifest", sha256_file(out / "preflight.json") == man["preflight_sha256"])
+
+    pre = json.loads((out / "preflight.json").read_text())
+    root = Path(upstream or man["upstream_root"])
+    cipher = load_upstream(root, f)
+    ck = root / CHECKPOINT_RELPATH
+    f.check("published_checkpoint_sha256",
+            ck.is_file() and sha256_file(ck) == design["reference"]["checkpoint_sha256"])
+    rounds = design["cipher"]["rounds"]
+    dxw, dyw = int(design["cipher"]["input_difference_words"]["x"], 16), \
+        int(design["cipher"]["input_difference_words"]["y"], 16)
+
+    models = None
+    if recompute_models and cipher is not None and man.get("untrained_twin"):
+        dbitnet = _import_no_bytecode("dbitnet")
+        pub = dbitnet.make_model(64)
+        pub.load_weights(str(ck))
+        twin = dbitnet.make_model(64)
+        twin.load_weights(str(out / man["untrained_twin"]["file"]))
+        models = (pub, twin)
+    f.check("untrained_twin_file_hash", (not man.get("untrained_twin")) or
+            sha256_file(out / man["untrained_twin"]["file"]) == man["untrained_twin"]["file_sha256"])
+    tol = design["verification"]["output_recompute_tolerance_abs"]
+
+    def predict(model, X):
+        return np.asarray(model.predict(X, batch_size=5000, verbose=0), dtype=np.float32).ravel()
+
+    # behavioural binding
+    if (out / "behavioural.json").exists():
+        beh = json.loads((out / "behavioural.json").read_text())
+        f.check("behavioural_hash_matches_manifest", sha256_file(out / "behavioural.json") == man["behavioural_sha256"])
+        bz = npz(out / beh["file"])
+        Y, s = bz["labels"], bz["score"]
+        k = int(np.sum((s > 0.5).astype(np.uint8) == Y))
+        nb = int(Y.size)
+        z = 1.6448536269514722
+        p = k / nb
+        lb = (p + z * z / (2 * nb) - z * math.sqrt(p * (1 - p) / nb + z * z / (4 * nb * nb))) / (1 + z * z / nb)
+        f.check("behavioural_accuracy_recomputed", k == beh["n_correct"] and abs(lb - beh["wilson_one_sided_95_lower"]) < 1e-12)
+        f.check("behavioural_balanced", int(Y.sum()) == beh["n_genuine"] and nb == beh["n"])
+        xs0, ys0 = _trajectory(bz["key_words"], bz["pt0"], rounds)
+        xs1, ys1 = _trajectory(bz["key_words"], bz["pt1"], rounds)
+        f.check("behavioural_genuine_ciphertexts",
+                np.array_equal(np.stack([xs0[:, -1], ys0[:, -1]], 1), bz["c0"]) and
+                np.array_equal(np.stack([xs1[:, -1], ys1[:, -1]], 1), bz["c1"]) and
+                bool(np.all((bz["pt0"][:, 0] ^ bz["pt1"][:, 0]) == dxw) and np.all((bz["pt0"][:, 1] ^ bz["pt1"][:, 1]) == dyw)))
+        Xg = np.hstack([_words_to_bits(bz["c0"]), _words_to_bits(bz["c1"])])
+        Xr = np.unpackbits(bz["random_inputs_packed"], axis=1)[:, :64]
+        X = np.concatenate([Xg, Xr])[bz["order"]]
+        exp_order = np.random.Generator(np.random.PCG64(design["behavioural_binding"]["shuffle_seed"])).permutation(nb)
+        f.check("behavioural_shuffle_reproduced", np.array_equal(exp_order, bz["order"]))
+        f.check("behavioural_labels_reproduced",
+                np.array_equal(np.concatenate([np.ones(Xg.shape[0], np.uint8), np.zeros(Xr.shape[0], np.uint8)])[bz["order"]], Y))
+        if models:
+            d = float(np.max(np.abs(predict(models[0], X) - s)))
+            f.check("behavioural_scores_recomputed", d <= tol, {"max_abs_diff": d})
+        del bz, X
+
+    # runs
+    perm_base = design["controls"]["permuted_target"]["permutation_seed_base"]
+    rhos, statuses = {}, {}
+    for i, rid in enumerate(man["run_ids"]):
+        rd = out / "runs" / rid
+        if not (rd / "record.json").exists():
+            statuses[rid] = "NOT_STARTED"
+            continue
+        rec = json.loads((rd / "record.json").read_text())
+        statuses[rid] = rec["state"]
+        if rec["state"] not in ("VALID", "EXCLUDED"):
+            continue
+        D = npz(rd / "data.npz")
+        f.check(f"{rid}:data_sha256", sha256_file(rd / "data.npz") == rec["data_sha256"])
+        f.check(f"{rid}:pair_count", D["target"].shape[0] == man["sizes"]["pairs_per_run"])
+        f.check(f"{rid}:input_difference", bool(np.all((D["pt0"][:, 0] ^ D["pt1"][:, 0]) == dxw) and
+                                                np.all((D["pt0"][:, 1] ^ D["pt1"][:, 1]) == dyw)))
+        xs0, ys0 = _trajectory(D["key_words"], D["pt0"], rounds)
+        xs1, ys1 = _trajectory(D["key_words"], D["pt1"], rounds)
+        f.check(f"{rid}:ciphertexts_own_cipher",
+                np.array_equal(np.stack([xs0[:, -1], ys0[:, -1]], 1), D["c0"]) and
+                np.array_equal(np.stack([xs1[:, -1], ys1[:, -1]], 1), D["c1"]))
+        if cipher is not None:
+            kb = _words_to_bits(D["key_words"])
+            up_c0 = cipher.encrypt(_words_to_bits(D["pt0"]), kb, rounds)
+            up_c1 = cipher.encrypt(_words_to_bits(D["pt1"]), kb, rounds)
+            f.check(f"{rid}:ciphertexts_upstream_encrypt",
+                    np.array_equal(up_c0, _words_to_bits(D["c0"])) and np.array_equal(up_c1, _words_to_bits(D["c1"])))
+        dx, dy = xs0 ^ xs1, ys0 ^ ys1
+        f.check(f"{rid}:trajectory_differences", np.array_equal(dx, D["dx"]) and np.array_equal(dy, D["dy"]))
+        w = np.stack([xdp_weight(_ror(dx[:, r], 7), dy[:, r], dx[:, r + 1]) for r in range(rounds)], 1)
+        f.check(f"{rid}:factors_positive_and_equal", bool(np.all(w >= 0)) and np.array_equal(w, D["weights"]))
+        f.check(f"{rid}:target", np.array_equal(-w.sum(1), D["target"]))
+        O = npz(rd / "outputs.npz")
+        f.check(f"{rid}:outputs_sha256", sha256_file(rd / "outputs.npz") == rec["outputs_sha256"])
+        perm = np.random.Generator(np.random.PCG64(perm_base + i)).permutation(D["target"].shape[0])
+        f.check(f"{rid}:permutation", np.array_equal(perm, O["permutation"]))
+        if models:
+            X = np.hstack([_words_to_bits(D["c0"]), _words_to_bits(D["c1"])])
+            d1 = float(np.max(np.abs(predict(models[0], X) - O["score_published"])))
+            d2 = float(np.max(np.abs(predict(models[1], X) - O["score_twin"])))
+            f.check(f"{rid}:scores_recomputed", d1 <= tol and d2 <= tol, {"published": d1, "twin": d2})
+        t = D["target"].astype(np.float64)
+        r = {"primary": rho(O["score_published"], t), "permuted_target": rho(O["score_published"], t[perm]),
+             "untrained_twin": rho(O["score_twin"], t)}
+        undefined = [c for c, v in r.items() if v is None]
+        if rec["state"] == "EXCLUDED":
+            f.check(f"{rid}:exclusion_justified", bool(undefined), undefined)
+            continue
+        f.check(f"{rid}:rho_recomputed", not undefined and all(abs(r[c] - rec["rho"][c]) < 1e-12 for c in r),
+                {"recomputed": r, "recorded": rec["rho"]})
+        rhos[rid] = r
+
+    # analysis and decision
+    if cert:
+        a = cert["analysis"]
+        alpha = design["statistics"]["alpha"]
+        f.check("run_states_match_certificate", statuses == cert["run_states"])
+        n_valid = len(rhos)
+        f.check("n_valid", n_valid == a["n_valid"])
+        decision = None
+        pre_ok = cert["decision"] != "PRECHECK_FAILED"
+        if not pre_ok:
+            decision = "PRECHECK_FAILED"
+        elif len([s for s in statuses.values() if s in ("VALID", "EXCLUDED", "FAILED")]) != man["sizes"]["n_runs"] \
+                or n_valid < man["sizes"]["min_valid_runs"]:
+            decision = "INCONCLUSIVE"
+        else:
+            ids = list(rhos)
+            prim = [rhos[k]["primary"] for k in ids]
+            pos, neg, p = sign_two_sided(prim)
+            f.check("primary_sign_test", (pos, neg) == (a["primary"]["n_positive"], a["primary"]["n_negative"])
+                    and abs(p - a["primary"]["p_value"]) < 1e-15, {"pos": pos, "neg": neg, "p": p})
+            ci = order_ci(prim)
+            rec_ci = a["primary"]["median_ci"]
+            f.check("median_order_statistic_ci",
+                    (ci is None and not rec_ci["available"]) or
+                    (ci is not None and rec_ci["available"] and abs(ci[0] - rec_ci["lower"]) < 1e-15
+                     and abs(ci[1] - rec_ci["upper"]) < 1e-15), {"recomputed": ci})
+            f.check("median", abs(float(np.median(prim)) - a["primary"]["summary"]["median"]) < 1e-15)
+            if p > alpha:
+                decision = "INCONCLUSIVE"
+            else:
+                ps = {}
+                for c in ("permuted_target", "untrained_twin"):
+                    d = [abs(rhos[k]["primary"]) - abs(rhos[k][c]) for k in ids]
+                    cp, cn, cpv = sign_greater(d)
+                    rec_c = a[f"control_{c}"]["separation_test"]
+                    f.check(f"control_{c}_sign_test", (cp, cn) == (rec_c["n_positive"], rec_c["n_negative"])
+                            and abs(cpv - rec_c["p_value"]) < 1e-15)
+                    ps[c] = cpv
+                h = holm_two(ps, alpha)
+                for c in ps:
+                    f.check(f"control_{c}_holm", h[c]["rejected"] == a[f"control_{c}"]["holm"]["rejected"]
+                            and abs(h[c]["adjusted"] - a[f"control_{c}"]["holm"]["holm_adjusted_p"]) < 1e-15)
+                decision = "SUPPORTED" if all(h[c]["rejected"] for c in h) else \
+                    "ASSOCIATION_OBSERVED_CONTROL_UNRESOLVED"
+        f.check("decision_recomputed", decision == cert["decision"], {"recomputed": decision, "certificate": cert["decision"]})
+
+    report = {"verifier": "audit/cryptography/experiments/ce2/autond_verify.py", "output_dir": str(out),
+              "utc": datetime.now(timezone.utc).isoformat(), "mode": man["mode"],
+              "model_scores_recomputed": bool(models), "tolerance_abs": tol,
+              "certificate_sha256": sha256_file(cert_path) if cert else None,
+              "n_checks": len(f.checks), "failures": f.failures, "passed": not f.failures, "checks": f.checks}
+    return report
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="Independent verification of an AutoND CE2 output directory")
+    ap.add_argument("output_dir", type=Path)
+    ap.add_argument("--preregistration", type=Path, default=None)
+    ap.add_argument("--upstream", type=Path, default=None)
+    ap.add_argument("--skip-model-recompute", action="store_true")
+    args = ap.parse_args(argv)
+    rep = verify(args.output_dir, prereg_path=args.preregistration, upstream=args.upstream,
+                 recompute_models=not args.skip_model_recompute)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    path = args.output_dir / f"verification_{stamp}.json"
+    path.write_text(json.dumps(rep, indent=1, default=str) + "\n")
+    print(f"{'VERIFIED' if rep['passed'] else 'VERIFICATION FAILED'}: {rep['n_checks']} checks, "
+          f"{len(rep['failures'])} failures -> {path}")
+    for name in rep["failures"]:
+        print(f"  FAILED {name}")
+    return 0 if rep["passed"] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

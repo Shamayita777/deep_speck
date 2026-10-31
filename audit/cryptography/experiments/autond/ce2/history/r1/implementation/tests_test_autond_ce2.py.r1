@@ -1,0 +1,445 @@
+"""
+AutoND CE2 tests. No test trains a model. Pipeline tests write only to pytest temporary directories.
+
+Run from the repository root with the pinned runtime:
+    python -m pytest -q audit/cryptography/tests/test_autond_ce2.py
+"""
+
+from __future__ import annotations
+
+import ast
+import json
+import math
+import shutil
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from audit.cryptography import frozen_design_autond_ce2 as FD
+from audit.cryptography.experiments.ce2 import autond_ce2 as S
+from audit.cryptography.experiments.ce2 import autond_theory as T
+
+CRYPTO = Path(__file__).resolve().parents[1]
+CE2_SOURCES = {
+    "adapter": CRYPTO / "adapters" / "autond_ce2.py",
+    "design": CRYPTO / "frozen_design_autond_ce2.py",
+    "analysis": CRYPTO / "experiments" / "ce2" / "autond_ce2.py",
+    "theory": CRYPTO / "experiments" / "ce2" / "autond_theory.py",
+    "runner": CRYPTO / "experiments" / "ce2" / "autond_runner.py",
+    "verify": CRYPTO / "experiments" / "ce2" / "autond_verify.py",
+    "cli": CRYPTO / "kaggle" / "autond_ce2_kaggle.py",
+}
+
+
+def _imports(path: Path) -> set[str]:
+    out = set()
+    for node in ast.walk(ast.parse(path.read_text())):
+        if isinstance(node, ast.Import):
+            out |= {a.name for a in node.names}
+        elif isinstance(node, ast.ImportFrom):
+            mod = ("." * node.level) + (node.module or "")
+            out.add(mod)
+            out |= {f"{mod}.{a.name}" for a in node.names}
+    return out
+
+
+# ============================================================== theory
+
+
+def test_lm_known_values():
+    n = 16
+    assert T.lm_weight(np.int64(0), np.int64(0), np.int64(0), n) == 0
+    assert T.lm_weight(np.int64(0x8000), np.int64(0), np.int64(0x8000), n) == 0      # MSB is free
+    assert T.lm_weight(np.int64(1), np.int64(0), np.int64(0), n) == T.IMPOSSIBLE   # LSB is linear
+    assert T.lm_weight(np.int64(1), np.int64(0), np.int64(1), n) == 1
+
+
+@pytest.mark.parametrize("n", [3, 4, 5])
+def test_gate_c_exhaustive_small(n):
+    r = T.gate_c_exhaustive(n)
+    assert r["passed"] and r["transitions_checked"] == 8 ** n
+    assert r["possible_transitions"] == 4 * 7 ** (n - 1)   # known count of possible differentials
+
+
+def test_gate_d_literal_exhaustive_word4():
+    r = T.gate_d_literal(4, exhaustive=True)
+    assert r["passed"] and r["alpha_beta_pairs"] == 256
+
+
+def test_gate_d_selected_is_not_called_exhaustive():
+    r = T.gate_d_literal(5, exhaustive=False, n_random=8)
+    assert r["passed"] and "NOT exhaustive" in r["coverage"]
+
+
+def test_literal_count_equals_histogram():
+    for a, b in [(0, 0), (3, 5), (0x2A, 0x15), (0x3F, 1)]:
+        h = T.literal_histogram(a, b, 6)
+        for g in (0, 1, 7, 0x20, 0x3F):
+            assert T.literal_count(a, b, g, 6) == h[g]
+
+
+def test_automaton_does_not_use_closed_form():
+    tree = ast.parse(CE2_SOURCES["theory"].read_text())
+    fn = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "carry_count")
+    names = {n.id for n in ast.walk(fn) if isinstance(n, ast.Name)} | \
+            {n.attr for n in ast.walk(fn) if isinstance(n, ast.Attribute)}
+    assert not names & {"lm_weight", "_popcount", "eq"}
+
+
+def test_weight_from_count_exact_and_refuses_non_dyadic():
+    assert list(T.weight_from_count(np.array([0, 1, 2, 256]), 4)) == [T.IMPOSSIBLE, 8, 7, 0]
+    with pytest.raises(ArithmeticError):
+        T.weight_from_count(np.array([3]), 4)
+
+
+def test_log2_target_refuses_impossible_factor():
+    assert list(T.log2_target(np.array([[0, 1, 2], [3, 0, 0]]))) == [-3, -3]
+    with pytest.raises(ArithmeticError):
+        T.log2_target(np.array([[0, -1, 2]]))
+
+
+# ========================================================== statistics
+
+
+def test_average_ranks_ties():
+    assert list(S.average_ranks(np.array([10, 20, 20, 5, 20]))) == [2.0, 4.0, 4.0, 1.0, 4.0]
+
+
+def test_spearman_matches_scipy_with_ties():
+    scipy_stats = pytest.importorskip("scipy.stats")
+    rng = np.random.default_rng(3)
+    x = rng.integers(0, 7, 500).astype(float)
+    y = x + rng.integers(0, 4, 500)
+    assert S.spearman(x, y) == pytest.approx(scipy_stats.spearmanr(x, y).statistic, abs=1e-12)
+
+
+@pytest.mark.parametrize("score,target,reason", [
+    ([1.0, 1.0, 1.0, 1.0], [1, 2, 3, 4], "constant model output"),
+    ([1.0, 2.0, 3.0, 4.0], [5, 5, 5, 5], "constant target"),
+    ([1.0, np.nan, 3.0, 4.0], [1, 2, 3, 4], "non-finite model output"),
+])
+def test_undefined_correlation_is_an_exclusion_not_zero(score, target, reason):
+    assert S.definedness(np.array(score), np.array(target, dtype=float)) == reason
+    with pytest.raises(S.UndefinedCorrelation):
+        S.spearman(np.array(score), np.array(target, dtype=float))
+    assert not issubclass(S.UndefinedCorrelation, ValueError)
+
+
+def test_exact_sign_tests():
+    v = [1] * 15 + [-1] * 5
+    r = S.sign_test_two_sided(v)
+    assert r["p_value"] == 2 * sum(math.comb(20, i) for i in range(6)) / 2 ** 20
+    assert S.sign_test_two_sided([1] * 20)["p_value"] == 2 / 2 ** 20
+    z = S.sign_test_two_sided([1, -1, 0, 0])
+    assert z["n_zero_ties_removed"] == 2 and z["n_effective"] == 2
+    assert S.sign_test_one_sided_greater([1] * 20)["p_value"] == 1 / 2 ** 20
+    assert S.sign_test_one_sided_greater([1] * 10 + [-1] * 10)["p_value"] > 0.5
+
+
+def test_holm():
+    h = S.holm({"a": 0.01, "b": 0.04}, 0.05)
+    assert h["a"]["rejected"] and h["b"]["rejected"] and h["a"]["holm_adjusted_p"] == 0.02
+    h = S.holm({"a": 0.03, "b": 0.04}, 0.05)
+    assert not h["a"]["rejected"] and not h["b"]["rejected"]
+
+
+def test_median_order_statistic_ci_twenty_runs():
+    ci = S.median_order_statistic_ci(np.arange(1, 21, dtype=float))
+    assert (ci["lower_rank"], ci["upper_rank"], ci["lower"], ci["upper"]) == (6, 15, 6.0, 15.0)
+    assert ci["exact_coverage"] == pytest.approx(1 - 2 * 21700 / 2 ** 20)
+    assert not S.median_order_statistic_ci([1.0, 2.0, 3.0])["available"]
+
+
+def _outcomes(primary, perm, twin):
+    return [S.RunOutcome(f"run_{i:02d}", "VALID", {"primary": p, "permuted_target": q, "untrained_twin": t})
+            for i, (p, q, t) in enumerate(zip(primary, perm, twin))]
+
+
+def _analyse(outcomes, n=20, **kw):
+    return S.analyse(outcomes, alpha=0.05, min_valid_runs=n, n_planned=n, bootstrap_resamples=200,
+                     bootstrap_seed=1, **kw)
+
+
+def test_decision_supported_and_two_sided():
+    for sign in (1, -1):
+        a = _analyse(_outcomes([sign * 0.05] * 20, [0.001] * 20, [0.002] * 20))
+        assert a["decision"] == S.SUPPORTED
+
+
+def test_decision_control_unresolved():
+    a = _analyse(_outcomes([0.05] * 20, [0.001] * 20, [0.08] * 20))
+    assert a["decision"] == S.ASSOCIATION_OBSERVED_CONTROL_UNRESOLVED
+
+
+def test_decision_inconclusive_paths():
+    mixed = [0.01, -0.01] * 10
+    assert _analyse(_outcomes(mixed, [0] * 20, [0] * 20))["decision"] == S.INCONCLUSIVE
+    few = _outcomes([0.05] * 19, [0.0] * 19, [0.0] * 19) + [S.RunOutcome("run_19", "EXCLUDED", {}, "constant")]
+    assert _analyse(few)["decision"] == S.INCONCLUSIVE
+    assert _analyse(_outcomes([0.05] * 19, [0] * 19, [0] * 19))["decision"] == S.INCONCLUSIVE   # incomplete
+    assert _analyse([], precheck_ok=False, precheck_reason="x")["decision"] == S.PRECHECK_FAILED
+
+
+def test_controls_not_tested_when_primary_fails():
+    a = _analyse(_outcomes([0.01, -0.01] * 10, [0] * 20, [0] * 20))
+    assert "separation_test" not in a["control_permuted_target"]
+
+
+def test_power_primary_exact():
+    assert S.primary_power_exact(20, 0.5, 0.05) == pytest.approx(2 * sum(math.comb(20, i) for i in range(6)) / 2 ** 20)
+    assert S.primary_power_exact(20, 0.85, 0.05) > 0.9
+
+
+# ======================================================= design / prereg
+
+
+def test_preregistration_matches_frozen_design():
+    prereg = FD.load_preregistration(CRYPTO / FD.PREREGISTRATION_RELPATH)
+    assert prereg["design_sha256"] == FD.design_sha256()
+    assert prereg["approval"]["status"] == "PENDING_REVIEW"
+
+
+def test_production_refused_until_approved(tmp_path):
+    prereg = FD.render_preregistration()
+    ok, why = FD.production_authorisation(prereg)
+    assert not ok and "pending" in why
+    d = FD.design()
+    d["runs"]["status"] = d["statistics"]["power"]["status"] = "FROZEN"
+    approved = {"design": d, "approval": {"status": "APPROVED", "approved_design_sha256": "0" * 64,
+                                          "approved_by": "x", "approved_utc": "y"}}
+    assert not FD.production_authorisation(approved)[0]
+
+
+def test_design_terminology():
+    t = json.dumps(FD.DESIGN["target"])
+    assert "Markov-model single-characteristic probability proxy" in t
+    assert "NOT the exact fixed-key characteristic probability" in t
+    assert "halving" not in json.dumps(FD.DESIGN).lower()
+
+
+# ========================================================= isolation
+
+
+def test_ce2_sources_do_not_import_gohr_ce1_or_ce234():
+    banned = ("gohr", "ce234", "adapters.autond", "frozen_design_autond", "experiments.ce1",
+              "audit_config", "frozen_design", "ce2.design", "provenance", "certificate", "preflight")
+    for name, path in CE2_SOURCES.items():
+        for imp in _imports(path):
+            leaf = imp.lstrip(".")
+            for b in banned:
+                hit = leaf == b or leaf.endswith("." + b) or leaf.startswith(b + ".") or f".{b}." in f".{leaf}."
+                if b in ("adapters.autond", "frozen_design_autond", "frozen_design") and \
+                        ("autond_ce2" in leaf):
+                    hit = False
+                assert not hit, f"{name} imports {imp}"
+
+
+def test_verifier_is_independent():
+    imps = _imports(CE2_SOURCES["verify"])
+    assert not any(x in i for i in imps for x in ("autond_runner", "autond_ce2", "autond_theory",
+                                                    "frozen_design", "adapters"))
+
+
+def test_no_ce1_evidence_path_is_referenced():
+    for path in CE2_SOURCES.values():
+        assert "autond_ce1/evidence" not in path.read_text()
+
+
+# ================================================== upstream / model / data
+
+
+@pytest.fixture(scope="module")
+def up():
+    pytest.importorskip("tensorflow")
+    from audit.cryptography.adapters import autond_ce2 as A
+    return A.Upstream()
+
+
+@pytest.fixture(scope="module")
+def published(up):
+    from audit.cryptography.adapters import autond_ce2 as A
+    return A.load_published_model(up)
+
+
+def test_upstream_verification_detects_tampering(tmp_path, up):
+    from audit.cryptography.adapters import autond_ce2 as A
+    copy = tmp_path / "up"
+    shutil.copytree(up.root, copy, ignore=shutil.ignore_patterns("__pycache__"))
+    assert A.verify_upstream(copy)["all_verified"]
+    (copy / "dbitnet.py").write_text((copy / "dbitnet.py").read_text() + "\n# altered\n")
+    assert not A.verify_upstream(copy)["all_verified"]
+
+
+def test_upstream_import_writes_no_bytecode(tmp_path, up):
+    import subprocess
+    import sys
+    copy = tmp_path / "up"
+    shutil.copytree(up.root, copy, ignore=shutil.ignore_patterns("__pycache__"))
+    code = ("import sys; sys.dont_write_bytecode = True\n"
+            "from audit.cryptography.adapters import autond_ce2 as A\n"
+            "sys.dont_write_bytecode = False\n"
+            f"u = A.Upstream({str(copy)!r}); u.delta_bits()\n")
+    subprocess.run([sys.executable, "-c", code], check=True, cwd=CRYPTO.parents[1],
+                   env={**__import__("os").environ, "TF_CPP_MIN_LOG_LEVEL": "3"})
+    assert not list(copy.rglob("__pycache__"))
+
+
+def test_published_model_binding(published):
+    _, b = published
+    assert b["sha256"] == FD.PUBLISHED_CHECKPOINT_SHA256
+    assert b["strict_load"]["all_arrays_bit_identical"] and b["strict_load"]["weight_arrays_in_file"] == 68
+    arch = b["architecture"]
+    assert (arch["weight_bearing_layers"], arch["params_total"], arch["params_trainable"]) == (23, 298113, 296065)
+    assert arch["input_shape"] == [None, 64, 1] and arch["output_shape"] == [None, 1]
+
+
+def test_genuine_pairs_gates_and_upstream_encoding(up):
+    from audit.cryptography.adapters import autond_ce2 as A
+    from audit.cryptography.experiments.ce2 import autond_runner as R
+    g = A.generate_genuine_pairs(up, 512)
+    assert g["gates"]["E"]["passed"] and g["gates"]["F"]["passed"]
+    assert all(g["gates"]["F"]["checks"].values())
+    assert up.delta_words() == (0x0040, 0x0000)
+    assert R.upstream_encoding_check(up, n=512)["genuine_rows_identical"]
+
+
+def test_trajectory_mismatch_is_detected(up):
+    from audit.cryptography.adapters import autond_ce2 as A
+    a = A.generate_genuine_pairs(up, 64)["arrays"]
+    a["c0"] = a["c0"].copy()
+    a["c0"][0, 0] ^= 1
+    _, gates = A.trajectory_and_weights(up, a, 8)
+    assert not gates["F"]["passed"]
+
+
+def _context(up, published, n=256, twin_scores=None):
+    from audit.cryptography.adapters import autond_ce2 as A
+    a = A.generate_genuine_pairs(up, n)["arrays"]
+    d = A.FrozenRunData.create(a)
+    twin = A.build_untrained_twin(up, 1)
+    ctx = A.RunContext(data=d, published_model=published[0], twin_model=twin,
+                       permutation=np.random.Generator(np.random.PCG64(0)).permutation(n),
+                       model_input=A.model_input(up, a["c0"], a["c1"]))
+    if twin_scores is not None:
+        ctx.scores["twin"] = twin_scores
+    return ctx
+
+
+def test_framework_measures_one_frozen_dataset_in_all_conditions(up, published):
+    from audit.cryptography.adapters import autond_ce2 as A
+    from audit.cryptography.test.ce2.theory_consistency import TheoryConsistencyTest
+    ctx = _context(up, published)
+    results = {c: TheoryConsistencyTest().run(A.AutoNDCE2Adapter(ctx, c)) for c in S.CONDITIONS}
+    assert {x["dataset_sha256"] for x in ctx.calls} == {ctx.data.sha256}
+    assert len(ctx.calls) == 15
+    assert results["primary"].test_score == S.spearman(ctx.scores["published"], ctx.data["target"].astype(float))
+    with pytest.raises(ValueError):
+        ctx.data["target"][0] = 0   # read-only
+
+
+def test_framework_cannot_turn_undefined_into_zero(up, published):
+    from audit.cryptography.adapters import autond_ce2 as A
+    from audit.cryptography.test.ce2.theory_consistency import TheoryConsistencyTest
+    ctx = _context(up, published, twin_scores=np.full(256, 0.5, dtype=np.float32))
+    with pytest.raises(S.UndefinedCorrelation):
+        TheoryConsistencyTest().run(A.AutoNDCE2Adapter(ctx, "untrained_twin"))
+
+
+def test_adapter_interface_and_scope(up, published):
+    from audit.cryptography.adapters import autond_ce2 as A
+    from audit.cryptography.adapters.base import CryptographicAdapter
+    ad = A.AutoNDCE2Adapter(_context(up, published, n=32), "primary")
+    assert isinstance(ad, CryptographicAdapter)
+    for m in ("generate_baseline_dataset", "generate_signal_destroyed_dataset", "provide_control_model",
+              "generate_intervention_tasks", "generate_representation_tasks"):
+        with pytest.raises(A.AutoNDCE2ScopeError):
+            getattr(ad, m)()
+    with pytest.raises(A.AutoNDCE2Error):
+        ad.load("some/other/path.h5")
+
+
+# =========================================================== pipeline
+
+
+@pytest.fixture()
+def tiny(monkeypatch):
+    monkeypatch.setitem(FD.SMOKE, "n_runs", 2)
+    monkeypatch.setitem(FD.SMOKE, "min_valid_runs", 2)
+    monkeypatch.setitem(FD.SMOKE, "pairs_per_run", 512)
+    monkeypatch.setitem(FD.SMOKE, "behavioural_n", 2000)
+    monkeypatch.setitem(FD.SMOKE, "gate_c_word_sizes", [4])
+    monkeypatch.setitem(FD.SMOKE, "gate_d_word_sizes", [4])
+    monkeypatch.setitem(FD.SMOKE, "word16_transitions", 0)
+    monkeypatch.setitem(FD.SMOKE, "preflight_corpus_pairs", 256)
+    monkeypatch.setitem(FD.SMOKE, "bootstrap_resamples", 100)
+
+
+def test_smoke_pipeline_verify_and_tamper(tmp_path, tiny, up):
+    from audit.cryptography.experiments.ce2 import autond_runner as R
+    from audit.cryptography.experiments.ce2 import autond_verify as V
+    out = tmp_path / "autond_ce2_smoke_test"
+    man = R.initialise(out, "smoke")
+    assert man["status"] == "INITIALISED" and man["label"] == "SMOKE_NOT_CONFIRMATORY"
+    recs = R.run_all(out)
+    assert [r["state"] for r in recs] == ["VALID", "VALID"]
+    before = (out / "runs" / "run_00" / "record.json").read_bytes()
+    assert R.run_all(out)[0]["state"] == "VALID"
+    assert (out / "runs" / "run_00" / "record.json").read_bytes() == before   # terminal never rewritten
+    cert = R.finalize(out)
+    assert cert["schema"] == FD.CERTIFICATE_SCHEMA and not cert["evidentiary"]
+    with pytest.raises(R.RunnerError):
+        R.finalize(out)
+    rep = V.verify(out, recompute_models=True)
+    assert rep["passed"], rep["failures"]
+    data = out / "runs" / "run_01" / "data.npz"
+    raw = bytearray(data.read_bytes())
+    raw[-100] ^= 0xFF
+    data.write_bytes(bytes(raw))
+    assert not V.verify(out, recompute_models=False)["passed"]
+
+
+def test_resume_continues_without_regenerating(tmp_path, tiny, up, monkeypatch):
+    from audit.cryptography.adapters import autond_ce2 as A
+    from audit.cryptography.experiments.ce2 import autond_runner as R
+    out = tmp_path / "autond_ce2_smoke_resume"
+    R.initialise(out, "smoke")
+    real_predict = A.predict
+
+    def interrupted(*a, **k):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(A, "predict", interrupted)
+    with pytest.raises(KeyboardInterrupt):
+        R.run_all(out, only=0)
+    rec = R.read_record(out, "run_00")
+    assert rec["state"] == "DATA_VERIFIED"
+    monkeypatch.setattr(A, "predict", real_predict)
+    done = R.run_all(out, only=0)[0]
+    assert done["state"] == "VALID" and done["data_sha256"] == rec["data_sha256"]
+
+
+def test_terminal_record_cannot_be_advanced(tmp_path):
+    from audit.cryptography.experiments.ce2 import autond_runner as R
+    out = tmp_path / "x"
+    (out / "runs" / "run_00").mkdir(parents=True)
+    rec = {"schema": R.RECORD_SCHEMA, "run_id": "run_00", "state": "VALID", "history": []}
+    with pytest.raises(R.RunnerError):
+        R._advance(out, rec, "FAILED", R.Journal(out / "journal.jsonl"))
+
+
+def test_output_directory_rules(tmp_path):
+    from audit.cryptography.experiments.ce2 import autond_runner as R
+    with pytest.raises(R.RunnerError):
+        R._check_out_dir(tmp_path / "not_smoke_named", "smoke")
+    with pytest.raises(R.RunnerError):
+        R._check_out_dir(tmp_path / "autond_ce2_smoke_x", "production")
+    with pytest.raises(R.RunnerError):
+        R._check_out_dir(tmp_path / "autond_ce1" / "evidence" / "x", "production")
+
+
+def test_production_initialisation_refused_while_pending(tmp_path):
+    from audit.cryptography.experiments.ce2 import autond_runner as R
+    with pytest.raises(R.RunnerError, match="production refused"):
+        R.initialise(tmp_path / "prod", "production")
+    assert not (tmp_path / "prod").exists()

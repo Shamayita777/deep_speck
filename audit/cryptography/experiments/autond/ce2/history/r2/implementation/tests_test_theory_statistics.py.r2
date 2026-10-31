@@ -1,0 +1,302 @@
+"""AutoND CE2: theory, statistics, numerics, power and design. No TensorFlow needed."""
+
+from __future__ import annotations
+
+import ast
+import json
+import math
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from audit.cryptography.core.hypothesis import AssociationStatus
+from audit.cryptography.experiments.autond.ce2 import analysis as S
+from audit.cryptography.experiments.autond.ce2 import design as FD
+from audit.cryptography.experiments.autond.ce2 import power as PW
+from audit.cryptography.experiments.autond.ce2 import theory as T
+
+CE2 = Path(__file__).resolve().parents[1]
+CRYPTO = CE2.parents[2]
+
+
+# ============================================================== theory
+
+
+def test_lm_known_values():
+    n = 16
+    assert T.lm_weight(np.int64(0), np.int64(0), np.int64(0), n) == 0
+    assert T.lm_weight(np.int64(0x8000), np.int64(0), np.int64(0x8000), n) == 0
+    assert T.lm_weight(np.int64(1), np.int64(0), np.int64(0), n) == T.IMPOSSIBLE
+    assert T.lm_weight(np.int64(1), np.int64(0), np.int64(1), n) == 1
+
+
+@pytest.mark.parametrize("n", [3, 4, 5])
+def test_gate_c_exhaustive_small(n):
+    r = T.gate_c_exhaustive(n)
+    assert r["passed"] and r["transitions_checked"] == 8 ** n
+    assert r["possible_transitions"] == 4 * 7 ** (n - 1)
+
+
+def test_gate_d_literal_exhaustive_word4():
+    r = T.gate_d_literal(4, exhaustive=True)
+    assert r["passed"] and r["alpha_beta_pairs"] == 256
+
+
+def test_gate_d_selected_is_not_called_exhaustive():
+    r = T.gate_d_literal(5, exhaustive=False, n_random=8)
+    assert r["passed"] and "NOT exhaustive" in r["coverage"]
+
+
+def test_literal_count_equals_histogram():
+    for a, b in [(0, 0), (3, 5), (0x2A, 0x15), (0x3F, 1)]:
+        h = T.literal_histogram(a, b, 6)
+        for g in (0, 1, 7, 0x20, 0x3F):
+            assert T.literal_count(a, b, g, 6) == h[g]
+
+
+def test_automaton_does_not_use_closed_form():
+    tree = ast.parse((CE2 / "theory.py").read_text())
+    fn = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "carry_count")
+    names = {n.id for n in ast.walk(fn) if isinstance(n, ast.Name)} | \
+            {n.attr for n in ast.walk(fn) if isinstance(n, ast.Attribute)}
+    assert not names & {"lm_weight", "_popcount", "eq"}
+
+
+def test_weight_from_count_exact_and_refuses_non_dyadic():
+    assert list(T.weight_from_count(np.array([0, 1, 2, 256]), 4)) == [T.IMPOSSIBLE, 8, 7, 0]
+    with pytest.raises(ArithmeticError):
+        T.weight_from_count(np.array([3]), 4)
+
+
+def test_log2_target_refuses_impossible_factor():
+    assert list(T.log2_target(np.array([[0, 1, 2], [3, 0, 0]]))) == [-3, -3]
+    with pytest.raises(ArithmeticError):
+        T.log2_target(np.array([[0, -1, 2]]))
+
+
+def test_verifier_transfer_matrix_agrees_with_production_paths_word6():
+    from audit.cryptography.experiments.autond.ce2 import verify as V
+    r = V.recompute_gates(6)
+    assert r["transfer_equals_literal"] and r["possible"] == 4 * 7 ** 5 and r["row_sums_are_4_pow_n"]
+    size = 64
+    a, b, g = (x.ravel() for x in np.meshgrid(np.arange(size), np.arange(size), np.arange(size), indexing="ij"))
+    assert np.array_equal(V.xdp_weight(a, b, g, 6), T.lm_weight(a, b, g, 6))
+
+
+# ========================================================== statistics
+
+
+def test_average_ranks_ties():
+    assert list(S.average_ranks(np.array([10, 20, 20, 5, 20]))) == [2.0, 4.0, 4.0, 1.0, 4.0]
+
+
+def test_spearman_matches_scipy_with_ties():
+    scipy_stats = pytest.importorskip("scipy.stats")
+    rng = np.random.default_rng(3)
+    x = rng.integers(0, 7, 500).astype(float)
+    y = x + rng.integers(0, 4, 500)
+    assert S.spearman(x, y) == pytest.approx(scipy_stats.spearmanr(x, y).statistic, abs=1e-12)
+
+
+@pytest.mark.parametrize("score,target,reason,status", [
+    ([1.0, 1.0, 1.0, 1.0], [1, 2, 3, 4], "constant model output", AssociationStatus.UNDEFINED),
+    ([1.0, 2.0, 3.0, 4.0], [5, 5, 5, 5], "constant target", AssociationStatus.UNDEFINED),
+    ([1.0, np.nan, 3.0, 4.0], [1, 2, 3, 4], "non-finite model output", AssociationStatus.INVALID_INPUT),
+    ([1.0, 2.0], [1, 2], "fewer than 3 pairs", AssociationStatus.INSUFFICIENT_OBSERVATIONS),
+    ([1.0, 2.0, 3.0], [1, 2], "shape mismatch", AssociationStatus.INVALID_INPUT),
+])
+def test_undefined_is_distinguished_from_zero(score, target, reason, status):
+    assert S.definedness(np.array(score), np.array(target, dtype=float)) == reason
+    with pytest.raises(S.UndefinedCorrelation) as e:
+        S.spearman(np.array(score), np.array(target, dtype=float))
+    assert e.value.status is status
+    assert not issubclass(S.UndefinedCorrelation, (ValueError, RuntimeError))
+
+
+def test_genuine_zero_association_is_defined_and_zero():
+    x = np.array([1.0, 2.0, 3.0, 4.0])
+    y = np.array([1.0, 2.0, 2.0, 1.0])
+    assert S.spearman(x, y) == 0.0
+    p = S.within_run_p_value(0.0, 4)
+    assert p["status"] == "APPROXIMATE" and p["value"] == 1.0
+
+
+def test_within_run_p_value_underflow_and_degenerate_are_not_zero():
+    tiny = S.within_run_p_value(0.2, 1_000_000)
+    assert tiny["status"] == "UNDERFLOW" and tiny["value"] is None and tiny["log10"] < -300
+    ref = S.within_run_p_value(0.02, 1_000_000)
+    assert ref["status"] == "APPROXIMATE" and 0 < ref["value"] < 1e-80
+    assert S.within_run_p_value(1.0, 100)["status"] == "DEGENERATE"
+    assert S.within_run_p_value(None, 100)["status"] == "UNDEFINED"
+    for p in (tiny, ref):
+        assert p["value"] != 0.0
+
+
+def test_exact_sign_tests():
+    v = [1] * 15 + [-1] * 5
+    r = S.sign_test_two_sided(v)
+    assert r["p_value"] == 2 * sum(math.comb(20, i) for i in range(6)) / 2 ** 20
+    assert S.sign_test_two_sided([1] * 20)["p_value"] == 2 / 2 ** 20
+    z = S.sign_test_two_sided([1, -1, 0, 0])
+    assert z["n_zero_ties_removed"] == 2 and z["n_effective"] == 2
+    assert S.sign_test_one_sided_greater([1] * 20)["p_value"] == 1 / 2 ** 20
+    assert S.sign_test_one_sided_greater([1] * 10 + [-1] * 10)["p_value"] > 0.5
+
+
+def test_holm():
+    h = S.holm({"a": 0.01, "b": 0.04}, 0.05)
+    assert h["a"]["rejected"] and h["b"]["rejected"] and h["a"]["holm_adjusted_p"] == 0.02
+    h = S.holm({"a": 0.03, "b": 0.04}, 0.05)
+    assert not h["a"]["rejected"] and not h["b"]["rejected"]
+
+
+def test_median_order_statistic_ci_twenty_runs():
+    ci = S.median_order_statistic_ci(np.arange(1, 21, dtype=float))
+    assert (ci["lower_rank"], ci["upper_rank"], ci["lower"], ci["upper"]) == (6, 15, 6.0, 15.0)
+    assert ci["exact_coverage"] == pytest.approx(1 - 2 * 21700 / 2 ** 20)
+    assert not S.median_order_statistic_ci([1.0, 2.0, 3.0])["available"]
+
+
+def _outcomes(primary, perm, twin):
+    return [S.RunOutcome(f"run_{i:02d}", "VALID", {"primary": p, "permuted_target": q, "untrained_twin": t})
+            for i, (p, q, t) in enumerate(zip(primary, perm, twin))]
+
+
+def _analyse(outcomes, n=20, **kw):
+    return S.analyse(outcomes, alpha=0.05, min_valid_runs=n, n_planned=n, bootstrap_resamples=200,
+                     bootstrap_seed=1, **kw)
+
+
+def test_decision_supported_and_two_sided():
+    for sign in (1, -1):
+        assert _analyse(_outcomes([sign * 0.05] * 20, [0.001] * 20, [0.002] * 20))["decision"] == S.SUPPORTED
+
+
+def test_decision_control_unresolved():
+    a = _analyse(_outcomes([0.05] * 20, [0.001] * 20, [0.08] * 20))
+    assert a["decision"] == S.ASSOCIATION_OBSERVED_CONTROL_UNRESOLVED
+
+
+def test_decision_inconclusive_paths():
+    mixed = [0.01, -0.01] * 10
+    assert _analyse(_outcomes(mixed, [0] * 20, [0] * 20))["decision"] == S.INCONCLUSIVE
+    few = _outcomes([0.05] * 19, [0.0] * 19, [0.0] * 19) + [S.RunOutcome("run_19", "EXCLUDED", {}, "constant")]
+    assert _analyse(few)["decision"] == S.INCONCLUSIVE
+    assert _analyse(_outcomes([0.05] * 19, [0] * 19, [0] * 19))["decision"] == S.INCONCLUSIVE
+    assert _analyse([], precheck_ok=False, precheck_reason="x")["decision"] == S.PRECHECK_FAILED
+
+
+def test_controls_not_tested_when_primary_fails():
+    a = _analyse(_outcomes([0.01, -0.01] * 10, [0] * 20, [0] * 20))
+    assert "separation_test" not in a["control_permuted_target"]
+
+
+def test_verifier_decision_rule_agrees_with_analysis():
+    from audit.cryptography.experiments.autond.ce2 import verify as V
+    rng = np.random.default_rng(11)
+    for _ in range(200):
+        p, q, t = rng.normal(0.01, 0.02, 20), rng.normal(0, 0.01, 20), rng.normal(0.005, 0.02, 20)
+        a = _analyse(_outcomes(p, q, t))
+        rh = {f"run_{i:02d}": {"primary": p[i], "permuted_target": q[i], "untrained_twin": t[i]} for i in range(20)}
+        v = V.decide(rh, statuses={k: "VALID" for k in rh}, n_runs=20, min_valid=20, alpha=0.05, precheck_ok=True)
+        assert v["decision"] == a["decision"]
+
+
+# ================================================================ power
+
+
+def test_power_primary_exact():
+    assert PW.primary_power_exact(20, 0.5, 0.05) == pytest.approx(2 * sum(math.comb(20, i) for i in range(6)) / 2 ** 20)
+    assert PW.primary_power_exact(20, 0.85, 0.05) > 0.9
+
+
+def test_joint_power_reports_monte_carlo_error_and_null_size():
+    r = PW.simulate_joint_power(n_runs=20, delta=0.0, twin_ratio=0.0, twin_error_corr=0.0, alpha=0.05,
+                                n_sim=20_000, seed=1)
+    ps = r["power_supported"]
+    assert set(ps) >= {"estimate", "mc_se", "ci95", "n_sim"}
+    assert ps["ci95"][0] <= ps["estimate"] <= ps["ci95"][1]
+    # under the null the SUPPORTED rate must not exceed alpha (gatekeeping + Holm)
+    assert ps["ci95"][0] <= 0.05
+    assert r["power_primary"]["estimate"] < 0.05
+
+
+def test_joint_power_monotone_in_delta_and_hurt_by_twin_association():
+    lo = PW.simulate_joint_power(n_runs=20, delta=1.0, twin_ratio=0.0, twin_error_corr=0.0, alpha=0.05,
+                                 n_sim=10_000, seed=2)["power_supported"]["estimate"]
+    hi = PW.simulate_joint_power(n_runs=20, delta=3.0, twin_ratio=0.0, twin_error_corr=0.0, alpha=0.05,
+                                 n_sim=10_000, seed=3)["power_supported"]["estimate"]
+    twin = PW.simulate_joint_power(n_runs=20, delta=3.0, twin_ratio=0.75, twin_error_corr=0.0, alpha=0.05,
+                                   n_sim=10_000, seed=4)["power_supported"]["estimate"]
+    assert lo < hi and twin < hi
+
+
+def test_clopper_pearson_small_n_is_exact():
+    lo, hi = PW.clopper_pearson(0, 10)
+    assert lo == 0.0 and hi == pytest.approx(1 - 0.025 ** (1 / 10), abs=1e-9)
+    beta = pytest.importorskip("scipy.stats").beta
+    for k, n in ((5, 10), (3, 40), (970, 1000)):
+        lo, hi = PW.clopper_pearson(k, n)
+        assert lo == pytest.approx(beta.ppf(0.025, k, n - k + 1), abs=1e-9)
+        assert hi == pytest.approx(beta.ppf(0.975, k + 1, n - k), abs=1e-9)
+    lo, hi = PW.clopper_pearson(45_000, 50_000)          # normal-tail branch, labelled as such
+    assert lo == pytest.approx(beta.ppf(0.025, 45_000, 5_001), abs=2e-5)
+    assert hi == pytest.approx(beta.ppf(0.975, 45_001, 5_000), abs=2e-5)
+
+
+def test_pipeline_faithful_check_null_variance_with_real_tie_structure():
+    rng = np.random.default_rng(5)
+    target = -rng.integers(20, 60, 50_000)            # discrete, heavily tied, like the CE2 target
+    r = PW.pipeline_faithful_check(target, n=5_000, lambdas=(0.0,), n_sim=300, seed=1)["rows"][0]
+    assert abs(r["n_minus_1_times_var"] - 1.0) < 4 * r["n_minus_1_times_var_mc_se"]
+
+
+# ======================================================= design / prereg
+
+
+def test_preregistration_matches_design():
+    prereg = FD.load_preregistration(CRYPTO / FD.PREREGISTRATION_RELPATH)
+    assert prereg["design_sha256"] == FD.design_sha256()
+    assert prereg["approval"]["status"] == "PENDING_REVIEW"
+    assert prereg["design"]["hypothesis"]["direction"] == "TWO_SIDED"
+
+
+def test_r1_is_preserved_and_superseded_without_scientific_change():
+    hist = CE2 / "history" / "r1"
+    r1 = json.loads((hist / "docs" / "preregistration.json").read_text())
+    assert r1["design_sha256"] == FD.R1_DESIGN_SHA256 == FD.design_sha256(r1["design"])
+    assert FD.DESIGN["revision"]["supersedes"]["design_sha256"] == FD.R1_DESIGN_SHA256
+    for k in ("runs", "controls", "cipher", "sampling", "target", "decision", "exclusion", "runtime",
+              "mathematical_gates", "reference", "score", "population", "estimand", "research_question"):
+        assert r1["design"][k] == FD.DESIGN[k], k
+    for k in ("alpha", "primary_test", "control_tests", "unit", "primary_endpoint", "familywise"):
+        assert r1["design"]["statistics"][k] == FD.DESIGN["statistics"][k], k
+    import hashlib
+    for line in (hist / "SHA256SUMS").read_text().splitlines():
+        h, rel = line.split("  ", 1)
+        assert hashlib.sha256((hist / rel).read_bytes()).hexdigest() == h, rel
+
+
+def test_production_refused_until_approved():
+    prereg = FD.render_preregistration()
+    ok, why = FD.production_authorisation(prereg)
+    assert not ok and "pending" in why
+    d = FD.design()
+    d["runs"]["status"] = d["statistics"]["power"]["status"] = "FROZEN"
+    approved = {"design": d, "approval": {"status": "APPROVED", "approved_design_sha256": "0" * 64,
+                                          "approved_by": "x", "approved_utc": "y"}}
+    assert not FD.production_authorisation(approved)[0]
+
+
+def test_design_terminology_and_power_wording():
+    t = json.dumps(FD.DESIGN["target"])
+    assert "Markov-model single-characteristic probability proxy" in t
+    assert "NOT the exact fixed-key characteristic probability" in t
+    power = FD.DESIGN["statistics"]["power"]["nature"]
+    assert "scenario-based sensitivity analysis" in power and "NOT a guarantee" in power
+
+
+def test_power_document_does_not_present_a_guarantee():
+    text = (CE2 / "docs" / "POWER_ANALYSIS.md").read_text().lower()
+    assert "scenario" in text and "not a guarantee" in text

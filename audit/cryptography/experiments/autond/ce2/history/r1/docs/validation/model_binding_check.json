@@ -1,0 +1,120 @@
+{
+ "environment": {
+  "cpu_count": 8,
+  "cuda_visible_devices": null,
+  "gpu_details": [],
+  "gpus": [],
+  "h5py": "3.10.0",
+  "implementation": "CPython",
+  "keras": "2.15.0",
+  "machine": "arm64",
+  "numpy": "1.26.4",
+  "pandas": "2.2.3",
+  "platform": "macOS-13.5-arm64-arm-64bit",
+  "python": "3.11.14",
+  "scipy": "1.17.1",
+  "tensorflow": "2.15.1"
+ },
+ "inference_batch": "256 fresh non-evidentiary genuine pairs; scores not retained",
+ "inference_mode": {
+  "finite": true,
+  "max": 0.5803185105323792,
+  "min": 0.44446736574172974,
+  "n": 256,
+  "predict_vs_call_training_false_max_abs_diff": 5.960464477539063e-08
+ },
+ "model_binding": {
+  "architecture": {
+   "hdf5_weight_arrays": 68,
+   "input_shape": [
+    null,
+    64,
+    1
+   ],
+   "layers": 34,
+   "output_shape": [
+    null,
+    1
+   ],
+   "params_non_trainable": 2048,
+   "params_total": 298113,
+   "params_trainable": 296065,
+   "weight_bearing_layers": 23
+  },
+  "architecture_differences": {},
+  "architecture_matches_design": true,
+  "checkpoint": "/Users/oishimoitra/Documents/deep_speck/audit/cryptography/autond_ce1/AutoND-upstream/model_weights/speck3264_single-key_0x400000_round8_polished.h5",
+  "hdf5_keras_version": "2.7.0",
+  "sha256": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+  "sha256_verified": true,
+  "strict_load": {
+   "all_arrays_bit_identical": true,
+   "mismatches": [],
+   "weight_arrays_in_file": 68,
+   "weight_groups_in_file": 23
+  },
+  "weights_sha256": "683da39c613db103030f5a31d536754c6b99f3422ffe4e1bd67c85eb89938735"
+ },
+ "not_performed": [
+  "fit",
+  "training",
+  "saving weights",
+  "modifying the checkpoint",
+  "generating CE2 production data",
+  "writing to AutoND CE1 directories"
+ ],
+ "report": "AutoND CE2 read-only model binding check",
+ "runtime_problems": [
+  "pandas 2.2.3 (required 2.2.2)",
+  "scipy 1.17.1 (required 1.11.4)"
+ ],
+ "upstream": {
+  "all_verified": true,
+  "files": {
+   "ciphers/speck3264.py": {
+    "expected": "fd4a04be7fb632cea422338e6ae8446e421049649944f9dab87cc05e0e5ca9fe",
+    "observed": "fd4a04be7fb632cea422338e6ae8446e421049649944f9dab87cc05e0e5ca9fe",
+    "ok": true
+   },
+   "dbitnet.py": {
+    "expected": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+    "observed": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+    "ok": true
+   },
+   "gohrnet.py": {
+    "expected": "324c3768e19a6230dbedbe0446f54c6139d72f5dc642f5cfb60a8fa9a9ea1d56",
+    "observed": "324c3768e19a6230dbedbe0446f54c6139d72f5dc642f5cfb60a8fa9a9ea1d56",
+    "ok": true
+   },
+   "main.py": {
+    "expected": "52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665",
+    "observed": "52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665",
+    "ok": true
+   },
+   "model_weights/speck3264_single-key_0x400000_round8_polished.h5": {
+    "expected": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+    "observed": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+    "ok": true
+   },
+   "optimizer.py": {
+    "expected": "2d58e4fd94973040e1ead21166b188527b6935d499a7a818a3c613ac4888d505",
+    "observed": "2d58e4fd94973040e1ead21166b188527b6935d499a7a818a3c613ac4888d505",
+    "ok": true
+   },
+   "polish_nets.py": {
+    "expected": "2ebdb34801e2f2478ad6382f1ce3c83162a62fab32eae6d354c4894509eab169",
+    "observed": "2ebdb34801e2f2478ad6382f1ce3c83162a62fab32eae6d354c4894509eab169",
+    "ok": true
+   },
+   "train_nets.py": {
+    "expected": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e",
+    "observed": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e",
+    "ok": true
+   }
+  },
+  "hash_file": "/Users/oishimoitra/Documents/deep_speck/audit/cryptography/upstream_sha256.json",
+  "hash_file_sha256": "5c9fe81107091e81804c7fa606039018c8ad56b3dce6e85e02fc6336251ebf56",
+  "root": "/Users/oishimoitra/Documents/deep_speck/audit/cryptography/autond_ce1/AutoND-upstream"
+ },
+ "utc": "2026-10-30T14:18:55.700131+00:00"
+}

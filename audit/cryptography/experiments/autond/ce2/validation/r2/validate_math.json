@@ -1,0 +1,176 @@
+{
+ "A": "Lipmaa-Moriai closed form with exact integer weights",
+ "B": "carry-pair automaton with exact integer path counts, sharing no code with A",
+ "C": [
+  {
+   "coverage": "exhaustive over all (alpha, beta, gamma)",
+   "first_mismatch": null,
+   "gate": "C",
+   "mismatches": 0,
+   "passed": true,
+   "possible_transitions": 1372,
+   "transitions_checked": 4096,
+   "word_size": 4
+  },
+  {
+   "coverage": "exhaustive over all (alpha, beta, gamma)",
+   "first_mismatch": null,
+   "gate": "C",
+   "mismatches": 0,
+   "passed": true,
+   "possible_transitions": 67228,
+   "transitions_checked": 262144,
+   "word_size": 6
+  },
+  {
+   "coverage": "exhaustive over all (alpha, beta, gamma)",
+   "first_mismatch": null,
+   "gate": "C",
+   "mismatches": 0,
+   "passed": true,
+   "possible_transitions": 3294172,
+   "transitions_checked": 16777216,
+   "word_size": 8
+  }
+ ],
+ "D": [
+  {
+   "alpha_beta_pairs": 256,
+   "coverage": "exhaustive: every (alpha, beta), full output-difference histogram",
+   "first_mismatch": null,
+   "gate": "D",
+   "mismatches": 0,
+   "passed": true,
+   "transitions_checked": 4096,
+   "word_size": 4
+  },
+  {
+   "alpha_beta_pairs": 4096,
+   "coverage": "exhaustive: every (alpha, beta), full output-difference histogram",
+   "first_mismatch": null,
+   "gate": "D",
+   "mismatches": 0,
+   "passed": true,
+   "transitions_checked": 262144,
+   "word_size": 6
+  },
+  {
+   "alpha_beta_pairs": 65536,
+   "coverage": "exhaustive: every (alpha, beta), full output-difference histogram",
+   "first_mismatch": null,
+   "gate": "D",
+   "mismatches": 0,
+   "passed": true,
+   "transitions_checked": 16777216,
+   "word_size": 8
+  },
+  {
+   "coverage": "8 selected trajectory transitions, each by literal enumeration of all 2^32 operand pairs",
+   "gate": "D",
+   "passed": true,
+   "transitions": [
+    {
+     "agree": true,
+     "alpha": 256,
+     "automaton": 2,
+     "beta": 32768,
+     "gamma": 33536,
+     "literal": 2,
+     "lm": 2
+    },
+    {
+     "agree": true,
+     "alpha": 262,
+     "automaton": 5,
+     "beta": 33538,
+     "gamma": 34304,
+     "literal": 5,
+     "lm": 5
+    },
+    {
+     "agree": true,
+     "alpha": 268,
+     "automaton": 8,
+     "beta": 35338,
+     "gamma": 36666,
+     "literal": 8,
+     "lm": 8
+    },
+    {
+     "agree": true,
+     "alpha": 3128,
+     "automaton": 8,
+     "beta": 32836,
+     "gamma": 33988,
+     "literal": 8,
+     "lm": 8
+    },
+    {
+     "agree": true,
+     "alpha": 29982,
+     "automaton": 10,
+     "beta": 42768,
+     "gamma": 7174,
+     "literal": 10,
+     "lm": 10
+    },
+    {
+     "agree": true,
+     "alpha": 32768,
+     "automaton": 0,
+     "beta": 0,
+     "gamma": 32768,
+     "literal": 0,
+     "lm": 0
+    },
+    {
+     "agree": true,
+     "alpha": 35081,
+     "automaton": 10,
+     "beta": 34262,
+     "gamma": 4037,
+     "literal": 10,
+     "lm": 10
+    },
+    {
+     "agree": true,
+     "alpha": 35359,
+     "automaton": 9,
+     "beta": 6303,
+     "gamma": 42430,
+     "literal": 9,
+     "lm": 9
+    }
+   ],
+   "word_size": 16
+  }
+ ],
+ "E": {
+  "all_factors_positive": true,
+  "lm_equals_automaton": true,
+  "n_impossible": 0,
+  "n_mismatch": 0,
+  "passed": true
+ },
+ "F": {
+  "checks": {
+   "addition_output_difference_is_next_dx": true,
+   "dy_linear_layer": true,
+   "final_state_equals_upstream_encrypt": true,
+   "initial_difference": true,
+   "model_input_equals_upstream_hstack": true
+  },
+  "passed": true
+ },
+ "corpus": "non-evidentiary, 4096 fresh genuine pairs, not retained",
+ "passed": true,
+ "report": "AutoND CE2 mathematical verification",
+ "upstream_encoding": {
+  "genuine_rows_identical": true,
+  "n": 2048,
+  "n_genuine_rows_compared": 1027,
+  "note": "deterministic byte stream substituted for os.urandom in this check only",
+  "upstream_label_convention": "Y = 1 genuine pair, Y = 0 uniform random 64-bit input"
+ },
+ "utc": "2026-10-31T05:16:54.151429+00:00"
+}

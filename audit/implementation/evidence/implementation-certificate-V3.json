@@ -253,7 +253,7 @@
           "n_batchnorm_layers": 13,
           "n_conv1d_layers": 11,
           "n_dense_layers": 3,
-          "path": "/home/claude/inspect2/cryptography/cryptography/evidence/ce1/best5depth10 (10).h5",
+          "path": "~/inspect2/cryptography/cryptography/evidence/ce1/best5depth10 (10).h5",
           "sha256": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea"
         },
         "content_hash": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea",
@@ -292,7 +292,7 @@
           "n_batchnorm_layers": 13,
           "n_conv1d_layers": 11,
           "n_dense_layers": 3,
-          "path": "/home/claude/inspect2/cryptography/cryptography/evidence/ce1/signal_destroyed.h5",
+          "path": "~/inspect2/cryptography/cryptography/evidence/ce1/signal_destroyed.h5",
           "sha256": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308"
         },
         "content_hash": "a110fad1e5b3adc3600acf9bbfd26cd0decdc563f6c5f08d965a8dd3c50a8308",

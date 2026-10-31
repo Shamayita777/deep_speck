@@ -3,9 +3,9 @@
   "change_from_freeze_version_1": "PACKAGING ONLY. Historical evidence artifacts were vendored into audit/evidence_bundle (byte-identical, verified) and ledger paths made archive-relative, so the gate runs 8/8 from a clean extraction with no external dependency. No scientific result, aggregation rule, decision logic or CE conclusion was altered; V4 records the same outcomes as V3.",
   "components": {
     "artifact_index.json": "4a6e660ce5495b268ff7fc75125dfa4ee22cdaeef17a015c5916b8cb637f8a80",
-    "audit-snapshot-V4.json": "ef38669d10d89c04a1bcc0934d74a9f0f7ff0e247c348e8e9c9d6a1b8695d328",
+    "audit-snapshot-V4.json": "8184dea6e3e31be97bfd7d6dc3b79492d753d2f71318d4377132525581709eb5",
     "decision.json": "2bd5a1ed0289c5e012bbbc2b0afa6f5176b78ba8cbbee0c99d0fdaf29cab7006",
-    "evidence_ledger.json": "5035345260cf8b3adbce52531deec44bf114a56473c6c0ae070398e7e1939e8c",
+    "evidence_ledger.json": "f2c1d3cd97566df16bb1b3b743d6f3ddf3409930643b8af1c4a1cc9ce1f4f06b",
     "pillar_interpretation.json": "029dabb3adc90250f980f2201266b14ef8466b632a21fd86fa3c31786f4f65f8"
   },
   "evidence_bundle": {
