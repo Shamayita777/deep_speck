@@ -1,0 +1,119 @@
+{
+ "all_converged": true,
+ "binding": {
+  "checkpoint_sha256": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+  "published_weights_sha256": "683da39c613db103030f5a31d536754c6b99f3422ffe4e1bd67c85eb89938735",
+  "representation": {
+   "published": true,
+   "twin": true
+  },
+  "twin_file_sha256": "adda08a31be371229424d464273689784c61a4f16a4852f9f3e2223d424982b4",
+  "twin_weights_sha256": "237722786db3075a8501b670d51f0009edaa4e02e2b367460441978e8c0a239a"
+ },
+ "blinding": "probes are fitted on a fresh non-evidentiary dataset but never asked to predict: no held-out prediction, balanced accuracy, accuracy, loss value or score of any arm is computed or stored; coefficients are discarded; the record keeps only per-arm convergence flags and the maximum iteration count, maximum gradient norm, warning count and time over all fits",
+ "calibration_per_class": 50000,
+ "confirmatory": false,
+ "data_content_sha256": "04dfe2bce684a764a59545cc3e713bc6b862f28276a121424473ebdd60d39c2f",
+ "data_retained": false,
+ "edges": [
+  -68,
+  -63,
+  -59,
+  -55
+ ],
+ "environment": {
+  "cpu_count": 8,
+  "gpus": [],
+  "h5py": "3.10.0",
+  "implementation": "CPython",
+  "keras": "2.15.0",
+  "machine": "arm64",
+  "numpy": "1.26.4",
+  "pandas": "2.2.2",
+  "platform": "macOS-13.5-arm64-arm-64bit",
+  "python": "3.11.14",
+  "scikit_learn": "1.9.1",
+  "scipy": "1.11.4",
+  "tensorflow": "2.15.1",
+  "threadpoolctl": "3.7.0"
+ },
+ "evidentiary": false,
+ "experiment_id": "AUTOND-CE3-REPRESENTATION-DECODABILITY",
+ "generation_gates_passed": true,
+ "label_use": {
+  "A": "true target classes on a fresh non-evidentiary dataset (fit only)",
+  "CAL_trained": "calibration labels genuine versus random, not the target (fit only)",
+  "CAL_twin": "calibration labels genuine versus random, not the target (fit only)",
+  "P_b": "group-permuted target classes (fit only)",
+  "R": "true target classes on a fresh non-evidentiary dataset (fit only)",
+  "T": "true target classes on a fresh non-evidentiary dataset (fit only)"
+ },
+ "main_pairs": 200000,
+ "permutation_construction": "a cyclic permutation group of order B + 1 per replicate: o = PCG64(50000000 + replicate_index).permutation(n) is cut, in order, into floor(n / (B + 1)) cycles of length B + 1 followed by cycles whose lengths divide B + 1 (largest divisor first) covering the remainder; sigma maps each element of a cycle to the next one (sigma[c] = roll(c, -1)); permuted arm b = 0 .. B-1 uses labels[sigma^(b+1)], where sigma^(B+1) is the identity, so {id, sigma, ..., sigma^B} is a group and the observed assignment is its identity element; global class counts are preserved exactly",
+ "permutations": 5,
+ "predictions_computed": false,
+ "probe": {
+  "blas_threads": 1,
+  "convergence": "a fit converges when n_iter_ < max_iter, no ConvergenceWarning is raised and the maximum absolute gradient of the training objective at the fitted parameters, computed independently of scikit-learn, is at most gradient_tolerance",
+  "feature_dtype": "float64",
+  "gradient_tolerance": 0.001,
+  "logistic": {
+   "C": 1.0,
+   "class": "sklearn.linear_model.LogisticRegression",
+   "class_weight": null,
+   "fit_intercept": true,
+   "max_iter": 2000,
+   "penalty": "l2",
+   "random_state": 0,
+   "solver": "lbfgs",
+   "tol": 0.0001
+  },
+  "max_iter_rule": "max_iter = 2000 unless the blinded benchmark records a non-converged fit at 2000 and every fit converges at 5000, in which case 5000; no other value and no retry",
+  "non_convergence": "the replicate is FAILED; nothing is retried or changed",
+  "objective": "mean multinomial (or binary) log-loss over the training fold plus ||W||^2 / (2 C n_train); the intercept is not penalised",
+  "pipeline": "sklearn.pipeline.Pipeline([StandardScaler(), LogisticRegression(...)])",
+  "scaler": {
+   "class": "sklearn.preprocessing.StandardScaler",
+   "fit_on": "training fold only",
+   "with_mean": true,
+   "with_std": true
+  },
+  "scikit_learn": "1.9.1"
+ },
+ "replicate_index": 999,
+ "runs": {
+  "2000": {
+   "all_converged": true,
+   "converged_per_arm": {
+    "A": true,
+    "CAL_trained": true,
+    "CAL_twin": true,
+    "P00": true,
+    "P01": true,
+    "P02": true,
+    "P03": true,
+    "P04": true,
+    "R": true,
+    "T": true
+   },
+   "convergence_warnings": 0,
+   "max_gradient": 9.946668566041356e-05,
+   "max_n_iter": 21,
+   "n_fits": 50,
+   "seconds": 22.43181085586548
+  }
+ },
+ "runtime_problems": [],
+ "schema": "autond-ce3-blinded-benchmark-2",
+ "scores_computed": false,
+ "seconds_total": 42.54356503486633,
+ "selected_max_iter": 2000,
+ "side_channel_disclosed": "the maximum iteration count over all arms could weakly reflect signal strength; per-arm iteration counts are not recorded",
+ "training_fold_quantities": "fitting necessarily evaluates the training-fold class probabilities inside lbfgs and in the independent gradient check; they are reduced at once to a single gradient norm per fit and are neither stored nor turned into an accuracy",
+ "true_target_labels_used_in_fitting": [
+  "A",
+  "T",
+  "R"
+ ],
+ "utc": "2026-11-01T13:42:24.513036+00:00"
+}

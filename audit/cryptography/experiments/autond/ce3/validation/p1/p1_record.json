@@ -1,0 +1,286 @@
+{
+ "class_rule": "class(T) = number of frozen edges e with T > e; equal T values are never split",
+ "data_content_sha256": "b614a21f6dc6e5e071a7b20bc73690a8c297d95dae6523a6b593cba38c9ff956",
+ "data_file": "p1_pairs.npz",
+ "data_sha256": "882daef6582a52dd5bb952982dd16fdc0d37f0751975ed4f3d1236d464325b6c",
+ "environment": {
+  "numpy": "1.26.4",
+  "python": "3.11.14"
+ },
+ "evidentiary": false,
+ "experiment_id": "AUTOND-CE3-REPRESENTATION-DECODABILITY",
+ "generated_utc": "2026-11-01T05:11:44.268100+00:00",
+ "generation_gates": {
+  "E": {
+   "all_factors_positive": true,
+   "lm_equals_automaton": true,
+   "n_impossible": 0,
+   "n_mismatch": 0,
+   "passed": true
+  },
+  "F": {
+   "checks": {
+    "addition_output_difference_is_next_dx": true,
+    "dy_linear_layer": true,
+    "final_state_equals_upstream_encrypt": true,
+    "initial_difference": true,
+    "model_input_equals_upstream_hstack": true
+   },
+   "passed": true
+  }
+ },
+ "generator": {
+  "dependencies": {
+   "experiments/autond/ce2/adapter.py": "2726c66361e2c445d3226d079e9e3ce03bf99304b1b149ad203e7a713239d25e",
+   "experiments/autond/ce2/theory.py": "1b13c89fd6387da6d507663d283e1f2b566793aeefa5c1f41698a2d50ad3c45b",
+   "targets/autond/upstream.py": "99d703135e1c569f74da3e20d741aab6cf411d9c1e21abfedacee1a1b923dd95",
+   "upstream_sha256.json": "5c9fe81107091e81804c7fa606039018c8ad56b3dce6e85e02fc6336251ebf56"
+  },
+  "function": "experiments/autond/ce2/adapter.py generate_genuine_pairs",
+  "randomness": "os.urandom",
+  "upstream_verification_all_verified": true
+ },
+ "min_class_fraction": 0.15,
+ "model_loaded": false,
+ "n": 1000000,
+ "role": "model-free target discretisation pilot; never part of a CE3 replicate; fixes the class count and whole-value edges before any probe is fitted",
+ "rule": "among all whole-value partitions of the P1 support into K classes whose every class holds at least min_class_fraction of P1, choose the one minimising sum_j |K * N(T <= e_j) - j * N|, ties broken by the lexicographically smallest edge tuple; K = 5, and K = 3 only if no five-class partition is feasible",
+ "schema": "autond-ce3-p1-target-pilot-1",
+ "selected_edges": [
+  -68,
+  -63,
+  -59,
+  -55
+ ],
+ "selected_n_classes": 5,
+ "selection": {
+  "candidates": {
+   "3": {
+    "class_counts": [
+     353251,
+     291531,
+     355218
+    ],
+    "class_fractions": [
+     0.353251,
+     0.291531,
+     0.355218
+    ],
+    "edges": [
+     -64,
+     -58
+    ],
+    "feasible": true,
+    "minimum_count": 150000,
+    "n": 1000000,
+    "n_classes": 3,
+    "objective_integer": 125407,
+    "support_size": 56
+   },
+   "5": {
+    "class_counts": [
+     195717,
+     202881,
+     195318,
+     199894,
+     206190
+    ],
+    "class_fractions": [
+     0.195717,
+     0.202881,
+     0.195318,
+     0.199894,
+     0.20619
+    ],
+    "edges": [
+     -68,
+     -63,
+     -59,
+     -55
+    ],
+    "feasible": true,
+    "minimum_count": 150000,
+    "n": 1000000,
+    "n_classes": 5,
+    "objective_integer": 89795,
+    "support_size": 56
+   }
+  },
+  "selected": {
+   "class_counts": [
+    195717,
+    202881,
+    195318,
+    199894,
+    206190
+   ],
+   "class_fractions": [
+    0.195717,
+    0.202881,
+    0.195318,
+    0.199894,
+    0.20619
+   ],
+   "edges": [
+    -68,
+    -63,
+    -59,
+    -55
+   ],
+   "feasible": true,
+   "minimum_count": 150000,
+   "n": 1000000,
+   "n_classes": 5,
+   "objective_integer": 89795,
+   "support_size": 56
+  },
+  "three_class_branch_taken": false
+ },
+ "stored_arrays": {
+  "key_words": {
+   "dtype": "uint16",
+   "shape": [
+    1000000,
+    4
+   ]
+  },
+  "pt0": {
+   "dtype": "uint16",
+   "shape": [
+    1000000,
+    2
+   ]
+  },
+  "pt1": {
+   "dtype": "uint16",
+   "shape": [
+    1000000,
+    2
+   ]
+  },
+  "target": {
+   "dtype": "int16",
+   "shape": [
+    1000000
+   ]
+  }
+ },
+ "support": {
+  "counts": [
+   3,
+   4,
+   16,
+   52,
+   103,
+   232,
+   422,
+   760,
+   1223,
+   1957,
+   2708,
+   3880,
+   5089,
+   6918,
+   8510,
+   10603,
+   12983,
+   15656,
+   18559,
+   21574,
+   24723,
+   28284,
+   31458,
+   34781,
+   37986,
+   41238,
+   43529,
+   45347,
+   47116,
+   48589,
+   49421,
+   50192,
+   50866,
+   50930,
+   50043,
+   48055,
+   44794,
+   39512,
+   33894,
+   27239,
+   20722,
+   14914,
+   9902,
+   6518,
+   3965,
+   2257,
+   1217,
+   679,
+   310,
+   146,
+   61,
+   30,
+   20,
+   7,
+   2,
+   1
+  ],
+  "values": [
+   -90,
+   -89,
+   -88,
+   -87,
+   -86,
+   -85,
+   -84,
+   -83,
+   -82,
+   -81,
+   -80,
+   -79,
+   -78,
+   -77,
+   -76,
+   -75,
+   -74,
+   -73,
+   -72,
+   -71,
+   -70,
+   -69,
+   -68,
+   -67,
+   -66,
+   -65,
+   -64,
+   -63,
+   -62,
+   -61,
+   -60,
+   -59,
+   -58,
+   -57,
+   -56,
+   -55,
+   -54,
+   -53,
+   -52,
+   -51,
+   -50,
+   -49,
+   -48,
+   -47,
+   -46,
+   -45,
+   -44,
+   -43,
+   -42,
+   -41,
+   -40,
+   -39,
+   -38,
+   -37,
+   -36,
+   -35
+  ]
+ }
+}

@@ -1,0 +1,312 @@
+{
+ "approval": {
+  "approved_by": "human-approver-01",
+  "approved_design_sha256": "849ffaa3001e0d6c953625e22fb9523ab3eba2cf1d557b0509e8ec5df76da3be",
+  "approved_utc": "2026-11-01T15:34:29Z",
+  "status": "APPROVED"
+ },
+ "design": {
+  "arms": {
+   "A": "trained representation, actual classes, main folds",
+   "CAL_model": "the published model's own decision 1[score > 0.5] on the calibration set (no probe)",
+   "CAL_trained": "trained representation, calibration labels, calibration folds",
+   "CAL_twin": "twin representation, calibration labels, calibration folds",
+   "P_b": "trained representation, permuted classes b = 0 .. B-1, main folds",
+   "R": "raw 64-bit model input as float64, actual classes, main folds (informational only)",
+   "T": "twin representation, actual classes, main folds",
+   "score": "balanced accuracy of the pooled held-out predictions (each example predicted exactly once)"
+  },
+  "claim_scope": {
+   "accessibility_vs_information": "every comparison is between balanced accuracies of one fixed linear probe; a higher score means the target is more linearly accessible from that representation under that probe, not that the representation holds more information. By the data-processing inequality I(T; h(X)) <= I(T; X) for every representation h of the 64-bit input X.",
+   "ce1_ce2_relation": "uses the CE2 target construct and CE2's untrained twin; does not amend CE1 or CE2",
+   "not_claimed": [
+    "that the network uses the target (A3 shows decodability without use)",
+    "a learned cryptanalytic strategy or an internal decision process",
+    "the exact fixed-key characteristic probability or the full-cipher differential probability",
+    "independence from CE2: the target is the CE2 construct",
+    "information-theoretic content: a deterministic representation of the input cannot contain more information about the target than the input does",
+    "anything about other checkpoints, layers, twins, probes, ciphers or round counts",
+    "absence of decodability after a non-rejection"
+   ],
+   "positive_claim": "linear-probe decodability of the coarsened CE2 target from the specified fixed representation under the specified probe"
+  },
+  "conduct": {
+   "evidence_location": "experiments/autond/ce3/evidence",
+   "resume": "the journal is authoritative; terminal states are never left; an artifact without a committed transition is quarantined and its step re-executed; a committed artifact that is missing or altered makes the replicate FAILED",
+   "smoke": "non-evidentiary, separate autond_ce3_smoke_* directory, never merged"
+  },
+  "dependencies": {
+   "root": "audit/cryptography",
+   "sha256": {
+    "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "core/__init__.py": "e60cf7a039fdd4f75354acef18b2ad962a8df2380203bb6af0e87a8559e1f740",
+    "core/evidence.py": "187cb6faeddb68b19a73232f31b0d295d9efd3fef417c5400915b1fb192ba08b",
+    "experiments/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "experiments/autond/__init__.py": "6bce8850ca27829b0b89c85b31e0a4e711e37243f3fd452d5fa0af2ba0dd699b",
+    "experiments/autond/ce2/__init__.py": "c27d83dd9a6804d47d9353b09a6096205d0a5c5cb3cf570b31365a73ee786d8b",
+    "experiments/autond/ce2/adapter.py": "2726c66361e2c445d3226d079e9e3ce03bf99304b1b149ad203e7a713239d25e",
+    "experiments/autond/ce2/design.py": "1cf3ca643e4acf1aaaed73870a2fb39502a8e92648e5d14424527bc422306631",
+    "experiments/autond/ce2/preregistration/preregistration.json": "b8629e155e1054636622b119d9349fb27aaa3ed220ff13949f704ea1ab035741",
+    "experiments/autond/ce2/theory.py": "1b13c89fd6387da6d507663d283e1f2b566793aeefa5c1f41698a2d50ad3c45b",
+    "experiments/autond/ce2/verify.py": "5eedafcaa8545730fcb71df662d762f18a1492bfe83976bfbc063bbd0a9e8331",
+    "targets/__init__.py": "26371bc876181812de568c1bc57b9d1c36b48a36e9fd56fbd5ba62aaa2f644b1",
+    "targets/autond/__init__.py": "a60fa8668433880ad9d8174accb4e724849041f6f2565aa7306871a60194cb8d",
+    "targets/autond/model_binding.py": "32e96468ef7d18e060e33182461d42250f00cda8b421c73234c4a6c6b216950a",
+    "targets/autond/upstream.py": "99d703135e1c569f74da3e20d741aab6cf411d9c1e21abfedacee1a1b923dd95",
+    "upstream_sha256.json": "5c9fe81107091e81804c7fa606039018c8ad56b3dce6e85e02fc6336251ebf56"
+   }
+  },
+  "design_version": "AutoND-CE3-design-2026-11-r1",
+  "endpoints": {
+   "C_task": "BA(CAL_trained) - [0.5 + kappa * max(BA(CAL_model) - 0.5, 0)], kappa = 0.5: the probe must exceed a per-replicate recovery threshold set by the published model's own balanced accuracy on the same calibration examples (at the published reference accuracy 0.5144 the threshold is 0.5072)",
+   "C_twin": "BA(CAL_trained) - BA(CAL_twin)",
+   "S1": "R - (B + 2) / 2, where R in {1, ..., B + 1} is the rank of the observed assignment among the B + 1 group assignments when they are ordered by (exact rational BA, recorded tie-break value), ascending; S1 > 0 exactly when R is one of the upper (B + 1) / 2 ranks (R >= 4 for B = 5); S1 is never 0",
+   "S1_margin": "BA(A) - median_b BA(P_b): descriptive only, never tested",
+   "S2": "BA(A) - BA(T)",
+   "kappa": 0.5,
+   "kappa_rationale": "kappa is the minimum fraction of the published model's own above-chance balanced accuracy that the probe must recover. The model's head is a sigmoid of a linear function of this same layer, so a linear probe can represent the model's decision exactly and kappa = 1 is attainable in the population; a finite-sample probe loses part of it (the pipeline-faithful power check measures the loss). kappa = 0.5 requires that at least half of the known signal survives the probe pipeline, so a pipeline that recovers only a small fraction of a known effect cannot pass, while estimation loss alone does not fail a working pipeline; the power evidence reports kappa in {0, 0.25, 0.5, 0.75, 0.9}. kappa is a prospective judgment, fixed before any CE3 measurement",
+   "published_reference_accuracy": 0.5144,
+   "published_reference_source": "autond_ce1/AutoND-upstream/README.md lines 151-181 at the pinned upstream commit: eval_nets.py on the polished round-8 SPECK32/64 checkpoint, 5 evaluation sets of 10^6 samples from main.make_train_data (label Y ~ Bernoulli(1/2), Y = 0 inputs uniform), metric accuracy of 1[score > 0.5] (eval_nets.py evaluate_X_Y), reported as mean 0.5144 +- 0.0003 (standard deviation over the 5 sets); the per-set TPR 0.512-0.514 and TNR 0.515-0.517 make the balanced accuracy equal to the accuracy to the reported precision",
+   "raw_gap": "BA(A) - BA(R): descriptive linear-accessibility contrast only"
+  },
+  "evidence_schema": {
+   "calibration": "runs/<id>/calibration.npz: genuine key_words, pt0, pt1, c0, c1, random_inputs_packed, order, labels",
+   "certificate": "autond-ce3-certificate-1",
+   "data": "runs/<id>/data.npz: CE2 run-data arrays (key_words, pt0, pt1, c0, c1, dx, dy, weights, target), classes (int8) and s1_tiebreak (int16, length B + 1)",
+   "journal": "journal.jsonl, core-journal-2",
+   "measurement": "runs/<id>/measurement.json: balanced accuracies, endpoints, coverage, convergence, timings",
+   "probes": "runs/<id>/probes.npz: fold ids, permutation index vectors, and per arm and fold the scaler mean and scale, coefficients, intercepts, iterations, gradient norms and held-out predictions",
+   "representations": "runs/<id>/representations.npz: trained_main, twin_main, trained_cal, twin_cal (float32), score_main, score_cal (float32)"
+  },
+  "experiment_id": "AUTOND-CE3-REPRESENTATION-DECODABILITY",
+  "failure_semantics": {
+   "EXCLUDED": "a replicate with a non-finite endpoint",
+   "FAILED": "a replicate whose gate E/F, class coverage, twin admissibility, head consistency or probe convergence fails, or whose execution raises; retained with its partial artifacts",
+   "VALID": "all checks passed and all endpoints finite",
+   "replacement": "none"
+  },
+  "model": {
+   "checkpoint_sha256": "a7be788dbbb760a7be9053748e6e0f37dedc5768db3a74a5c3ebd294dca4cc26",
+   "loading": "targets/autond/model_binding.py load_published (strict, pinned)",
+   "representation": {
+    "activation": "relu",
+    "consumer": {
+     "activation": "sigmoid",
+     "class": "Dense",
+     "index": 33,
+     "is_output": true,
+     "units": 1
+    },
+    "extraction": "keras.Model(model.input, model.layers[32].output).predict(X, batch_size=5000), float32",
+    "head_consistency": "sigmoid(h @ W_dense_3 + b_dense_3) must equal model.predict(X) to within head_tolerance on every main and calibration example",
+    "head_tolerance": 1e-05,
+    "identity_rule": "identity is the graph position and structure checked above; Keras layer names depend on how many models a process has built (the twin built second is named activation_5) and are recorded but never used for identity",
+    "inbound": {
+     "class": "BatchNormalization",
+     "index": 31
+    },
+    "layer_class": "Activation",
+    "layer_index": 32,
+    "n_layers": 34,
+    "output_shape": [
+     null,
+     64
+    ],
+    "pre_activation_dense": {
+     "activation": "linear",
+     "class": "Dense",
+     "index": 30,
+     "units": 64
+    },
+    "published_layer_name": "activation_2",
+    "twin_admissibility": "the twin representation must have at least 2 features with nonzero variance on every main and calibration set; otherwise the replicate is FAILED"
+   },
+   "untrained_twin": {
+    "loading": "targets/autond/model_binding.py load_untrained_twin with the weights hash",
+    "scope": "one fixed initialisation; results are conditional on it and say nothing about untrained DBitNets in general",
+    "source": {
+     "certificate_sha256": "4eaa7ce86ae4681befbd032eefa9657ec82a68e33ac4b60f816dbd0d6ddb3f85",
+     "decision": "SUPPORTED",
+     "design_sha256": "3f6340e8625749d1a1281ea44984ea4ee48521e00c6c774598398680b8a0635f",
+     "design_version": "AutoND-CE2-frozen-design-2026-10-r3",
+     "preregistration_sha256": "b8629e155e1054636622b119d9349fb27aaa3ed220ff13949f704ea1ab035741",
+     "relpath": "evidence/ce2/autond_ce2_production_20261031T155733Z",
+     "run_manifest_sha256": "8976f00cbf04196ed1f28f4f4237e1a0c0f8c7e4ea50c6e0c36421b852df6d6d",
+     "twin_file": "controls/untrained_twin.weights.h5",
+     "twin_file_sha256": "adda08a31be371229424d464273689784c61a4f16a4852f9f3e2223d424982b4",
+     "twin_seed": 20261031,
+     "twin_weights_sha256": "237722786db3075a8501b670d51f0009edaa4e02e2b367460441978e8c0a239a",
+     "use": "read-only: the fixed untrained twin saved by this run is copied byte for byte into each CE3 output directory and hash-checked; no other CE2 evidence is used and CE2 is not amended",
+     "verification_report": "verification_20261031T170659Z.json",
+     "verification_report_sha256": "e27123a5f65742c490e097da12bf5659077cb3b922bc500cfda7e835c8f15c59"
+    }
+   },
+   "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+  },
+  "probe": {
+   "blas_threads": 1,
+   "convergence": "a fit converges when n_iter_ < max_iter, no ConvergenceWarning is raised and the maximum absolute gradient of the training objective at the fitted parameters, computed independently of scikit-learn, is at most gradient_tolerance",
+   "feature_dtype": "float64",
+   "gradient_tolerance": 0.001,
+   "logistic": {
+    "C": 1.0,
+    "class": "sklearn.linear_model.LogisticRegression",
+    "class_weight": null,
+    "fit_intercept": true,
+    "max_iter": 2000,
+    "penalty": "l2",
+    "random_state": 0,
+    "solver": "lbfgs",
+    "tol": 0.0001
+   },
+   "max_iter_rule": "max_iter = 2000 unless the blinded benchmark records a non-converged fit at 2000 and every fit converges at 5000, in which case 5000; no other value and no retry",
+   "non_convergence": "the replicate is FAILED; nothing is retried or changed",
+   "objective": "mean multinomial (or binary) log-loss over the training fold plus ||W||^2 / (2 C n_train); the intercept is not penalised",
+   "pipeline": "sklearn.pipeline.Pipeline([StandardScaler(), LogisticRegression(...)])",
+   "scaler": {
+    "class": "sklearn.preprocessing.StandardScaler",
+    "fit_on": "training fold only",
+    "with_mean": true,
+    "with_std": true
+   },
+   "scikit_learn": "1.9.1"
+  },
+  "references": [
+   "Bellini et al., A Cipher-Agnostic Neural Training Pipeline with Automated Finding of Good Input Differences, IACR ePrint 2022/1467; https://github.com/Crypto-TII/AutoND",
+   "Hewitt and Liang, Designing and Interpreting Probes with Control Tasks, EMNLP 2019",
+   "Maurer, Hothorn and Lehmacher, Multiple comparisons in drug clinical trials and preclinical assays: a-priori ordered hypotheses, 1995",
+   "Berger, Multiparameter hypothesis testing and acceptance sampling, Technometrics 1982 (intersection-union)",
+   "Hemerik and Goeman, Exact testing with random permutations, TEST 2018 (permutation subgroups)"
+  ],
+  "research_question": "Across independent evaluation replicates, is the AutoND CE2 trajectory-derived target, coarsened into frozen whole-value classes, linearly decodable from the 64-unit penultimate ReLU representation of the published AutoND SPECK32/64 round-8 DBitNet, beyond a within-replicate permuted-label control and beyond one fixed untrained DBitNet, once the probe pipeline has shown that it recovers the known genuine-versus-random task?",
+  "runtime": {
+   "keras": "2.15.0",
+   "numpy": "1.26.4",
+   "pandas": "2.2.2",
+   "python": "3.11",
+   "scikit_learn": "1.9.1",
+   "scipy": "1.11.4",
+   "tensorflow": "2.15.1",
+   "threadpoolctl": "3.7.0"
+  },
+  "sampling": {
+   "all_replicates_required_valid": true,
+   "calibration_construction": "a separate set per replicate: 50000 fresh genuine pairs (CE2 generate_genuine_pairs) and 50000 uniform 64-bit inputs (CE2 random_pairs_input), labels 1 and 0, concatenated and shuffled by PCG64(30000000 + replicate_index).permutation",
+   "calibration_fold_assignment": "as main with random_state 60000000 + replicate_index",
+   "calibration_per_class": 50000,
+   "early_stopping": false,
+   "folds": 5,
+   "interim_analysis": false,
+   "main_fold_assignment": "sklearn KFold(n_splits=5, shuffle=True, random_state=40000000 + replicate_index) applied to sample indices only, shared by every main-set arm",
+   "main_pairs_per_replicate": 200000,
+   "main_pairs_rule": "the smallest n in {50000, 100000, 200000} whose uncertainty-propagated lower bound for P(SUPPORTED) (5th percentile over the bootstrap distribution of the synthetic pipeline parameters, evaluated with B = 21) is at least 0.90 at the reference scenario of the power evidence; if none qualifies the design is not frozen",
+   "main_pairs_status": "FROZEN",
+   "n_replicates": 20,
+   "pair_construction": "fresh genuine pairs from os.urandom with the construction of upstream main.make_train_data (Y = 1): experiments/autond/ce2/adapter.py generate_genuine_pairs (pinned), gates E and F required",
+   "permutation_construction": "a cyclic permutation group of order B + 1 per replicate: o = PCG64(50000000 + replicate_index).permutation(n) is cut, in order, into floor(n / (B + 1)) cycles of length B + 1 followed by cycles whose lengths divide B + 1 (largest divisor first) covering the remainder; sigma maps each element of a cycle to the next one (sigma[c] = roll(c, -1)); permuted arm b = 0 .. B-1 uses labels[sigma^(b+1)], where sigma^(B+1) is the identity, so {id, sigma, ..., sigma^B} is a group and the observed assignment is its identity element; global class counts are preserved exactly",
+   "permutations_per_replicate": 5,
+   "permutations_rule": "B odd, so that B + 1 assignments split into two equal halves of ranks; the smallest B in {5, 11, 21} whose planning P(SUPPORTED) at the reference scenario is within 0.01 of B = 21 and whose uncertainty-propagated lower bound still meets the n rule",
+   "permutations_status": "FROZEN",
+   "reserve_replicates": 0,
+   "s1_tiebreak": "per replicate, a uniformly random permutation (t_0, ..., t_B) of {0, ..., B} drawn with random.SystemRandom (os.urandom) when the data are generated and committed in data.npz as s1_tiebreak before any probe is fitted; t_0 belongs to the observed assignment and t_(b+1) to permuted arm b"
+  },
+  "seeds": {
+   "benchmark_replicate_index": 999,
+   "calibration_folds": 60000000,
+   "calibration_shuffle": 30000000,
+   "data": "os.urandom; the generated data are retained, not their seeds",
+   "main_folds": 40000000,
+   "permutations": 50000000,
+   "s1_tiebreak": "os.urandom via random.SystemRandom; recorded in data.npz, not derived from a seed"
+  },
+  "statistics": {
+   "alpha": 0.05,
+   "alternative": "H1_D: q(D) > 1/2",
+   "decision": {
+    "INCONCLUSIVE": "fewer than 20 VALID replicates, an untestable step, or S1 not rejected",
+    "POSITIVE_CONTROL_FAILED": "C not rejected; S1 and S2 are reported descriptively as not tested",
+    "PRECHECK_FAILED": "preflight, binding, provenance, pins, P1 or benchmark check failed",
+    "SUPPORTED": "C, S1 and S2 rejected in the frozen order",
+    "TARGET_DECODABLE_TWIN_UNRESOLVED": "C and S1 rejected, S2 not"
+   },
+   "descriptive": "mean, median with exact order-statistic 95% interval, quartiles, range and all values",
+   "estimand": "q(D) = P(D_i > 0) for a valid replicate i, separately for each endpoint",
+   "fixed_sequence": [
+    "C",
+    "S1",
+    "S2"
+   ],
+   "gate_C": "H0_C = H0_task OR H0_twin, with H0_task: q(C_task) <= 1/2 and H0_twin: q(C_twin) <= 1/2; C is rejected only when both component tests reject at alpha (Berger's intersection-union test: under H0_C at least one component null is true, and that component rejects with probability at most alpha, so the gate has level alpha without adjustment)",
+   "interval": "two-sided exact 95% Clopper-Pearson interval for q over all valid replicates",
+   "multiplicity": "fixed-sequence gatekeeping at full alpha: a step is tested only after every earlier step rejected; the family-wise error rate is at most alpha under arbitrary dependence",
+   "no_valid_observations": "n = 0: no p-value, not rejected, reported NO_VALID_OBSERVATIONS",
+   "non_finite": "a non-finite endpoint makes the replicate EXCLUDED; it is never treated as zero",
+   "null": "H0_D: q(D) <= 1/2",
+   "s1_null": "H0_S1: conditional on the trained representation matrix H, the label-independent folds F and the class-count vector N = (N_0, ..., N_4) of the replicate's main-set labels, the label vector y is exchangeable: every arrangement of labels with counts N is equally likely, whatever H is. It holds in particular when the rows (h_j, y_j) are i.i.d. with y_j independent of h_j",
+   "s1_null_exactness": "every element of the permutation group G = {id, sigma, ..., sigma^B} preserves N, and under H0_S1 y o sigma has the same conditional law as y given (H, F, N). Replacing y by y o sigma maps the assignment tuple (y, y o sigma, ..., y o sigma^B) to its cyclic shift, so, conditionally on (H, F, N), the score tuple s_j = f(H, y o sigma^j, F) of the deterministic probe has the same law as its cyclic shift, whatever ties the discrete balanced accuracy produces. The recorded tie-break is a uniform permutation independent of (H, F, N, y), so the pairs (s_j, t_j) are distinct and jointly shift-invariant in law; all B + 1 positions therefore have the same rank law, and since the ranks are a permutation of 1 .. B + 1, P(R = r | H, F, N) = 1/(B + 1) for each r and P(S1 > 0 | H, F, N) = 1/2 exactly; the unconditional statement follows by averaging. The event E that coverage and convergence hold for all B + 1 assignments is a function of (H, F) and of the set of assignments, hence shift-symmetric, so the law also holds given E. Other validity checks (for example the T arm, which uses y) need not be symmetric, but {S1 rejects and all replicates VALID} is contained in {S1 rejects and E holds in every replicate}, so P(S1 rejects and all VALID) <= P(S1 rejects | E) <= alpha. Replicates are independent, so N+ ~ Bin(n, 1/2) under H0_S1 given E",
+   "s1_superseded_rule": "the earlier rule S1 = BA(A) - median of B permuted BAs with zeros removed is not exact: with exchangeable two-valued scores P(s = 1) = 0.3 and B = 5 it gives P(S1 > 0 | S1 != 0) = 0.687 (and 0.313 for P(s = 1) = 0.7), so it was replaced",
+   "test": "exact one-sided binomial test over all n valid replicates: N+ = #{i : D_i > 0}, p = P(X >= N+), X ~ Bin(n, 1/2); reject when p < alpha (with n = 20: N+ >= 15); valid for every q <= 1/2 because P(Bin(n, q) >= k) is increasing in q",
+   "unit": "the replicate; folds and permutations are nested within it",
+   "zero_policy": "an endpoint exactly 0.0 (including -0.0) is a non-positive outcome: it stays in the denominator and counts against rejection; no zero is ever removed. S1 cannot be 0"
+  },
+  "status": "FROZEN",
+  "target": {
+   "class_order": "ascending T",
+   "class_rule": "class(T) = number of frozen edges e with T > e; equal T values are never split",
+   "coverage_checked_for": "the actual target labels and every permuted label vector on the main folds, and the calibration labels on the calibration folds, in every training and test partition",
+   "edges": [
+    -68,
+    -63,
+    -59,
+    -55
+   ],
+   "fallback_resolution": "resolved before production by P1: the class count and edges are frozen in this design and applied unchanged to every replicate; no replicate is rebinned and no three-class branch exists in the confirmatory protocol; a replicate violating the class-coverage minimum is FAILED",
+   "min_class_count_per_fold": 1000,
+   "min_class_fraction": 0.15,
+   "n_classes": 5,
+   "pilot": {
+    "evidentiary": false,
+    "exploratory_pilot_disclosed": "an earlier unrecorded in-memory pilot of 10^6 pairs (P0) showed 57 integer values in [-91, -35]; it was used only to judge that five classes are feasible and is not evidence",
+    "model_free": true,
+    "name": "P1",
+    "pairs": 1000000,
+    "record": "experiments/autond/ce3/validation/p1/p1_record.json",
+    "record_sha256": "69b430ecd0112e857ee8d71cc7a56b96f079a236181c155db594f1e1e80bad22",
+    "rule": "among all whole-value partitions of the P1 support into K classes whose every class holds at least min_class_fraction of P1, choose the one minimising sum_j |K * N(T <= e_j) - j * N|, ties broken by the lexicographically smallest edge tuple; K = 5, and K = 3 only if no five-class partition is feasible"
+   },
+   "source": "T = sum over the 8 rounds of log2 xdp+ along the reconstructed genuine-pair trajectory, computed by experiments/autond/ce2/adapter.py trajectory_and_weights (r3, pinned)"
+  },
+  "validation_evidence": {
+   "benchmark": {
+    "relpath": "experiments/autond/ce3/validation/benchmark/benchmark.json",
+    "sha256": "c7d063461e74795b513294d937440ba7790ea878ca7a22512ceb5bc7c14629d7"
+   },
+   "p1": {
+    "relpath": "experiments/autond/ce3/validation/p1/p1_record.json",
+    "sha256": "69b430ecd0112e857ee8d71cc7a56b96f079a236181c155db594f1e1e80bad22"
+   },
+   "power": {
+    "relpath": "experiments/autond/ce3/validation/power/power.json",
+    "sha256": "ecc61ce0aa22b18ce2eadab77bfeb3b95f0253169f10c75335373289a0d5226c"
+   },
+   "representation_diagnostics": {
+    "relpath": "experiments/autond/ce3/validation/representation/representation_diagnostics.json",
+    "sha256": "ffc19d390a061ea3f235f2f090a57b46ffb14ec266224392e4c5912fb55e4147"
+   }
+  },
+  "verification": {
+   "independence": "imports nothing from the CE3 producer modules, targets/autond or core.evidence; it has its own journal replay, KFold, permutation-group and tie-break reconstruction, class assignment, edge selection, scaler, logistic-objective gradient, prediction, float and exact rational balanced accuracy, S1 rank, exact sign tests, Clopper-Pearson bisection and decision rule",
+   "numerical_policy": "representations are re-extracted and compared bitwise; if they differ, the stored probe parameters are applied to the re-extracted representations and every held-out prediction, endpoint sign and the decision must be identical (DECISION_INVARIANT_NUMERICAL_DIFFERENCE); any sign or decision difference fails",
+   "shared_with_producer": {
+    "ce2_verifier_primitives": "experiments/autond/ce2/verify.py (pinned): SPECK trajectory (_trajectory, _ror), xdp+ weights (xdp_weight), word-to-bit conversion (_words_to_bits), sha256_file, canonical_sha256, content_hash, Findings, load_upstream, strict_matches_hdf5 and weights_hash; the CE3 producer uses CE2 r3 adapter.py, which the CE2 verifier was written to check independently, so these primitives are independent of the producer's cipher but are themselves CE2 code",
+    "evidence_infrastructure": "the verifier does not import core/evidence.py but reads the core-journal-2 journal, record caches, quarantine and staging layout that it writes, and the content-hash convention shared with CE2",
+    "inference": "TensorFlow/Keras 2.15 predict for both representations and the model scores",
+    "model_building_and_binding": "the pinned upstream dbitnet.make_model builder loaded through CE2 load_upstream; the producer loads the same builder through targets/autond/upstream.py and binds with targets/autond/model_binding.py, the verifier binds with the CE2 verifier's strict_matches_hdf5 and weights_hash",
+    "optional": "--sklearn-refit also shares scikit-learn 1.9.1"
+   },
+   "verifier": "audit/cryptography/experiments/autond/ce3/verify.py"
+  }
+ },
+ "design_sha256": "849ffaa3001e0d6c953625e22fb9523ab3eba2cf1d557b0509e8ec5df76da3be",
+ "schema": "autond-ce3-preregistration-1"
+}
