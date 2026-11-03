@@ -16,7 +16,8 @@ Upstream `train_nets` for DBitNet, for one stage at round 5: `dbitnet.make_model
 - the outcome is final-epoch accuracy on an independent 10⁶-row confirmatory test set, not max validation accuracy;
 - TensorFlow is seeded per model, while GPU kernels stay nondeterministic;
 - datasets are persisted and reloaded hash-verified;
-- `shuffle` is passed explicitly.
+- `shuffle` is passed explicitly;
+- the two arms of a pair train in the frozen balanced order (`autond/order.py`), not always A first.
 
 D5's approval does not cover any of this.
 
@@ -47,11 +48,13 @@ The AutoND family is separate from Gohr's. `autond.experiments.apply_family_corr
 | sizes | tiny | full protocol | full protocol |
 | evidentiary | no | no | yes |
 | binds | — | `design_hash` | `production_hash` |
-| gates | config only | no pending decision in representation/decisions/calibration; sources committed and clean; pin; permutation validated | as calibration, plus the production plan and power plan |
+| A/B order | derived on the fly | frozen schedule (10 pairs) | frozen schedule (6 pairs) |
+| output | `results/autond/smoke/` (or `--output-root`) | `results/autond/calibration-balanced-ab-v1/` | `results/autond/production/` |
+| gates | config only | no pending decision in representation/decisions/calibration; sources committed and clean; pin; permutation validated | as calibration, plus the production plan and a power plan derived under the same A/B protocol |
 
 - `design_hash` covers the protocol, representation, decisions and calibration plan. So ε and the target effect are frozen before any pilot data exist.
 - Each `(mode, experiment)` has its own directory, bound to its mode and held by a single-writer lock. Calibration and production seeds must not overlap.
-- **Resumption.** A completed or failed unit is never re-run. An interrupted unit is re-run from scratch on its persisted data with the same seed. A unit whose confirmatory test set was consumed but whose result was not recorded is refused.
+- **Resumption.** A completed or failed unit is never re-run. An interrupted unit is re-run from scratch on its persisted data, with the same seed and the same scheduled A/B order. A unit whose confirmatory test set was consumed but whose result was not recorded is refused.
 
 ## Power planning
 
@@ -61,29 +64,116 @@ For each hypothesis, it requires P(SUPPORTED | effect = target) ≥ 80 % and P(N
 
 The target effect must exceed ε. At a true effect equal to ε, P(SUPPORTED) stays below ½ for every n, so a plan that sets the target at the margin and sizes on "difference significant" alone, as the Gohr planner does, does not power the SUPPORTED decision.
 
-## Decisions still required (placeholders in the config)
+## Balanced A/B execution order (`autond/order.py`, protocol `balanced-ab-v1`)
 
-1. ε (`practical_threshold`) and its justification. The audit-wide precedent is 0.01 (Gohr EV, II-4); adopting it for AutoND is a decision, not a default.
-2. `target_effect` (> ε) and its justification.
-3. Calibration pairs per paired hypothesis.
-4. Production units and `minimum_valid` for all four experiments, with the paired minimum ≥ the power plan's `required_n`.
-5. The power plan's SHA-256 and `required_n`, after `plan-power`.
+Within a pair, both arms share data, seed and verified initial weights, and run one after the other in one process on one GPU. Training them always A-then-B would confound B − A with execution position, for example through autotuning, caching or thermal state. So each pair has a frozen order, AB or BA, with ⌊n/2⌋ BA pairs:
 
-The seeds, the within-word permutation and the inherited α = 0.05, 80 % power, 50 000 simulations and σ upper bound are proposed in the config; review them with the rest.
+    tag   = "autond-ev-ab-order-v1|<experiment>|design=<design_hash>|pairs=<n>"
+    seed  = int(SHA-256(tag)[:16 hex digits], 16)
+    order = numpy PCG64(seed).permutation(["AB"] * ceil(n/2) + ["BA"] * floor(n/2))
+
+The schedules are frozen in `configs/autond_ev_order_schedule.json` (SHA-256 pinned in `autond/order.py`):
+
+| Experiment | Production order, pairs 0–5 |
+|---|---|
+| `H-EV-AUTOND-TRAIN-ORDER` | BA, AB, AB, BA, AB, BA |
+| `H-EV-AUTOND-REPRESENTATION` | BA, AB, AB, AB, BA, BA |
+
+The file also holds the 10-pair calibration schedules.
+
+**How the schedule is enforced:**
+- **No draw at run time:** the runner never draws a schedule for calibration or production. It reads the frozen file and refuses if the file's hash, its design hash, its derivation, its length or its balance differ.
+- **Recorded per unit:** each unit records `pair_id`, `execution_order`, `executed_conditions` and each arm's `execution_position`. The arms are stored in canonical A, B order, so the analysis is unchanged.
+- **Bound to resume:** the order is part of the unit hash, so a schedule change refuses resumption.
+- **Checked at aggregation:** a recorded order that differs from the schedule refuses aggregation.
+
+The treatment definitions, statistics and decision rules are unchanged.
+
+## Source and session provenance
+
+**The source manifest** (`baseline.source_manifest`) is the SHA-256 of every file in `baseline.SOURCE_FILES`: the AutoND EV modules, the framework modules, both configs, and the dataset adapter and integrity code, plus one digest over them all. It is a code identity, distinct from the design and production hashes.
+
+**How the manifest is bound:**
+- **Launch:** every calibration or production invocation records git HEAD and checks that each file is clean.
+- **Each unit:** every unit records `source_manifest_sha256`, `git_head`, `session_id` and `device`, and the manifest digest is part of the unit hash.
+- **Each directory:** each output directory pins the manifest it was started under (`source_identity.json`). A later session with different code is refused (`SourceIdentityMismatch`), and so is aggregation of units carrying different digests.
+- **Certificate:** it records the manifest, the single unit digest, the sessions and devices, and the frozen schedule.
+
+**Session provenance** (`adapter.session_provenance`) records the following for every invocation:
+- the GPU name, UUID and driver (`nvidia-smi`), TensorFlow build information (CUDA and cuDNN), visible devices and device details;
+- the Python, TensorFlow, Keras, NumPy, SciPy, h5py, pandas and PyYAML versions;
+- non-secret `KAGGLE_*` variables;
+- a per-process session ID (boot ID plus a random token).
+
+**NOISE scope.** EV-AUTOND-NOISE measures repeated-execution variability for one fixed dataset, seed, set of initial weights, and hardware and software environment, and nothing beyond that. Its reruns are refused if they would span two sessions or two devices (`SessionScopeViolation`). Run all ten in one session on one GPU.
+
+## Calibration compatibility: production is blocked until recalibration
+
+The existing calibration (2026-10-30, Kaggle, design `84123aa4…`) trained every pair A then B. It is preserved unchanged in `results/autond/calibration/`:
+- the 32 files of the original archive, byte-identical;
+- a second backup outside the repository;
+- no raw `.npz` datasets and no `.keras` models, so it cannot be fully recomputed;
+- its GPU, CUDA, cuDNN and driver were not recorded and cannot be recovered.
+
+**Why it can't size production.** Balanced order leaves the mean of B − A unbiased, but adds about δ² to its variance if training position has an effect δ. A fixed-order calibration cannot estimate that. So:
+- `calibration_variance` accepts only certificates under the current protocol;
+- `power_plan` records the protocol;
+- the production gate refuses a power plan from another protocol.
+
+The declared power plan, `9fdf7244…` with `required_n = 3`, comes from the fixed-order calibration, so the gate **refuses production** ("derived from a calibration under A/B execution order 'fixed-ab-legacy'"). To unblock it: run the balanced calibration (10 pairs per hypothesis under the frozen schedule, about 14 GPU-hours), then `analyze-calibration` and `plan-power`, and declare the new plan's path, SHA-256 and `required_n` in `production.power_plan`.
+
+## Production design (`configs/autond_ev.yaml`)
+
+| Experiment | Planned | Minimum valid | Trainings |
+|---|---|---|---|
+| EV-AUTOND-BASELINE | 10 | 8 | 10 |
+| EV-AUTOND-NOISE | 10 | 8 | 10 |
+| H-EV-AUTOND-TRAIN-ORDER | 6 pairs | 5 | 12 |
+| H-EV-AUTOND-REPRESENTATION | 6 pairs | 5 | 12 |
+
+That is 44 trainings in total.
+
+**Power at 5 valid pairs (the minimum).** With the hypothesis-specific calibrated upper σ (TRAIN-ORDER 0.0019803, REPRESENTATION 0.0005462), the probability that both final decisions are correct is:
+
+| σ × | Worst case over the four true-effect states |
+|---|---|
+| 1 | 0.949 |
+| 1.25 | 0.950 |
+| 1.5 | 0.949 |
+| 2 | 0.918 |
+
+At 6 valid pairs it is at least 0.947. The run is `power-sensitivity`, recorded in `results/autond/planning/power_sensitivity.json`.
+
+**Fewer pairs miss 80%:** at 4 valid pairs with 2× σ it is 0.783, which is below 80%, and at 3 pairs 0.448.
+
+**Non-normal differences (n = 5):**
+- t₅, t₃ and contamination keep at least 0.95;
+- skewed (lognormal) differences reduce NOT_SUPPORTED to about 0.82–0.86, because the small-sample t-test's false-significance rate rises.
+
+**What these numbers rest on:** the σ values from the fixed-order calibration. A balanced recalibration must regenerate them.
 
 ## Commands (from `audit/experimental_validity`, pinned Python 3.11 / TF 2.15.1 with PyYAML, repository root importable)
 
 ```bash
-python -B -m pytest -q -p no:cacheprovider tests/test_autond_ev.py              # tiny, non-evidentiary; runs tests/autond_tf_cases.py in a child process
+python -B -m pytest -q -p no:cacheprovider tests                                 # full EV suite (TF cases run in a child process)
 python -B -m autond.runner run --mode smoke --experiment all                     # pipeline check
 python -B -m autond.runner preflight --mode calibration                          # gates only
+# balanced recalibration (non-confirmatory), one process per GPU:
 python -B -m autond.runner --gpu 0 run --mode calibration --experiment H-EV-AUTOND-TRAIN-ORDER --confirm-execute
 python -B -m autond.runner --gpu 1 run --mode calibration --experiment H-EV-AUTOND-REPRESENTATION --confirm-execute
-python -B -m autond.runner analyze-calibration                                   # -> results/autond/calibration/variance.json
-python -B -m autond.runner plan-power                                            # -> results/autond/calibration/power_plan.json
-python -B -m autond.runner preflight --mode production
+python -B -m autond.runner analyze-calibration                                   # -> results/autond/calibration-balanced-ab-v1/variance.json
+python -B -m autond.runner plan-power                                            # -> results/autond/calibration-balanced-ab-v1/power_plan.json
+python -B -m autond.runner power-sensitivity --variance <variance.json> --output <new.json>
+python -B -m autond.runner preflight --mode production                           # refuses until the plan matches the protocol
 python -B -m autond.runner --gpu 0 run --mode production --experiment <ID> --confirm-execute   # one process per GPU
 python -B -m autond.runner family                                                # production Holm family
 ```
 
-Compute: 10 epochs per training against Gohr's 200. On a T4 at roughly 2 min per 10⁷-row epoch, that is about 20–25 min per training and about 45–50 min per pair. This is an estimate, not a measurement.
+## Compute
+
+Measured in calibration: 119–135 s per epoch, so about 20–22.5 min per training. Data generation, evaluation and saving were not measured separately.
+
+| Run | Trainings | GPU time |
+|---|---|---|
+| Production | 44 | about 16.5–17.5 GPU-hours serial; about 8.5–9 h on 2 GPUs |
+| Balanced recalibration | 40 | about 14–16 GPU-hours |

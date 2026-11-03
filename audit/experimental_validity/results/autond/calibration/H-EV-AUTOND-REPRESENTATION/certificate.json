@@ -1,0 +1,2167 @@
+{
+  "calibration": true,
+  "certificate_schema_version": "1.1",
+  "conservative_wording": {
+    "equivalent": "The information-preserving permutation did not change confirmatory accuracy by more than the predeclared margin under this architecture and protocol.",
+    "inconclusive": "No practically meaningful effect of the permutation was established under this architecture and protocol; this does not establish that none exists.",
+    "supported": "The information-preserving permutation changed confirmatory accuracy materially: the result depends on the tested encoding under this architecture and protocol. It does not show that the ciphertext lacks information recoverable another way."
+  },
+  "decision": "SUPPORTED",
+  "design_hash": "84123aa4bb01c6160e1286cedddf68b35419378c2131f65822b57017e65db154",
+  "experiment_definition": {
+    "conditions": [
+      {
+        "condition_id": "condition_a",
+        "description": "shuffle=True, permuted=False",
+        "overrides": {
+          "permuted": false,
+          "shuffle": true
+        }
+      },
+      {
+        "condition_id": "condition_b",
+        "description": "shuffle=True, permuted=True",
+        "overrides": {
+          "permuted": true,
+          "shuffle": true
+        }
+      }
+    ],
+    "controls": [
+      "dataset (shared by both arms of a pair)",
+      "model seed (shared by both arms of a pair)",
+      "shuffle=True",
+      "round 5",
+      "DBitNet",
+      "Adam(amsgrad=True)",
+      "MSE",
+      "epochs",
+      "batch size",
+      "software environment"
+    ],
+    "dependent_variable": "confirmatory_test_accuracy",
+    "design_type": "matched_paired",
+    "expected_observation_if_alternative": null,
+    "expected_observation_if_null": null,
+    "factors": [
+      {
+        "essential": false,
+        "name": "representation",
+        "rationale": "DBitNet's dilated convolutions relate input positions at fixed distances; if the natural alignment of corresponding bits across the four ciphertext words, rather than information in the ciphertext pair, drives performance, scrambling bit positions within each word should materially reduce accuracy."
+      }
+    ],
+    "hypothesis_id": "H-EV-AUTOND-REPRESENTATION",
+    "hypothesized_confounding_mechanism": "DBitNet's dilated convolutions relate input positions at fixed distances; if the natural alignment of corresponding bits across the four ciphertext words, rather than information in the ciphertext pair, drives performance, scrambling bit positions within each word should materially reduce accuracy.",
+    "id": "H-EV-AUTOND-REPRESENTATION",
+    "independent_variable": "representation",
+    "multiplicity_family": "ev_autond_primary_family_v1",
+    "pairing": {
+      "same_dataset": true,
+      "same_evaluation_data": true,
+      "same_model_initialization": true,
+      "same_training_shuffle_stream": false
+    },
+    "practical_significance": {
+      "justification": "The practical-effect margin is one percentage point of absolute held-out accuracy. It follows the audit-wide margin previously adopted for II-4, using the same accuracy metric. This is a prospective methodological judgment, not a universal literature-derived threshold, and is not based on calibration variability or observed EV outcomes.",
+      "predeclared": true,
+      "threshold": 0.01
+    },
+    "rationale": "AutoND counterpart of the EV experiment of the same role.",
+    "replicate_plan": {
+      "minimum_valid_replicates": 10,
+      "requested_replicates": 10
+    },
+    "scientific_claim": "Under the fixed DBitNet architecture and round-5 protocol, whether a fixed, information-preserving within-word bit permutation of the input produces a practically meaningful change in confirmatory distinguishing accuracy.",
+    "unit_of_replication": "matched pair of independently trained models (shared dataset, model initialization, evaluation data; independent training shuffle stream)",
+    "version": "1"
+  },
+  "experiment_hash": "f802d9429c163d40dc560cd3b394a9fe52f09d0b73d08cee10e15a32bd267428",
+  "experiment_id": "H-EV-AUTOND-REPRESENTATION",
+  "firewall": {
+    "confirmatory_data_mode": "PER_REPLICATE",
+    "consumed_evaluation_keys": [
+      "condition_a:pair000",
+      "condition_a:pair001",
+      "condition_a:pair002",
+      "condition_a:pair003",
+      "condition_a:pair004",
+      "condition_a:pair005",
+      "condition_a:pair006",
+      "condition_a:pair007",
+      "condition_a:pair008",
+      "condition_a:pair009",
+      "condition_b:pair000",
+      "condition_b:pair001",
+      "condition_b:pair002",
+      "condition_b:pair003",
+      "condition_b:pair004",
+      "condition_b:pair005",
+      "condition_b:pair006",
+      "condition_b:pair007",
+      "condition_b:pair008",
+      "condition_b:pair009"
+    ],
+    "experiment_id": "H-EV-AUTOND-REPRESENTATION",
+    "freeze_record": {
+      "frozen_at_utc": "2026-10-30T06:15:19.020228+00:00",
+      "frozen_config_hash": "f802d9429c163d40dc560cd3b394a9fe52f09d0b73d08cee10e15a32bd267428",
+      "frozen_permutation_hash": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+      "frozen_replicate_plan_hash": "246d58e2af8dfcca8af27d5b77793789e7519d77d6a2c5d825206c931f75e16e",
+      "frozen_statistical_plan_hash": "9447a8e269fcfed1d6d27c13a672d07d550b2fbc2a07f889a66ea0e01f0a905f"
+    },
+    "frozen": true,
+    "sealed_dataset_hashes": {
+      "pair000": "65ecc5d4fc749ba5b047c87d3889118ea37a431b729e3bce1e238ac6b9a904e1",
+      "pair001": "899ef6c3c618014658cbbf7202ee9381f4f29be2cdd27c4528f2c94c166dcb0f",
+      "pair002": "9815de39a065dcf144f5786b5ee0cb54b2c2456dff9f23740341fca5a5c5dd2a",
+      "pair003": "ecb700fd35bcbe159a94076f2ce7b6c746e97c012d80778af15f2fc4cac74dba",
+      "pair004": "fe7d0ca6d68f22771ce7c6ba2984dc09e27c0a9f914a5577531af7f934e80481",
+      "pair005": "fb4729373de9e1fff30c9a8f906b3a02a9b62e907e2b959450c8c447b09386c3",
+      "pair006": "fd1c6f29b35a0d5acb9be31fa62cbf500b7f88d0d547224ec60bcfd1a19203f4",
+      "pair007": "4988548bdfb43b0f8466815b99a1ebd58e91d08cf9eb07fc4e8a327f28da2dae",
+      "pair008": "f4b2a89a51111ce35018c1ad4a26568307db2f1ee803257c246cbefa3ac5722a",
+      "pair009": "ffbb87447c98b7eef37b60924fe2610135553add91097ecea5816b0a6d0b405e"
+    }
+  },
+  "generated_at_utc": "2026-10-30T13:29:20.242975+00:00",
+  "initial_weight_hashes": {
+    "pair000": [
+      "80745bbd8c2c8ed21dbf8dedf65346a5231b323b2fd8d58fd78e19ee13706eab",
+      "80745bbd8c2c8ed21dbf8dedf65346a5231b323b2fd8d58fd78e19ee13706eab"
+    ],
+    "pair001": [
+      "ca7d80472a897fb6691824fe9a867cf24f9108fa252da0929f04bc196327e7fd",
+      "ca7d80472a897fb6691824fe9a867cf24f9108fa252da0929f04bc196327e7fd"
+    ],
+    "pair002": [
+      "a0435192830bebfe3ab8847b76ca341927ad81fb0a96f2c6a3978fe6665106cf",
+      "a0435192830bebfe3ab8847b76ca341927ad81fb0a96f2c6a3978fe6665106cf"
+    ],
+    "pair003": [
+      "18a24285f3da86bc8076b236ef8ad111d1c30ed483f08c451fd6b55aa3909787",
+      "18a24285f3da86bc8076b236ef8ad111d1c30ed483f08c451fd6b55aa3909787"
+    ],
+    "pair004": [
+      "6e4e021e4c9e9ca8024fb249897cccff55e1269832feb8b77de341af341192ba",
+      "6e4e021e4c9e9ca8024fb249897cccff55e1269832feb8b77de341af341192ba"
+    ],
+    "pair005": [
+      "075ded444c900e67a010179d788afd434bb0592914dfa1ebae2ed12d91139188",
+      "075ded444c900e67a010179d788afd434bb0592914dfa1ebae2ed12d91139188"
+    ],
+    "pair006": [
+      "312f4261aa704d9036a5c168069c57f633754823327eba9ce1e4619dc3ea93f4",
+      "312f4261aa704d9036a5c168069c57f633754823327eba9ce1e4619dc3ea93f4"
+    ],
+    "pair007": [
+      "997850782e0f0257cc7419247000c77a6c333b88afde5360bc757acc52e949c4",
+      "997850782e0f0257cc7419247000c77a6c333b88afde5360bc757acc52e949c4"
+    ],
+    "pair008": [
+      "cef6fb5345d90c8863d2742f005bc6012633de3c481c2df1ca4ea35bc9f99c0a",
+      "cef6fb5345d90c8863d2742f005bc6012633de3c481c2df1ca4ea35bc9f99c0a"
+    ],
+    "pair009": [
+      "0111b6dc6c3427331ddd7bdb8faa848d80441c0d46b944be02925694d602372d",
+      "0111b6dc6c3427331ddd7bdb8faa848d80441c0d46b944be02925694d602372d"
+    ]
+  },
+  "is_evidentiary": false,
+  "limitations": [
+    "one training stage at round 5 from a fresh initialisation; upstream's staged multi-round loop (weight transfer between rounds, stopping rule) is not run",
+    "outcome is accuracy of the final-epoch model on an independent 10**6-row confirmatory test set; upstream reports max validation accuracy and keeps the min-val_loss checkpoint per round",
+    "TensorFlow is seeded per model with tf.keras.utils.set_random_seed (upstream is unseeded); GPU kernels remain nondeterministic and no op-determinism flag is set",
+    "datasets are persisted once per replicate/pair and reloaded hash-verified, so both arms of a pair and any resumed unit use the identical data",
+    "shuffle is passed explicitly; the baseline value is upstream's model.fit default (True)",
+    "a non-significant difference without formal equivalence is INCONCLUSIVE, never evidence of no effect",
+    "decisions in a per-experiment certificate are provisional (raw alpha); the final paired decisions come from the AutoND primary-family Holm correction",
+    "exact replay is unavailable: datasets come from os.urandom; the persisted arrays are the reference"
+  ],
+  "manifest": {
+    "alpha": 0.05,
+    "architecture": "dbitnet",
+    "cipher": "speck3264",
+    "condition": [
+      "condition_a",
+      "condition_b"
+    ],
+    "config_hash": "f802d9429c163d40dc560cd3b394a9fe52f09d0b73d08cee10e15a32bd267428",
+    "controls": [
+      "dataset (shared by both arms of a pair)",
+      "model seed (shared by both arms of a pair)",
+      "shuffle=True",
+      "round 5",
+      "DBitNet",
+      "Adam(amsgrad=True)",
+      "MSE",
+      "epochs",
+      "batch size",
+      "software environment"
+    ],
+    "dataset_generation_method": "os.urandom via main.make_train_data",
+    "dataset_hash": {
+      "pair000": {
+        "test": "65ecc5d4fc749ba5b047c87d3889118ea37a431b729e3bce1e238ac6b9a904e1",
+        "train": "6131c446c3d1f2b4f81226bc84d07a7af14ff2acceee49522333089927210a47",
+        "validation": "f5868de18e9d0284c5e74f98cea2b8824d56a64ee38a228e7245978850a7cb28"
+      },
+      "pair001": {
+        "test": "899ef6c3c618014658cbbf7202ee9381f4f29be2cdd27c4528f2c94c166dcb0f",
+        "train": "69c3381b39cdf1f07bd49cad239477894648ce0646a9e99d0d9f56158ba6db1f",
+        "validation": "d56ab30a9554f3ff61b91dcd00e356cca468aa63acd431853d80ee5294c55f7d"
+      },
+      "pair002": {
+        "test": "9815de39a065dcf144f5786b5ee0cb54b2c2456dff9f23740341fca5a5c5dd2a",
+        "train": "54fc80738c4b6926ec1655dd6bf2e90f604ddb32f78916291581fbb449762b76",
+        "validation": "7fb24301fd931da9e3e693f84b89c60ce2ff8c1e8bcb8b3c6ac74e19f4e4716b"
+      },
+      "pair003": {
+        "test": "ecb700fd35bcbe159a94076f2ce7b6c746e97c012d80778af15f2fc4cac74dba",
+        "train": "8b319dc0f4ea654ec83040ad94fa7031da03c6856de2aa41e14e1356c4281fbb",
+        "validation": "93ac2b4095b201e19226d6400d9f03fbb3836e295ef635f4bd8ca0bb61a2dbee"
+      },
+      "pair004": {
+        "test": "fe7d0ca6d68f22771ce7c6ba2984dc09e27c0a9f914a5577531af7f934e80481",
+        "train": "f66b275d272894d9bb6be83fcffd8a5944ccf6ec5cd02866d22968843b10767c",
+        "validation": "ee65a828f1f4b0e03e887dd3952be22e53046f6ff5644edbc5a74297bfd29c79"
+      },
+      "pair005": {
+        "test": "fb4729373de9e1fff30c9a8f906b3a02a9b62e907e2b959450c8c447b09386c3",
+        "train": "a9b4dbaa9e0bbba74892abf23db378cc281a0f3990546f7afb93b7e197605229",
+        "validation": "fd0248903ee7a0dcf1398909fcf6190c97d7b54793946e86c710a7d3c386174a"
+      },
+      "pair006": {
+        "test": "fd1c6f29b35a0d5acb9be31fa62cbf500b7f88d0d547224ec60bcfd1a19203f4",
+        "train": "2ea4355e1ea36f6c2b5df0bdb977f54688cb9c58fd8b4c42e89b686faed68d8d",
+        "validation": "37913faaa5df0f3fe957a34bc29e7df4c8392aaf3c70bbc433af2d7413b82952"
+      },
+      "pair007": {
+        "test": "4988548bdfb43b0f8466815b99a1ebd58e91d08cf9eb07fc4e8a327f28da2dae",
+        "train": "347a2c638c1416f6c467ed0c13b303d44c06339b54829c22f5f8dcc23989187f",
+        "validation": "ea2751535b93b5babb17c403a187f9eb885bfac64b72025b7a070cdd52817d49"
+      },
+      "pair008": {
+        "test": "f4b2a89a51111ce35018c1ad4a26568307db2f1ee803257c246cbefa3ac5722a",
+        "train": "b9a748e517326fe6fef68b4310c754fefb116fd88af8857e0f790eb5e8a668ac",
+        "validation": "cf5d84937286b82ac8d5212b97cd207a70a9127624bf421a038ebde5b80773ea"
+      },
+      "pair009": {
+        "test": "ffbb87447c98b7eef37b60924fe2610135553add91097ecea5816b0a6d0b405e",
+        "train": "9ddacb4fa945be552e8386afdc83c923a7cf5e7987795089d26d0698e5daaae7",
+        "validation": "c8e0b175451253e4728cc917d7aadc01d56e62549355d80f35dcd8e74386deaf"
+      }
+    },
+    "dataset_id": "autond-speck3264",
+    "dataset_role": "matched_per_pair",
+    "dataset_seed": null,
+    "dataset_size": {
+      "test": 1000000,
+      "train": 10000000,
+      "validation": 1000000
+    },
+    "decision": "SUPPORTED",
+    "dependent_variable": "confirmatory_test_accuracy",
+    "depth": null,
+    "differential": "0x400000",
+    "evaluation_seed_if_available": null,
+    "exact_replay_available": false,
+    "experiment_id": "H-EV-AUTOND-REPRESENTATION",
+    "experiment_version": "1",
+    "failure_status": "valid",
+    "hypothesis_id": "H-EV-AUTOND-REPRESENTATION",
+    "independent_variable": "representation",
+    "limitations": [
+      "one training stage at round 5 from a fresh initialisation; upstream's staged multi-round loop (weight transfer between rounds, stopping rule) is not run",
+      "outcome is accuracy of the final-epoch model on an independent 10**6-row confirmatory test set; upstream reports max validation accuracy and keeps the min-val_loss checkpoint per round",
+      "TensorFlow is seeded per model with tf.keras.utils.set_random_seed (upstream is unseeded); GPU kernels remain nondeterministic and no op-determinism flag is set",
+      "datasets are persisted once per replicate/pair and reloaded hash-verified, so both arms of a pair and any resumed unit use the identical data",
+      "shuffle is passed explicitly; the baseline value is upstream's model.fit default (True)",
+      "a non-significant difference without formal equivalence is INCONCLUSIVE, never evidence of no effect",
+      "decisions in a per-experiment certificate are provisional (raw alpha); the final paired decisions come from the AutoND primary-family Holm correction",
+      "exact replay is unavailable: datasets come from os.urandom; the persisted arrays are the reference"
+    ],
+    "methodology_version": "ciphermind-methodology-v1",
+    "model_seed": {
+      "base": 92000,
+      "shared_across_units": false
+    },
+    "practical_threshold": 0.01,
+    "practical_threshold_status": "PREDECLARED",
+    "raw_metrics": {
+      "condition_a": [
+        0.91815,
+        0.918905,
+        0.919064,
+        0.918982,
+        0.918645,
+        0.918713,
+        0.918969,
+        0.918376,
+        0.918672,
+        0.918648
+      ],
+      "condition_b": [
+        0.784578,
+        0.785463,
+        0.785467,
+        0.785016,
+        0.785413,
+        0.784732,
+        0.784815,
+        0.785246,
+        0.785138,
+        0.785189
+      ]
+    },
+    "replicate_id": "aggregate",
+    "rounds": 5,
+    "run_id": "f802d9429c163d40dc560cd3b394a9fe52f09d0b73d08cee10e15a32bd267428",
+    "shuffle_seed_if_available": null,
+    "software_versions": {
+      "git_commit": "fb539bc83d605cf1200fb2eed3640bc2dcbed9d2",
+      "hardware": "x86_64",
+      "keras_version": "2.15.0",
+      "numpy_version": "1.26.4",
+      "os": "Linux-6.18.55+-x86_64-with-glibc2.39",
+      "python_version": "3.11.17 (main, Oct 21 2026, 17:46:53) [Clang 23.1.3 ]",
+      "tensorflow_version": "2.15.1"
+    },
+    "statistics_seed": 54,
+    "task": "neural_ciphertext_distinguisher",
+    "timestamps": {
+      "certified": "2026-10-30T13:29:20.242893+00:00"
+    },
+    "warnings": []
+  },
+  "narrative": {
+    "controls": [
+      "dataset (shared by both arms of a pair)",
+      "model seed (shared by both arms of a pair)",
+      "shuffle=True",
+      "round 5",
+      "DBitNet",
+      "Adam(amsgrad=True)",
+      "MSE",
+      "epochs",
+      "batch size",
+      "software environment"
+    ],
+    "dataset": {
+      "role": "matched_per_pair",
+      "sizes": {
+        "test": 1000000,
+        "train": 10000000,
+        "validation": 1000000
+      }
+    },
+    "exact_replay_available": false,
+    "hypothesis": "DBitNet's dilated convolutions relate input positions at fixed distances; if the natural alignment of corresponding bits across the four ciphertext words, rather than information in the ciphertext pair, drives performance, scrambling bit positions within each word should materially reduce accuracy.",
+    "unit_of_replication": "matched pair of independently trained models (shared dataset, model initialization, evaluation data; independent training shuffle stream)",
+    "what_changed": "representation: original encoding -> frozen within-word bit permutation (autond.representation)",
+    "what_was_tested": "Under the fixed DBitNet architecture and round-5 protocol, whether a fixed, information-preserving within-word bit permutation of the input produces a practically meaningful change in confirmatory distinguishing accuracy."
+  },
+  "non_evidentiary": true,
+  "permutation": {
+    "convention": "destination column j of word w receives source column mapping[w][j]",
+    "mapping": [
+      [
+        7,
+        9,
+        2,
+        15,
+        14,
+        8,
+        4,
+        5,
+        10,
+        1,
+        0,
+        3,
+        6,
+        12,
+        11,
+        13
+      ],
+      [
+        10,
+        15,
+        11,
+        7,
+        1,
+        2,
+        9,
+        12,
+        6,
+        4,
+        8,
+        3,
+        13,
+        5,
+        0,
+        14
+      ],
+      [
+        12,
+        4,
+        10,
+        2,
+        1,
+        3,
+        6,
+        11,
+        5,
+        15,
+        13,
+        14,
+        0,
+        7,
+        8,
+        9
+      ],
+      [
+        6,
+        15,
+        7,
+        3,
+        10,
+        8,
+        1,
+        11,
+        2,
+        14,
+        12,
+        5,
+        9,
+        13,
+        4,
+        0
+      ]
+    ],
+    "sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+    "words": [
+      "C0_left",
+      "C0_right",
+      "C1_left",
+      "C1_right"
+    ]
+  },
+  "plan": {
+    "batch_size": 5000,
+    "epochs": 10,
+    "minimum_valid": 10,
+    "seed": 92000,
+    "sizes": {
+      "test": 1000000,
+      "train": 10000000,
+      "validation": 1000000
+    },
+    "units": 10
+  },
+  "practical_significance": {
+    "assessment": {
+      "formal_practical_equivalence": "INCONCLUSIVE",
+      "justification": "The practical-effect margin is one percentage point of absolute held-out accuracy. It follows the audit-wide margin previously adopted for II-4, using the same accuracy metric. This is a prospective methodological judgment, not a universal literature-derived threshold, and is not based on calibration variability or observed EV outcomes.",
+      "threshold": 0.01,
+      "tost": {
+        "alpha": 0.05,
+        "degrees_of_freedom": 9,
+        "epsilon": 0.01,
+        "equivalent": false,
+        "mean_diff": -0.1336067,
+        "method": "TOST (Schuirmann 1987; Lakens 2017)",
+        "n_pairs": 10,
+        "p_lower": 1.0,
+        "p_tost": 1.0,
+        "p_upper": 1.5180228871257704e-25,
+        "se_diff": 0.00010498159097881957
+      }
+    },
+    "predeclared": true
+  },
+  "production_hash": null,
+  "provenance": {
+    "representation_validation": {
+      "all_passed": true,
+      "bijection": true,
+      "content_preserved": true,
+      "deterministic": true,
+      "dtype_and_shape_preserved": true,
+      "labels_unchanged": true,
+      "round_trip": true,
+      "sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427"
+    },
+    "software": {
+      "git_commit": "fb539bc83d605cf1200fb2eed3640bc2dcbed9d2",
+      "hardware": "x86_64",
+      "keras_version": "2.15.0",
+      "numpy_version": "1.26.4",
+      "os": "Linux-6.18.55+-x86_64-with-glibc2.39",
+      "python_version": "3.11.17 (main, Oct 21 2026, 17:46:53) [Clang 23.1.3 ]",
+      "tensorflow_version": "2.15.1"
+    },
+    "source_identity": {
+      "files": {
+        "audit/dataset/adapters/autond.py": {
+          "clean_at_head": true,
+          "sha256": "be81a5dc0f1f8f68a68fdc1bd7884ada90578c634b9d97150251e70732bd9dd1"
+        },
+        "audit/dataset/experiments/d0_autond_canonical.py": {
+          "clean_at_head": true,
+          "sha256": "f5145ed28a9be250b60e9c39ef71efdd986e8b77cc8a994ebdb2f311857f8b20"
+        },
+        "audit/dataset/integrity.py": {
+          "clean_at_head": true,
+          "sha256": "e1bf42ccadb7a8a8c961b8dcea1f6dd245d5278203c191ebbca0163d2db0caff"
+        },
+        "audit/experimental_validity/autond/__init__.py": {
+          "clean_at_head": true,
+          "sha256": "e181d9a80233d66003ed1d41c2f6abc7f65443ef61cf5756748723ef4378be7a"
+        },
+        "audit/experimental_validity/autond/adapter.py": {
+          "clean_at_head": true,
+          "sha256": "80ac6e4ddc28a9a0700c223f852196c76cbfd8e6645f52e788a8a8dde1304885"
+        },
+        "audit/experimental_validity/autond/baseline.py": {
+          "clean_at_head": true,
+          "sha256": "fd9e24e9ae71d22c5c757b9afc1b1fca1eebb66c3160b55022fd30d08ff40f81"
+        },
+        "audit/experimental_validity/autond/calibration.py": {
+          "clean_at_head": true,
+          "sha256": "938685574b00be24c8d2f202934117b56fe4da7ceb9415d6d0f752d093220930"
+        },
+        "audit/experimental_validity/autond/experiments.py": {
+          "clean_at_head": true,
+          "sha256": "0bbb5cb217e81e29bddbf4b3a385edfbe27e3097fcf01bffaa8de938918d433f"
+        },
+        "audit/experimental_validity/autond/representation.py": {
+          "clean_at_head": true,
+          "sha256": "989f5590ca16f51233b6b5b4980ab0cb5302234ead12eebad2dac6e7d098f085"
+        },
+        "audit/experimental_validity/autond/runner.py": {
+          "clean_at_head": true,
+          "sha256": "c81bc37b9d2cb1a3fa8de182aa0dea50b88c354c4b6abc05ff3e36b483ba96aa"
+        },
+        "audit/experimental_validity/configs/autond_ev.yaml": {
+          "clean_at_head": true,
+          "sha256": "2dc840994e08a20835605d021ccf3a5d5e6fc58db9d28a941f9320a422568658"
+        },
+        "audit/experimental_validity/framework/certificate.py": {
+          "clean_at_head": true,
+          "sha256": "89bb95feb652fb38c1fbca113ba736e1b154911ad8c02d1aabc3c784a62bcbc5"
+        },
+        "audit/experimental_validity/framework/confidence_intervals.py": {
+          "clean_at_head": true,
+          "sha256": "8b62bca6ee4ebb3e583a71a7708d3639ca459bb9be837ece923c73ac0a076af0"
+        },
+        "audit/experimental_validity/framework/effect_sizes.py": {
+          "clean_at_head": true,
+          "sha256": "2fdbc46da804c6b32dffb961bd2801c8e226b11badd13afd26d021f381185bf3"
+        },
+        "audit/experimental_validity/framework/experiment.py": {
+          "clean_at_head": true,
+          "sha256": "a3e96cb282f72594aad094ed7551575abf556bce282c7aabaf386cdd6eb036b7"
+        },
+        "audit/experimental_validity/framework/failures.py": {
+          "clean_at_head": true,
+          "sha256": "1304c19ba3a5a6e8ebec6cb50ea3f153746e872337f0f32e6564d7a86ad3462a"
+        },
+        "audit/experimental_validity/framework/firewall.py": {
+          "clean_at_head": true,
+          "sha256": "6e40ad7c8f6119a6c50eb12155db980a76e6afb0a73a9ee2b93b97b2b17a6b62"
+        },
+        "audit/experimental_validity/framework/manifest.py": {
+          "clean_at_head": true,
+          "sha256": "f32e5a0616dabf340142c1f42a707cad235f729cabc7fd1513cb7fa1cc37a4a5"
+        },
+        "audit/experimental_validity/framework/multiplicity.py": {
+          "clean_at_head": true,
+          "sha256": "ed72ef24249e2d3d2baf94c731826e3f68bea2f73c375a7ebc5e4ba5cfbc6b17"
+        },
+        "audit/experimental_validity/framework/power.py": {
+          "clean_at_head": true,
+          "sha256": "64b392081f4ae54759434943fe9faf5c5685349d43eaef3e956f0a7a7890b6da"
+        },
+        "audit/experimental_validity/framework/provenance.py": {
+          "clean_at_head": true,
+          "sha256": "f11532ee048c6fd0ea22b851e6609e4ce2470eecc506f645799b9ed2be9cf8a9"
+        },
+        "audit/experimental_validity/framework/replication.py": {
+          "clean_at_head": true,
+          "sha256": "ebab3c9a1599ce47ffb95fa3ac505c07a8c54fc6b3a5abb3feffbc67fb4b230b"
+        },
+        "audit/experimental_validity/framework/resumability.py": {
+          "clean_at_head": true,
+          "sha256": "e87a8e980748a5653cdfcc02122bda38f6e2f175790a0d60b9f49156cc8f8feb"
+        },
+        "audit/experimental_validity/framework/seeds.py": {
+          "clean_at_head": true,
+          "sha256": "bee8f408f4b152681ac6df182aef840635904044daccd8e8031009e33248e5fd"
+        },
+        "audit/experimental_validity/framework/statistics.py": {
+          "clean_at_head": true,
+          "sha256": "07389b7fc550c9dddeac28f8ff87990b15204528ca39169fda510c4a080121e9"
+        },
+        "audit/experimental_validity/framework/validation.py": {
+          "clean_at_head": true,
+          "sha256": "0abc6d8cb1892a939074a439f9e38476f7406fb90f0ba0e26b6bcb7d1f75bd56"
+        }
+      },
+      "git_head": "fb539bc83d605cf1200fb2eed3640bc2dcbed9d2"
+    },
+    "upstream": {
+      "bound_source_digests": {
+        "ciphers/speck3264.py": "fd4a04be7fb632cea422338e6ae8446e421049649944f9dab87cc05e0e5ca9fe",
+        "dbitnet.py": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+        "gohrnet.py": "324c3768e19a6230dbedbe0446f54c6139d72f5dc642f5cfb60a8fa9a9ea1d56",
+        "main.py": "52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665",
+        "optimizer.py": "2d58e4fd94973040e1ead21166b188527b6935d499a7a818a3c613ac4888d505",
+        "train_nets.py": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e"
+      },
+      "commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+    }
+  },
+  "raw_paired_values": {
+    "condition_a": [
+      0.91815,
+      0.918905,
+      0.919064,
+      0.918982,
+      0.918645,
+      0.918713,
+      0.918969,
+      0.918376,
+      0.918672,
+      0.918648
+    ],
+    "condition_b": [
+      0.784578,
+      0.785463,
+      0.785467,
+      0.785016,
+      0.785413,
+      0.784732,
+      0.784815,
+      0.785246,
+      0.785138,
+      0.785189
+    ]
+  },
+  "replication": {
+    "raw_replicate_results": [
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.91815,
+            "dataset_sha256": {
+              "test": "65ecc5d4fc749ba5b047c87d3889118ea37a431b729e3bce1e238ac6b9a904e1",
+              "train": "6131c446c3d1f2b4f81226bc84d07a7af14ff2acceee49522333089927210a47",
+              "validation": "f5868de18e9d0284c5e74f98cea2b8824d56a64ee38a228e7245978850a7cb28"
+            },
+            "failure": null,
+            "final_model_sha256": "255dd9d79f1734a7506f03edadc6e26c2b07e3c147e03c459dee82ecdec85c59",
+            "final_weight_sha256": "e36ee984c517f83dd69f05bc6b8c8e152ce75b6fc1ec3356f5b9c9e6d45eff84",
+            "history": {
+              "acc": [
+                0.875529408454895,
+                0.9075143933296204,
+                0.9150679707527161,
+                0.9169905185699463,
+                0.9174699187278748,
+                0.917865514755249,
+                0.9180147051811218,
+                0.9181923270225525,
+                0.9183542132377625,
+                0.9185060262680054
+              ],
+              "loss": [
+                0.09842626005411148,
+                0.07563389837741852,
+                0.06814222782850266,
+                0.06569535285234451,
+                0.0649738535284996,
+                0.0645509585738182,
+                0.06425019353628159,
+                0.06402870267629623,
+                0.06385472416877747,
+                0.06370434165000916
+              ],
+              "val_acc": [
+                0.894245982170105,
+                0.911719024181366,
+                0.9162229895591736,
+                0.9165369868278503,
+                0.9170960187911987,
+                0.9172520041465759,
+                0.9174929857254028,
+                0.9178040027618408,
+                0.9180219769477844,
+                0.9178910255432129
+              ],
+              "val_loss": [
+                0.08574134111404419,
+                0.07170850038528442,
+                0.06650647521018982,
+                0.0656733363866806,
+                0.0650390237569809,
+                0.064782053232193,
+                0.06455688923597336,
+                0.06432774662971497,
+                0.06412728875875473,
+                0.06417878717184067
+              ]
+            },
+            "initial_weight_sha256": "80745bbd8c2c8ed21dbf8dedf65346a5231b323b2fd8d58fd78e19ee13706eab",
+            "input_sha256": {
+              "test": "65ecc5d4fc749ba5b047c87d3889118ea37a431b729e3bce1e238ac6b9a904e1",
+              "train": "6131c446c3d1f2b4f81226bc84d07a7af14ff2acceee49522333089927210a47",
+              "validation": "f5868de18e9d0284c5e74f98cea2b8824d56a64ee38a228e7245978850a7cb28"
+            },
+            "model_seed": 92000,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.784578,
+            "dataset_sha256": {
+              "test": "65ecc5d4fc749ba5b047c87d3889118ea37a431b729e3bce1e238ac6b9a904e1",
+              "train": "6131c446c3d1f2b4f81226bc84d07a7af14ff2acceee49522333089927210a47",
+              "validation": "f5868de18e9d0284c5e74f98cea2b8824d56a64ee38a228e7245978850a7cb28"
+            },
+            "failure": null,
+            "final_model_sha256": "28e9472ddcbb586ec4ed77052cec373ca2fc9191bbe3dfbf15a00c2ea59cc249",
+            "final_weight_sha256": "decad2dba700d2dd21b2cbd690ecbe45f49f7db315ff16f8a2e1169ae3362c57",
+            "history": {
+              "acc": [
+                0.7757821083068848,
+                0.7830318212509155,
+                0.7834748029708862,
+                0.7837420701980591,
+                0.7841001152992249,
+                0.7843452095985413,
+                0.7845463752746582,
+                0.784738302230835,
+                0.7849109768867493,
+                0.7850826978683472
+              ],
+              "loss": [
+                0.16048087179660797,
+                0.15156488120555878,
+                0.15028749406337738,
+                0.14975816011428833,
+                0.14945589005947113,
+                0.14925594627857208,
+                0.14910262823104858,
+                0.14896583557128906,
+                0.14884305000305176,
+                0.14873909950256348
+              ],
+              "val_acc": [
+                0.7828080058097839,
+                0.7833880186080933,
+                0.7832850217819214,
+                0.7841699719429016,
+                0.7840880155563354,
+                0.7844499945640564,
+                0.7843210101127625,
+                0.7840890288352966,
+                0.7846770286560059,
+                0.7850319743156433
+              ],
+              "val_loss": [
+                0.15283872187137604,
+                0.15063431859016418,
+                0.15004166960716248,
+                0.1496315747499466,
+                0.14934983849525452,
+                0.14936994016170502,
+                0.14913612604141235,
+                0.14910949766635895,
+                0.14888903498649597,
+                0.1488143503665924
+              ]
+            },
+            "initial_weight_sha256": "80745bbd8c2c8ed21dbf8dedf65346a5231b323b2fd8d58fd78e19ee13706eab",
+            "input_sha256": {
+              "test": "e6c336d1a4c52c9af2dd503ea5727b98ba403a025cf781fb0188b9f8cdc8ae68",
+              "train": "e8eb5fbd850940f0ee9acebed54ad68b33fdccca9acd7098da7421ad38bae38b",
+              "validation": "9c57d9ff2c3d8d090a95934fb19ab88ea464973649a1cf9a254cd11909782a90"
+            },
+            "model_seed": 92000,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      },
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.918905,
+            "dataset_sha256": {
+              "test": "899ef6c3c618014658cbbf7202ee9381f4f29be2cdd27c4528f2c94c166dcb0f",
+              "train": "69c3381b39cdf1f07bd49cad239477894648ce0646a9e99d0d9f56158ba6db1f",
+              "validation": "d56ab30a9554f3ff61b91dcd00e356cca468aa63acd431853d80ee5294c55f7d"
+            },
+            "failure": null,
+            "final_model_sha256": "ff6f1d37dd14e7de8a3605781a0b6c7310d7f8f91c15b1e042d2a215ae4c0601",
+            "final_weight_sha256": "68a75d58363e7e950474b10c9a48d7bdeac47e8590905db0d7da6e3a73ebc87a",
+            "history": {
+              "acc": [
+                0.8730229735374451,
+                0.9008941054344177,
+                0.9156093001365662,
+                0.9172316789627075,
+                0.9177041053771973,
+                0.9180651903152466,
+                0.9183685779571533,
+                0.9186089038848877,
+                0.9188632965087891,
+                0.9190359115600586
+              ],
+              "loss": [
+                0.09990344941616058,
+                0.07948122173547745,
+                0.06738169491291046,
+                0.06537409871816635,
+                0.0647631287574768,
+                0.06432334333658218,
+                0.06397662311792374,
+                0.06372392177581787,
+                0.06351695954799652,
+                0.06333542615175247
+              ],
+              "val_acc": [
+                0.8871039748191833,
+                0.9126700162887573,
+                0.9171059727668762,
+                0.9174829721450806,
+                0.9178339838981628,
+                0.918192982673645,
+                0.9183040261268616,
+                0.918632984161377,
+                0.9187989830970764,
+                0.9188860058784485
+              ],
+              "val_loss": [
+                0.08876018226146698,
+                0.07048057019710541,
+                0.06582973897457123,
+                0.06494742631912231,
+                0.06444241851568222,
+                0.06413797289133072,
+                0.0639602467417717,
+                0.06372298300266266,
+                0.06345335394144058,
+                0.06333578377962112
+              ]
+            },
+            "initial_weight_sha256": "ca7d80472a897fb6691824fe9a867cf24f9108fa252da0929f04bc196327e7fd",
+            "input_sha256": {
+              "test": "899ef6c3c618014658cbbf7202ee9381f4f29be2cdd27c4528f2c94c166dcb0f",
+              "train": "69c3381b39cdf1f07bd49cad239477894648ce0646a9e99d0d9f56158ba6db1f",
+              "validation": "d56ab30a9554f3ff61b91dcd00e356cca468aa63acd431853d80ee5294c55f7d"
+            },
+            "model_seed": 92001,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.785463,
+            "dataset_sha256": {
+              "test": "899ef6c3c618014658cbbf7202ee9381f4f29be2cdd27c4528f2c94c166dcb0f",
+              "train": "69c3381b39cdf1f07bd49cad239477894648ce0646a9e99d0d9f56158ba6db1f",
+              "validation": "d56ab30a9554f3ff61b91dcd00e356cca468aa63acd431853d80ee5294c55f7d"
+            },
+            "failure": null,
+            "final_model_sha256": "580b284099be9dfb73bec5d2a01df415780077b5016d507f095bfcac400a4b64",
+            "final_weight_sha256": "25c6d9bea8c391b87a2b6211e35fcaee8724c321455ee39fa7165f5f75f10beb",
+            "history": {
+              "acc": [
+                0.7754114866256714,
+                0.7833948135375977,
+                0.7837594151496887,
+                0.7842323780059814,
+                0.7845903038978577,
+                0.7848154902458191,
+                0.7850179076194763,
+                0.7851557731628418,
+                0.7851364016532898,
+                0.785312294960022
+              ],
+              "loss": [
+                0.16034528613090515,
+                0.15126508474349976,
+                0.1500001847743988,
+                0.14949050545692444,
+                0.14921990036964417,
+                0.14903652667999268,
+                0.1488945633172989,
+                0.14877472817897797,
+                0.14865896105766296,
+                0.1485510617494583
+              ],
+              "val_acc": [
+                0.7827349901199341,
+                0.7838220000267029,
+                0.7832329869270325,
+                0.7843049764633179,
+                0.7840830087661743,
+                0.7843700051307678,
+                0.784621000289917,
+                0.7843340039253235,
+                0.784758985042572,
+                0.7846869826316833
+              ],
+              "val_loss": [
+                0.152963787317276,
+                0.1505531668663025,
+                0.14987505972385406,
+                0.14943750202655792,
+                0.14932172000408173,
+                0.14927761256694794,
+                0.14898481965065002,
+                0.14895813167095184,
+                0.14889191091060638,
+                0.148747518658638
+              ]
+            },
+            "initial_weight_sha256": "ca7d80472a897fb6691824fe9a867cf24f9108fa252da0929f04bc196327e7fd",
+            "input_sha256": {
+              "test": "b3e5a99b0f8f822c8ae60bc87e7c47523d9e8ca8b1d61f05adbb0af6ba9d81ff",
+              "train": "e43197650a7db9c9baa84b288a62e72f41fc81b4b8208799602807760db7ab37",
+              "validation": "639e6c23d9ed635d9e08ae208e5658bf7a9259367ea5656b8b8762b0b38d9294"
+            },
+            "model_seed": 92001,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      },
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.919064,
+            "dataset_sha256": {
+              "test": "9815de39a065dcf144f5786b5ee0cb54b2c2456dff9f23740341fca5a5c5dd2a",
+              "train": "54fc80738c4b6926ec1655dd6bf2e90f604ddb32f78916291581fbb449762b76",
+              "validation": "7fb24301fd931da9e3e693f84b89c60ce2ff8c1e8bcb8b3c6ac74e19f4e4716b"
+            },
+            "failure": null,
+            "final_model_sha256": "25f63f9f49800365b510f1b37c7716f3ee3e8c6d6e7d33d5ec8bb5b2e7613dc0",
+            "final_weight_sha256": "638d99bad88a2627e971f9c3aef15c01d0352bd3d0965723b4ab32524da8ea2c",
+            "history": {
+              "acc": [
+                0.8751419186592102,
+                0.8868123292922974,
+                0.902489423751831,
+                0.912499725818634,
+                0.915783703327179,
+                0.9163352847099304,
+                0.9173917770385742,
+                0.9185782074928284,
+                0.9191045165061951,
+                0.9193335175514221
+              ],
+              "loss": [
+                0.09869953244924545,
+                0.08779662102460861,
+                0.07782017439603806,
+                0.06995461136102676,
+                0.06670662015676498,
+                0.06603939086198807,
+                0.06507571041584015,
+                0.06393958628177643,
+                0.06345310807228088,
+                0.06316737830638885
+              ],
+              "val_acc": [
+                0.886493980884552,
+                0.8875190019607544,
+                0.9097030162811279,
+                0.9152719974517822,
+                0.9159989953041077,
+                0.9164320230484009,
+                0.9179450273513794,
+                0.918578028678894,
+                0.9190970063209534,
+                0.9191920161247253
+              ],
+              "val_loss": [
+                0.0887170284986496,
+                0.08718414604663849,
+                0.07254785299301147,
+                0.06729058921337128,
+                0.06644083559513092,
+                0.06588272750377655,
+                0.06456159800291061,
+                0.06393620371818542,
+                0.06342308223247528,
+                0.06324227899312973
+              ]
+            },
+            "initial_weight_sha256": "a0435192830bebfe3ab8847b76ca341927ad81fb0a96f2c6a3978fe6665106cf",
+            "input_sha256": {
+              "test": "9815de39a065dcf144f5786b5ee0cb54b2c2456dff9f23740341fca5a5c5dd2a",
+              "train": "54fc80738c4b6926ec1655dd6bf2e90f604ddb32f78916291581fbb449762b76",
+              "validation": "7fb24301fd931da9e3e693f84b89c60ce2ff8c1e8bcb8b3c6ac74e19f4e4716b"
+            },
+            "model_seed": 92002,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.785467,
+            "dataset_sha256": {
+              "test": "9815de39a065dcf144f5786b5ee0cb54b2c2456dff9f23740341fca5a5c5dd2a",
+              "train": "54fc80738c4b6926ec1655dd6bf2e90f604ddb32f78916291581fbb449762b76",
+              "validation": "7fb24301fd931da9e3e693f84b89c60ce2ff8c1e8bcb8b3c6ac74e19f4e4716b"
+            },
+            "failure": null,
+            "final_model_sha256": "2ce30369d0e1226f352de83ac134009e62259b6f5ff6d21166a6e4212757ba05",
+            "final_weight_sha256": "6a324e58ee002e5303c14068bc89ed5a34fcb46a37829c924a0462b3edf0e5d8",
+            "history": {
+              "acc": [
+                0.7741848826408386,
+                0.7831081748008728,
+                0.7835198044776917,
+                0.7841067910194397,
+                0.7844858765602112,
+                0.7847353219985962,
+                0.7849677205085754,
+                0.7850623726844788,
+                0.7852783203125,
+                0.785374104976654
+              ],
+              "loss": [
+                0.16210079193115234,
+                0.15140458941459656,
+                0.15010063350200653,
+                0.14953236281871796,
+                0.1492576003074646,
+                0.14906366169452667,
+                0.14889375865459442,
+                0.14876925945281982,
+                0.14864349365234375,
+                0.1485278457403183
+              ],
+              "val_acc": [
+                0.7833750247955322,
+                0.7840189933776855,
+                0.784591019153595,
+                0.7849000096321106,
+                0.7850630283355713,
+                0.7854160070419312,
+                0.7848219871520996,
+                0.7857409715652466,
+                0.7854999899864197,
+                0.7860400080680847
+              ],
+              "val_loss": [
+                0.15255175530910492,
+                0.1502307653427124,
+                0.1494121104478836,
+                0.14916981756687164,
+                0.1490667760372162,
+                0.14873237907886505,
+                0.1487542688846588,
+                0.14852800965309143,
+                0.14841493964195251,
+                0.1482911854982376
+              ]
+            },
+            "initial_weight_sha256": "a0435192830bebfe3ab8847b76ca341927ad81fb0a96f2c6a3978fe6665106cf",
+            "input_sha256": {
+              "test": "e5b9691d323a49f904c75bdf5073f2d25d5160cd5bfa97e06dc35aabedb1de5f",
+              "train": "477bcfc70aff98c5ab92dcd7ffacd0a83087fbf3faf2124ddd77f6a1c923994d",
+              "validation": "2963f0918fbd89c264560565589f3d6d428ca377aee270c82fe4d87341181dde"
+            },
+            "model_seed": 92002,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      },
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.918982,
+            "dataset_sha256": {
+              "test": "ecb700fd35bcbe159a94076f2ce7b6c746e97c012d80778af15f2fc4cac74dba",
+              "train": "8b319dc0f4ea654ec83040ad94fa7031da03c6856de2aa41e14e1356c4281fbb",
+              "validation": "93ac2b4095b201e19226d6400d9f03fbb3836e295ef635f4bd8ca0bb61a2dbee"
+            },
+            "failure": null,
+            "final_model_sha256": "1ca8496023f956728ba605527919cf6570cac09d8cecd34b086a1b1724b3e6e7",
+            "final_weight_sha256": "199f00f5d37e105a860f9229dbe3f4f0dd5969ded142c528061400af4d1f1d36",
+            "history": {
+              "acc": [
+                0.8749606013298035,
+                0.9026886820793152,
+                0.9095805287361145,
+                0.9121729135513306,
+                0.9156947731971741,
+                0.9163163900375366,
+                0.9175071120262146,
+                0.918319821357727,
+                0.9187378883361816,
+                0.9191356897354126
+              ],
+              "loss": [
+                0.09898991137742996,
+                0.07861495018005371,
+                0.07254678755998611,
+                0.07012748718261719,
+                0.06678670644760132,
+                0.06601197272539139,
+                0.06483562290668488,
+                0.06406067311763763,
+                0.0636400431394577,
+                0.06330325454473495
+              ],
+              "val_acc": [
+                0.8879449963569641,
+                0.9089969992637634,
+                0.9099799990653992,
+                0.9153010249137878,
+                0.9159520268440247,
+                0.9164909720420837,
+                0.917818009853363,
+                0.9183750152587891,
+                0.9185590147972107,
+                0.9190959930419922
+              ],
+              "val_loss": [
+                0.08903512358665466,
+                0.07365848124027252,
+                0.07204892486333847,
+                0.06743533909320831,
+                0.06664582341909409,
+                0.06582300364971161,
+                0.06445351243019104,
+                0.06395668536424637,
+                0.0637114867568016,
+                0.06337505578994751
+              ]
+            },
+            "initial_weight_sha256": "18a24285f3da86bc8076b236ef8ad111d1c30ed483f08c451fd6b55aa3909787",
+            "input_sha256": {
+              "test": "ecb700fd35bcbe159a94076f2ce7b6c746e97c012d80778af15f2fc4cac74dba",
+              "train": "8b319dc0f4ea654ec83040ad94fa7031da03c6856de2aa41e14e1356c4281fbb",
+              "validation": "93ac2b4095b201e19226d6400d9f03fbb3836e295ef635f4bd8ca0bb61a2dbee"
+            },
+            "model_seed": 92003,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.785016,
+            "dataset_sha256": {
+              "test": "ecb700fd35bcbe159a94076f2ce7b6c746e97c012d80778af15f2fc4cac74dba",
+              "train": "8b319dc0f4ea654ec83040ad94fa7031da03c6856de2aa41e14e1356c4281fbb",
+              "validation": "93ac2b4095b201e19226d6400d9f03fbb3836e295ef635f4bd8ca0bb61a2dbee"
+            },
+            "failure": null,
+            "final_model_sha256": "7eea453071dd1540dacab3666a750ef619dd9eb3a0f7a2533bc2d4929e30d319",
+            "final_weight_sha256": "801d43a68c6e71e917342874fdee7cebf46a741076f088ac9635b43572d61e61",
+            "history": {
+              "acc": [
+                0.7756444811820984,
+                0.7830886244773865,
+                0.7835580110549927,
+                0.7838361859321594,
+                0.7842400074005127,
+                0.784491777420044,
+                0.7847018837928772,
+                0.7848052978515625,
+                0.7850072979927063,
+                0.785068929195404
+              ],
+              "loss": [
+                0.1609756052494049,
+                0.15160544216632843,
+                0.1503385752439499,
+                0.1497289538383484,
+                0.14937849342823029,
+                0.14918595552444458,
+                0.1490401178598404,
+                0.14892776310443878,
+                0.1487942636013031,
+                0.14868906140327454
+              ],
+              "val_acc": [
+                0.7826600074768066,
+                0.7833380103111267,
+                0.7840780019760132,
+                0.7839779853820801,
+                0.7845039963722229,
+                0.7843790054321289,
+                0.784555971622467,
+                0.7848640084266663,
+                0.7848619818687439,
+                0.7850710153579712
+              ],
+              "val_loss": [
+                0.15304435789585114,
+                0.15120893716812134,
+                0.14999477565288544,
+                0.14963434636592865,
+                0.14935223758220673,
+                0.14939698576927185,
+                0.1491445004940033,
+                0.14910899102687836,
+                0.14885500073432922,
+                0.14877597987651825
+              ]
+            },
+            "initial_weight_sha256": "18a24285f3da86bc8076b236ef8ad111d1c30ed483f08c451fd6b55aa3909787",
+            "input_sha256": {
+              "test": "eaafbb1dcde67e2385733e69b995cfb027eab02c043afd29db6f10808c16d14a",
+              "train": "5657d11e069a8371fc772e5b2faf3baa7eb050ca5bcbffc528676c289c057479",
+              "validation": "b26d16024ec9afb08f7fda7daf9d29699d6f98d395c0c9f8def7c33a4daf5546"
+            },
+            "model_seed": 92003,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      },
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.918645,
+            "dataset_sha256": {
+              "test": "fe7d0ca6d68f22771ce7c6ba2984dc09e27c0a9f914a5577531af7f934e80481",
+              "train": "f66b275d272894d9bb6be83fcffd8a5944ccf6ec5cd02866d22968843b10767c",
+              "validation": "ee65a828f1f4b0e03e887dd3952be22e53046f6ff5644edbc5a74297bfd29c79"
+            },
+            "failure": null,
+            "final_model_sha256": "0cde251f3021fb7e8fb155395c48a3f2f2ab30312b86a9ae08edb8d2115e4862",
+            "final_weight_sha256": "e6361b2cc4be374b502316c102e4258574f8b9f50e950185d7e7b45a4b6b5a81",
+            "history": {
+              "acc": [
+                0.8743541836738586,
+                0.8954110145568848,
+                0.9098073840141296,
+                0.9149900078773499,
+                0.9171103835105896,
+                0.9175627827644348,
+                0.9178413152694702,
+                0.918070912361145,
+                0.918199896812439,
+                0.918439507484436
+              ],
+              "loss": [
+                0.09901038557291031,
+                0.08285726606845856,
+                0.0724060907959938,
+                0.06763249635696411,
+                0.06534816324710846,
+                0.0647178366780281,
+                0.06434932351112366,
+                0.06408119201660156,
+                0.06386519968509674,
+                0.06364212185144424
+              ],
+              "val_acc": [
+                0.8860840201377869,
+                0.9054099917411804,
+                0.9126610159873962,
+                0.9158380031585693,
+                0.9174339771270752,
+                0.9175840020179749,
+                0.917788028717041,
+                0.9179250001907349,
+                0.9181420207023621,
+                0.9182289838790894
+              ],
+              "val_loss": [
+                0.0890357568860054,
+                0.07594593614339828,
+                0.06991030275821686,
+                0.06653200089931488,
+                0.06504818052053452,
+                0.0646183043718338,
+                0.06437940895557404,
+                0.06418943405151367,
+                0.06391429901123047,
+                0.06370295584201813
+              ]
+            },
+            "initial_weight_sha256": "6e4e021e4c9e9ca8024fb249897cccff55e1269832feb8b77de341af341192ba",
+            "input_sha256": {
+              "test": "fe7d0ca6d68f22771ce7c6ba2984dc09e27c0a9f914a5577531af7f934e80481",
+              "train": "f66b275d272894d9bb6be83fcffd8a5944ccf6ec5cd02866d22968843b10767c",
+              "validation": "ee65a828f1f4b0e03e887dd3952be22e53046f6ff5644edbc5a74297bfd29c79"
+            },
+            "model_seed": 92004,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.785413,
+            "dataset_sha256": {
+              "test": "fe7d0ca6d68f22771ce7c6ba2984dc09e27c0a9f914a5577531af7f934e80481",
+              "train": "f66b275d272894d9bb6be83fcffd8a5944ccf6ec5cd02866d22968843b10767c",
+              "validation": "ee65a828f1f4b0e03e887dd3952be22e53046f6ff5644edbc5a74297bfd29c79"
+            },
+            "failure": null,
+            "final_model_sha256": "30168ad4f26832eddf4ddb85099b7c193d6e13a80cd13dd82e1aec2092bbe324",
+            "final_weight_sha256": "a1555043f29715ba5a2ec6346983e11191ada878e661621c5d636093c4ef96e2",
+            "history": {
+              "acc": [
+                0.7755208015441895,
+                0.782841682434082,
+                0.7834289073944092,
+                0.7839210033416748,
+                0.7842296957969666,
+                0.7844874262809753,
+                0.7847499847412109,
+                0.7849674224853516,
+                0.7850561141967773,
+                0.7852265238761902
+              ],
+              "loss": [
+                0.16024531424045563,
+                0.1514090597629547,
+                0.1502041071653366,
+                0.14965194463729858,
+                0.1493750810623169,
+                0.14919157326221466,
+                0.14901494979858398,
+                0.14885598421096802,
+                0.14873361587524414,
+                0.14861398935317993
+              ],
+              "val_acc": [
+                0.782567024230957,
+                0.7833290100097656,
+                0.7836660146713257,
+                0.784142017364502,
+                0.7846829891204834,
+                0.7843599915504456,
+                0.7849599719047546,
+                0.7851120233535767,
+                0.7850890159606934,
+                0.78547602891922
+              ],
+              "val_loss": [
+                0.15240034461021423,
+                0.15057894587516785,
+                0.14968761801719666,
+                0.1493314951658249,
+                0.14914363622665405,
+                0.14894793927669525,
+                0.1487860083580017,
+                0.14863498508930206,
+                0.14864042401313782,
+                0.1484571099281311
+              ]
+            },
+            "initial_weight_sha256": "6e4e021e4c9e9ca8024fb249897cccff55e1269832feb8b77de341af341192ba",
+            "input_sha256": {
+              "test": "ef9a8d46a74450fcf12fa60f846c6ebba9f75520e17ed2a5b053fd5f5f09f459",
+              "train": "b2ff315eed8acf50b5d2dd3f99fecd078b8afcf24afe612136b5ce39d08f0053",
+              "validation": "eba3ce46352c7415218062c9b4a06668b7a4355569010d0b30897d3bd3979b0d"
+            },
+            "model_seed": 92004,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      },
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.918713,
+            "dataset_sha256": {
+              "test": "fb4729373de9e1fff30c9a8f906b3a02a9b62e907e2b959450c8c447b09386c3",
+              "train": "a9b4dbaa9e0bbba74892abf23db378cc281a0f3990546f7afb93b7e197605229",
+              "validation": "fd0248903ee7a0dcf1398909fcf6190c97d7b54793946e86c710a7d3c386174a"
+            },
+            "failure": null,
+            "final_model_sha256": "9e608c9a990de47e275e8e40933255da8ce83a35732686567f0e5d6ab918e7c5",
+            "final_weight_sha256": "734a72d6bed2c01154d16954b4c2fbf1cc173c639895c32a58db311636b20f39",
+            "history": {
+              "acc": [
+                0.8751376271247864,
+                0.8952925801277161,
+                0.9128075838088989,
+                0.9155560731887817,
+                0.9160361886024475,
+                0.9176477193832397,
+                0.9182714223861694,
+                0.9185469746589661,
+                0.9187657833099365,
+                0.9190003275871277
+              ],
+              "loss": [
+                0.09871382266283035,
+                0.08306048810482025,
+                0.07013963907957077,
+                0.0670943334698677,
+                0.06634487211704254,
+                0.06479451060295105,
+                0.06412966549396515,
+                0.06379207223653793,
+                0.063542440533638,
+                0.06335223466157913
+              ],
+              "val_acc": [
+                0.8863959908485413,
+                0.9070709943771362,
+                0.9148600101470947,
+                0.9154229760169983,
+                0.916163980960846,
+                0.917726993560791,
+                0.9179610013961792,
+                0.9182450175285339,
+                0.9183430075645447,
+                0.9185109734535217
+              ],
+              "val_loss": [
+                0.08892686665058136,
+                0.07509512454271317,
+                0.0678718313574791,
+                0.06704428791999817,
+                0.06610424816608429,
+                0.06463015079498291,
+                0.06425933539867401,
+                0.06405476480722427,
+                0.06392201781272888,
+                0.06371872872114182
+              ]
+            },
+            "initial_weight_sha256": "075ded444c900e67a010179d788afd434bb0592914dfa1ebae2ed12d91139188",
+            "input_sha256": {
+              "test": "fb4729373de9e1fff30c9a8f906b3a02a9b62e907e2b959450c8c447b09386c3",
+              "train": "a9b4dbaa9e0bbba74892abf23db378cc281a0f3990546f7afb93b7e197605229",
+              "validation": "fd0248903ee7a0dcf1398909fcf6190c97d7b54793946e86c710a7d3c386174a"
+            },
+            "model_seed": 92005,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.784732,
+            "dataset_sha256": {
+              "test": "fb4729373de9e1fff30c9a8f906b3a02a9b62e907e2b959450c8c447b09386c3",
+              "train": "a9b4dbaa9e0bbba74892abf23db378cc281a0f3990546f7afb93b7e197605229",
+              "validation": "fd0248903ee7a0dcf1398909fcf6190c97d7b54793946e86c710a7d3c386174a"
+            },
+            "failure": null,
+            "final_model_sha256": "dd3684a34c542728807e41dbdc4250d4bd206c0296d9207fb792a7c3437841de",
+            "final_weight_sha256": "95c5595c3adba6831b5b796dbccdd85910fab37589b6829764a7c37fba556257",
+            "history": {
+              "acc": [
+                0.7753545045852661,
+                0.7830772995948792,
+                0.7836012244224548,
+                0.7840362191200256,
+                0.7843893766403198,
+                0.7845613956451416,
+                0.7847815155982971,
+                0.7849187254905701,
+                0.7850834131240845,
+                0.785240888595581
+              ],
+              "loss": [
+                0.16106995940208435,
+                0.15164801478385925,
+                0.15019094944000244,
+                0.14963006973266602,
+                0.14933636784553528,
+                0.14914536476135254,
+                0.14899088442325592,
+                0.148857980966568,
+                0.1487412452697754,
+                0.1486271172761917
+              ],
+              "val_acc": [
+                0.7821230292320251,
+                0.7827720046043396,
+                0.7832520008087158,
+                0.7835209965705872,
+                0.7834259867668152,
+                0.7836369872093201,
+                0.7844290137290955,
+                0.7841690182685852,
+                0.7842509746551514,
+                0.7846260070800781
+              ],
+              "val_loss": [
+                0.15328188240528107,
+                0.15093037486076355,
+                0.15033769607543945,
+                0.14966394007205963,
+                0.14966440200805664,
+                0.14940989017486572,
+                0.14913204312324524,
+                0.14908146858215332,
+                0.1489861011505127,
+                0.14885568618774414
+              ]
+            },
+            "initial_weight_sha256": "075ded444c900e67a010179d788afd434bb0592914dfa1ebae2ed12d91139188",
+            "input_sha256": {
+              "test": "e3027f6b18bf454675641388804ccfda9e38f21d66c00834e85013b3afcb35a2",
+              "train": "d35bb1dcbacc90193da00a44a3f5a9a8dbe67fd42fc21f0bd9887ee95e888c2c",
+              "validation": "4cd4d6a1920de97dd12d1764202d08650d024b3574e588ab652d3b988854ad2a"
+            },
+            "model_seed": 92005,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      },
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.918969,
+            "dataset_sha256": {
+              "test": "fd1c6f29b35a0d5acb9be31fa62cbf500b7f88d0d547224ec60bcfd1a19203f4",
+              "train": "2ea4355e1ea36f6c2b5df0bdb977f54688cb9c58fd8b4c42e89b686faed68d8d",
+              "validation": "37913faaa5df0f3fe957a34bc29e7df4c8392aaf3c70bbc433af2d7413b82952"
+            },
+            "failure": null,
+            "final_model_sha256": "fe7ac0e3374a24676294e1ffc17594f64f7ac247d552561092f6c88c5adf6273",
+            "final_weight_sha256": "e7eec23539265f963577fba0da64e9c6f2e53634e0cab0f8b2f43292012d4f45",
+            "history": {
+              "acc": [
+                0.8731307983398438,
+                0.891730785369873,
+                0.9090191125869751,
+                0.9140855073928833,
+                0.9166958928108215,
+                0.9177051186561584,
+                0.9181848168373108,
+                0.9185917973518372,
+                0.9189152121543884,
+                0.9192361831665039
+              ],
+              "loss": [
+                0.09942133724689484,
+                0.08503499627113342,
+                0.07311135530471802,
+                0.06845230609178543,
+                0.06578745692968369,
+                0.06467016041278839,
+                0.06415621936321259,
+                0.06376294046640396,
+                0.06347769498825073,
+                0.0632205680012703
+              ],
+              "val_acc": [
+                0.8867059946060181,
+                0.9061650037765503,
+                0.9107009768486023,
+                0.9160140156745911,
+                0.9178299903869629,
+                0.918267011642456,
+                0.9188060164451599,
+                0.9190840125083923,
+                0.9193410277366638,
+                0.9195700287818909
+              ],
+              "val_loss": [
+                0.0886962041258812,
+                0.07600107043981552,
+                0.07157900929450989,
+                0.06670242547988892,
+                0.06479376554489136,
+                0.06426607817411423,
+                0.06375192105770111,
+                0.06349269300699234,
+                0.06321204453706741,
+                0.06302886456251144
+              ]
+            },
+            "initial_weight_sha256": "312f4261aa704d9036a5c168069c57f633754823327eba9ce1e4619dc3ea93f4",
+            "input_sha256": {
+              "test": "fd1c6f29b35a0d5acb9be31fa62cbf500b7f88d0d547224ec60bcfd1a19203f4",
+              "train": "2ea4355e1ea36f6c2b5df0bdb977f54688cb9c58fd8b4c42e89b686faed68d8d",
+              "validation": "37913faaa5df0f3fe957a34bc29e7df4c8392aaf3c70bbc433af2d7413b82952"
+            },
+            "model_seed": 92006,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.784815,
+            "dataset_sha256": {
+              "test": "fd1c6f29b35a0d5acb9be31fa62cbf500b7f88d0d547224ec60bcfd1a19203f4",
+              "train": "2ea4355e1ea36f6c2b5df0bdb977f54688cb9c58fd8b4c42e89b686faed68d8d",
+              "validation": "37913faaa5df0f3fe957a34bc29e7df4c8392aaf3c70bbc433af2d7413b82952"
+            },
+            "failure": null,
+            "final_model_sha256": "aa47f6b151c591b43564adf6e767eaba5aa9e4fe3c658a519587539ef27ae50a",
+            "final_weight_sha256": "7d39436116edbb48a5a53142a9a6c259dd03f21188fb537b05e54d3e6d5bc9ac",
+            "history": {
+              "acc": [
+                0.7758901715278625,
+                0.7831354737281799,
+                0.7836030125617981,
+                0.7839590907096863,
+                0.7844864130020142,
+                0.7846583724021912,
+                0.7848150730133057,
+                0.785005509853363,
+                0.785161018371582,
+                0.7852147817611694
+              ],
+              "loss": [
+                0.15995930135250092,
+                0.15127722918987274,
+                0.15010082721710205,
+                0.1495307832956314,
+                0.14919410645961761,
+                0.14899002015590668,
+                0.1487990766763687,
+                0.14866141974925995,
+                0.14853587746620178,
+                0.14842431247234344
+              ],
+              "val_acc": [
+                0.7830349802970886,
+                0.7839059829711914,
+                0.78404301404953,
+                0.784807026386261,
+                0.7846230268478394,
+                0.7851049900054932,
+                0.7854480147361755,
+                0.7856829762458801,
+                0.785306990146637,
+                0.7856810092926025
+              ],
+              "val_loss": [
+                0.15237411856651306,
+                0.1503186821937561,
+                0.14956405758857727,
+                0.14916740357875824,
+                0.1491209715604782,
+                0.14875179529190063,
+                0.14863350987434387,
+                0.14845992624759674,
+                0.14849762618541718,
+                0.14835703372955322
+              ]
+            },
+            "initial_weight_sha256": "312f4261aa704d9036a5c168069c57f633754823327eba9ce1e4619dc3ea93f4",
+            "input_sha256": {
+              "test": "1899a7b91dfa2bf6f9dc563e2d82f2a7078614292d395b2ab574c03c4836953d",
+              "train": "de0112ba6623a9576249837eddb743f27fe17cf43646d74e13dacd7765f365a7",
+              "validation": "66721658f23d6cf8ecdee724c85246deece0a4b57553b4937882cc7e4c7e810a"
+            },
+            "model_seed": 92006,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      },
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.918376,
+            "dataset_sha256": {
+              "test": "4988548bdfb43b0f8466815b99a1ebd58e91d08cf9eb07fc4e8a327f28da2dae",
+              "train": "347a2c638c1416f6c467ed0c13b303d44c06339b54829c22f5f8dcc23989187f",
+              "validation": "ea2751535b93b5babb17c403a187f9eb885bfac64b72025b7a070cdd52817d49"
+            },
+            "failure": null,
+            "final_model_sha256": "a5ae04f90ec63dec8fb33efa8729b4015eb99d9c546f2e5a68dd2ed30eb555fd",
+            "final_weight_sha256": "c80083294e558606f471620e89174329c058fe5b27f2100ac65a738b8d7d372c",
+            "history": {
+              "acc": [
+                0.874090313911438,
+                0.906266987323761,
+                0.9156025052070618,
+                0.9171004295349121,
+                0.917631208896637,
+                0.9178569912910461,
+                0.9180542230606079,
+                0.9182053804397583,
+                0.9183524250984192,
+                0.9185230731964111
+              ],
+              "loss": [
+                0.09923551976680756,
+                0.07527677714824677,
+                0.06743484735488892,
+                0.06568168848752975,
+                0.06503986567258835,
+                0.06467485427856445,
+                0.06439488381147385,
+                0.06419871747493744,
+                0.06401466578245163,
+                0.06383632868528366
+              ],
+              "val_acc": [
+                0.89308100938797,
+                0.9146509766578674,
+                0.9170399904251099,
+                0.9175580143928528,
+                0.9178230166435242,
+                0.91805499792099,
+                0.918366014957428,
+                0.918524980545044,
+                0.9186699986457825,
+                0.9186729788780212
+              ],
+              "val_loss": [
+                0.08556878566741943,
+                0.0689476728439331,
+                0.06602396816015244,
+                0.06518003344535828,
+                0.0648190826177597,
+                0.06447907537221909,
+                0.06413576751947403,
+                0.06396298855543137,
+                0.06383668631315231,
+                0.06370154768228531
+              ]
+            },
+            "initial_weight_sha256": "997850782e0f0257cc7419247000c77a6c333b88afde5360bc757acc52e949c4",
+            "input_sha256": {
+              "test": "4988548bdfb43b0f8466815b99a1ebd58e91d08cf9eb07fc4e8a327f28da2dae",
+              "train": "347a2c638c1416f6c467ed0c13b303d44c06339b54829c22f5f8dcc23989187f",
+              "validation": "ea2751535b93b5babb17c403a187f9eb885bfac64b72025b7a070cdd52817d49"
+            },
+            "model_seed": 92007,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.785246,
+            "dataset_sha256": {
+              "test": "4988548bdfb43b0f8466815b99a1ebd58e91d08cf9eb07fc4e8a327f28da2dae",
+              "train": "347a2c638c1416f6c467ed0c13b303d44c06339b54829c22f5f8dcc23989187f",
+              "validation": "ea2751535b93b5babb17c403a187f9eb885bfac64b72025b7a070cdd52817d49"
+            },
+            "failure": null,
+            "final_model_sha256": "ca0baf8e23f9fa0b5a6eff734be34533f75c3a35c7e20d30f1bef60227caba66",
+            "final_weight_sha256": "e8bc1600c6ebd3502c5ea01489c60022bc561c3f91f35978de7f14d003cbc75c",
+            "history": {
+              "acc": [
+                0.7748873829841614,
+                0.7831032276153564,
+                0.7835069894790649,
+                0.7839654088020325,
+                0.7842804789543152,
+                0.7846642732620239,
+                0.7848240733146667,
+                0.7850576043128967,
+                0.7851765155792236,
+                0.7852892279624939
+              ],
+              "loss": [
+                0.16075588762760162,
+                0.1514333188533783,
+                0.15014562010765076,
+                0.14953844249248505,
+                0.14921621978282928,
+                0.14900092780590057,
+                0.14883624017238617,
+                0.1487060785293579,
+                0.1485854983329773,
+                0.14848777651786804
+              ],
+              "val_acc": [
+                0.7829399704933167,
+                0.7834889888763428,
+                0.7833439707756042,
+                0.7834150195121765,
+                0.7840780019760132,
+                0.784171998500824,
+                0.7846019864082336,
+                0.7847669720649719,
+                0.7849149703979492,
+                0.7853729724884033
+              ],
+              "val_loss": [
+                0.1529899686574936,
+                0.15067866444587708,
+                0.14982250332832336,
+                0.1496075689792633,
+                0.14930802583694458,
+                0.14900705218315125,
+                0.14915093779563904,
+                0.14877259731292725,
+                0.14868949353694916,
+                0.14847557246685028
+              ]
+            },
+            "initial_weight_sha256": "997850782e0f0257cc7419247000c77a6c333b88afde5360bc757acc52e949c4",
+            "input_sha256": {
+              "test": "48de598f320109618a9291cd91a42a4f332e916652b7021745bc8f559505b1f9",
+              "train": "0181e039e6dfca55c13190a775fab64c4c445a99df2456fa920ebc08080a7bf6",
+              "validation": "c4c5f0d3271869e281378977fb0f5edb2e103c87f0123bc3af214c12620d99d8"
+            },
+            "model_seed": 92007,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      },
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.918672,
+            "dataset_sha256": {
+              "test": "f4b2a89a51111ce35018c1ad4a26568307db2f1ee803257c246cbefa3ac5722a",
+              "train": "b9a748e517326fe6fef68b4310c754fefb116fd88af8857e0f790eb5e8a668ac",
+              "validation": "cf5d84937286b82ac8d5212b97cd207a70a9127624bf421a038ebde5b80773ea"
+            },
+            "failure": null,
+            "final_model_sha256": "eee9cb82c844bdfb695e4d13c8341da2091844d9b808493c1d18725e9bf2650f",
+            "final_weight_sha256": "b39898460e6019f9d0cf95282eddf82abfb3c2083e7287bb75faa94b4f071a39",
+            "history": {
+              "acc": [
+                0.8739966750144958,
+                0.8879294991493225,
+                0.906575083732605,
+                0.9098389148712158,
+                0.9101657271385193,
+                0.9106497168540955,
+                0.9151902198791504,
+                0.9180960059165955,
+                0.9186581969261169,
+                0.9190571904182434
+              ],
+              "loss": [
+                0.09901964664459229,
+                0.08720589429140091,
+                0.07503531128168106,
+                0.07200979441404343,
+                0.07141049206256866,
+                0.0709228441119194,
+                0.06694180518388748,
+                0.06415646523237228,
+                0.06364700943231583,
+                0.0632597878575325
+              ],
+              "val_acc": [
+                0.8864290118217468,
+                0.8971610069274902,
+                0.9098780155181885,
+                0.9101160168647766,
+                0.9105219841003418,
+                0.9111639857292175,
+                0.9180930256843567,
+                0.9185439944267273,
+                0.9190279841423035,
+                0.9189249873161316
+              ],
+              "val_loss": [
+                0.08866669237613678,
+                0.08268323540687561,
+                0.07228344678878784,
+                0.07144605368375778,
+                0.0710223913192749,
+                0.07043208181858063,
+                0.06428603082895279,
+                0.06377234309911728,
+                0.06342622637748718,
+                0.06322105973958969
+              ]
+            },
+            "initial_weight_sha256": "cef6fb5345d90c8863d2742f005bc6012633de3c481c2df1ca4ea35bc9f99c0a",
+            "input_sha256": {
+              "test": "f4b2a89a51111ce35018c1ad4a26568307db2f1ee803257c246cbefa3ac5722a",
+              "train": "b9a748e517326fe6fef68b4310c754fefb116fd88af8857e0f790eb5e8a668ac",
+              "validation": "cf5d84937286b82ac8d5212b97cd207a70a9127624bf421a038ebde5b80773ea"
+            },
+            "model_seed": 92008,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.785138,
+            "dataset_sha256": {
+              "test": "f4b2a89a51111ce35018c1ad4a26568307db2f1ee803257c246cbefa3ac5722a",
+              "train": "b9a748e517326fe6fef68b4310c754fefb116fd88af8857e0f790eb5e8a668ac",
+              "validation": "cf5d84937286b82ac8d5212b97cd207a70a9127624bf421a038ebde5b80773ea"
+            },
+            "failure": null,
+            "final_model_sha256": "084f192d43cb5be0507bb84f82bc4e7877110f52dc02e13e541f1cf638e87f9e",
+            "final_weight_sha256": "3d999a4a3516e20fa19767be84de2593dc751303a699e2fb5f5f6e1e569e1f41",
+            "history": {
+              "acc": [
+                0.7746226191520691,
+                0.7829387187957764,
+                0.7833697199821472,
+                0.7837879061698914,
+                0.784242570400238,
+                0.7844604253768921,
+                0.7847185730934143,
+                0.7849193215370178,
+                0.7851843237876892,
+                0.7852998971939087
+              ],
+              "loss": [
+                0.16101031005382538,
+                0.15143440663814545,
+                0.15022675693035126,
+                0.1496298462152481,
+                0.14930973947048187,
+                0.1490904688835144,
+                0.14890700578689575,
+                0.1487484574317932,
+                0.14860346913337708,
+                0.14848755300045013
+              ],
+              "val_acc": [
+                0.7832239866256714,
+                0.7834569811820984,
+                0.7835090160369873,
+                0.7845039963722229,
+                0.7848079800605774,
+                0.7852010130882263,
+                0.7852540016174316,
+                0.7849400043487549,
+                0.7855460047721863,
+                0.7855380177497864
+              ],
+              "val_loss": [
+                0.15242372453212738,
+                0.1505914032459259,
+                0.1499098539352417,
+                0.14928311109542847,
+                0.1491488814353943,
+                0.148871511220932,
+                0.14865994453430176,
+                0.1486867368221283,
+                0.14842821657657623,
+                0.14838211238384247
+              ]
+            },
+            "initial_weight_sha256": "cef6fb5345d90c8863d2742f005bc6012633de3c481c2df1ca4ea35bc9f99c0a",
+            "input_sha256": {
+              "test": "402980d310a5435fb9f282f7379bf779dfa1634305a4c716024446364abe9598",
+              "train": "1e1294e48a4cf9963de682d7a45d314159949f44a8dc3c9299fc2fc1a80a46d2",
+              "validation": "9877724dc2cb8d068d8d836ce92a17870ea6d429b0e2398e2e823b3b6328c87f"
+            },
+            "model_seed": 92008,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      },
+      {
+        "arms": [
+          {
+            "condition_id": "condition_a",
+            "confirmatory_accuracy": 0.918648,
+            "dataset_sha256": {
+              "test": "ffbb87447c98b7eef37b60924fe2610135553add91097ecea5816b0a6d0b405e",
+              "train": "9ddacb4fa945be552e8386afdc83c923a7cf5e7987795089d26d0698e5daaae7",
+              "validation": "c8e0b175451253e4728cc917d7aadc01d56e62549355d80f35dcd8e74386deaf"
+            },
+            "failure": null,
+            "final_model_sha256": "771323e2ec4c7819cdab6fadf3eff82379e66e1958f4cdd5449b849499219283",
+            "final_weight_sha256": "0085405ee5d12fdb98847db0884a6f9727c58bafcf3c0dd4dfbccad34056885f",
+            "history": {
+              "acc": [
+                0.8748080730438232,
+                0.8866224884986877,
+                0.8973913192749023,
+                0.9095209836959839,
+                0.9101955890655518,
+                0.9110859036445618,
+                0.9156739711761475,
+                0.9165270924568176,
+                0.9181790947914124,
+                0.9186422228813171
+              ],
+              "loss": [
+                0.0989265963435173,
+                0.08800718188285828,
+                0.0811019092798233,
+                0.07240787893533707,
+                0.07145239412784576,
+                0.07057622820138931,
+                0.06666876375675201,
+                0.0657351091504097,
+                0.06426768749952316,
+                0.06374773383140564
+              ],
+              "val_acc": [
+                0.886335015296936,
+                0.8868370056152344,
+                0.9061989784240723,
+                0.9101099967956543,
+                0.9102410078048706,
+                0.9135029911994934,
+                0.9161909818649292,
+                0.9173250198364258,
+                0.9184150099754333,
+                0.9185060262680054
+              ],
+              "val_loss": [
+                0.08917192369699478,
+                0.08748609572649002,
+                0.07507724314928055,
+                0.07174385339021683,
+                0.07141158729791641,
+                0.0686645656824112,
+                0.06617400795221329,
+                0.06506010890007019,
+                0.06399737298488617,
+                0.06376156955957413
+              ]
+            },
+            "initial_weight_sha256": "0111b6dc6c3427331ddd7bdb8faa848d80441c0d46b944be02925694d602372d",
+            "input_sha256": {
+              "test": "ffbb87447c98b7eef37b60924fe2610135553add91097ecea5816b0a6d0b405e",
+              "train": "9ddacb4fa945be552e8386afdc83c923a7cf5e7987795089d26d0698e5daaae7",
+              "validation": "c8e0b175451253e4728cc917d7aadc01d56e62549355d80f35dcd8e74386deaf"
+            },
+            "model_seed": 92009,
+            "permutation_sha256": null,
+            "shuffle": true
+          },
+          {
+            "condition_id": "condition_b",
+            "confirmatory_accuracy": 0.785189,
+            "dataset_sha256": {
+              "test": "ffbb87447c98b7eef37b60924fe2610135553add91097ecea5816b0a6d0b405e",
+              "train": "9ddacb4fa945be552e8386afdc83c923a7cf5e7987795089d26d0698e5daaae7",
+              "validation": "c8e0b175451253e4728cc917d7aadc01d56e62549355d80f35dcd8e74386deaf"
+            },
+            "failure": null,
+            "final_model_sha256": "90ec520d6e6cafb55c16bc1a387a39a059b080f9ede57defb76e269b3d9f4b45",
+            "final_weight_sha256": "4988e547fb78a5df48147ef743bca613a8ae2bde3237b1242f9d72bbb51cb337",
+            "history": {
+              "acc": [
+                0.7758746147155762,
+                0.783135712146759,
+                0.7837455868721008,
+                0.7840527892112732,
+                0.7845252156257629,
+                0.784827470779419,
+                0.7849758863449097,
+                0.7850909233093262,
+                0.7852413058280945,
+                0.7853808999061584
+              ],
+              "loss": [
+                0.160531148314476,
+                0.15128929913043976,
+                0.15010347962379456,
+                0.1495569944381714,
+                0.1492524892091751,
+                0.1490403562784195,
+                0.1488974392414093,
+                0.14875555038452148,
+                0.14864271879196167,
+                0.1485266536474228
+              ],
+              "val_acc": [
+                0.782600998878479,
+                0.7836359739303589,
+                0.7835209965705872,
+                0.7843350172042847,
+                0.7844539880752563,
+                0.7850369811058044,
+                0.7847080230712891,
+                0.7848680019378662,
+                0.7850859761238098,
+                0.7850689888000488
+              ],
+              "val_loss": [
+                0.1525450050830841,
+                0.15055955946445465,
+                0.15000827610492706,
+                0.1494239717721939,
+                0.14923660457134247,
+                0.1489674150943756,
+                0.14895793795585632,
+                0.14889419078826904,
+                0.14855170249938965,
+                0.1486022174358368
+              ]
+            },
+            "initial_weight_sha256": "0111b6dc6c3427331ddd7bdb8faa848d80441c0d46b944be02925694d602372d",
+            "input_sha256": {
+              "test": "d9b2bcb9ef9f782c169ba563cfc7dc2712f8dcabc8ea526c984820545c675205",
+              "train": "8e20cb89d13576274d46e1b47179b638991c4563312cce41d4240860e82ecb67",
+              "validation": "2f830aa828a67812dace14dbfde0b05e5e7ca4fae4de5f90c5d684c8dfcc9f67"
+            },
+            "model_seed": 92009,
+            "permutation_sha256": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+            "shuffle": true
+          }
+        ],
+        "status": "valid"
+      }
+    ],
+    "requested_replicates": 10,
+    "valid_replicates": 10
+  },
+  "resume_ledger_sha256": "fbf8a128e482bfcb3ef688ef940963756065247ad18aabf7f4a85eb678220f34",
+  "run_mode": "calibration",
+  "statistics": {
+    "adjusted_p_value": null,
+    "confidence_interval": {
+      "high": -0.1333692151420053,
+      "low": -0.13384418485799468
+    },
+    "effect_size": -402.45292409795906,
+    "raw_p_value": 5.813332644057269e-25
+  },
+  "statistics_detail": {
+    "confidence_interval": {
+      "high": -0.1333692151420053,
+      "low": -0.13384418485799468,
+      "method": "t_distribution"
+    },
+    "degrees_of_freedom": 9,
+    "effect_size_cohens_dz": -402.45292409795906,
+    "mean_diff": -0.1336067,
+    "n_pairs": 10,
+    "p_value": 5.813332644057269e-25,
+    "sd_diff": 0.0003319809398812554,
+    "se_diff": 0.00010498159097881957,
+    "secondary_bootstrap_ci": {
+      "high": -0.13341779749999996,
+      "low": -0.13380779999999998,
+      "note": "Sensitivity check only; does not drive any decision."
+    },
+    "statistic": -1272.6678911444164,
+    "test_name": "paired_t_test",
+    "warnings": []
+  },
+  "sufficiency_summary": {
+    "failed_replicates": 0,
+    "failure_reasons": [],
+    "minimum_required": 10,
+    "not_run_replicates": 0,
+    "requested_replicates": 10,
+    "valid_replicates": 10
+  },
+  "sufficient": true
+}

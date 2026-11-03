@@ -64,15 +64,15 @@ calibration:
   H-EV-AUTOND-REPRESENTATION: {units: 10, base_seed: 92000}
 
 production:
-  EV-AUTOND-BASELINE: {units: UNSPECIFIED_REQUIRES_APPROVAL, minimum_valid: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 1000}
-  EV-AUTOND-NOISE: {units: UNSPECIFIED_REQUIRES_APPROVAL, minimum_valid: UNSPECIFIED_REQUIRES_APPROVAL, seed: 2000}
-  H-EV-AUTOND-TRAIN-ORDER: {units: UNSPECIFIED_REQUIRES_APPROVAL, minimum_valid: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 3000}
-  H-EV-AUTOND-REPRESENTATION: {units: UNSPECIFIED_REQUIRES_APPROVAL, minimum_valid: UNSPECIFIED_REQUIRES_APPROVAL, base_seed: 4000}
+  EV-AUTOND-BASELINE: {units: 10, minimum_valid: 8, base_seed: 1000}
+  EV-AUTOND-NOISE: {units: 10, minimum_valid: 8, seed: 2000}
+  H-EV-AUTOND-TRAIN-ORDER: {units: 6, minimum_valid: 5, base_seed: 3000}
+  H-EV-AUTOND-REPRESENTATION: {units: 6, minimum_valid: 5, base_seed: 4000}
   # Written by `autond.runner plan-power`; declare its SHA-256 and required_n here before production.
   power_plan:
     path: results/autond/calibration/power_plan.json
-    sha256: UNSPECIFIED_REQUIRES_APPROVAL
-    required_n: UNSPECIFIED_REQUIRES_APPROVAL
+    sha256: 9fdf7244139c538c90aeae847216e4568ee8c42fde4fcfa3e245bb8deaf7dbd5
+    required_n: 3
 
 # Pipeline check only: reduced sizes, never evidentiary, excluded from every design hash.
 smoke:

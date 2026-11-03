@@ -195,3 +195,74 @@ def accuracy(model, test: Partition) -> float:
     """Confirmatory accuracy of the final-epoch model: fraction with (prediction > 0.5) == label."""
     predictions = model.predict(test.X, batch_size=PREDICT_BATCH, verbose=0).reshape(-1)
     return float(np.mean((predictions > 0.5).astype(np.uint8) == test.Y))
+
+
+_SESSION_ID: Optional[str] = None
+_SECRET_MARKERS = ("TOKEN", "KEY", "SECRET", "PASSWORD", "CREDENTIAL", "AUTH")
+
+
+def session_id() -> str:
+    """One identifier per process: the boot id (Linux) plus a random token drawn when first asked for."""
+    global _SESSION_ID
+    if _SESSION_ID is None:
+        import uuid
+        boot = Path("/proc/sys/kernel/random/boot_id")
+        _SESSION_ID = f"{boot.read_text().strip() if boot.is_file() else 'no-boot-id'}:{uuid.uuid4().hex}"
+    return _SESSION_ID
+
+
+def _nvidia_smi() -> dict:
+    import shutil
+    import subprocess
+    exe = shutil.which("nvidia-smi")
+    if exe is None:
+        return {"available": False}
+    fields = "index,name,uuid,driver_version,memory.total,pci.bus_id"
+    out = subprocess.run([exe, f"--query-gpu={fields}", "--format=csv,noheader"], capture_output=True, text=True)
+    gpus = [dict(zip(fields.split(","), (c.strip() for c in line.split(","))))
+            for line in out.stdout.strip().splitlines() if line.strip()] if out.returncode == 0 else []
+    return {"available": out.returncode == 0, "gpus": gpus, "stderr": out.stderr.strip()[:500]}
+
+
+def session_provenance() -> dict:
+    """Hardware and software identity of this process, recorded per run invocation and per unit."""
+    import os
+    import platform
+    from importlib import metadata
+    import tensorflow as tf
+    build = {k: str(v) for k, v in tf.sysconfig.get_build_info().items()}
+    physical = [d.name for d in tf.config.list_physical_devices("GPU")]
+    details = []
+    for d in tf.config.list_physical_devices("GPU"):
+        try:
+            details.append({k: str(v) for k, v in tf.config.experimental.get_device_details(d).items()})
+        except Exception as exc:              # device details are best effort; their absence is recorded
+            details.append({"error": f"{type(exc).__name__}: {exc}"})
+    versions = {}
+    for pkg in ("tensorflow", "keras", "numpy", "scipy", "h5py", "pandas", "PyYAML"):
+        try:
+            versions[pkg] = metadata.version(pkg)
+        except metadata.PackageNotFoundError:
+            versions[pkg] = None
+    kaggle = {k: v for k, v in sorted(os.environ.items())
+              if k.startswith("KAGGLE_") and not any(m in k.upper() for m in _SECRET_MARKERS)}
+    return {"session_id": session_id(), "hostname": platform.node(), "platform": platform.platform(),
+            "python": platform.python_version(), "versions": versions,
+            "tensorflow_build": build, "tensorflow_gpus": physical, "tensorflow_gpu_details": details,
+            "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"), "nvidia_smi": _nvidia_smi(),
+            "kaggle_environment": kaggle}
+
+
+def device_identity(session: dict) -> dict:
+    """The GPU this process trains on: the first visible GPU's nvidia-smi record, or the CPU."""
+    gpus = (session.get("nvidia_smi") or {}).get("gpus") or []
+    visible = session.get("cuda_visible_devices")
+    if not session.get("tensorflow_gpus"):
+        return {"device": "CPU", "gpu_uuid": None, "gpu_name": None}
+    if visible not in (None, ""):
+        first = visible.split(",")[0].strip()
+        match = [g for g in gpus if g.get("index") == first or g.get("uuid") == first]
+        gpus = match or gpus
+    g = gpus[0] if gpus else {}
+    return {"device": "GPU", "gpu_uuid": g.get("uuid"), "gpu_name": g.get("name"),
+            "driver_version": g.get("driver_version")}

@@ -30,20 +30,13 @@ if str(EV_ROOT) not in sys.path:
 from autond import adapter as A  # noqa: E402
 from autond import calibration as C  # noqa: E402
 from autond import experiments as E  # noqa: E402
-from autond.baseline import EXPERIMENT_IDS, PRIMARY_FAMILY, check_config, load_config  # noqa: E402
+from autond import order as O  # noqa: E402
+from autond.baseline import (  # noqa: E402
+    EXPERIMENT_IDS, PRIMARY_FAMILY, SOURCE_FILES, check_config, load_config, source_manifest,
+)
 
 RESULTS = EV_ROOT / "results" / "autond"
-SOURCES = (
-    *(f"audit/experimental_validity/autond/{f}" for f in ("__init__.py", "adapter.py", "baseline.py", "calibration.py",
-                                                          "experiments.py", "representation.py", "runner.py")),
-    *(f"audit/experimental_validity/framework/{f}" for f in (
-        "certificate.py", "confidence_intervals.py", "effect_sizes.py", "experiment.py", "failures.py", "firewall.py",
-        "manifest.py", "multiplicity.py", "power.py", "provenance.py", "replication.py", "resumability.py", "seeds.py",
-        "statistics.py", "validation.py")),
-    "audit/experimental_validity/configs/autond_ev.yaml",
-    "audit/dataset/adapters/autond.py", "audit/dataset/experiments/d0_autond_canonical.py",
-    "audit/dataset/integrity.py",
-)
+SOURCES = SOURCE_FILES
 
 
 class Refused(RuntimeError):
@@ -51,7 +44,7 @@ class Refused(RuntimeError):
 
 
 def output_dir(mode: str, experiment: str, root: Path = RESULTS) -> Path:
-    return Path(root) / mode / experiment
+    return Path(root) / tier_dir(mode) / experiment
 
 
 def lock_mode(directory: Path, mode: str) -> None:
@@ -76,9 +69,21 @@ def acquire_lock(directory: Path) -> Path:
 
 
 def source_identity() -> dict:
+    """Git HEAD and per-file cleanliness, plus the content manifest every unit is bound to."""
     from audit.dataset.integrity import source_identity as identity
 
-    return identity([A.REPOSITORY_ROOT / p for p in SOURCES], root=A.REPOSITORY_ROOT)
+    out = identity([A.REPOSITORY_ROOT / p for p in SOURCES], root=A.REPOSITORY_ROOT)
+    manifest = source_manifest(A.REPOSITORY_ROOT)
+    if {rel: e["sha256"] for rel, e in out["files"].items()} != manifest["files"]:
+        raise Refused("source files changed while their identity was being recorded")
+    out["manifest_sha256"] = manifest["sha256"]
+    return out
+
+
+def tier_dir(mode: str) -> str:
+    """Calibration output is keyed by the A/B execution protocol, so a calibration under the frozen
+    balanced order never shares a directory with the historical fixed-order calibration."""
+    return f"calibration-{O.PROTOCOL}" if mode == "calibration" else mode
 
 
 def gates(config: dict, mode: str, binding=None) -> dict:
@@ -91,12 +96,14 @@ def gates(config: dict, mode: str, binding=None) -> dict:
         problems += E.check_power_plan(config)
     if problems:
         raise Refused("; ".join(problems))
-    provenance: dict = {"software": E.software_provenance()}
+    provenance: dict = {"software": E.software_provenance(), "source_manifest": source_manifest(A.REPOSITORY_ROOT)}
     if mode != "smoke":
         identity = source_identity()
         dirty = sorted(rel for rel, entry in identity["files"].items() if not entry["clean_at_head"])
         if dirty:
             raise Refused(f"sources are not committed and clean at HEAD: {dirty}")
+        if identity["manifest_sha256"] != provenance["source_manifest"]["sha256"]:
+            raise Refused("source manifest differs between two reads; refusing")
         provenance["source_identity"] = identity
     if binding is not None:
         X, Y = binding.generate_partition(2000)
@@ -122,6 +129,7 @@ def cmd_run(args, config) -> int:
     gates(config, args.mode)
     binding = A.bind(args.autond_root)
     provenance = gates(config, args.mode, binding)
+    provenance["session"] = A.session_provenance()
     if args.mode != "smoke" and not args.confirm_execute:
         print(f"VALIDATION ONLY: every {args.mode} gate passed; nothing generated or trained. "
               "Re-run with --confirm-execute.")
@@ -152,7 +160,7 @@ def cmd_run(args, config) -> int:
 def cmd_analyze(args, config) -> int:
     paths = args.certificates or [output_dir("calibration", h) / "certificate.json" for h in PRIMARY_FAMILY]
     artifact = C.calibration_variance(paths, config)
-    out = Path(args.output or RESULTS / "calibration" / "variance.json")
+    out = Path(args.output or RESULTS / tier_dir("calibration") / "variance.json")
     out.write_text(json.dumps(artifact, indent=2, sort_keys=True))
     print(f"wrote {out}: sigma_Delta_upper_95={artifact['sigma_Delta_upper_95']}")
     return 0
@@ -162,12 +170,27 @@ def cmd_plan(args, config) -> int:
     problems = check_config(config, "calibration")
     if problems:
         raise Refused("; ".join(problems))
-    path = Path(args.variance or RESULTS / "calibration" / "variance.json")
+    path = Path(args.variance or RESULTS / tier_dir("calibration") / "variance.json")
     plan = E.power_plan(json.loads(path.read_text()), config, variance_sha256=E.sha256_file(path), max_n=args.max_n)
-    out = Path(args.output or RESULTS / "calibration" / "power_plan.json")
+    out = Path(args.output or RESULTS / tier_dir("calibration") / "power_plan.json")
     out.write_text(json.dumps(plan, indent=2, sort_keys=True))
     print(f"wrote {out} (sha256 {E.sha256_file(out)}): required_n={plan['required_n']}")
     return 0 if plan["required_n"] is not None else 3
+
+
+def cmd_sensitivity(args, config) -> int:
+    from autond import sensitivity as SENS
+    path = Path(args.variance)
+    out = Path(args.output or RESULTS / "planning" / "power_sensitivity.json")
+    if out.exists():
+        raise Refused(f"{out} exists; a planning record is never overwritten")
+    report = SENS.analyse(json.loads(path.read_text()), config, n_sim=args.simulations)
+    report["variance_artifact"] = {"path": str(path.relative_to(EV_ROOT) if path.is_relative_to(EV_ROOT) else path),
+                                   "sha256": E.sha256_file(path)}
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(report, indent=1, sort_keys=True))
+    print(f"wrote {out} (sha256 {E.sha256_file(out)}); worst joint by cell: {report['worst_joint_correct_by_cell']}")
+    return 0
 
 
 def cmd_family(args, config) -> int:
@@ -205,6 +228,10 @@ def main(argv=None) -> int:
     plan.add_argument("--variance", default=None)
     plan.add_argument("--output", default=None)
     plan.add_argument("--max-n", type=int, default=200)
+    sens = sub.add_parser("power-sensitivity")
+    sens.add_argument("--variance", required=True)
+    sens.add_argument("--output", default=None)
+    sens.add_argument("--simulations", type=int, default=100_000)
     args = parser.parse_args(argv)
     if args.gpu is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
@@ -218,7 +245,7 @@ def main(argv=None) -> int:
                   f"{provenance['source_identity']['git_head']}; permutation validated on AutoND data")
             return 0
         return {"run": cmd_run, "analyze-calibration": cmd_analyze, "plan-power": cmd_plan,
-                "family": cmd_family}[args.command](args, config)
+                "family": cmd_family, "power-sensitivity": cmd_sensitivity}[args.command](args, config)
     except (RuntimeError, ValueError) as exc:     # Refused, binding, firewall and resume violations included
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 2

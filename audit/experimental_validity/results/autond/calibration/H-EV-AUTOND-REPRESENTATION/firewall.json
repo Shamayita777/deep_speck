@@ -1,0 +1,46 @@
+{
+  "confirmatory_data_mode": "PER_REPLICATE",
+  "consumed_evaluation_keys": [
+    "condition_a:pair000",
+    "condition_a:pair001",
+    "condition_a:pair002",
+    "condition_a:pair003",
+    "condition_a:pair004",
+    "condition_a:pair005",
+    "condition_a:pair006",
+    "condition_a:pair007",
+    "condition_a:pair008",
+    "condition_a:pair009",
+    "condition_b:pair000",
+    "condition_b:pair001",
+    "condition_b:pair002",
+    "condition_b:pair003",
+    "condition_b:pair004",
+    "condition_b:pair005",
+    "condition_b:pair006",
+    "condition_b:pair007",
+    "condition_b:pair008",
+    "condition_b:pair009"
+  ],
+  "experiment_id": "H-EV-AUTOND-REPRESENTATION",
+  "freeze_record": {
+    "frozen_at_utc": "2026-10-30T06:15:19.020228+00:00",
+    "frozen_config_hash": "f802d9429c163d40dc560cd3b394a9fe52f09d0b73d08cee10e15a32bd267428",
+    "frozen_permutation_hash": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+    "frozen_replicate_plan_hash": "246d58e2af8dfcca8af27d5b77793789e7519d77d6a2c5d825206c931f75e16e",
+    "frozen_statistical_plan_hash": "9447a8e269fcfed1d6d27c13a672d07d550b2fbc2a07f889a66ea0e01f0a905f"
+  },
+  "frozen": true,
+  "sealed_dataset_hashes": {
+    "pair000": "65ecc5d4fc749ba5b047c87d3889118ea37a431b729e3bce1e238ac6b9a904e1",
+    "pair001": "899ef6c3c618014658cbbf7202ee9381f4f29be2cdd27c4528f2c94c166dcb0f",
+    "pair002": "9815de39a065dcf144f5786b5ee0cb54b2c2456dff9f23740341fca5a5c5dd2a",
+    "pair003": "ecb700fd35bcbe159a94076f2ce7b6c746e97c012d80778af15f2fc4cac74dba",
+    "pair004": "fe7d0ca6d68f22771ce7c6ba2984dc09e27c0a9f914a5577531af7f934e80481",
+    "pair005": "fb4729373de9e1fff30c9a8f906b3a02a9b62e907e2b959450c8c447b09386c3",
+    "pair006": "fd1c6f29b35a0d5acb9be31fa62cbf500b7f88d0d547224ec60bcfd1a19203f4",
+    "pair007": "4988548bdfb43b0f8466815b99a1ebd58e91d08cf9eb07fc4e8a327f28da2dae",
+    "pair008": "f4b2a89a51111ce35018c1ad4a26568307db2f1ee803257c246cbefa3ac5722a",
+    "pair009": "ffbb87447c98b7eef37b60924fe2610135553add91097ecea5816b0a6d0b405e"
+  }
+}

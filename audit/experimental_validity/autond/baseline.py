@@ -53,7 +53,43 @@ EV_SPECIFIC_CHANGES = (
     "datasets are persisted once per replicate/pair and reloaded hash-verified, so both arms of a pair "
     "and any resumed unit use the identical data",
     "shuffle is passed explicitly; the baseline value is upstream's model.fit default (True)",
+    "the two arms of a pair train one after the other in one process on one GPU, in the frozen balanced "
+    "order of autond.order (protocol balanced-ab-v1: half the pairs AB, half BA), not always A first",
 )
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
+SOURCE_MANIFEST_SCHEMA = "autond-ev-source-manifest-1"
+
+#: Every file whose content can change what a calibration or production unit computes or records.
+SOURCE_FILES = (
+    *(f"audit/experimental_validity/autond/{f}" for f in ("__init__.py", "adapter.py", "baseline.py", "calibration.py",
+                                                          "experiments.py", "order.py", "representation.py",
+                                                          "runner.py")),
+    *(f"audit/experimental_validity/framework/{f}" for f in (
+        "certificate.py", "confidence_intervals.py", "effect_sizes.py", "experiment.py", "failures.py", "firewall.py",
+        "manifest.py", "multiplicity.py", "power.py", "provenance.py", "replication.py", "resumability.py", "seeds.py",
+        "statistics.py", "validation.py")),
+    "audit/experimental_validity/configs/autond_ev.yaml",
+    "audit/experimental_validity/configs/autond_ev_order_schedule.json",
+    "audit/dataset/adapters/autond.py", "audit/dataset/experiments/d0_autond_canonical.py",
+    "audit/dataset/integrity.py",
+)
+
+
+def source_manifest(root: Path = REPOSITORY_ROOT, files: tuple = SOURCE_FILES) -> dict:
+    """SHA-256 of every source file and one digest over them. A code identity, never a config or design hash."""
+    import hashlib
+    import json
+    root = Path(root)
+    hashes = {}
+    for rel in sorted(files):
+        h = hashlib.sha256()
+        with open(root / rel, "rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        hashes[rel] = h.hexdigest()
+    body = json.dumps({"schema": SOURCE_MANIFEST_SCHEMA, "files": hashes}, sort_keys=True, separators=(",", ":"))
+    return {"schema": SOURCE_MANIFEST_SCHEMA, "files": hashes, "sha256": hashlib.sha256(body.encode()).hexdigest()}
 
 
 class ConfigError(ValueError):

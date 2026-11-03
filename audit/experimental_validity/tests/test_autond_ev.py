@@ -25,6 +25,7 @@ from autond import adapter as A
 from autond import baseline as B
 from autond import calibration as C
 from autond import experiments as E
+from autond import order as O
 from autond import representation as REP
 from autond import runner as R
 from framework.certificate import DecisionState, NonConfirmatoryEvidenceError, decide_final
@@ -181,21 +182,23 @@ def test_output_directories_are_bound_to_one_mode_and_one_writer(tmp_path):
 # ============================================================ configuration gates
 
 
-def test_the_shipped_config_freezes_calibration_and_leaves_production_open():
+def test_the_shipped_config_declares_production_but_the_gate_blocks_the_fixed_order_power_plan():
     config = B.load_config()
     assert config["protocol"] == B.FROZEN_PROTOCOL and B.check_config(config, "smoke") == []
-    assert B.check_config(config, "calibration") == []
+    assert B.check_config(config, "calibration") == [] and B.check_config(config, "production") == []
     d = config["decisions"]
     assert (d["practical_threshold"], d["target_effect"]) == (0.01, 0.02)
     assert all(config["calibration"][h]["units"] == 10 for h in B.PRIMARY_FAMILY)
-    pending = B.check_config(config, "production")
-    assert len(pending) == 1 and "production.power_plan.sha256" in pending[0]
-    assert all(f"production.{e}.units" in pending[0] for e in B.EXPERIMENT_IDS)
+    plan = {e: (config["production"][e]["units"], config["production"][e]["minimum_valid"]) for e in B.EXPERIMENT_IDS}
+    assert plan == {"EV-AUTOND-BASELINE": (10, 8), "EV-AUTOND-NOISE": (10, 8), H1: (6, 5), H2: (6, 5)}
+    assert config["production"]["power_plan"]["required_n"] == 3
+    problems = E.check_power_plan(config)
+    assert len(problems) == 1 and "'fixed-ab-legacy'" in problems[0] and "Recalibrate" in problems[0]
 
 
-def test_production_refuses_through_the_entry_point_while_decisions_are_pending(tmp_path, capsys):
+def test_production_refuses_through_the_entry_point_while_the_power_plan_is_unvalidated(tmp_path, capsys):
     assert R.main(["run", "--mode", "production", "--experiment", H1, "--autond-root", str(tmp_path)]) == 2
-    assert "unresolved decisions" in capsys.readouterr().err
+    assert "A/B execution order 'fixed-ab-legacy'" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("edit, message", [
@@ -288,9 +291,9 @@ def test_a_target_effect_at_the_margin_cannot_power_supported():
         assert res.power_difference_significant[H1] > 0.99 and res.power_supported[H1] < 0.5
 
 
-def _variance(config, sigma=0.004):
+def _variance(config, sigma=0.004, protocol=O.PROTOCOL):
     return {"artifact": C.VARIANCE_ARTIFACT, "design_hash": B.design_hash(config),
-            "sigma_Delta_upper_95": {H1: sigma, H2: sigma}}
+            "execution_order_protocol": protocol, "sigma_Delta_upper_95": {H1: sigma, H2: sigma}}
 
 
 def test_power_plan_sizes_the_actual_final_decisions_under_the_worst_other_hypothesis():
@@ -310,6 +313,9 @@ def test_power_plan_sizes_the_actual_final_decisions_under_the_worst_other_hypot
         E.power_plan(_variance(filled(target_effect=0.01)), filled(target_effect=0.01), variance_sha256="v")
     with pytest.raises(ValueError, match="this design"):
         E.power_plan(_variance(filled()), filled(practical_threshold=0.005), variance_sha256="v")
+    with pytest.raises(ValueError, match="'fixed-ab-legacy'"):
+        E.power_plan(_variance(config, protocol=None), config, variance_sha256="v")
+    assert plan["inputs"]["execution_order_protocol"] == O.PROTOCOL
 
 
 def test_production_requires_the_declared_power_plan_and_enough_pairs(tmp_path, monkeypatch):
@@ -327,6 +333,10 @@ def test_production_requires_the_declared_power_plan_and_enough_pairs(tmp_path, 
     assert any("below" in p for p in E.check_power_plan(low))
     plan_path.write_text(json.dumps(plan | {"required_n": 2}))
     assert "differs from the SHA-256" in E.check_power_plan(config)[0]
+    legacy = plan | {"inputs": {k: v for k, v in plan["inputs"].items() if k != "execution_order_protocol"}}
+    plan_path.write_text(json.dumps(legacy))
+    config["production"]["power_plan"]["sha256"] = E.sha256_file(plan_path)
+    assert any("'fixed-ab-legacy'" in p for p in E.check_power_plan(config))
 
 
 # Lower 5% points of chi-square (standard published tables), fixed here rather than computed by SciPy.
@@ -371,7 +381,7 @@ def test_calibration_variance_uses_only_matching_calibration_certificates(tmp_pa
     paths = {}
     for h, diffs in ((H1, [0.001, -0.002, 0.003]), (H2, [0.002, 0.0, -0.001])):
         cert = {"run_mode": "calibration", "calibration": True, "non_evidentiary": True, "experiment_id": h,
-                "design_hash": B.design_hash(config),
+                "design_hash": B.design_hash(config), "execution_order": {"protocol": O.PROTOCOL},
                 "raw_paired_values": {"condition_a": [0.9] * 3, "condition_b": [0.9 + d for d in diffs]}}
         paths[h] = tmp_path / f"{h}.json"
         paths[h].write_text(json.dumps(cert))
@@ -383,12 +393,15 @@ def test_calibration_variance_uses_only_matching_calibration_certificates(tmp_pa
     assert artifact["sigma_Delta_upper_95"][H1] == pytest.approx(sd * np.sqrt(2 / 0.102587), rel=2e-5)   # df = 2
     assert artifact["artifact"] == "autond-ev-calibration-variance-1" and artifact["non_evidentiary"] is True
     assert set(artifact) == {"artifact", "non_evidentiary", "design_hash", "generated_at_utc", "inputs",
-                             "sigma_Delta_upper_95", "prohibition"}
+                             "sigma_Delta_upper_95", "prohibition", "execution_order_protocol"}
+    assert artifact["execution_order_protocol"] == O.PROTOCOL
     assert set(artifact["inputs"][H1]) == {"certificate", "certificate_sha256", "n_valid", "sigma_Delta",
                                            "sigma_Delta_upper_95"}
     production = {"run_mode": "production", "calibration": False, "non_evidentiary": False}
     for bad, message in ((production, "not a calibration"),
-                         ({"design_hash": "other"}, "different design")):
+                         ({"design_hash": "other"}, "different design"),
+                         ({"execution_order": None}, "'fixed-ab-legacy'"),
+                         ({"execution_order": {"protocol": "other-order"}}, "'other-order'")):
         paths[H1].write_text(json.dumps(base | bad))
         with pytest.raises(ValueError, match=message):
             C.calibration_variance(list(paths.values()), config)
@@ -396,3 +409,114 @@ def test_calibration_variance_uses_only_matching_calibration_certificates(tmp_pa
     config["calibration"][H1]["units"] = 4
     with pytest.raises(ValueError, match="different design"):     # the plan is part of the design hash
         C.calibration_variance(list(paths.values()), config)
+
+
+# ============================================================ balanced A/B order and source identity
+
+
+def test_the_frozen_schedule_reproduces_its_derivation_and_the_reviewed_orders():
+    frozen = O.load_frozen()
+    design = B.design_hash(B.load_config())
+    assert frozen["design_hash"] == design and frozen["protocol"] == O.PROTOCOL == "balanced-ab-v1"
+    assert O.schedule_for(H1, "production", 6, design) == ["BA", "AB", "AB", "BA", "AB", "BA"]
+    assert O.schedule_for(H2, "production", 6, design) == ["BA", "AB", "AB", "AB", "BA", "BA"]
+    for mode, pairs in (("production", 6), ("calibration", 10)):
+        for h in B.PRIMARY_FAMILY:
+            order = O.schedule_for(h, mode, pairs, design)
+            assert order == O.derive(h, design, pairs) and order.count("BA") == pairs // 2
+            assert frozen["schedules"][mode][h]["schedule_sha256"] == O.schedule_sha256(order)
+    assert O.SCHEDULE_SHA256 == E.sha256_file(O.SCHEDULE_PATH)
+
+
+def test_a_tampered_or_mismatched_schedule_is_refused(tmp_path):
+    design = B.design_hash(B.load_config())
+    frozen = O.load_frozen()
+    with pytest.raises(O.OrderError, match="pinned schedule"):
+        bad = tmp_path / "s.json"
+        bad.write_text(O.SCHEDULE_PATH.read_text().replace('"BA"', '"AB"', 1))
+        O.load_frozen(bad)
+    with pytest.raises(O.OrderError, match="exactly 7 pairs"):
+        O.schedule_for(H1, "production", 7, design, frozen=frozen)
+    with pytest.raises(O.OrderError, match="derived for design"):
+        O.schedule_for(H1, "production", 6, "0" * 64, frozen=frozen)
+    edited = copy.deepcopy(frozen)
+    edited["schedules"]["production"][H1]["order"] = ["AB", "BA", "AB", "BA", "AB", "BA"]
+    with pytest.raises(O.OrderError, match="documented derivation"):
+        O.schedule_for(H1, "production", 6, design, frozen=edited)
+    with pytest.raises(O.OrderError, match="no frozen production schedule"):
+        O.schedule_for("EV-AUTOND-BASELINE", "production", 6, design, frozen=frozen)
+
+
+def test_the_source_manifest_is_a_content_digest_distinct_from_the_config_hashes(tmp_path):
+    first = B.source_manifest()
+    assert first == B.source_manifest() and set(first["files"]) == set(B.SOURCE_FILES)
+    config = B.load_config()
+    assert first["sha256"] not in (B.design_hash(config), B.production_hash(config))
+    root = tmp_path / "repo"
+    for rel in B.SOURCE_FILES:
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / rel).write_bytes((B.REPOSITORY_ROOT / rel).read_bytes())
+    assert B.source_manifest(root)["sha256"] == first["sha256"]
+    (root / "audit/experimental_validity/autond/experiments.py").write_text("# changed\n")
+    changed = B.source_manifest(root)
+    assert changed["sha256"] != first["sha256"]
+    assert [r for r in changed["files"] if changed["files"][r] != first["files"][r]] == [
+        "audit/experimental_validity/autond/experiments.py"]
+
+
+def _unit(i, digest, order=None, session="s1", gpu="GPU-1"):
+    return {"status": "valid", "pair_id": i, "execution_order": order, "source_manifest_sha256": digest,
+            "session_id": session, "device": {"device": "GPU", "gpu_uuid": gpu}}
+
+
+def test_units_of_different_source_code_order_or_session_are_never_aggregated():
+    paired, noise = E.SPECS[H1], E.SPECS["EV-AUTOND-NOISE"]
+    schedule = ["BA", "AB", "AB"]
+    good = {f"pair{i:03d}": _unit(i, "a", schedule[i]) for i in range(3)}
+    E.check_unit_consistency(paired, good, source_sha256="a", schedule=schedule)
+    with pytest.raises(E.SourceIdentityMismatch, match="pair001"):
+        E.check_unit_consistency(paired, good | {"pair001": _unit(1, "b", "AB")}, source_sha256="a", schedule=schedule)
+    with pytest.raises(O.OrderError, match="frozen schedule"):
+        E.check_unit_consistency(paired, good | {"pair002": _unit(2, "a", "BA")}, source_sha256="a", schedule=schedule)
+    reruns = {f"rerun{i:03d}": _unit(i, "a") for i in range(3)}
+    E.check_unit_consistency(noise, reruns, source_sha256="a", schedule=None)
+    with pytest.raises(E.SessionScopeViolation):
+        E.check_unit_consistency(noise, reruns | {"rerun002": _unit(2, "a", session="s2")}, source_sha256="a",
+                                 schedule=None)
+    with pytest.raises(E.SessionScopeViolation):
+        E.check_unit_consistency(noise, reruns | {"rerun002": _unit(2, "a", gpu="GPU-2")}, source_sha256="a",
+                                 schedule=None)
+
+
+def test_every_executed_source_file_is_in_the_manifest():
+    for module in ("adapter", "baseline", "calibration", "experiments", "order", "representation", "runner"):
+        assert f"audit/experimental_validity/autond/{module}.py" in B.SOURCE_FILES
+    assert "audit/experimental_validity/configs/autond_ev_order_schedule.json" in B.SOURCE_FILES
+    assert R.SOURCES == B.SOURCE_FILES
+    assert R.tier_dir("calibration") == "calibration-balanced-ab-v1" and R.tier_dir("production") == "production"
+
+
+def test_autond_and_gohr_experiment_identifiers_cannot_collide():
+    import re
+    from pathlib import Path
+    gohr_ids = set()
+    for path in Path(__file__).resolve().parents[1].joinpath("gohr").rglob("*.py"):
+        gohr_ids |= set(re.findall(r'"((?:H-)?EV-[A-Z0-9-]+)"', path.read_text()))
+    assert gohr_ids and not (gohr_ids & set(B.EXPERIMENT_IDS))
+    assert all("-AUTOND-" in e for e in B.EXPERIMENT_IDS)
+
+
+def test_power_sensitivity_reproduces_the_framework_rule_and_flags_the_sub_80_cell():
+    from autond import sensitivity as SENS
+    config = B.load_config()
+    sigmas = {H1: 0.0019802517571800957, H2: 0.0005461742370377552}
+    kw = {"sigmas": sigmas, "target": 0.02, "epsilon": 0.01, "alpha": 0.05, "n_sim": 40000}
+    four = SENS.cell(4, 2.0, "first_null_second_effect", "normal", **kw)
+    five = SENS.cell(5, 2.0, "first_null_second_effect", "normal", **kw)
+    assert four["correct"]["joint"] < 0.80 <= five["correct"]["joint"]
+    fw = simulate_joint_primary_family(hypotheses=(H1, H2), sigmas={h: 2 * s for h, s in sigmas.items()},
+                                       true_effects={H1: 0.0, H2: 0.02}, n_pairs=4, alpha=0.05, epsilon=0.01,
+                                       n_simulations=40000, rng=statistics_rng(1), target_effect_source="predeclared")
+    assert abs(fw.power_not_supported[H1] - four["correct"][H1]) < 0.01
+    assert sum(four["decision_counts"].values()) == 40000
+    assert config["production"][H1]["minimum_valid"] == 5

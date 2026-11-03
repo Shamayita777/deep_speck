@@ -1,0 +1,27 @@
+{
+  "artifact": "autond-ev-calibration-variance-1",
+  "design_hash": "84123aa4bb01c6160e1286cedddf68b35419378c2131f65822b57017e65db154",
+  "generated_at_utc": "2026-10-30T13:51:59.300465+00:00",
+  "inputs": {
+    "H-EV-AUTOND-REPRESENTATION": {
+      "certificate": "/kaggle/working/deep_speck/audit/experimental_validity/results/autond/calibration/H-EV-AUTOND-REPRESENTATION/certificate.json",
+      "certificate_sha256": "bcb6ec0b3ba73b7961d274b3021b070dc7cb90cf1d1eb3c4078d17f820bf8830",
+      "n_valid": 10,
+      "sigma_Delta": 0.0003319809398812554,
+      "sigma_Delta_upper_95": 0.0005461742370377552
+    },
+    "H-EV-AUTOND-TRAIN-ORDER": {
+      "certificate": "/kaggle/working/deep_speck/audit/experimental_validity/results/autond/calibration/H-EV-AUTOND-TRAIN-ORDER/certificate.json",
+      "certificate_sha256": "fedf6aef0c18cfae9c50b1e3f8b9a73786d6d245034fe75aa835092dafe081dc",
+      "n_valid": 10,
+      "sigma_Delta": 0.0012036558939793262,
+      "sigma_Delta_upper_95": 0.0019802517571800957
+    }
+  },
+  "non_evidentiary": true,
+  "prohibition": "sizes the production design only; never chooses or validates epsilon or the target effect",
+  "sigma_Delta_upper_95": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0005461742370377552,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0019802517571800957
+  }
+}

@@ -30,7 +30,7 @@ import numpy as np
 
 from autond import adapter as A
 from autond.baseline import (
-    EV_SPECIFIC_CHANGES, PRIMARY_FAMILY, ConfigError, design_hash, production_hash, run_plan,
+    EV_SPECIFIC_CHANGES, PRIMARY_FAMILY, ConfigError, design_hash, production_hash, run_plan, source_manifest,
 )
 from framework.certificate import (
     DecisionState, assess_practical_equivalence, build_certificate, decide_difference_detection, decide_final,
@@ -49,6 +49,7 @@ from framework.replication import ReplicateSet
 from framework.resumability import ResumeLedger, ResumeViolation, RunState
 from framework.seeds import statistics_rng
 from framework.statistics import descriptive_statistics, paired_analysis
+from autond import order as O
 from autond import representation as REP
 from autond.calibration import VARIANCE_ARTIFACT
 
@@ -225,6 +226,53 @@ def _load_firewall(path: Path, spec: Spec, unit_hash: str, plan: dict, config: d
     return firewall
 
 
+class SourceIdentityMismatch(RuntimeError):
+    """Units produced by different source code may never be resumed into, or aggregated with, each other."""
+
+
+class SessionScopeViolation(RuntimeError):
+    """EV-AUTOND-NOISE reruns must all come from one session on one device."""
+
+
+def _unit_sources(results: dict) -> dict[str, str]:
+    return {u: r.get("source_manifest_sha256") for u, r in results.items() if not u.startswith("_")}
+
+
+def check_unit_consistency(spec: Spec, results: dict, *, source_sha256: str, schedule: Optional[list[str]]) -> None:
+    """Refuse to aggregate units of different source identity, out-of-schedule pairs or a split NOISE run."""
+    bad = sorted(u for u, h in _unit_sources(results).items() if h != source_sha256)
+    if bad:
+        raise SourceIdentityMismatch(f"{spec.experiment_id}: units {bad} were produced by source manifest(s) "
+                                     f"{sorted({_unit_sources(results)[u] for u in bad}, key=str)}, not {source_sha256}")
+    if schedule is not None:
+        for u, r in results.items():
+            if u.startswith("_"):
+                continue
+            i = int(r.get("pair_id", -1))
+            if not (0 <= i < len(schedule)) or r.get("execution_order") != schedule[i] or u != f"{spec.unit}{i:03d}":
+                raise O.OrderError(f"{spec.experiment_id}/{u}: recorded order {r.get('execution_order')!r} "
+                                   f"(pair {r.get('pair_id')}) differs from the frozen schedule")
+    if spec.shared_data and spec.shared_seed:
+        scopes = {(r.get("session_id"), (r.get("device") or {}).get("gpu_uuid"), (r.get("device") or {}).get("device"))
+                  for u, r in results.items() if not u.startswith("_")}
+        if len(scopes) > 1:
+            raise SessionScopeViolation(f"{spec.experiment_id}: reruns come from more than one session/device "
+                                        f"{sorted(scopes, key=str)}; NOISE is scoped to one session on one device")
+
+
+def _pin_directory_identity(output_dir: Path, source: dict, mode: str) -> None:
+    path = output_dir / "source_identity.json"
+    if path.is_file():
+        frozen = json.loads(path.read_text())
+        if frozen.get("source_manifest_sha256") != source["sha256"]:
+            raise SourceIdentityMismatch(f"{output_dir}: started under source manifest "
+                                         f"{frozen.get('source_manifest_sha256')}, now {source['sha256']}; units of "
+                                         "different code are never combined")
+        return
+    _write_json(path, {"mode": mode, "source_manifest_sha256": source["sha256"], "files": source["files"],
+                       "frozen_at_utc": utc_timestamp()})
+
+
 def run_experiment(experiment_id: str, *, config: dict, mode: str, output_dir: Path, binding,
                    permutation: Optional[REP.WordPermutation] = None, provenance: Optional[dict] = None) -> dict:
     """Run (or resume) every unit of one experiment in one tier and return its certificate."""
@@ -233,23 +281,37 @@ def run_experiment(experiment_id: str, *, config: dict, mode: str, output_dir: P
     if any(a.permuted for a in spec.arms) and (permutation is None
                                                or permutation.hash != frozen_permutation(config).hash):
         raise ConfigError(f"{experiment_id} requires the frozen representation permutation")
+    provenance = dict(provenance or {})
+    source = provenance.get("source_manifest") or source_manifest()
+    provenance["source_manifest"] = source
+    session = provenance.get("session") or A.session_provenance()
+    provenance["session"] = session
+    device = A.device_identity(session)
+    git_head = (provenance.get("source_identity") or {}).get("git_head")
+    schedule = O.schedule_for(experiment_id, mode, plan["units"], design_hash(config)) if spec.paired else None
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    _pin_directory_identity(output_dir, source, mode)
     experiment_hash = config_hash({"tier": tier_hash(config, mode), "experiment": experiment_id, "mode": mode})
     ledger = ResumeLedger(output_dir / "resume_ledger.jsonl")
     results_path = output_dir / "unit_results.json"
     results: dict = json.loads(results_path.read_text()) if results_path.is_file() else {}
+    check_unit_consistency(spec, results, source_sha256=source["sha256"], schedule=schedule)
     firewall_path = output_dir / "firewall.json"
     firewall = _load_firewall(firewall_path, spec, experiment_hash, plan, config, permutation) if spec.paired else None
 
     for i in range(plan["units"]):
         unit_id = f"{spec.unit}{i:03d}"
         seed = plan["seed"] if spec.shared_seed else plan["seed"] + i
-        unit_hash = config_hash({"experiment": experiment_hash, "unit": unit_id, "seed": seed})
+        order = schedule[i] if schedule is not None else None
+        unit_hash = config_hash({"experiment": experiment_hash, "unit": unit_id, "seed": seed,
+                                 "execution_order": order, "order_protocol": O.PROTOCOL if spec.paired else None,
+                                 "source_manifest_sha256": source["sha256"]})
         previous = ledger.last_state_for(experiment_id, unit_id)
         if previous is not None:
             if previous["config_hash"] != unit_hash:
-                raise ResumeViolation(f"{experiment_id}/{unit_id}: configuration changed since it was started")
+                raise ResumeViolation(f"{experiment_id}/{unit_id}: configuration, execution order or source code "
+                                      "changed since it was started")
             if previous["stage"] in ("complete", "failed"):
                 if unit_id not in results:
                     raise ResumeViolation(f"{experiment_id}/{unit_id}: recorded {previous['stage']} but its "
@@ -260,6 +322,12 @@ def run_experiment(experiment_id: str, *, config: dict, mode: str, output_dir: P
             if previous["stage"] == "consumed":
                 raise FirewallViolation(f"{experiment_id}/{unit_id}: its confirmatory data were consumed but the "
                                         "result was never recorded; refusing to evaluate them again")
+        if spec.shared_data and spec.shared_seed:
+            done = [r for u, r in results.items() if not u.startswith("_")]
+            if done and {(r.get("session_id"), (r.get("device") or {}).get("gpu_uuid")) for r in done} != {
+                    (session.get("session_id"), device.get("gpu_uuid"))}:
+                raise SessionScopeViolation(f"{experiment_id}/{unit_id}: earlier reruns ran in another session or on "
+                                            "another device; NOISE reruns are never combined across sessions")
         ledger.record_state(RunState(experiment_id, unit_id, "started", [], unit_hash, None))
         data_file = output_dir / "datasets" / ("shared.npz" if spec.shared_data else f"{unit_id}.npz")
         parts = A.load_or_generate(binding, data_file, plan["sizes"])
@@ -267,20 +335,23 @@ def run_experiment(experiment_id: str, *, config: dict, mode: str, output_dir: P
             firewall.seal_confirmatory_dataset(unit_id, parts["test"].sha256)
             firewall.save(firewall_path)
 
-        arms = []
-        for arm in spec.arms:
+        executed = list(spec.arms) if order in (None, "AB") else list(reversed(spec.arms))
+        trained = {}
+        for position, arm in enumerate(executed):
             data = _arm_partitions(parts, arm, permutation)
             model = A.build_model(binding, seed)
             initial = A.weights_sha256(model)
             training = A.train(model, data["train"], data["validation"], epochs=plan["epochs"],
                                batch_size=plan["batch_size"], shuffle=arm.shuffle)
-            arms.append((arm, model, data, {
+            trained[arm.condition_id] = (arm, model, data, {
                 "condition_id": arm.condition_id, "model_seed": seed, "shuffle": arm.shuffle,
+                "execution_position": position,
                 "permutation_sha256": permutation.hash if arm.permuted else None,
                 "dataset_sha256": {r: p.sha256 for r, p in parts.items()},
                 "input_sha256": {r: p.sha256 for r, p in data.items()},
                 "initial_weight_sha256": initial, "history": training.history,
-                "failure": training.failure.value if training.failure else None}))
+                "failure": training.failure.value if training.failure else None})
+        arms = [trained[a.condition_id] for a in spec.arms]          # canonical A, B order for the analysis
 
         initial_hashes = {rec["initial_weight_sha256"] for *_, rec in arms}
         reference = results.get("_reference_initial_weight_sha256") if spec.shared_seed else None
@@ -298,20 +369,28 @@ def run_experiment(experiment_id: str, *, config: dict, mode: str, output_dir: P
                                                              observed_dataset_hash=parts["test"].sha256)
                 firewall.save(firewall_path)
                 ledger.record_state(RunState(experiment_id, unit_id, "consumed", ["train", "consume"], unit_hash, None))
-            for arm, model, data, rec in arms:
+            for arm in executed:
+                _, model, data, rec = trained[arm.condition_id]
                 rec["confirmatory_accuracy"] = A.accuracy(model, data["test"])
                 model_path = output_dir / "models" / f"{unit_id}_{arm.condition_id}.keras"
                 model_path.parent.mkdir(parents=True, exist_ok=True)
                 model.save(model_path)
                 rec["final_model_sha256"] = sha256_file(model_path)      # the archive, incl. save-time metadata
                 rec["final_weight_sha256"] = A.weights_sha256(model)     # the trained weights themselves
-        results[unit_id] = {"status": "valid" if valid else "failed", "arms": [rec for *_, rec in arms]}
+        results[unit_id] = {"status": "valid" if valid else "failed", "arms": [rec for *_, rec in arms],
+                            "pair_id": i if spec.paired else None, "execution_order": order,
+                            "executed_conditions": [a.condition_id for a in executed],
+                            "source_manifest_sha256": source["sha256"], "git_head": git_head,
+                            "session_id": session.get("session_id"), "device": device,
+                            "unit_hash": unit_hash, "recorded_utc": utc_timestamp()}
         _write_json(results_path, results)
         ledger.record_state(RunState(experiment_id, unit_id, "complete" if valid else "failed",
                                      ["train", "evaluate"] if valid else ["train"], unit_hash, None))
 
+    check_unit_consistency(spec, results, source_sha256=source["sha256"], schedule=schedule)
     return _certificate(spec, plan, config, mode, results, output_dir, experiment_hash,
-                        firewall.to_dict() if firewall else None, permutation, provenance or {})
+                        firewall.to_dict() if firewall else None, permutation, provenance,
+                        schedule=schedule, source=source)
 
 
 # ============================================================ certificates
@@ -338,7 +417,8 @@ def _outcomes(spec: Spec, results: dict, plan: dict) -> dict[str, ReplicateSet]:
     return sets
 
 
-def _certificate(spec, plan, config, mode, results, output_dir, experiment_hash, firewall, permutation, provenance):
+def _certificate(spec, plan, config, mode, results, output_dir, experiment_hash, firewall, permutation, provenance, *,
+                 schedule=None, source=None):
     sets = _outcomes(spec, results, plan)
     first = sets[spec.arms[0].condition_id]
     sufficient, summary = first.check_sufficiency(max(plan["minimum_valid"], 2))
@@ -425,7 +505,16 @@ def _certificate(spec, plan, config, mode, results, output_dir, experiment_hash,
         "resume_ledger_sha256": sha256_file(output_dir / "resume_ledger.jsonl"),
         "permutation": (permutation.to_dict() if permutation is not None and any(a.permuted for a in spec.arms)
                         else None),
-        "provenance": provenance, "conservative_wording": spec.wording})
+        "provenance": provenance, "conservative_wording": spec.wording,
+        "source_manifest": source,
+        "unit_source_manifest_sha256": sorted({r.get("source_manifest_sha256") for r in unit_records.values()}, key=str),
+        "unit_sessions": sorted({(r.get("session_id"), (r.get("device") or {}).get("gpu_uuid"),
+                                  (r.get("device") or {}).get("gpu_name")) for r in unit_records.values()}, key=str),
+        "execution_order": ({"protocol": O.PROTOCOL, "schedule": schedule,
+                             "schedule_sha256": O.schedule_sha256(schedule),
+                             "frozen_schedule_file_sha256": O.SCHEDULE_SHA256 if mode != "smoke" else None,
+                             "per_unit": {u: r.get("execution_order") for u, r in sorted(unit_records.items())}}
+                            if schedule is not None else None)})
     if spec.paired:
         cert["raw_paired_values"] = values
         cert["initial_weight_hashes"] = {u: [a["initial_weight_sha256"] for a in r["arms"]]
@@ -510,6 +599,9 @@ def power_plan(variance: dict, config: dict, *, variance_sha256: str, simulation
     """
     if variance.get("artifact") != VARIANCE_ARTIFACT or variance.get("design_hash") != design_hash(config):
         raise ValueError("variance artifact is not this design's calibration output")
+    protocol = variance.get("execution_order_protocol") or O.LEGACY_PROTOCOL
+    if protocol != O.PROTOCOL:
+        raise ValueError(f"variance artifact was calibrated under A/B execution order {protocol!r}, not {O.PROTOCOL!r}")
     d = config["decisions"]
     epsilon, target, alpha, power = d["practical_threshold"], d["target_effect"], d["alpha"], d["target_power"]
     if not target > epsilon:
@@ -539,7 +631,7 @@ def power_plan(variance: dict, config: dict, *, variance_sha256: str, simulation
         "design_hash": design_hash(config), "variance_artifact_sha256": variance_sha256,
         "inputs": {"epsilon": epsilon, "target_effect": target, "target_effect_source": "predeclared", "alpha": alpha,
                    "target_power": power, "n_simulations": simulations, "sigma": "sigma_Delta_upper_95",
-                   "sigma_values": sigmas, "max_n": max_n},
+                   "sigma_values": sigmas, "max_n": max_n, "execution_order_protocol": O.PROTOCOL},
         "required_n": required,
         "decision_rule_simulated": "paired t -> difference Holm -> TOST -> equivalence Holm -> decide_final",
         "requirement": ("for each hypothesis, min over the other hypothesis's state of P(SUPPORTED | effect = "
@@ -562,6 +654,11 @@ def check_power_plan(config: dict) -> list[str]:
     problems = []
     if plan.get("artifact") != POWER_PLAN_ARTIFACT or plan.get("design_hash") != design_hash(config):
         problems.append("power plan was not produced for this design")
+    protocol = (plan.get("inputs") or {}).get("execution_order_protocol") or O.LEGACY_PROTOCOL
+    if protocol != O.PROTOCOL:
+        problems.append(f"power plan was derived from a calibration under A/B execution order {protocol!r}; "
+                        f"production runs {O.PROTOCOL!r}, so its sigma_Delta is not validated for production. "
+                        "Recalibrate under the frozen balanced schedule first")
     d = config["decisions"]
     for key, value in (("epsilon", d["practical_threshold"]), ("target_effect", d["target_effect"]),
                        ("alpha", d["alpha"]), ("target_power", d["target_power"]),

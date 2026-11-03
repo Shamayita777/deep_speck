@@ -19,6 +19,8 @@ import numpy as np
 from scipy import stats
 
 from autond.baseline import PRIMARY_FAMILY, design_hash
+from autond.order import LEGACY_PROTOCOL as LEGACY_ORDER_PROTOCOL
+from autond.order import PROTOCOL as ORDER_PROTOCOL
 from framework.provenance import sha256_file, utc_timestamp
 
 VARIANCE_ARTIFACT = "autond-ev-calibration-variance-1"
@@ -49,6 +51,10 @@ def calibration_variance(paths: list[Path], config: dict) -> dict:
             raise ValueError(f"{path}: unexpected or duplicate hypothesis {h!r}")
         if cert.get("design_hash") != design_hash(config):
             raise ValueError(f"{path}: produced under a different design (protocol, decisions or calibration plan)")
+        protocol = (cert.get("execution_order") or {}).get("protocol") or LEGACY_ORDER_PROTOCOL
+        if protocol != ORDER_PROTOCOL:
+            raise ValueError(f"{path}: calibrated under A/B execution order {protocol!r}; the production protocol is "
+                             f"{ORDER_PROTOCOL!r}, so its sigma_Delta cannot size production")
         a, b = (np.asarray(cert["raw_paired_values"][k], dtype=float) for k in ("condition_a", "condition_b"))
         n = len(a)
         if n != config["calibration"][h]["units"] or len(b) != n:
@@ -62,6 +68,7 @@ def calibration_variance(paths: list[Path], config: dict) -> dict:
     if set(entries) != set(PRIMARY_FAMILY):
         raise ValueError(f"calibration certificates are needed for both of {PRIMARY_FAMILY}")
     return {"artifact": VARIANCE_ARTIFACT, "non_evidentiary": True, "design_hash": design_hash(config),
+            "execution_order_protocol": ORDER_PROTOCOL,
             "generated_at_utc": utc_timestamp(), "inputs": entries,
             "sigma_Delta_upper_95": {h: e["sigma_Delta_upper_95"] for h, e in entries.items()},
             "prohibition": "sizes the production design only; never chooses or validates epsilon or the target effect"}

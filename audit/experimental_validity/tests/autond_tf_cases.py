@@ -22,6 +22,7 @@ os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "3")
 from autond import adapter as A  # noqa: E402
 from autond import baseline as B  # noqa: E402
 from autond import experiments as E  # noqa: E402
+from autond import order as O  # noqa: E402
 from autond import representation as REP  # noqa: E402
 from autond import runner as R  # noqa: E402
 from framework.certificate import NonConfirmatoryEvidenceError  # noqa: E402
@@ -48,11 +49,11 @@ def smoke(tmp_path_factory):
         "_root": root, "_family": json.loads((root / "smoke" / "family_certificate.json").read_text())}
 
 
-def tiny(experiment, binding, out, config=None, units=2):
+def tiny(experiment, binding, out, config=None, units=2, provenance=None):
     config = copy.deepcopy(config or B.load_config())
     config["smoke"][experiment]["units"] = units
     return E.run_experiment(experiment, config=config, mode="smoke", output_dir=out, binding=binding,
-                            permutation=E.frozen_permutation(config))
+                            permutation=E.frozen_permutation(config), provenance=provenance)
 
 
 def bits(word: int) -> list[int]:
@@ -280,9 +281,158 @@ def test_calibration_requires_clean_committed_sources_and_confirmation(binding, 
     config = filled()
     monkeypatch.setattr(R, "load_config", lambda *a: config)
     monkeypatch.setattr(R, "RESULTS", tmp_path / "results")
-    dirty = {"git_head": "x", "files": {"audit/experimental_validity/autond/experiments.py": {"clean_at_head": False}}}
+    digest = B.source_manifest()["sha256"]
+    dirty = {"git_head": "x", "manifest_sha256": digest,
+             "files": {"audit/experimental_validity/autond/experiments.py": {"clean_at_head": False}}}
     monkeypatch.setattr(R, "source_identity", lambda: dirty)
     assert R.main(["run", "--mode", "calibration", "--autond-root", ROOT]) == 2
-    monkeypatch.setattr(R, "source_identity", lambda: {"git_head": "x", "files": {}})
+    monkeypatch.setattr(R, "source_identity", lambda: {"git_head": "x", "files": {}, "manifest_sha256": digest})
     assert R.main(["run", "--mode", "calibration", "--autond-root", ROOT]) == 0     # dry run
     assert not (tmp_path / "results").exists()
+
+
+# ============================================================ balanced A/B order, source and session binding
+
+
+def _spy_shuffle(monkeypatch, interrupt_at=None):
+    train, seen = A.train, []
+
+    def spy(model, tr, va, **kw):
+        seen.append(kw["shuffle"])
+        if interrupt_at is not None and len(seen) == interrupt_at:
+            raise KeyboardInterrupt
+        return train(model, tr, va, **kw)
+    monkeypatch.setattr(A, "train", spy)
+    return seen
+
+
+def _expected_shuffles(order):
+    return [x for o in order for x in ((True, False) if o == "AB" else (False, True))]
+
+
+def test_paired_arms_train_in_the_frozen_balanced_order_for_all_six_pairs(binding, tmp_path, monkeypatch):
+    design = B.design_hash(B.load_config())
+    schedule = O.derive(H1, design, 6)
+    assert schedule == O.schedule_for(H1, "production", 6, design) == ["BA", "AB", "AB", "BA", "AB", "BA"]
+    seen = _spy_shuffle(monkeypatch)
+    cert = tiny(H1, binding, tmp_path / "r", units=6)
+    assert seen == _expected_shuffles(schedule)
+    eo = cert["execution_order"]
+    assert eo["protocol"] == O.PROTOCOL and eo["schedule"] == schedule
+    assert list(eo["per_unit"].values()) == schedule and {"AB", "BA"} <= set(schedule)
+    results = json.loads((tmp_path / "r" / "unit_results.json").read_text())
+    for i, order in enumerate(schedule):
+        unit = results[f"pair{i:03d}"]
+        a, b = unit["arms"]
+        assert unit["pair_id"] == i and unit["execution_order"] == order
+        assert (a["condition_id"], b["condition_id"]) == ("condition_a", "condition_b")      # canonical for analysis
+        assert (a["execution_position"], b["execution_position"]) == ((0, 1) if order == "AB" else (1, 0))
+        assert unit["executed_conditions"] == (["condition_a", "condition_b"] if order == "AB"
+                                               else ["condition_b", "condition_a"])
+        assert a["model_seed"] == b["model_seed"] and a["initial_weight_sha256"] == b["initial_weight_sha256"]
+        assert a["dataset_sha256"] == b["dataset_sha256"]
+
+
+def test_an_interrupted_pair_reruns_both_arms_in_its_scheduled_order(binding, tmp_path, monkeypatch):
+    out = tmp_path / "r"
+    schedule = O.derive(H1, B.design_hash(B.load_config()), 2)
+    seen = _spy_shuffle(monkeypatch, interrupt_at=4)          # second arm of pair 1
+    with pytest.raises(KeyboardInterrupt):
+        tiny(H1, binding, out)
+    monkeypatch.undo()
+    seen = _spy_shuffle(monkeypatch)
+    cert = tiny(H1, binding, out)
+    assert seen == _expected_shuffles(schedule[1:])          # only pair 1, both arms, in its scheduled order
+    assert cert["sufficiency_summary"]["valid_replicates"] == 2 and cert["execution_order"]["schedule"] == schedule
+
+
+def test_a_schedule_change_or_a_tampered_order_record_is_refused(binding, tmp_path, monkeypatch):
+    out = tmp_path / "r"
+    _spy_shuffle(monkeypatch, interrupt_at=3)
+    with pytest.raises(KeyboardInterrupt):
+        tiny(H1, binding, out)
+    monkeypatch.undo()
+    derive = O.derive
+    monkeypatch.setattr(O, "derive", lambda *a: [("BA" if o == "AB" else "AB") for o in derive(*a)])
+    with pytest.raises((O.OrderError, ResumeViolation)):
+        tiny(H1, binding, out)
+    monkeypatch.undo()
+    tiny(H1, binding, out)
+    path = out / "unit_results.json"
+    results = json.loads(path.read_text())
+    results["pair000"]["execution_order"] = "AB" if results["pair000"]["execution_order"] == "BA" else "BA"
+    path.write_text(json.dumps(results))
+    with pytest.raises(O.OrderError, match="frozen schedule"):
+        tiny(H1, binding, out)
+
+
+def _source_copy(root):
+    for rel in B.SOURCE_FILES:
+        (root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (root / rel).write_bytes((B.REPOSITORY_ROOT / rel).read_bytes())
+    return {"source_manifest": B.source_manifest(root)}
+
+
+def test_a_source_file_changed_between_sessions_is_never_combined(binding, tmp_path, monkeypatch):
+    out, repo = tmp_path / "r", tmp_path / "repo"
+    first = _source_copy(repo)
+    _spy_shuffle(monkeypatch, interrupt_at=3)
+    with pytest.raises(KeyboardInterrupt):
+        tiny(H1, binding, out, provenance=first)
+    monkeypatch.undo()
+    target = repo / "audit/experimental_validity/framework/statistics.py"
+    target.write_text(target.read_text() + "\n# a change between sessions\n")
+    second = {"source_manifest": B.source_manifest(repo)}
+    assert second["source_manifest"]["sha256"] != first["source_manifest"]["sha256"]
+    with pytest.raises(E.SourceIdentityMismatch, match="never combined"):
+        tiny(H1, binding, out, provenance=second)
+    complete = tmp_path / "c"
+    tiny(H1, binding, complete, provenance=first)
+    with pytest.raises(E.SourceIdentityMismatch):
+        tiny(H1, binding, complete, provenance=second)
+
+
+def test_a_unit_with_a_foreign_source_digest_is_not_aggregated(binding, tmp_path):
+    out = tmp_path / "r"
+    cert = tiny(H1, binding, out)
+    assert len(cert["unit_source_manifest_sha256"]) == 1
+    assert cert["unit_source_manifest_sha256"] == [cert["source_manifest"]["sha256"]]
+    path = out / "unit_results.json"
+    results = json.loads(path.read_text())
+    results["pair001"]["source_manifest_sha256"] = "0" * 64
+    path.write_text(json.dumps(results))
+    (out / "source_identity.json").unlink()                  # even without the directory pin, units are checked
+    with pytest.raises(E.SourceIdentityMismatch, match="pair001"):
+        tiny(H1, binding, out)
+
+
+def test_noise_reruns_never_span_two_sessions(binding, tmp_path, monkeypatch):
+    out, train, calls = tmp_path / "r", A.train, []
+
+    def interrupt_second(*args, **kwargs):
+        calls.append(1)
+        if len(calls) == 2:
+            raise KeyboardInterrupt
+        return train(*args, **kwargs)
+    monkeypatch.setattr(A, "train", interrupt_second)
+    with pytest.raises(KeyboardInterrupt):
+        tiny("EV-AUTOND-NOISE", binding, out)
+    monkeypatch.setattr(A, "train", train)
+    monkeypatch.setattr(A, "_SESSION_ID", None)              # a new session, as after a Kaggle restart
+    with pytest.raises(E.SessionScopeViolation, match="never combined across sessions"):
+        tiny("EV-AUTOND-NOISE", binding, out)
+
+
+def test_every_unit_records_source_session_and_device(smoke):
+    for e in B.EXPERIMENT_IDS:
+        cert = smoke[e]
+        digest = cert["source_manifest"]["sha256"]
+        assert cert["unit_source_manifest_sha256"] == [digest] and digest == B.source_manifest()["sha256"]
+        units = json.loads((smoke["_root"] / "smoke" / e / "unit_results.json").read_text())
+        for u, r in units.items():
+            if u.startswith("_"):
+                continue
+            assert r["source_manifest_sha256"] == digest and r["session_id"] and r["device"]["device"] in ("CPU", "GPU")
+        session = cert["provenance"]["session"]
+        assert {"tensorflow_build", "nvidia_smi", "versions", "kaggle_environment", "session_id"} <= set(session)
+        assert (cert["execution_order"] is not None) == (e in B.PRIMARY_FAMILY)

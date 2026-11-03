@@ -1,0 +1,76 @@
+{
+ "artifact": "autond-ev-order-schedule-1",
+ "derivation": "seed = int(SHA-256(tag)[:16 hex], 16); order = numpy PCG64(seed).permutation(['AB'] * ceil(n/2) + ['BA'] * floor(n/2)); tag = 'autond-ev-ab-order-v1|<experiment>|design=<design_hash>|pairs=<n>'",
+ "design_hash": "84123aa4bb01c6160e1286cedddf68b35419378c2131f65822b57017e65db154",
+ "meaning": {
+  "AB": "condition_a trains (and is evaluated) first, then condition_b",
+  "BA": "condition_b first, then condition_a"
+ },
+ "protocol": "balanced-ab-v1",
+ "schedules": {
+  "calibration": {
+   "H-EV-AUTOND-REPRESENTATION": {
+    "order": [
+     "AB",
+     "BA",
+     "AB",
+     "BA",
+     "BA",
+     "AB",
+     "AB",
+     "AB",
+     "BA",
+     "BA"
+    ],
+    "pairs": 10,
+    "schedule_sha256": "63818a02f8786646f0fe49a0245003fa67277227eb94f9bc0828c3a1e58dfe01",
+    "tag": "autond-ev-ab-order-v1|H-EV-AUTOND-REPRESENTATION|design=84123aa4bb01c6160e1286cedddf68b35419378c2131f65822b57017e65db154|pairs=10"
+   },
+   "H-EV-AUTOND-TRAIN-ORDER": {
+    "order": [
+     "BA",
+     "AB",
+     "BA",
+     "AB",
+     "AB",
+     "BA",
+     "BA",
+     "BA",
+     "AB",
+     "AB"
+    ],
+    "pairs": 10,
+    "schedule_sha256": "2a93c538dc1edda6bc76c191fbbaaab72d7054b95a389fdbd30fb961f8e7b528",
+    "tag": "autond-ev-ab-order-v1|H-EV-AUTOND-TRAIN-ORDER|design=84123aa4bb01c6160e1286cedddf68b35419378c2131f65822b57017e65db154|pairs=10"
+   }
+  },
+  "production": {
+   "H-EV-AUTOND-REPRESENTATION": {
+    "order": [
+     "BA",
+     "AB",
+     "AB",
+     "AB",
+     "BA",
+     "BA"
+    ],
+    "pairs": 6,
+    "schedule_sha256": "e864c24f06be6025ce3341c5b6db03ef8c0ab32b0e024b69f90c429d857bd111",
+    "tag": "autond-ev-ab-order-v1|H-EV-AUTOND-REPRESENTATION|design=84123aa4bb01c6160e1286cedddf68b35419378c2131f65822b57017e65db154|pairs=6"
+   },
+   "H-EV-AUTOND-TRAIN-ORDER": {
+    "order": [
+     "BA",
+     "AB",
+     "AB",
+     "BA",
+     "AB",
+     "BA"
+    ],
+    "pairs": 6,
+    "schedule_sha256": "0060b82b67910abec54c22f722c4cad18d51d1b2eb6a79c45eed128d3d911a21",
+    "tag": "autond-ev-ab-order-v1|H-EV-AUTOND-TRAIN-ORDER|design=84123aa4bb01c6160e1286cedddf68b35419378c2131f65822b57017e65db154|pairs=6"
+   }
+  }
+ }
+}
