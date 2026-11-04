@@ -1,0 +1,782 @@
+{
+  "audit": {
+    "claim": "Characterizes how predictive performance changes with training-set size; it does not by itself establish cryptographic learning or a universal dataset-size law.",
+    "id": "D5",
+    "name": "Training-Data Scaling Audit",
+    "scope": "sample-size scaling under a fixed dataset/model/training protocol"
+  },
+  "configuration": {
+    "audit_seed": 0,
+    "baseline_training_size": 2500000,
+    "batch_size": 5000,
+    "bootstrap_replicates": 5000,
+    "config_hash": "ef9f49fa0aa13a11fbdfda1dfe1195e33569fbf21a0127fb065e45d027ed9ec3",
+    "dataset_id": "autond-speck3264",
+    "dataset_replay_available": false,
+    "dataset_replay_reason": "AutoND dataset generation is main.make_train_data at the pinned commit (via AutoNDDatasetAdapter.generate_partition), which draws keys, plaintexts, labels and the random-class substitution from os.urandom. The integer audit/replicate seed does not control dataset content and cannot regenerate a bit-identical dataset. The persisted dataset files and their file and logical SHA-256 hashes (including every nested prefix) are the reproducibility object.",
+    "dataset_seed": null,
+    "design": {
+      "fixed_test_partition": true,
+      "independent_experimental_unit": "replicate",
+      "independent_replicate_datasets": true,
+      "individual_test_examples_are_not_independent_replicates": true,
+      "nested_prefixes_are_not_independent_datasets": true,
+      "nested_prefixes_within_replicate": true,
+      "same_model_seed_across_sizes_within_replicate": true
+    },
+    "experiment": "AutoND SPECK32/64 r5 DBitNet training-data scaling with nested independent replicates",
+    "generation": {
+      "deterministic_seed": null,
+      "procedure": "main.make_train_data(encrypt, 32, 64, n, 5, delta_plain_bits, 0)",
+      "randomness_source": "os.urandom"
+    },
+    "model": {
+      "architecture": "dbitnet",
+      "builder": "dbitnet.make_model(64)",
+      "learning_rate_schedule": null,
+      "loss": "mse",
+      "metrics": [
+        "acc"
+      ],
+      "optimizer": "Adam(amsgrad=True)",
+      "shuffle": true
+    },
+    "preregistration": {
+      "commit": {
+        "committed_utc": "2026-10-29T16:21:49+05:30",
+        "path": "audit/targets/autond/preregistrations/d5_autond_speck3264_r5_training_data_scaling.json",
+        "sha": "2c1ee391dbae3a5fabdf23acb0f2aa20beaa8a88"
+      },
+      "path": "audit/targets/autond/preregistrations/d5_autond_speck3264_r5_training_data_scaling.json",
+      "protocol_id": "d5-autond-speck3264-single-key-0x400000-r5-dbitnet-training-data-scaling-v1",
+      "sha256": "ea0e03f63b03ce5563d5b48bad103b02650f0521e8a5fbb5aba85daaddc584fd"
+    },
+    "replicate_seed_role": "model_initialization_and_training_RNG_stream (tf.keras.utils.set_random_seed before building the model; also seeds Keras' shuffle order) and the audit's own RNG stream; NOT dataset generation (os.urandom).",
+    "replicates": 12,
+    "run_id": "d5-autond-20261029T114825Z-20149d32",
+    "schema_version": "2.1",
+    "target": {
+      "cipher": "speck3264",
+      "delta_key_hex": "0x0",
+      "delta_plain_hex": "0x400000",
+      "feature_width": 64,
+      "num_rounds": 5,
+      "scenario": "single-key"
+    },
+    "test_samples": 1000000,
+    "total_epochs": 10,
+    "training": {
+      "initialization": "tf.keras.utils.set_random_seed(replicate_seed) immediately before building",
+      "model_selection": "final_epoch_model",
+      "stopping_rule": null,
+      "validation_data": null
+    },
+    "training_sizes": [
+      2500000,
+      5000000,
+      7500000,
+      10000000
+    ],
+    "upstream": {
+      "bound_source_digests": {
+        "ciphers/speck3264.py": "fd4a04be7fb632cea422338e6ae8446e421049649944f9dab87cc05e0e5ca9fe",
+        "dbitnet.py": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+        "gohrnet.py": "324c3768e19a6230dbedbe0446f54c6139d72f5dc642f5cfb60a8fa9a9ea1d56",
+        "main.py": "52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665",
+        "optimizer.py": "2d58e4fd94973040e1ead21166b188527b6935d499a7a818a3c613ac4888d505",
+        "train_nets.py": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e"
+      },
+      "commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+    }
+  },
+  "design": {
+    "fixed_test_partition": true,
+    "independent_experimental_unit": "replicate",
+    "independent_replicate_datasets": true,
+    "individual_test_examples_are_not_independent_replicates": true,
+    "nested_prefixes_are_not_independent_datasets": true,
+    "nested_prefixes_within_replicate": true,
+    "same_model_seed_across_sizes_within_replicate": true
+  },
+  "findings": {
+    "baseline_training_size": 2500000,
+    "observations": [
+      {
+        "completed_epochs": 10,
+        "replicate": 1,
+        "seed": 3757552657,
+        "test_accuracy": 0.9097729921340942,
+        "test_loss": 0.0729672834277153,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 1,
+        "seed": 3757552657,
+        "test_accuracy": 0.917730987071991,
+        "test_loss": 0.06511352211236954,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 1,
+        "seed": 3757552657,
+        "test_accuracy": 0.9182630181312561,
+        "test_loss": 0.06425873935222626,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 1,
+        "seed": 3757552657,
+        "test_accuracy": 0.9185150265693665,
+        "test_loss": 0.06363292038440704,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 2,
+        "seed": 673228719,
+        "test_accuracy": 0.9066439867019653,
+        "test_loss": 0.07550466060638428,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 2,
+        "seed": 673228719,
+        "test_accuracy": 0.916172981262207,
+        "test_loss": 0.0665169283747673,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 2,
+        "seed": 673228719,
+        "test_accuracy": 0.9183279871940613,
+        "test_loss": 0.06407290697097778,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 2,
+        "seed": 673228719,
+        "test_accuracy": 0.9192379713058472,
+        "test_loss": 0.06310591101646423,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 3,
+        "seed": 3241444873,
+        "test_accuracy": 0.9098439812660217,
+        "test_loss": 0.07277242839336395,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 3,
+        "seed": 3241444873,
+        "test_accuracy": 0.91669100522995,
+        "test_loss": 0.06622175872325897,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 3,
+        "seed": 3241444873,
+        "test_accuracy": 0.917930006980896,
+        "test_loss": 0.06451869755983353,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 3,
+        "seed": 3241444873,
+        "test_accuracy": 0.9189249873161316,
+        "test_loss": 0.06348782777786255,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 4,
+        "seed": 3685993406,
+        "test_accuracy": 0.9147899746894836,
+        "test_loss": 0.06888790428638458,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 4,
+        "seed": 3685993406,
+        "test_accuracy": 0.9161400198936462,
+        "test_loss": 0.06658504903316498,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 4,
+        "seed": 3685993406,
+        "test_accuracy": 0.9187650084495544,
+        "test_loss": 0.06400376558303833,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 4,
+        "seed": 3685993406,
+        "test_accuracy": 0.924049973487854,
+        "test_loss": 0.05937062203884125,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 5,
+        "seed": 1216546553,
+        "test_accuracy": 0.9086170196533203,
+        "test_loss": 0.07393765449523926,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 5,
+        "seed": 1216546553,
+        "test_accuracy": 0.9159240126609802,
+        "test_loss": 0.06693339347839355,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 5,
+        "seed": 1216546553,
+        "test_accuracy": 0.9183260202407837,
+        "test_loss": 0.06401725113391876,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 5,
+        "seed": 1216546553,
+        "test_accuracy": 0.9192090034484863,
+        "test_loss": 0.06322343647480011,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 6,
+        "seed": 2078861726,
+        "test_accuracy": 0.9140620231628418,
+        "test_loss": 0.06939636915922165,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 6,
+        "seed": 2078861726,
+        "test_accuracy": 0.9176369905471802,
+        "test_loss": 0.06511431932449341,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 6,
+        "seed": 2078861726,
+        "test_accuracy": 0.9180870056152344,
+        "test_loss": 0.06425005197525024,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 6,
+        "seed": 2078861726,
+        "test_accuracy": 0.9192039966583252,
+        "test_loss": 0.06334351003170013,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 7,
+        "seed": 2471122328,
+        "test_accuracy": 0.9152730107307434,
+        "test_loss": 0.06835822016000748,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 7,
+        "seed": 2471122328,
+        "test_accuracy": 0.9178130030632019,
+        "test_loss": 0.06492599844932556,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 7,
+        "seed": 2471122328,
+        "test_accuracy": 0.9183869957923889,
+        "test_loss": 0.06417994201183319,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 7,
+        "seed": 2471122328,
+        "test_accuracy": 0.9195169806480408,
+        "test_loss": 0.06300602108240128,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 8,
+        "seed": 23012616,
+        "test_accuracy": 0.91634601354599,
+        "test_loss": 0.06738967448472977,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 8,
+        "seed": 23012616,
+        "test_accuracy": 0.9177939891815186,
+        "test_loss": 0.06502706557512283,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 8,
+        "seed": 23012616,
+        "test_accuracy": 0.9183070063591003,
+        "test_loss": 0.06415840983390808,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 8,
+        "seed": 23012616,
+        "test_accuracy": 0.9191510081291199,
+        "test_loss": 0.0632438063621521,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 9,
+        "seed": 3031610183,
+        "test_accuracy": 0.9147639870643616,
+        "test_loss": 0.06890197843313217,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 9,
+        "seed": 3031610183,
+        "test_accuracy": 0.9176819920539856,
+        "test_loss": 0.0650748759508133,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 9,
+        "seed": 3031610183,
+        "test_accuracy": 0.9189339876174927,
+        "test_loss": 0.06388721615076065,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 9,
+        "seed": 3031610183,
+        "test_accuracy": 0.918940007686615,
+        "test_loss": 0.06332722306251526,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 10,
+        "seed": 2976135721,
+        "test_accuracy": 0.9159430265426636,
+        "test_loss": 0.06737851351499557,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 10,
+        "seed": 2976135721,
+        "test_accuracy": 0.917231023311615,
+        "test_loss": 0.06557795405387878,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 10,
+        "seed": 2976135721,
+        "test_accuracy": 0.9185299873352051,
+        "test_loss": 0.06381619721651077,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 10,
+        "seed": 2976135721,
+        "test_accuracy": 0.9194859862327576,
+        "test_loss": 0.06298292428255081,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 11,
+        "seed": 556745865,
+        "test_accuracy": 0.9098449945449829,
+        "test_loss": 0.0728377029299736,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 11,
+        "seed": 556745865,
+        "test_accuracy": 0.916163980960846,
+        "test_loss": 0.0666208490729332,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 11,
+        "seed": 556745865,
+        "test_accuracy": 0.918641984462738,
+        "test_loss": 0.06401054561138153,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 11,
+        "seed": 556745865,
+        "test_accuracy": 0.919152021408081,
+        "test_loss": 0.06320710480213165,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 12,
+        "seed": 4118645239,
+        "test_accuracy": 0.9093279838562012,
+        "test_loss": 0.07330194115638733,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 2500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 12,
+        "seed": 4118645239,
+        "test_accuracy": 0.9157509803771973,
+        "test_loss": 0.06724255532026291,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 5000000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 12,
+        "seed": 4118645239,
+        "test_accuracy": 0.9169399738311768,
+        "test_loss": 0.06562210619449615,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 7500000
+      },
+      {
+        "completed_epochs": 10,
+        "replicate": 12,
+        "seed": 4118645239,
+        "test_accuracy": 0.9187059998512268,
+        "test_loss": 0.06387798488140106,
+        "test_samples": 1000000,
+        "total_epochs": 10,
+        "training_samples": 10000000
+      }
+    ],
+    "paired_contrasts": {
+      "2500000_vs_10000000": {
+        "baseline_size": 2500000,
+        "bootstrap_ci95": [
+          0.005706573526064555,
+          0.009130549927552542
+        ],
+        "comparison_size": 10000000,
+        "mean_accuracy_difference": 0.007405330737431844,
+        "paired_p_value": 6.851104562193204e-06,
+        "paired_t_statistic": 7.95997063171181,
+        "replicates": 12,
+        "sd_accuracy_difference": 0.003222727740472858
+      },
+      "2500000_vs_5000000": {
+        "baseline_size": 2500000,
+        "bootstrap_ci95": [
+          0.0032451448341210684,
+          0.006361106410622597
+        ],
+        "comparison_size": 5000000,
+        "mean_accuracy_difference": 0.004791830976804097,
+        "paired_p_value": 0.00013873247879796175,
+        "paired_t_statistic": 5.69735490835063,
+        "replicates": 12,
+        "sd_accuracy_difference": 0.0029135256085037675
+      },
+      "2500000_vs_7500000": {
+        "baseline_size": 2500000,
+        "bootstrap_ci95": [
+          0.004464243476589521,
+          0.007937500129143394
+        ],
+        "comparison_size": 7500000,
+        "mean_accuracy_difference": 0.0061841656764348345,
+        "paired_p_value": 3.627948935771345e-05,
+        "paired_t_statistic": 6.646563864104182,
+        "replicates": 12,
+        "sd_accuracy_difference": 0.003223105765027459
+      },
+      "baseline_role": "The smallest declared training size is the fixed baseline condition. Every paired contrast below is (comparison size) minus (this baseline), computed within-replicate.",
+      "baseline_training_size": 2500000,
+      "multiple_comparison_correction": {
+        "adjusted_p_values": {
+          "2500000_vs_10000000": 2.0553313686579612e-05,
+          "2500000_vs_5000000": 0.00013873247879796175,
+          "2500000_vs_7500000": 7.25589787154269e-05
+        },
+        "alpha": 0.05,
+        "method": "Holm step-down",
+        "rejections": {
+          "2500000_vs_10000000": true,
+          "2500000_vs_5000000": true,
+          "2500000_vs_7500000": true
+        }
+      }
+    },
+    "scaling_analysis": {
+      "mean_slope": 0.01226932716150389,
+      "mean_slope_bootstrap_ci95": [
+        0.009325365873634427,
+        0.015257841550138582
+      ],
+      "model": "ordinary least squares accuracy ~ log10(training_samples), fit separately per replicate",
+      "monotone_non_decreasing_replicates": 12,
+      "replicate_slopes": [
+        0.014756881072430011,
+        0.0213225546767909,
+        0.015161149328465158,
+        0.013914476348676713,
+        0.018009282536454587,
+        0.008292250000270602,
+        0.00679810083374801,
+        0.004480053659183802,
+        0.007313331472664268,
+        0.0058462324954806685,
+        0.016018046953536667,
+        0.015319566560345275
+      ],
+      "replicates_with_complete_curves": 12,
+      "role": "SECONDARY/DESCRIPTIVE diagnostic. Does not override, replace, or supersede the primary paired-contrast analysis above. Not a causal claim and not a claim of a universal scaling law or of cryptographic learning."
+    },
+    "summary_by_training_size": {
+      "10000000": {
+        "accuracy_ci95_bootstrap": [
+          0.9189697423328956,
+          0.92041462076207
+        ],
+        "accuracy_max": 0.924049973487854,
+        "accuracy_mean": 0.9195077468951544,
+        "accuracy_min": 0.9185150265693665,
+        "accuracy_sd": 0.0014594738654365425,
+        "loss_mean": 0.0629841076831023,
+        "loss_sd": 0.001166488594534938,
+        "n": 10000000,
+        "replicates": 12
+      },
+      "2500000": {
+        "accuracy_ci95_bootstrap": [
+          0.9102818158765634,
+          0.9138760396589836
+        ],
+        "accuracy_max": 0.91634601354599,
+        "accuracy_mean": 0.9121024161577225,
+        "accuracy_min": 0.9066439867019653,
+        "accuracy_sd": 0.003387418960157678,
+        "loss_mean": 0.07096952758729458,
+        "loss_sd": 0.0028470290738373803,
+        "n": 2500000,
+        "replicates": 12
+      },
+      "5000000": {
+        "accuracy_ci95_bootstrap": [
+          0.9164215767135222,
+          0.9173510370155176
+        ],
+        "accuracy_max": 0.9178130030632019,
+        "accuracy_mean": 0.9168942471345266,
+        "accuracy_min": 0.9157509803771973,
+        "accuracy_sd": 0.0008285531154810202,
+        "loss_mean": 0.06591285578906536,
+        "loss_sd": 0.0008566582475041253,
+        "n": 5000000,
+        "replicates": 12
+      },
+      "7500000": {
+        "accuracy_ci95_bootstrap": [
+          0.9179804001003503,
+          0.9185349229723214
+        ],
+        "accuracy_max": 0.9189339876174927,
+        "accuracy_mean": 0.9182865818341573,
+        "accuracy_min": 0.9169399738311768,
+        "accuracy_sd": 0.0005070626742555708,
+        "loss_mean": 0.06423298579951127,
+        "loss_sd": 0.00047559283529017627,
+        "n": 7500000,
+        "replicates": 12
+      }
+    }
+  },
+  "interpretation": "D5 is a descriptive/estimative scaling experiment. The nested-prefix component controls the sampled population within each replicate, while independent replicate maximum datasets quantify between-dataset and training stochastic variation. The primary analysis is the paired contrast of each training size against the smallest declared size (the baseline); the scaling slope is a secondary, descriptive diagnostic only.",
+  "limitations": [
+    "D5 is conditional on the specified model architecture, optimizer, training procedure, epoch budget, batch size, and dataset generator; it does not generalize beyond them.",
+    "Nested prefixes are not independent datasets; their purpose is paired sample-size comparison within a replicate, not additional independent sampling.",
+    "Independent maximum-size replicate datasets provide the between-dataset (and between-model-initialization) variation; the nested prefixes alone do not.",
+    "The fixed test set is deliberately shared across every condition.",
+    "Individual test examples are therefore NOT treated as independent experimental replicates; the independent experimental unit is the replicate, and the nested prefixes within a replicate are paired conditions, not additional independent units.",
+    "Dataset generation for this experiment is not guaranteed deterministic with respect to the audit seed (see provenance.dataset_replay_reason); exact historical dataset replay from the integer audit seed is not available.",
+    "Exact historical dataset replay is unavailable from the integer audit seed; the persisted dataset files and their hashes are the reproducibility/resumability object instead.",
+    "Persisted dataset hashes (file and logical/content, for the full replicate dataset, every declared nested prefix, and the fixed test set) are therefore part of the resumability contract, not merely diagnostic metadata.",
+    "The scaling curve is a secondary, descriptive diagnostic; it does not establish a universal scaling law and does not override the primary paired-contrast analysis.",
+    "D5 does not by itself establish cryptographic learning."
+  ],
+  "provenance": {
+    "audit_seed": 0,
+    "dataset_id": "autond-speck3264",
+    "dataset_replay_available": false,
+    "dataset_replay_reason": "AutoND dataset generation is main.make_train_data at the pinned commit (via AutoNDDatasetAdapter.generate_partition), which draws keys, plaintexts, labels and the random-class substitution from os.urandom. The integer audit/replicate seed does not control dataset content and cannot regenerate a bit-identical dataset. The persisted dataset files and their file and logical SHA-256 hashes (including every nested prefix) are the reproducibility object.",
+    "dataset_seed": null,
+    "dataset_version": "pinned-8d66e0a43a9e-r5",
+    "generation_parameters": {
+      "cipher": "speck3264",
+      "deterministic_seed": null,
+      "generator": "main.make_train_data",
+      "input_difference": {
+        "delta_key_hex": "0x0",
+        "delta_plain_hex": "0x400000",
+        "delta_plain_popcount": 1
+      },
+      "num_rounds": 5,
+      "randomness_source": "os.urandom",
+      "replicates": 12,
+      "representation": {
+        "c0_columns": [
+          0,
+          32
+        ],
+        "c1_columns": [
+          32,
+          64
+        ],
+        "feature_bits": 64,
+        "key_bits": 64,
+        "layout": "np.hstack([C0, C1])",
+        "plain_bits": 32,
+        "word_size": 16
+      },
+      "scenario": "single-key",
+      "test_samples": 1000000,
+      "train_samples": 10000000,
+      "validation_samples": 0
+    },
+    "generation_procedure": "AutoNDDatasetAdapter.generate_partition -> main.make_train_data",
+    "replicate_seed_role": "model_initialization_and_training_RNG_stream (tf.keras.utils.set_random_seed before building the model; also seeds Keras' shuffle order) and the audit's own RNG stream; NOT dataset generation (os.urandom).",
+    "resume_integrity_contract": "Persisted dataset files (full replicate datasets, every declared nested prefix, and the fixed test set) are identified by both a file SHA-256 and a logical content SHA-256 (dtype+shape+bytes). Per-condition checkpoints additionally record the exact configuration hash and dataset/test content hashes they were produced against. On resume, all of these are re-verified before any further computation; a mismatch or an incomplete persisted dataset is a hard failure, never a silent regeneration."
+  }
+}
