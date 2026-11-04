@@ -182,7 +182,11 @@ def test_output_directories_are_bound_to_one_mode_and_one_writer(tmp_path):
 # ============================================================ configuration gates
 
 
-def test_the_shipped_config_declares_production_but_the_gate_blocks_the_fixed_order_power_plan():
+LEGACY_PLAN = {"path": "results/autond/calibration/power_plan.json",
+               "sha256": "9fdf7244139c538c90aeae847216e4568ee8c42fde4fcfa3e245bb8deaf7dbd5", "required_n": 3}
+
+
+def test_the_shipped_config_declares_production_from_the_balanced_power_plan():
     config = B.load_config()
     assert config["protocol"] == B.FROZEN_PROTOCOL and B.check_config(config, "smoke") == []
     assert B.check_config(config, "calibration") == [] and B.check_config(config, "production") == []
@@ -191,13 +195,26 @@ def test_the_shipped_config_declares_production_but_the_gate_blocks_the_fixed_or
     assert all(config["calibration"][h]["units"] == 10 for h in B.PRIMARY_FAMILY)
     plan = {e: (config["production"][e]["units"], config["production"][e]["minimum_valid"]) for e in B.EXPERIMENT_IDS}
     assert plan == {"EV-AUTOND-BASELINE": (10, 8), "EV-AUTOND-NOISE": (10, 8), H1: (6, 5), H2: (6, 5)}
-    assert config["production"]["power_plan"]["required_n"] == 3
+    pp = config["production"]["power_plan"]
+    assert pp["path"] == "results/autond/calibration-balanced-ab-v1/power_plan.json" and pp["required_n"] == 3
+    assert E.check_power_plan(config) == []
+
+
+def test_the_gate_still_blocks_the_fixed_order_power_plan():
+    config = B.load_config()
+    config["production"]["power_plan"] = dict(LEGACY_PLAN)
     problems = E.check_power_plan(config)
     assert len(problems) == 1 and "'fixed-ab-legacy'" in problems[0] and "Recalibrate" in problems[0]
 
 
-def test_production_refuses_through_the_entry_point_while_the_power_plan_is_unvalidated(tmp_path, capsys):
-    assert R.main(["run", "--mode", "production", "--experiment", H1, "--autond-root", str(tmp_path)]) == 2
+def test_production_refuses_through_the_entry_point_with_the_fixed_order_power_plan(tmp_path, capsys):
+    import yaml
+    config = B.load_config()
+    config["production"]["power_plan"] = dict(LEGACY_PLAN)
+    path = tmp_path / "legacy_plan.yaml"
+    path.write_text(yaml.safe_dump(config, sort_keys=False))
+    assert R.main(["--config", str(path), "run", "--mode", "production", "--experiment", H1,
+                   "--autond-root", str(tmp_path)]) == 2
     assert "A/B execution order 'fixed-ab-legacy'" in capsys.readouterr().err
 
 

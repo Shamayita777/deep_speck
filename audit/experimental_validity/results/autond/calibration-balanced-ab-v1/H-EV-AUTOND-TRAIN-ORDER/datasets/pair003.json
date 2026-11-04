@@ -1,0 +1,17 @@
+{
+  "exact_replay_available": false,
+  "file_sha256": "ce5e22b516935771ed3dad7f9ea7c8d79f67fc9e3d2fcb82795a656a0515406f",
+  "generation": "AutoNDDatasetAdapter.generate_partition -> main.make_train_data",
+  "overlap_method": "exact_row_equality",
+  "reason": "main.make_train_data draws from os.urandom; there is no seed on this path",
+  "rows": {
+    "test": 1000000,
+    "train": 10000000,
+    "validation": 1000000
+  },
+  "sha256": {
+    "test": "8fbeca10a19dfe60cf66147082b9c5625d92b6b4bf88959dee59872495a4f334",
+    "train": "748491f7c4433e95d66de32566b352657f19fba09d41ed1dbe3c79c08ba4a15f",
+    "validation": "31dc9c1ab75af36d0bce00ec194666d42b70cb1e2151e274b96272bf803ebafa"
+  }
+}

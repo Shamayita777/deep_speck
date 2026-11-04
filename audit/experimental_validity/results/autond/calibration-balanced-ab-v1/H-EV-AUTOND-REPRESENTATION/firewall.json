@@ -1,0 +1,46 @@
+{
+  "confirmatory_data_mode": "PER_REPLICATE",
+  "consumed_evaluation_keys": [
+    "condition_a:pair000",
+    "condition_a:pair001",
+    "condition_a:pair002",
+    "condition_a:pair003",
+    "condition_a:pair004",
+    "condition_a:pair005",
+    "condition_a:pair006",
+    "condition_a:pair007",
+    "condition_a:pair008",
+    "condition_a:pair009",
+    "condition_b:pair000",
+    "condition_b:pair001",
+    "condition_b:pair002",
+    "condition_b:pair003",
+    "condition_b:pair004",
+    "condition_b:pair005",
+    "condition_b:pair006",
+    "condition_b:pair007",
+    "condition_b:pair008",
+    "condition_b:pair009"
+  ],
+  "experiment_id": "H-EV-AUTOND-REPRESENTATION",
+  "freeze_record": {
+    "frozen_at_utc": "2026-11-03T06:58:37.333583+00:00",
+    "frozen_config_hash": "f802d9429c163d40dc560cd3b394a9fe52f09d0b73d08cee10e15a32bd267428",
+    "frozen_permutation_hash": "d7f9dd38585283e432fd565544ad82ecd83e459c66eedb05e0a2ad2d140cd427",
+    "frozen_replicate_plan_hash": "246d58e2af8dfcca8af27d5b77793789e7519d77d6a2c5d825206c931f75e16e",
+    "frozen_statistical_plan_hash": "9447a8e269fcfed1d6d27c13a672d07d550b2fbc2a07f889a66ea0e01f0a905f"
+  },
+  "frozen": true,
+  "sealed_dataset_hashes": {
+    "pair000": "7b4170cad497d1815da1c62f9f03896b2be154745910ea7ad9f8b965f98ec3c8",
+    "pair001": "9c3c9774b6a9654cedbf38fb2b3811b84ed3c88c7fa62e65ede6d5e7861569d9",
+    "pair002": "7c02d7870467ec3a799f13803d69dd3f13fb265324f50c3edeb63b1e6e893b96",
+    "pair003": "fc95d95f23fc4d6a0379b8bcdf2ee8aa3e335138e8a286d8755c06abb880fbb9",
+    "pair004": "e625ccbe89089cfdce20ac7ec0bb5106e82c8a7747e594ee56b586f4ac2ef71b",
+    "pair005": "555ccb358b6ef8beb2ae95a2cefbfcf256798362e2b5f85440d392046d75515c",
+    "pair006": "08f0d44c46690d10328f9648c988eee2428f682d8dd6c8ccc5cbb13998d7b8fb",
+    "pair007": "91e7812adf2bcfa4173dc1bb057dc32d1da99588c4620b07024c3ca9295a441d",
+    "pair008": "e7be30c9e9dc45b7b680bedd75064ad46a12bebe57abef266bc2de3f4c44503c",
+    "pair009": "e84921cf881d32c9ba476dcce1b086636c6d8d569f75f68c1f6325080361775e"
+  }
+}

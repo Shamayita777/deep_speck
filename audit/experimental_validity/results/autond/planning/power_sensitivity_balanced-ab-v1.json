@@ -1,0 +1,5872 @@
+{
+ "artifact": "autond-ev-power-sensitivity-1",
+ "generated_at_utc": "2026-11-04T06:39:20.204653+00:00",
+ "grid": [
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20571103,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.9483,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.9483
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 5170,
+    "SN": 94830,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20571104,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9469103434486392,
+     0.9496552153546189
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9469103434486392,
+     0.9496552153546189
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95031,
+    "joint": 0.95031
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4969,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95031,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20571105,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.948945779360532,
+     0.9516396250220134
+    ],
+    "joint": [
+     0.948945779360532,
+     0.9516396250220134
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97408,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97498,
+    "joint": 0.95106
+   },
+   "decision_counts": {
+    "II": 200,
+    "IN": 2302,
+    "IS": 0,
+    "NI": 2392,
+    "NN": 95106,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.0544570133711388,
+   "scenario": "both_null",
+   "seed": 20571106,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9730768059628945,
+     0.9750467722602787
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9739935694594397,
+     0.9759299396201309
+    ],
+    "joint": [
+     0.9497054247923467,
+     0.95237992197053
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20671103,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95144,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95144
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4856,
+    "SN": 95144,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20671104,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9500903448131586,
+     0.9527549727557525
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9500903448131586,
+     0.9527549727557525
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94927,
+    "joint": 0.94927
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5073,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94927,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20671105,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9478925444986482,
+     0.9506129397831714
+    ],
+    "joint": [
+     0.9478925444986482,
+     0.9506129397831714
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97441,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97426,
+    "joint": 0.95044
+   },
+   "decision_counts": {
+    "II": 177,
+    "IN": 2397,
+    "IS": 0,
+    "NI": 2382,
+    "NN": 95044,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": 0.04444151285487304,
+   "scenario": "both_null",
+   "seed": 20671106,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9734129154157467,
+     0.9753706374547724
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9732601331302606,
+     0.9752234312641923
+    ],
+    "joint": [
+     0.9490774451002626,
+     0.9517679492948736
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20771103,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95046,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95046
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4954,
+    "SN": 95046,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20771104,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9490977015949555,
+     0.9517876912636563
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9490977015949555,
+     0.9517876912636563
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94947,
+    "joint": 0.94947
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5053,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94947,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20771105,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9480950772073276,
+     0.9508103917092472
+    ],
+    "joint": [
+     0.9480950772073276,
+     0.9508103917092472
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97436,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97463,
+    "joint": 0.95072
+   },
+   "decision_counts": {
+    "II": 173,
+    "IN": 2364,
+    "IS": 0,
+    "NI": 2391,
+    "NN": 95072,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.04343392750316506,
+   "scenario": "both_null",
+   "seed": 20771106,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9733619870077372,
+     0.9753215697040931
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9736370121298537,
+     0.9755865238388959
+    ],
+    "joint": [
+     0.9493610415571834,
+     0.9520443313266098
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20871103,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95053,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95053
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4947,
+    "SN": 95053,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20871104,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9491685998041727,
+     0.9518567876766032
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9491685998041727,
+     0.9518567876766032
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94955,
+    "joint": 0.94955
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5045,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94955,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20871105,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9481760919398841,
+     0.9508893708305926
+    ],
+    "joint": [
+     0.9481760919398841,
+     0.9508893708305926
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97397,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97318,
+    "joint": 0.94918
+   },
+   "decision_counts": {
+    "II": 203,
+    "IN": 2479,
+    "IS": 0,
+    "NI": 2400,
+    "NN": 94918,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.05177591100516389,
+   "scenario": "both_null",
+   "seed": 20871106,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9729647788589288,
+     0.9749388078151293
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9721603552466617,
+     0.9741632921201143
+    ],
+    "joint": [
+     0.9478014066945877,
+     0.9505240845015923
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99985,
+    "joint": 0.99985
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 15,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 99985
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20573603,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9997525063382153,
+     0.9999090920731355
+    ],
+    "joint": [
+     0.9997525063382153,
+     0.9999090920731355
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.94932,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99983,
+    "joint": 0.94915
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 17,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 5068,
+    "SN": 94915,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.0030128212558131794,
+   "scenario": "first_effect_second_null",
+   "seed": 20573604,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9479431771248561,
+     0.9506623033156525
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9997277472196127,
+     0.9998938527282626
+    ],
+    "joint": [
+     0.9477710276898966,
+     0.9504944658110702
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94868,
+    "joint": 0.94868
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5132,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94868,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20573605,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9472951070454118,
+     0.9500304225638808
+    ],
+    "joint": [
+     0.9472951070454118,
+     0.9500304225638808
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97562,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97516,
+    "joint": 0.95257
+   },
+   "decision_counts": {
+    "II": 179,
+    "IN": 2305,
+    "IS": 0,
+    "NI": 2259,
+    "NN": 95257,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.04934325091141626,
+   "scenario": "both_null",
+   "seed": 20573606,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9746456895146014,
+     0.9765577703961852
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9741769611247417,
+     0.9761065341261086
+    ],
+    "joint": [
+     0.951235109465463,
+     0.9538701212898137
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20673603,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95084,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95084
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4916,
+    "SN": 95084,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20673604,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9494825865561501,
+     0.9521627771084961
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9494825865561501,
+     0.9521627771084961
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95137,
+    "joint": 0.95137
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4863,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95137,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20673605,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9500194368085799,
+     0.9526858861381671
+    ],
+    "joint": [
+     0.9500194368085799,
+     0.9526858861381671
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97557,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97483,
+    "joint": 0.95216
+   },
+   "decision_counts": {
+    "II": 176,
+    "IN": 2341,
+    "IS": 0,
+    "NI": 2267,
+    "NN": 95216,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": 0.047352753348962676,
+   "scenario": "both_null",
+   "seed": 20673606,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9745947364932595,
+     0.9765087272588384
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9738407531373363,
+     0.9757827674661681
+    ],
+    "joint": [
+     0.9508197289332134,
+     0.9534655333208155
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20773603,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.94978,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.94978
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 5022,
+    "SN": 94978,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20773604,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9484090145702423,
+     0.9511164305302026
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9484090145702423,
+     0.9511164305302026
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95075,
+    "joint": 0.95075
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4925,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95075,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20773605,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9493914276004201,
+     0.9520739429785863
+    ],
+    "joint": [
+     0.9493914276004201,
+     0.9520739429785863
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97446,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97414,
+    "joint": 0.95063
+   },
+   "decision_counts": {
+    "II": 203,
+    "IN": 2383,
+    "IS": 0,
+    "NI": 2351,
+    "NN": 95063,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.05469604477981804,
+   "scenario": "both_null",
+   "seed": 20773606,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9734638448069965,
+     0.9754197042222112
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9731379136227664,
+     0.9751056599908335
+    ],
+    "joint": [
+     0.9492698842518257,
+     0.9519554955463279
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20873603,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95035,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95035
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4965,
+    "SN": 95035,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20873604,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9489862916236694,
+     0.9516791096858271
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9489862916236694,
+     0.9516791096858271
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.9512,
+    "joint": 0.9512
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4880,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95120,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20873605,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9498472348269436,
+     0.9525181011802617
+    ],
+    "joint": [
+     0.9498472348269436,
+     0.9525181011802617
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97436,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97469,
+    "joint": 0.95117
+   },
+   "decision_counts": {
+    "II": 212,
+    "IN": 2319,
+    "IS": 0,
+    "NI": 2352,
+    "NN": 95117,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.059255660740464684,
+   "scenario": "both_null",
+   "seed": 20873606,
+   "sigma_multiplier": 1.25,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.000933534888449261,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0013080594108936367
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9733619870077372,
+     0.9753215697040931
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9736981327509089,
+     0.9756453986082669
+    ],
+    "joint": [
+     0.9498168467072444,
+     0.9524884916047475
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99999,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99763,
+    "joint": 0.99762
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 237,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 1,
+    "SN": 0,
+    "SS": 99762
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.00015413156766142934,
+   "scenario": "both_effect",
+   "seed": 20576103,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9999433529034099,
+     0.9999982347522698
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.997308909786481,
+     0.9979128591790897
+    ],
+    "joint": [
+     0.9972982778461361,
+     0.9979034918876968
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95018,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99762,
+    "joint": 0.94791
+   },
+   "decision_counts": {
+    "II": 11,
+    "IN": 227,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4971,
+    "SN": 94791,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.0008085111992881044,
+   "scenario": "first_effect_second_null",
+   "seed": 20576104,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9488141161719855,
+     0.9515112981979693
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9972982778461361,
+     0.9979034918876968
+    ],
+    "joint": [
+     0.9465154759179676,
+     0.9492701128475184
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99999,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94483,
+    "joint": 0.94482
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5517,
+    "NI": 1,
+    "NN": 0,
+    "NS": 94482,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.000764146848377845,
+   "scenario": "first_null_second_effect",
+   "seed": 20576105,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9999433529034099,
+     0.9999982347522698
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9433977716080695,
+     0.9462280537821899
+    ],
+    "joint": [
+     0.9433876512570475,
+     0.9462181749014743
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97502,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97579,
+    "joint": 0.95245
+   },
+   "decision_counts": {
+    "II": 164,
+    "IN": 2257,
+    "IS": 0,
+    "NI": 2334,
+    "NN": 95245,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.04315787526805963,
+   "scenario": "both_null",
+   "seed": 20576106,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9740343220198842,
+     0.9759691839866376
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9748189377001545,
+     0.9767245091501738
+    ],
+    "joint": [
+     0.9511135318837916,
+     0.9537517080906321
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20676103,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.9501,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.9501
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4990,
+    "SN": 95010,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20676104,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9487330939352856,
+     0.9514323265807672
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9487330939352856,
+     0.9514323265807672
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94974,
+    "joint": 0.94974
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5026,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94974,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20676105,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9483685057230806,
+     0.9510769424504133
+    ],
+    "joint": [
+     0.9483685057230806,
+     0.9510769424504133
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97358,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97463,
+    "joint": 0.95015
+   },
+   "decision_counts": {
+    "II": 194,
+    "IN": 2343,
+    "IS": 0,
+    "NI": 2448,
+    "NN": 95015,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": 0.0503474157789794,
+   "scenario": "both_null",
+   "seed": 20676106,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9725676290640973,
+     0.9745559875721886
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9736370121298537,
+     0.9755865238388959
+    ],
+    "joint": [
+     0.9487837327205426,
+     0.9514816839541991
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20776103,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95048,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95048
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4952,
+    "SN": 95048,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20776104,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9491179581502913,
+     0.9518074331717958
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9491179581502913,
+     0.9518074331717958
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94968,
+    "joint": 0.94968
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5032,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94968,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20776105,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9483077428978464,
+     0.951017709885221
+    ],
+    "joint": [
+     0.9483077428978464,
+     0.951017709885221
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97415,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.9741,
+    "joint": 0.95019
+   },
+   "decision_counts": {
+    "II": 194,
+    "IN": 2396,
+    "IS": 0,
+    "NI": 2391,
+    "NN": 95019,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.05040512511176555,
+   "scenario": "both_null",
+   "seed": 20776106,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.973148098368178,
+     0.9751154744771595
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9730971750282165,
+     0.9750664016584323
+    ],
+    "joint": [
+     0.9488242440192071,
+     0.9515211695824856
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20876103,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95061,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95061
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4939,
+    "SN": 95061,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20876104,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9492496272405552,
+     0.9519357540941228
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9492496272405552,
+     0.9519357540941228
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95161,
+    "joint": 0.95161
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4839,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95161,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20876105,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9502625531521983,
+     0.9529227513562545
+    ],
+    "joint": [
+     0.9502625531521983,
+     0.9529227513562545
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97507,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.9746,
+    "joint": 0.9514
+   },
+   "decision_counts": {
+    "II": 173,
+    "IN": 2367,
+    "IS": 0,
+    "NI": 2320,
+    "NN": 95140,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.044710510850465165,
+   "scenario": "both_null",
+   "seed": 20876106,
+   "sigma_multiplier": 1.5,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0011202418661391132,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.001569671293072364
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.974085263637272,
+     0.9760182385279385
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.973606452357322,
+     0.9755570859162144
+    ],
+    "joint": [
+     0.9500498258599132,
+     0.952715494782047
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99862,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.96665,
+    "joint": 0.96533
+   },
+   "decision_counts": {
+    "II": 6,
+    "IN": 0,
+    "IS": 3329,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 132,
+    "SN": 0,
+    "SS": 96533
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.002096967721047182,
+   "scenario": "both_effect",
+   "seed": 20581103,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9983699702970339,
+     0.9988317226105738
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9655191168851027,
+     0.9677450321569236
+    ],
+    "joint": [
+     0.9641781370352076,
+     0.966446113417436
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.94738,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.96762,
+    "joint": 0.9167
+   },
+   "decision_counts": {
+    "II": 170,
+    "IN": 3068,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 5092,
+    "SN": 91670,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -9.705210102818532e-05,
+   "scenario": "first_effect_second_null",
+   "seed": 20581104,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9459788954458888,
+     0.9487467340374964
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9665048296844817,
+     0.9686992448361064
+    ],
+    "joint": [
+     0.9149712398787458,
+     0.9183967466332273
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99857,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.89518,
+    "joint": 0.89385
+   },
+   "decision_counts": {
+    "II": 10,
+    "IN": 0,
+    "IS": 10472,
+    "NI": 133,
+    "NN": 0,
+    "NS": 89385,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.004310241434619708,
+   "scenario": "first_null_second_effect",
+   "seed": 20581105,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9983158611731471,
+     0.9987858355757719
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.8932662311931919,
+     0.897063408619147
+    ],
+    "joint": [
+     0.8919256961337368,
+     0.8957440458574816
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.9741,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97193,
+    "joint": 0.94839
+   },
+   "decision_counts": {
+    "II": 236,
+    "IN": 2571,
+    "IS": 0,
+    "NI": 2354,
+    "NN": 94839,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.06224326613661945,
+   "scenario": "both_null",
+   "seed": 20581106,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9730971750282165,
+     0.9750664016584323
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9708879976559704,
+     0.9729357457435869
+    ],
+    "joint": [
+     0.9470014697987296,
+     0.9497440820901683
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99988,
+    "joint": 0.99988
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 12,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 99988
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20681103,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999790244987304,
+     0.99993135111926
+    ],
+    "joint": [
+     0.999790244987304,
+     0.99993135111926
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.94975,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.9999,
+    "joint": 0.94966
+   },
+   "decision_counts": {
+    "II": 1,
+    "IN": 9,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 5024,
+    "SN": 94966,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": 0.0022774146851632995,
+   "scenario": "first_effect_second_null",
+   "seed": 20681104,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9483786329125808,
+     0.9510868144926506
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9998159153045492,
+     0.9999456792654904
+    ],
+    "joint": [
+     0.9482874887414363,
+     0.9509979655781555
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94964,
+    "joint": 0.94964
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5036,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94964,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20681105,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9482672346443046,
+     0.9509782212118119
+    ],
+    "joint": [
+     0.9482672346443046,
+     0.9509782212118119
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.9739,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97513,
+    "joint": 0.95103
+   },
+   "decision_counts": {
+    "II": 200,
+    "IN": 2287,
+    "IS": 0,
+    "NI": 2410,
+    "NN": 95103,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 4,
+   "phi_correlation": 0.05440945342375678,
+   "scenario": "both_null",
+   "seed": 20681106,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9728934913023591,
+     0.9748701007495347
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9741463949267685,
+     0.9760771026288685
+    ],
+    "joint": [
+     0.9496750373215666,
+     0.952350311746097
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20781103,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.94838,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.94838
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 5162,
+    "SN": 94838,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20781104,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.946991344591553,
+     0.949734208065607
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.946991344591553,
+     0.949734208065607
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94996,
+    "joint": 0.94996
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5004,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94996,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20781105,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9485913073306006,
+     0.9512941239411238
+    ],
+    "joint": [
+     0.9485913073306006,
+     0.9512941239411238
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97465,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97435,
+    "joint": 0.95087
+   },
+   "decision_counts": {
+    "II": 187,
+    "IN": 2378,
+    "IS": 0,
+    "NI": 2348,
+    "NN": 95087,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.049086756137519054,
+   "scenario": "both_null",
+   "seed": 20781106,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9736573855106463,
+     0.9756061489215788
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9733518014438777,
+     0.9753117560362149
+    ],
+    "joint": [
+     0.9495129731504649,
+     0.9521923882093944
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20881103,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.94904,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.94904
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 5096,
+    "SN": 94904,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20881104,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9476596391300843,
+     0.9503858628217671
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9476596391300843,
+     0.9503858628217671
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95071,
+    "joint": 0.95071
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4929,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95071,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20881105,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9493509129066596,
+     0.952034460745396
+    ],
+    "joint": [
+     0.9493509129066596,
+     0.952034460745396
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97467,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97518,
+    "joint": 0.95154
+   },
+   "decision_counts": {
+    "II": 169,
+    "IN": 2313,
+    "IS": 0,
+    "NI": 2364,
+    "NN": 95154,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.0434162525672733,
+   "scenario": "both_null",
+   "seed": 20881106,
+   "sigma_multiplier": 2.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0014936558215188176,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0020928950574298187
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9736777590509367,
+     0.9756257738447638
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9741973387953973,
+     0.9761261549189284
+    ],
+    "joint": [
+     0.9501916432887575,
+     0.9528536665975312
+    ]
+   }
+  }
+ ],
+ "inputs": {
+  "alpha": 0.05,
+  "epsilon": 0.01,
+  "n_simulations_per_cell": 100000,
+  "seed_base": 20261103,
+  "sigma_Delta_upper_95": {
+   "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+   "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+  },
+  "target_effect": 0.02
+ },
+ "non_evidentiary": true,
+ "non_normal": [
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20571103,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.9483,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.9483
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 5170,
+    "SN": 94830,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20571104,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9469103434486392,
+     0.9496552153546189
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9469103434486392,
+     0.9496552153546189
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95031,
+    "joint": 0.95031
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4969,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95031,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20571105,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.948945779360532,
+     0.9516396250220134
+    ],
+    "joint": [
+     0.948945779360532,
+     0.9516396250220134
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97408,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97498,
+    "joint": 0.95106
+   },
+   "decision_counts": {
+    "II": 200,
+    "IN": 2302,
+    "IS": 0,
+    "NI": 2392,
+    "NN": 95106,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.0544570133711388,
+   "scenario": "both_null",
+   "seed": 20571106,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9730768059628945,
+     0.9750467722602787
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9739935694594397,
+     0.9759299396201309
+    ],
+    "joint": [
+     0.9497054247923467,
+     0.95237992197053
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20771103,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95046,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95046
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4954,
+    "SN": 95046,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20771104,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9490977015949555,
+     0.9517876912636563
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9490977015949555,
+     0.9517876912636563
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94947,
+    "joint": 0.94947
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5053,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94947,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20771105,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9480950772073276,
+     0.9508103917092472
+    ],
+    "joint": [
+     0.9480950772073276,
+     0.9508103917092472
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97436,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97463,
+    "joint": 0.95072
+   },
+   "decision_counts": {
+    "II": 173,
+    "IN": 2364,
+    "IS": 0,
+    "NI": 2391,
+    "NN": 95072,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.04343392750316506,
+   "scenario": "both_null",
+   "seed": 20771106,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9733619870077372,
+     0.9753215697040931
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9736370121298537,
+     0.9755865238388959
+    ],
+    "joint": [
+     0.9493610415571834,
+     0.9520443313266098
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20871103,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95053,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95053
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4947,
+    "SN": 95053,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20871104,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9491685998041727,
+     0.9518567876766032
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9491685998041727,
+     0.9518567876766032
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94955,
+    "joint": 0.94955
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5045,
+    "NI": 0,
+    "NN": 0,
+    "NS": 94955,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20871105,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9481760919398841,
+     0.9508893708305926
+    ],
+    "joint": [
+     0.9481760919398841,
+     0.9508893708305926
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97397,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97318,
+    "joint": 0.94918
+   },
+   "decision_counts": {
+    "II": 203,
+    "IN": 2479,
+    "IS": 0,
+    "NI": 2400,
+    "NN": 94918,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "normal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.05177591100516389,
+   "scenario": "both_null",
+   "seed": 20871106,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9729647788589288,
+     0.9749388078151293
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9721603552466617,
+     0.9741632921201143
+    ],
+    "joint": [
+     0.9478014066945877,
+     0.9505240845015923
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.9996,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99825,
+    "joint": 0.99785
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 175,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 40,
+    "SN": 0,
+    "SS": 99785
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.0008375605951437371,
+   "scenario": "both_effect",
+   "seed": 20571110,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999455399874866,
+     0.9997062177430412
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9979711076667809,
+     0.9984906136665302
+    ],
+    "joint": [
+     0.9975431672319022,
+     0.998118584831899
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95631,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99797,
+    "joint": 0.95434
+   },
+   "decision_counts": {
+    "II": 6,
+    "IN": 197,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4363,
+    "SN": 95434,
+    "SS": 0
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.00311848752735195,
+   "scenario": "first_effect_second_null",
+   "seed": 20571111,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9550254860923699,
+     0.9575594573328245
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9976712534249955,
+     0.9982304894196586
+    ],
+    "joint": [
+     0.9530286531520953,
+     0.9556164416207629
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99973,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95377,
+    "joint": 0.9535
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4623,
+    "NI": 27,
+    "NN": 0,
+    "NS": 95350,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.0036181005949703694,
+   "scenario": "first_null_second_effect",
+   "seed": 20571112,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9996071831918648,
+     0.999814424438633
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9524510144329223,
+     0.9550541241308841
+    ],
+    "joint": [
+     0.9521774151232396,
+     0.9547877441836476
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97927,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97691,
+    "joint": 0.95747
+   },
+   "decision_counts": {
+    "II": 129,
+    "IN": 2180,
+    "IS": 0,
+    "NI": 1944,
+    "NN": 95747,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.037915349993276094,
+   "scenario": "both_null",
+   "seed": 20571113,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.978368337018709,
+     0.9801348424763557
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9759606516708016,
+     0.9778227091341544
+    ],
+    "joint": [
+     0.956201612694531,
+     0.9587032416122425
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99997,
+    "joint": 0.99997
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 3,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 99997
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20771110,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9999117919507483,
+     0.9999897972414555
+    ],
+    "joint": [
+     0.9999117919507483,
+     0.9999897972414555
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.9566,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99997,
+    "joint": 0.95657
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 3,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4340,
+    "SN": 95657,
+    "SS": 0
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": -0.001166666743885108,
+   "scenario": "first_effect_second_null",
+   "seed": 20771111,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9553194944943612,
+     0.9578454266512281
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9999117919507483,
+     0.9999897972414555
+    ],
+    "joint": [
+     0.9552890791204673,
+     0.9578158443299087
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99998,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95531,
+    "joint": 0.95529
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4469,
+    "NI": 2,
+    "NN": 0,
+    "NS": 95529,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": -0.0009672803297562457,
+   "scenario": "first_null_second_effect",
+   "seed": 20771112,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999927073162458,
+     0.9999945152614834
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9540117801079468,
+     0.9565732401434728
+    ],
+    "joint": [
+     0.9539915077982957,
+     0.9565535139896484
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97964,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97961,
+    "joint": 0.96053
+   },
+   "decision_counts": {
+    "II": 128,
+    "IN": 1911,
+    "IS": 0,
+    "NI": 1908,
+    "NN": 96053,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.0433299562999551,
+   "scenario": "both_null",
+   "seed": 20771113,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9787460716449582,
+     0.9804970794244031
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9787154417363939,
+     0.9804677116377543
+    ],
+    "joint": [
+     0.9593053980759779,
+     0.9617192211425464
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20871110,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95652,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99997,
+    "joint": 0.95649
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 3,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4348,
+    "SN": 95649,
+    "SS": 0
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": -0.0011677903496872416,
+   "scenario": "first_effect_second_null",
+   "seed": 20871111,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9552383871964178,
+     0.9577665400952695
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9999117919507483,
+     0.9999897972414555
+    ],
+    "joint": [
+     0.9552079722611873,
+     0.9577369573352867
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95658,
+    "joint": 0.95658
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4342,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95658,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20871112,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9552992175601311,
+     0.9578257051219825
+    ],
+    "joint": [
+     0.9552992175601311,
+     0.9578257051219825
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97985,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97982,
+    "joint": 0.96094
+   },
+   "decision_counts": {
+    "II": 127,
+    "IN": 1891,
+    "IS": 0,
+    "NI": 1888,
+    "NN": 96094,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t5",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.04369657606924672,
+   "scenario": "both_null",
+   "seed": 20871113,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9789604949171122,
+     0.980702640018742
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9789298615229225,
+     0.9806732757177183
+    ],
+    "joint": [
+     0.9597214094237314,
+     0.9621231782960407
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99819,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99489,
+    "joint": 0.99308
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 511,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 181,
+    "SN": 0,
+    "SS": 99308
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.0030517966877212383,
+   "scenario": "both_effect",
+   "seed": 20571117,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9979067264263767,
+     0.9984349995165079
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9944286670601329,
+     0.9953133124092949
+    ],
+    "joint": [
+     0.9925469211244542,
+     0.993575197400441
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95953,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.995,
+    "joint": 0.95475
+   },
+   "decision_counts": {
+    "II": 22,
+    "IN": 478,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4025,
+    "SN": 95475,
+    "SS": 0
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.0012698495990317456,
+   "scenario": "first_effect_second_null",
+   "seed": 20571118,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9582908831395692,
+     0.9607338129051802
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9945434163307884,
+     0.9954185546877544
+    ],
+    "joint": [
+     0.9534441818245977,
+     0.956020881449508
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99804,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95331,
+    "joint": 0.95144
+   },
+   "decision_counts": {
+    "II": 9,
+    "IN": 0,
+    "IS": 4660,
+    "NI": 187,
+    "NN": 0,
+    "NS": 95144,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.0001620823213221132,
+   "scenario": "first_null_second_effect",
+   "seed": 20571119,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9977460812915367,
+     0.9982956561752817
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.951984889532174,
+     0.954600284371696
+    ],
+    "joint": [
+     0.9500903448131586,
+     0.9527549727557525
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97918,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97662,
+    "joint": 0.95715
+   },
+   "decision_counts": {
+    "II": 135,
+    "IN": 2203,
+    "IS": 0,
+    "NI": 1947,
+    "NN": 95715,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.04001004409352911,
+   "scenario": "both_null",
+   "seed": 20571120,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9782764667787208,
+     0.9800467196307042
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9756649758825431,
+     0.9775384072020183
+    ],
+    "joint": [
+     0.9558771390564542,
+     0.9583877398347111
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99979,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99938,
+    "joint": 0.99917
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 62,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 21,
+    "SN": 0,
+    "SS": 99917
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": -0.00036098218625900354,
+   "scenario": "both_effect",
+   "seed": 20771117,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9996789666498442,
+     0.9998626363710801
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9992053523399332,
+     0.9995162821797435
+    ],
+    "joint": [
+     0.9989713146340108,
+     0.9993303360191731
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.96201,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99935,
+    "joint": 0.96137
+   },
+   "decision_counts": {
+    "II": 1,
+    "IN": 64,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 3798,
+    "SN": 96137,
+    "SS": 0
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": -0.003015680519314649,
+   "scenario": "first_effect_second_null",
+   "seed": 20771118,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9608072676241144,
+     0.9631772378915968
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9991716951048621,
+     0.9994899417196013
+    ],
+    "joint": [
+     0.960157752486451,
+     0.9625468021980442
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99984,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.96269,
+    "joint": 0.96253
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 3731,
+    "NI": 16,
+    "NN": 0,
+    "NS": 96253,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": -0.0024903714672716514,
+   "scenario": "first_null_second_effect",
+   "seed": 20771119,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9997400916571778,
+     0.9999015075224352
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9614974770110704,
+     0.9638469762628078
+    ],
+    "joint": [
+     0.9613350654381592,
+     0.9636894001279148
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.98225,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.98229,
+    "joint": 0.96547
+   },
+   "decision_counts": {
+    "II": 93,
+    "IN": 1678,
+    "IS": 0,
+    "NI": 1682,
+    "NN": 96547,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.03535027370990024,
+   "scenario": "both_null",
+   "seed": 20771120,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9814128951750324,
+     0.9830500553778813
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9814537993548417,
+     0.9830891481250231
+    ],
+    "joint": [
+     0.9643203408416373,
+     0.9665838988553349
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99989,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.9997,
+    "joint": 0.99959
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 30,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 11,
+    "SN": 0,
+    "SS": 99959
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": -0.00018169626955273863,
+   "scenario": "both_effect",
+   "seed": 20871117,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9998030207771041,
+     0.9999385745611976
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9995717686165387,
+     0.9997898413187459
+    ],
+    "joint": [
+     0.9994438792675947,
+     0.9996977391185745
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.96195,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99967,
+    "joint": 0.96164
+   },
+   "decision_counts": {
+    "II": 2,
+    "IN": 31,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 3803,
+    "SN": 96164,
+    "SS": 0
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.0021420929563063223,
+   "scenario": "first_effect_second_null",
+   "seed": 20871118,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9607463717563444,
+     0.9631181383689401
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9995366108968757,
+     0.9997650013431956
+    ],
+    "joint": [
+     0.9604317557513802,
+     0.9628127781900344
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99994,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.96167,
+    "joint": 0.96161
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 3833,
+    "NI": 6,
+    "NN": 0,
+    "NS": 96161,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": -0.0015464825716218474,
+   "scenario": "first_null_second_effect",
+   "seed": 20871119,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9998690903160571,
+     0.9999725011809336
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9604622015394253,
+     0.9628423300972024
+    ],
+    "joint": [
+     0.9604013101600892,
+     0.9627832260861118
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.98271,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.98219,
+    "joint": 0.96589
+   },
+   "decision_counts": {
+    "II": 99,
+    "IN": 1682,
+    "IS": 0,
+    "NI": 1630,
+    "NN": 96589,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "t3",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.039562700644416186,
+   "scenario": "both_null",
+   "seed": 20871120,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9818833591201309,
+     0.9834995560927192
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9813515409217386,
+     0.9829914142407488
+    ],
+    "joint": [
+     0.9647469823018867,
+     0.9669972251280708
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99986,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99684,
+    "joint": 0.9967
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 316,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 14,
+    "SN": 0,
+    "SS": 99670
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.0006662316086633827,
+   "scenario": "both_effect",
+   "seed": 20571124,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9997649979764388,
+     0.9999165996666498
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9964725384500196,
+     0.9971692912082689
+    ],
+    "joint": [
+     0.9963249581426675,
+     0.9970368822712926
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95544,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99704,
+    "joint": 0.95261
+   },
+   "decision_counts": {
+    "II": 13,
+    "IN": 283,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4443,
+    "SN": 95261,
+    "SS": 0
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.0001692887991848601,
+   "scenario": "first_effect_second_null",
+   "seed": 20571125,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9541435518347322,
+     0.9567014584292782
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9966836671874829,
+     0.9973581471055607
+    ],
+    "joint": [
+     0.9512756358417557,
+     0.953909591840472
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99985,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.94837,
+    "joint": 0.94822
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 5163,
+    "NI": 15,
+    "NN": 0,
+    "NS": 94822,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.002857856137294429,
+   "scenario": "first_null_second_effect",
+   "seed": 20571126,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9997525063382153,
+     0.9999090920731355
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9469812193986773,
+     0.9497243340267452
+    ],
+    "joint": [
+     0.9468293432189683,
+     0.9495762217303878
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97774,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97658,
+    "joint": 0.95565
+   },
+   "decision_counts": {
+    "II": 133,
+    "IN": 2209,
+    "IS": 0,
+    "NI": 2093,
+    "NN": 95565,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.036245169236480156,
+   "scenario": "both_null",
+   "seed": 20571127,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9768071111099131,
+     0.9786361859292761
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9756241959928931,
+     0.9774991901647174
+    ],
+    "joint": [
+     0.9543564201552074,
+     0.9569085739752957
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20771124,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95699,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95699
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4301,
+    "SN": 95699,
+    "SS": 0
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20771125,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9557149094112215,
+     0.9582299817721399
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.9557149094112215,
+     0.9582299817721399
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.95686,
+    "joint": 0.95686
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4314,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95686,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20771126,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9555831013221359,
+     0.958101799848635
+    ],
+    "joint": [
+     0.9555831013221359,
+     0.958101799848635
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97783,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97865,
+    "joint": 0.95787
+   },
+   "decision_counts": {
+    "II": 139,
+    "IN": 1996,
+    "IS": 0,
+    "NI": 2078,
+    "NN": 95787,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.04307111256393703,
+   "scenario": "both_null",
+   "seed": 20771127,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.976898915517046,
+     0.9787243746077829
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9777355396528274,
+     0.979527687474497
+    ],
+    "joint": [
+     0.956607231910633,
+     0.9590975916656502
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20871124,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.95711,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.95711
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 4289,
+    "SN": 95711,
+    "SS": 0
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20871125,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.955836581198582,
+     0.9583483007656325
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.955836581198582,
+     0.9583483007656325
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.9572,
+    "joint": 0.9572
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 4280,
+    "NI": 0,
+    "NN": 0,
+    "NS": 95720,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20871126,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9559278367984286,
+     0.9584370382514257
+    ],
+    "joint": [
+     0.9559278367984286,
+     0.9584370382514257
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.97883,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.97889,
+    "joint": 0.95894
+   },
+   "decision_counts": {
+    "II": 122,
+    "IN": 1989,
+    "IS": 0,
+    "NI": 1995,
+    "NN": 95894,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "contaminated",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.03736037925128792,
+   "scenario": "both_null",
+   "seed": 20871127,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9779192343355668,
+     0.979703978963037
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9779804696236447,
+     0.9797627390653856
+    ],
+    "joint": [
+     0.9576924147428699,
+     0.9601523266293525
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99953,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99739,
+    "joint": 0.99692
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 261,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 47,
+    "SN": 0,
+    "SS": 99692
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.0011092738141967459,
+   "scenario": "both_effect",
+   "seed": 20571131,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9993751137599707,
+     0.9996465092357723
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9970540947112405,
+     0.9976876926926241
+    ],
+    "joint": [
+     0.9965569461391218,
+     0.9972448773730688
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.8754,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99723,
+    "joint": 0.87285
+   },
+   "decision_counts": {
+    "II": 22,
+    "IN": 255,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 12438,
+    "SN": 87285,
+    "SS": 0
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.007209468475725164,
+   "scenario": "first_effect_second_null",
+   "seed": 20571132,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.8733386033978288,
+     0.8774325560372438
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.996884595698978,
+     0.9975372039970827
+    ],
+    "joint": [
+     0.8707708767369109,
+     0.8749004786050361
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.9995,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.86845,
+    "joint": 0.86796
+   },
+   "decision_counts": {
+    "II": 1,
+    "IN": 0,
+    "IS": 13154,
+    "NI": 49,
+    "NN": 0,
+    "NS": 86796,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": -0.007381512195200226,
+   "scenario": "first_null_second_effect",
+   "seed": 20571133,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999340937322193,
+     0.9996206879783368
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.8663409264271809,
+     0.870530766950157
+    ],
+    "joint": [
+     0.8658476397387652,
+     0.8700440912834227
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.92258,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.91979,
+    "joint": 0.85532
+   },
+   "decision_counts": {
+    "II": 1295,
+    "IN": 6726,
+    "IS": 0,
+    "NI": 6447,
+    "NN": 85532,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 3,
+   "phi_correlation": 0.09284998376146723,
+   "scenario": "both_null",
+   "seed": 20571134,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9209072759159715,
+     0.9242202588577977
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9180903545878066,
+     0.921457394531131
+    ],
+    "joint": [
+     0.8531260481992042,
+     0.8574866539064698
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.99999,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99994,
+    "joint": 0.99993
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 6,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 1,
+    "SN": 0,
+    "SS": 99993
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": -2.4495761346383665e-05,
+   "scenario": "both_effect",
+   "seed": 20771131,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9999433529034099,
+     0.9999982347522698
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9998690903160571,
+     0.9999725011809336
+    ],
+    "joint": [
+     0.9998555013030429,
+     0.9999660909622098
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.86642,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.99998,
+    "joint": 0.86641
+   },
+   "decision_counts": {
+    "II": 1,
+    "IN": 1,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 13357,
+    "SN": 86641,
+    "SS": 0
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.004816854824205122,
+   "scenario": "first_effect_second_null",
+   "seed": 20771132,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.8642973723562996,
+     0.868514476978275
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999927073162458,
+     0.9999945152614834
+    ],
+    "joint": [
+     0.8642873059914242,
+     0.8685045441114128
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.86563,
+    "joint": 0.86563
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 13437,
+    "NI": 0,
+    "NN": 0,
+    "NS": 86563,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20771133,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.8635021416238494,
+     0.8677297684034432
+    ],
+    "joint": [
+     0.8635021416238494,
+     0.8677297684034432
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.90233,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.90315,
+    "joint": 0.82135
+   },
+   "decision_counts": {
+    "II": 1587,
+    "IN": 8098,
+    "IS": 0,
+    "NI": 8180,
+    "NN": 82135,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 5,
+   "phi_correlation": 0.0730146033007726,
+   "scenario": "both_null",
+   "seed": 20771134,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.9004745429701075,
+     0.9041545475347215
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9013014186228846,
+     0.9049676088844397
+    ],
+    "joint": [
+     0.8189634889648336,
+     0.8237118229277094
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 1.0
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 100000
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "both_effect",
+   "seed": 20871131,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.999961586887417,
+     1.0
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.86595,
+    "H-EV-AUTOND-TRAIN-ORDER": 1.0,
+    "joint": 0.86595
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 0,
+    "NI": 0,
+    "NN": 0,
+    "NS": 0,
+    "SI": 13405,
+    "SN": 86595,
+    "SS": 0
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_effect_second_null",
+   "seed": 20871132,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.02
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.863824257454287,
+     0.8680476279886135
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.999961586887417,
+     1.0
+    ],
+    "joint": [
+     0.863824257454287,
+     0.8680476279886135
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 1.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.8653,
+    "joint": 0.8653
+   },
+   "decision_counts": {
+    "II": 0,
+    "IN": 0,
+    "IS": 13470,
+    "NI": 0,
+    "NN": 0,
+    "NS": 86530,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": null,
+   "scenario": "first_null_second_effect",
+   "seed": 20871133,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.02,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.999961586887417,
+     1.0
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.8631699638622895,
+     0.8674019715176574
+    ],
+    "joint": [
+     0.8631699638622895,
+     0.8674019715176574
+    ]
+   }
+  },
+  {
+   "correct": {
+    "H-EV-AUTOND-REPRESENTATION": 0.90064,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.90243,
+    "joint": 0.8192
+   },
+   "decision_counts": {
+    "II": 1613,
+    "IN": 8144,
+    "IS": 0,
+    "NI": 8323,
+    "NN": 81920,
+    "NS": 0,
+    "SI": 0,
+    "SN": 0,
+    "SS": 0
+   },
+   "distribution": "lognormal",
+   "n_simulations": 100000,
+   "n_valid_pairs": 6,
+   "phi_correlation": 0.07249903864228459,
+   "scenario": "both_null",
+   "seed": 20871134,
+   "sigma_multiplier": 1.0,
+   "sigmas": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+   },
+   "true_means": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0
+   },
+   "wilson_95": {
+    "H-EV-AUTOND-REPRESENTATION": [
+     0.8987704975171283,
+     0.9024787228240211
+    ],
+    "H-EV-AUTOND-TRAIN-ORDER": [
+     0.9005753793236312,
+     0.9042537034985753
+    ],
+    "joint": [
+     0.8168024568550714,
+     0.8215730202138558
+    ]
+   }
+  }
+ ],
+ "statement": "planning sensitivity only; it neither changes the registered power plan nor validates sigma_Delta under an execution order other than the one its calibration used",
+ "variance_artifact": {
+  "path": "results/autond/calibration-balanced-ab-v1/variance.json",
+  "sha256": "4c77681b8930d27ec7c714ce3c83749f19af74c7343d15e156448e762ef5eee9"
+ },
+ "variance_execution_order_protocol": "balanced-ab-v1",
+ "worst_joint_correct_by_cell": {
+  "n=3,sigma_x1.0": 0.9483,
+  "n=3,sigma_x1.25": 0.94868,
+  "n=3,sigma_x1.5": 0.94482,
+  "n=3,sigma_x2.0": 0.89385,
+  "n=4,sigma_x1.0": 0.94927,
+  "n=4,sigma_x1.25": 0.95084,
+  "n=4,sigma_x1.5": 0.94974,
+  "n=4,sigma_x2.0": 0.94964,
+  "n=5,sigma_x1.0": 0.94947,
+  "n=5,sigma_x1.25": 0.94978,
+  "n=5,sigma_x1.5": 0.94968,
+  "n=5,sigma_x2.0": 0.94838,
+  "n=6,sigma_x1.0": 0.94918,
+  "n=6,sigma_x1.25": 0.95035,
+  "n=6,sigma_x1.5": 0.95061,
+  "n=6,sigma_x2.0": 0.94904
+ }
+}

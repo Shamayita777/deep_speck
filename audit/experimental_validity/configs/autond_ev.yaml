@@ -70,8 +70,8 @@ production:
   H-EV-AUTOND-REPRESENTATION: {units: 6, minimum_valid: 5, base_seed: 4000}
   # Written by `autond.runner plan-power`; declare its SHA-256 and required_n here before production.
   power_plan:
-    path: results/autond/calibration/power_plan.json
-    sha256: 9fdf7244139c538c90aeae847216e4568ee8c42fde4fcfa3e245bb8deaf7dbd5
+    path: results/autond/calibration-balanced-ab-v1/power_plan.json
+    sha256: c3db5cfe5ae7f48f79b373ddf74ef631a5c5ee9893e0860cedbc00fbdb6b1585
     required_n: 3
 
 # Pipeline check only: reduced sizes, never evidentiary, excluded from every design hash.

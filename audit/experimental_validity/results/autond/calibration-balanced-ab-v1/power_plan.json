@@ -1,0 +1,45 @@
+{
+  "artifact": "autond-ev-power-plan-1",
+  "assumptions": [
+    "paired differences independent and normal with SD = sigma_Delta_upper_95",
+    "the same target effect for both hypotheses; the sign does not matter (symmetric rule)"
+  ],
+  "decision_rule_simulated": "paired t -> difference Holm -> TOST -> equivalence Holm -> decide_final",
+  "design_hash": "84123aa4bb01c6160e1286cedddf68b35419378c2131f65822b57017e65db154",
+  "generated_at_utc": "2026-11-04T04:26:35.158078+00:00",
+  "inputs": {
+    "alpha": 0.05,
+    "epsilon": 0.01,
+    "execution_order_protocol": "balanced-ab-v1",
+    "max_n": 200,
+    "n_simulations": 50000,
+    "sigma": "sigma_Delta_upper_95",
+    "sigma_values": {
+      "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+      "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+    },
+    "target_effect": 0.02,
+    "target_effect_source": "predeclared",
+    "target_power": 0.8
+  },
+  "non_evidentiary": true,
+  "power_curve": [
+    {
+      "H-EV-AUTOND-REPRESENTATION:not_supported": 0.80472,
+      "H-EV-AUTOND-REPRESENTATION:supported": 0.85574,
+      "H-EV-AUTOND-TRAIN-ORDER:not_supported": 0.63766,
+      "H-EV-AUTOND-TRAIN-ORDER:supported": 0.70592,
+      "n": 2
+    },
+    {
+      "H-EV-AUTOND-REPRESENTATION:not_supported": 0.95058,
+      "H-EV-AUTOND-REPRESENTATION:supported": 1.0,
+      "H-EV-AUTOND-TRAIN-ORDER:not_supported": 0.9503,
+      "H-EV-AUTOND-TRAIN-ORDER:supported": 1.0,
+      "n": 3
+    }
+  ],
+  "required_n": 3,
+  "requirement": "for each hypothesis, min over the other hypothesis's state of P(SUPPORTED | effect = target) and of P(NOT_SUPPORTED | effect = 0) >= target_power",
+  "variance_artifact_sha256": "4c77681b8930d27ec7c714ce3c83749f19af74c7343d15e156448e762ef5eee9"
+}

@@ -1,0 +1,28 @@
+{
+  "artifact": "autond-ev-calibration-variance-1",
+  "design_hash": "84123aa4bb01c6160e1286cedddf68b35419378c2131f65822b57017e65db154",
+  "execution_order_protocol": "balanced-ab-v1",
+  "generated_at_utc": "2026-11-04T04:26:34.452851+00:00",
+  "inputs": {
+    "H-EV-AUTOND-REPRESENTATION": {
+      "certificate": "results/autond/calibration-balanced-ab-v1/H-EV-AUTOND-REPRESENTATION/certificate.json",
+      "certificate_sha256": "e8d41f82b1ae4c54bdc46af5011c2cd2c02a2b73d613e8475279161f09fbc169",
+      "n_valid": 10,
+      "sigma_Delta": 0.0004539442085151375,
+      "sigma_Delta_upper_95": 0.0007468279107594088
+    },
+    "H-EV-AUTOND-TRAIN-ORDER": {
+      "certificate": "results/autond/calibration-balanced-ab-v1/H-EV-AUTOND-TRAIN-ORDER/certificate.json",
+      "certificate_sha256": "6679ac7a94fb32204083a2e47cc97c1a55882a5949c6717cd2e38e76014410db",
+      "n_valid": 10,
+      "sigma_Delta": 0.0006360619204658275,
+      "sigma_Delta_upper_95": 0.0010464475287149094
+    }
+  },
+  "non_evidentiary": true,
+  "prohibition": "sizes the production design only; never chooses or validates epsilon or the target effect",
+  "sigma_Delta_upper_95": {
+    "H-EV-AUTOND-REPRESENTATION": 0.0007468279107594088,
+    "H-EV-AUTOND-TRAIN-ORDER": 0.0010464475287149094
+  }
+}

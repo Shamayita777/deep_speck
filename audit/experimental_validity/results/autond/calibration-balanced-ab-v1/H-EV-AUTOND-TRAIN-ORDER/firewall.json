@@ -1,0 +1,46 @@
+{
+  "confirmatory_data_mode": "PER_REPLICATE",
+  "consumed_evaluation_keys": [
+    "condition_a:pair000",
+    "condition_a:pair001",
+    "condition_a:pair002",
+    "condition_a:pair003",
+    "condition_a:pair004",
+    "condition_a:pair005",
+    "condition_a:pair006",
+    "condition_a:pair007",
+    "condition_a:pair008",
+    "condition_a:pair009",
+    "condition_b:pair000",
+    "condition_b:pair001",
+    "condition_b:pair002",
+    "condition_b:pair003",
+    "condition_b:pair004",
+    "condition_b:pair005",
+    "condition_b:pair006",
+    "condition_b:pair007",
+    "condition_b:pair008",
+    "condition_b:pair009"
+  ],
+  "experiment_id": "H-EV-AUTOND-TRAIN-ORDER",
+  "freeze_record": {
+    "frozen_at_utc": "2026-11-03T06:58:37.444053+00:00",
+    "frozen_config_hash": "3389824a5b26282221708d3e4c26decc81aba0b465638948531f92d36307d6b2",
+    "frozen_permutation_hash": null,
+    "frozen_replicate_plan_hash": "a0d865432036902f0345ca2a05e3d4895bdd96c9d24fdd3de83b1c700569b500",
+    "frozen_statistical_plan_hash": "9447a8e269fcfed1d6d27c13a672d07d550b2fbc2a07f889a66ea0e01f0a905f"
+  },
+  "frozen": true,
+  "sealed_dataset_hashes": {
+    "pair000": "7762e3207c65787d3f78cbd3b229028d7814daee82ec155b234177e0014f87c5",
+    "pair001": "e5f613320065202908385de58e78a6a0d22c2ca15c8bb5cc6979e4679a3c4a92",
+    "pair002": "1e5c8e4657a2f5a8937542695b707e4d82f1e2a6a95e68a4103e772a3457b98c",
+    "pair003": "8fbeca10a19dfe60cf66147082b9c5625d92b6b4bf88959dee59872495a4f334",
+    "pair004": "24f97fde1f401b5772a14b74a4748ee7af1ee1eb87c94439d1ede48ddee757ae",
+    "pair005": "c808ee3883c3b62f9748846d56ef2d2f5eadfabb7c65d4eb446a2f1d7ce7390f",
+    "pair006": "305b0dd11b8fcee2ca600b80bc31111f488f3910f5d9a163e987fa70c0986d81",
+    "pair007": "9b5e113a718ba127400712beea851d6662c71d1447c02922e63ab6377795f51d",
+    "pair008": "32285c14c61aa1d0a82c43c8249ecf9194d14804a9a9e1e401e57304a7c8618f",
+    "pair009": "fcd61d31194d7aa3acf0e567161c3c70c499f6d84d965c50f0e5a4539188e196"
+  }
+}

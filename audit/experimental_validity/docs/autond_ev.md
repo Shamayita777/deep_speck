@@ -107,7 +107,7 @@ The treatment definitions, statistics and decision rules are unchanged.
 
 **NOISE scope.** EV-AUTOND-NOISE measures repeated-execution variability for one fixed dataset, seed, set of initial weights, and hardware and software environment, and nothing beyond that. Its reruns are refused if they would span two sessions or two devices (`SessionScopeViolation`). Run all ten in one session on one GPU.
 
-## Calibration compatibility: production is blocked until recalibration
+## Calibration compatibility: fixed-order calibration replaced by a balanced one
 
 The existing calibration (2026-10-30, Kaggle, design `84123aa4…`) trained every pair A then B. It is preserved unchanged in `results/autond/calibration/`:
 - the 32 files of the original archive, byte-identical;
@@ -120,7 +120,21 @@ The existing calibration (2026-10-30, Kaggle, design `84123aa4…`) trained ever
 - `power_plan` records the protocol;
 - the production gate refuses a power plan from another protocol.
 
-The declared power plan, `9fdf7244…` with `required_n = 3`, comes from the fixed-order calibration, so the gate **refuses production** ("derived from a calibration under A/B execution order 'fixed-ab-legacy'"). To unblock it: run the balanced calibration (10 pairs per hypothesis under the frozen schedule, about 14 GPU-hours), then `analyze-calibration` and `plan-power`, and declare the new plan's path, SHA-256 and `required_n` in `production.power_plan`.
+The fixed-order plan `9fdf7244…` stays in `results/autond/calibration/` as a record, and the gate still refuses it.
+
+**Balanced calibration (`results/autond/calibration-balanced-ab-v1/`).** Run on Kaggle on 2026-11-03, 10 pairs per hypothesis under the frozen schedule, one T4 per hypothesis, one session each, at commit `cd52db63`, with source manifest `81027ceb…`:
+
+| Hypothesis | Valid | Order (AB / BA) | Mean B − A | SD | σ upper 95 % |
+|---|---|---|---|---|---|
+| H-EV-AUTOND-TRAIN-ORDER | 10/10 | 5 / 5 | −0.00024 | 0.00064 | 0.00105 |
+| H-EV-AUTOND-REPRESENTATION | 10/10 | 5 / 5 | −0.13377 | 0.00045 | 0.00075 |
+
+The resulting files are:
+- variance artifact: `4c77681b…`;
+- power plan: `c3db5cfe…`, with `required_n = 3`;
+- what `production.power_plan` now declares: this plan.
+
+The frozen production schedule has 6 pairs, so it covers that `n`. The raw `.npz` datasets and `.keras` models (2.5 GB) are kept outside the repository with the archive; the JSON records here carry their SHA-256s.
 
 ## Production design (`configs/autond_ev.yaml`)
 
@@ -133,24 +147,22 @@ The declared power plan, `9fdf7244…` with `required_n = 3`, comes from the fix
 
 That is 44 trainings in total.
 
-**Power at 5 valid pairs (the minimum).** With the hypothesis-specific calibrated upper σ (TRAIN-ORDER 0.0019803, REPRESENTATION 0.0005462), the probability that both final decisions are correct is:
+**Power at 5 valid pairs (the minimum).** With the hypothesis-specific upper σ from the balanced calibration (TRAIN-ORDER 0.0010464, REPRESENTATION 0.0007468), the probability that both final decisions are correct is:
 
 | σ × | Worst case over the four true-effect states |
 |---|---|
 | 1 | 0.949 |
 | 1.25 | 0.950 |
-| 1.5 | 0.949 |
-| 2 | 0.918 |
+| 1.5 | 0.950 |
+| 2 | 0.948 |
 
-At 6 valid pairs it is at least 0.947. The run is `power-sensitivity`, recorded in `results/autond/planning/power_sensitivity.json`.
+At 6 valid pairs it is at least 0.949. The run is `power-sensitivity`, recorded in `results/autond/planning/power_sensitivity_balanced-ab-v1.json` (`5b0fc81f…`). The fixed-order version, `power_sensitivity.json`, is kept as a record.
 
-**Fewer pairs miss 80%:** at 4 valid pairs with 2× σ it is 0.783, which is below 80%, and at 3 pairs 0.448.
+**Fewer pairs:** 4 valid pairs keep at least 0.949 up to 2× σ. 3 pairs keep 0.945 up to 1.5× σ but drop to 0.894 at 2× σ.
 
 **Non-normal differences (n = 5):**
-- t₅, t₃ and contamination keep at least 0.95;
-- skewed (lognormal) differences reduce NOT_SUPPORTED to about 0.82–0.86, because the small-sample t-test's false-significance rate rises.
-
-**What these numbers rest on:** the σ values from the fixed-order calibration. A balanced recalibration must regenerate them.
+- t₅, t₃ and contamination keep at least 0.955;
+- skewed (lognormal) differences reduce the joint probability to about 0.82 (NOT_SUPPORTED about 0.87), because the small-sample t-test's false-significance rate rises.
 
 ## Commands (from `audit/experimental_validity`, pinned Python 3.11 / TF 2.15.1 with PyYAML, repository root importable)
 
@@ -164,7 +176,7 @@ python -B -m autond.runner --gpu 1 run --mode calibration --experiment H-EV-AUTO
 python -B -m autond.runner analyze-calibration                                   # -> results/autond/calibration-balanced-ab-v1/variance.json
 python -B -m autond.runner plan-power                                            # -> results/autond/calibration-balanced-ab-v1/power_plan.json
 python -B -m autond.runner power-sensitivity --variance <variance.json> --output <new.json>
-python -B -m autond.runner preflight --mode production                           # refuses until the plan matches the protocol
+python -B -m autond.runner preflight --mode production                           # refuses a plan from another execution-order protocol
 python -B -m autond.runner --gpu 0 run --mode production --experiment <ID> --confirm-execute   # one process per GPU
 python -B -m autond.runner family                                                # production Holm family
 ```
