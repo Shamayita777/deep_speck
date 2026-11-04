@@ -1,0 +1,96 @@
+{
+  "condition": "perturbed",
+  "cuda_visible_devices": "1",
+  "finished_utc": "2026-10-29T09:09:55Z",
+  "fits": [
+    {
+      "completed_steps": 10,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "c76e327922e6269a45728ce9bf2dd0186ed847eb762146cc56baf33a8c24e92a",
+      "replicate": 1,
+      "retries": [],
+      "rounds_trained": [
+        5
+      ],
+      "seed": 3757552657,
+      "selected_checkpoint_sha256": "536e63a8cf95ac9889ae638ba8ebb29d280d5e754f01d5ba678259b92ebcb6bc",
+      "status_before": "absent",
+      "steps_before": 0
+    },
+    {
+      "completed_steps": 20,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "975c3fcdc0cb3d0227b89551435636cd7a7ea7732f9e831171f1a4178b530848",
+      "replicate": 2,
+      "retries": [],
+      "rounds_trained": [
+        5,
+        6
+      ],
+      "seed": 673228719,
+      "selected_checkpoint_sha256": "b96c4f8bdae3a33f8f1d9d9e2796bf286a0f7807b53aeaba70e50e0e5c1a5408",
+      "status_before": "absent",
+      "steps_before": 0
+    },
+    {
+      "completed_steps": 20,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "6f5c5c76f0dd1a50452a5b82e4d4b9861bcc749e923732c9bcb3767b8a0abee3",
+      "replicate": 3,
+      "retries": [],
+      "rounds_trained": [
+        5,
+        6
+      ],
+      "seed": 3241444873,
+      "selected_checkpoint_sha256": "f8f9425d5f2a560c65ef485058e77117ae1a289caf1e4dc1150bc88a9c88a911",
+      "status_before": "absent",
+      "steps_before": 0
+    },
+    {
+      "completed_steps": 20,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "ffea6f1097cad5a8cb672941bdeca3702af95fdedf5cdb84393dd59a72788b18",
+      "replicate": 4,
+      "retries": [],
+      "rounds_trained": [
+        5,
+        6
+      ],
+      "seed": 3685993406,
+      "selected_checkpoint_sha256": "73049443490bfed653c310b7e2cf2b00cc9be09f2aaca7fe27e24cf259208476",
+      "status_before": "absent",
+      "steps_before": 0
+    },
+    {
+      "completed_steps": 10,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "763e724fae8e98104e3860ac8efa4ca8e536a80e7342b051196d81d5ee57abf1",
+      "replicate": 5,
+      "retries": [],
+      "rounds_trained": [
+        5
+      ],
+      "seed": 1216546553,
+      "selected_checkpoint_sha256": "4c11dcd7ed975c50cc7698b78936aa81dbec30f8c1c87710c1b510cb28c89a66",
+      "status_before": "absent",
+      "steps_before": 0
+    }
+  ],
+  "schema_version": "d4-autond-worker-summary-1",
+  "started_utc": "2026-10-29T06:26:23Z",
+  "status": "ARM_COMPLETE_AND_VERIFIED",
+  "tensorflow_gpu": {
+    "details": {
+      "compute_capability": [
+        7,
+        5
+      ],
+      "device_name": "Tesla T4"
+    },
+    "devices": [
+      "/physical_device:GPU:0"
+    ],
+    "probe_device": "/job:localhost/replica:0/task:0/device:GPU:0"
+  }
+}

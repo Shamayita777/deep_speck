@@ -1,0 +1,113 @@
+{
+  "condition": "baseline",
+  "cuda_visible_devices": "0",
+  "finished_utc": "2026-10-29T14:27:41Z",
+  "fits": [
+    {
+      "completed_steps": 50,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "d2ae8dd17823eaaed1aaf9dc619fa0f9ff937fc96a38b41a3c94acb7e7919d58",
+      "replicate": 1,
+      "retries": [],
+      "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "seed": 3757552657,
+      "selected_checkpoint_sha256": "1f9312d7f3050190e60f477b2317cb82209c3cecec962c842de51ad7ac2b2037",
+      "status_before": "absent",
+      "steps_before": 0
+    },
+    {
+      "completed_steps": 50,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "290c8c0f959f6bb363aca8fc17f1b5f2b6ac7937b86e57e6246ac1827695b41c",
+      "replicate": 2,
+      "retries": [],
+      "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "seed": 673228719,
+      "selected_checkpoint_sha256": "4ab0b0a6a2aad4cf72eb35e4b76aeef722af34e9b4a9e6e31559e3f753e35ee3",
+      "status_before": "absent",
+      "steps_before": 0
+    },
+    {
+      "completed_steps": 50,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "733ee64d8da069ff667ee24e6fb876cf996626df72b768a603093f3730940bc6",
+      "replicate": 3,
+      "retries": [],
+      "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "seed": 3241444873,
+      "selected_checkpoint_sha256": "ba5a9ab6167521d235835244ebab6f7afc08f43bd2bd6cb0f05417b8e0ada23e",
+      "status_before": "absent",
+      "steps_before": 0
+    },
+    {
+      "completed_steps": 50,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "8003a0d3058228cb96586f410c1710f8dbfb4524b344ea4b5b445c5d5472995f",
+      "replicate": 4,
+      "retries": [],
+      "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "seed": 3685993406,
+      "selected_checkpoint_sha256": "ebe586eff45ff98d1be56341681d3b142aee1668f0aae66688e2f83afcd799f7",
+      "status_before": "absent",
+      "steps_before": 0
+    },
+    {
+      "completed_steps": 50,
+      "progression_status": "stopped_at_threshold",
+      "record_chain_head": "817fd0b00b5081b8942021d11cb93a1146fb64989234a460fb43a898679bb36f",
+      "replicate": 5,
+      "retries": [],
+      "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "seed": 1216546553,
+      "selected_checkpoint_sha256": "b192d1fa57251737fb8712949f7ae57dc3511cd9be3eabff78e7182fa1357bb2",
+      "status_before": "absent",
+      "steps_before": 0
+    }
+  ],
+  "schema_version": "d4-autond-worker-summary-1",
+  "started_utc": "2026-10-29T06:26:23Z",
+  "status": "ARM_COMPLETE_AND_VERIFIED",
+  "tensorflow_gpu": {
+    "details": {
+      "compute_capability": [
+        7,
+        5
+      ],
+      "device_name": "Tesla T4"
+    },
+    "devices": [
+      "/physical_device:GPU:0"
+    ],
+    "probe_device": "/job:localhost/replica:0/task:0/device:GPU:0"
+  }
+}

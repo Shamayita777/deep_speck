@@ -1,0 +1,3239 @@
+{
+  "audit": {
+    "claim": "Whether every label-shuffled fit's test accuracy is practically equivalent to chance (inside the registered band) while every intact-label baseline fit is adequate (above the registered floor), conditional on each fitted model and the shared test sample. The paired baseline-versus-shuffled comparison is reported as a secondary, non-gating endpoint.",
+    "id": "D4",
+    "name": "Controlled Perturbation Audit"
+  },
+  "autond_decision": {
+    "autond_overall_outcome": "INCONCLUSIVE",
+    "engine_overall_d4_outcome": "INCONCLUSIVE",
+    "overall_supported": false,
+    "pipeline_progression_role": "co_primary",
+    "progression_criterion": {
+      "baseline_pass_the_starting_round": true,
+      "met": false,
+      "perturbed_stop_at_starting_round_without_best_round": false,
+      "rule": "every perturbed fit stops at the starting round with no best_round, and every baseline fit passes at least its starting round (best_round is not None)"
+    },
+    "progression_gates_outcome": true
+  },
+  "autond_pipeline_progression": {
+    "fits": [
+      {
+        "best_round": 8,
+        "best_val_acc": 0.5085740089416504,
+        "condition": "baseline",
+        "replicate": 1,
+        "rounds_max_val_acc": [
+          0.9184899926185608,
+          0.7738469839096069,
+          0.6046149730682373,
+          0.5085740089416504,
+          0.5012649893760681
+        ],
+        "rounds_trained": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 9
+      },
+      {
+        "best_round": null,
+        "best_val_acc": null,
+        "condition": "perturbed",
+        "replicate": 1,
+        "rounds_max_val_acc": [
+          0.5048360228538513
+        ],
+        "rounds_trained": [
+          5
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 5
+      },
+      {
+        "best_round": 8,
+        "best_val_acc": 0.5104529857635498,
+        "condition": "baseline",
+        "replicate": 2,
+        "rounds_max_val_acc": [
+          0.9184769988059998,
+          0.7837550044059753,
+          0.6117630004882812,
+          0.5104529857635498,
+          0.5008130073547363
+        ],
+        "rounds_trained": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 9
+      },
+      {
+        "best_round": 5,
+        "best_val_acc": 0.5060949921607971,
+        "condition": "perturbed",
+        "replicate": 2,
+        "rounds_max_val_acc": [
+          0.5060949921607971,
+          0.5022460222244263
+        ],
+        "rounds_trained": [
+          5,
+          6
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 6
+      },
+      {
+        "best_round": 8,
+        "best_val_acc": 0.5096359848976135,
+        "condition": "baseline",
+        "replicate": 3,
+        "rounds_max_val_acc": [
+          0.9186310172080994,
+          0.7838190197944641,
+          0.6088520288467407,
+          0.5096359848976135,
+          0.5009890198707581
+        ],
+        "rounds_trained": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 9
+      },
+      {
+        "best_round": 5,
+        "best_val_acc": 0.5052779912948608,
+        "condition": "perturbed",
+        "replicate": 3,
+        "rounds_max_val_acc": [
+          0.5052779912948608,
+          0.501039981842041
+        ],
+        "rounds_trained": [
+          5,
+          6
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 6
+      },
+      {
+        "best_round": 8,
+        "best_val_acc": 0.5085160136222839,
+        "condition": "baseline",
+        "replicate": 4,
+        "rounds_max_val_acc": [
+          0.918599009513855,
+          0.7738249897956848,
+          0.6054869890213013,
+          0.5085160136222839,
+          0.5008730292320251
+        ],
+        "rounds_trained": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 9
+      },
+      {
+        "best_round": 5,
+        "best_val_acc": 0.505282998085022,
+        "condition": "perturbed",
+        "replicate": 4,
+        "rounds_max_val_acc": [
+          0.505282998085022,
+          0.5037109851837158
+        ],
+        "rounds_trained": [
+          5,
+          6
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 6
+      },
+      {
+        "best_round": 8,
+        "best_val_acc": 0.5098350048065186,
+        "condition": "baseline",
+        "replicate": 5,
+        "rounds_max_val_acc": [
+          0.9187620282173157,
+          0.7835100293159485,
+          0.6107630133628845,
+          0.5098350048065186,
+          0.5002449750900269
+        ],
+        "rounds_trained": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 9
+      },
+      {
+        "best_round": null,
+        "best_val_acc": null,
+        "condition": "perturbed",
+        "replicate": 5,
+        "rounds_max_val_acc": [
+          0.5001569986343384
+        ],
+        "rounds_trained": [
+          5
+        ],
+        "status": "stopped_at_threshold",
+        "stop_round": 5
+      }
+    ],
+    "role": "co_primary",
+    "rule": "upstream train_neural_distinguisher: stop when a round's max val_acc <= 0.505; best_round is the last round above it (None if the first round stops)",
+    "stop_threshold": 0.505,
+    "summary": {
+      "baseline_best_rounds": [
+        8,
+        8,
+        8,
+        8,
+        8
+      ],
+      "baseline_stop_rounds": [
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      "cap_reached": [],
+      "perturbed_stopped_at_first_round": 2,
+      "perturbed_with_no_best_round": 2
+    }
+  },
+  "dataset": {
+    "dataset_id": "autond-speck3264",
+    "dataset_version": "pinned-8d66e0a4-main.make_train_data",
+    "generation_parameters": {
+      "cipher": "speck3264",
+      "delta_key_hex": "0x0",
+      "delta_plain_hex": "0x400000",
+      "randomness_source": "os.urandom",
+      "rounds": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "sample_sizes": {
+        "test": 1000000,
+        "train_per_round": 10000000,
+        "validation_per_round": 1000000
+      },
+      "scenario": "single-key"
+    },
+    "generation_procedure": "main.make_train_data at the pinned commit: one call per registered round for train and validation, one comparison-round call for test, persisted at preflight"
+  },
+  "decision": {
+    "baseline_adequacy_gate": "PASSED",
+    "outcome": "INCONCLUSIVE",
+    "overall_d4_outcome": "INCONCLUSIVE",
+    "overall_supported": false,
+    "paired_degradation_endpoint": {
+      "established": true,
+      "role": "secondary_non_gating"
+    },
+    "rule": "near_chance_baseline_gated_v4",
+    "shuffled_near_chance_endpoint": "INCONCLUSIVE"
+  },
+  "findings": {
+    "baseline_adequacy": {
+      "alpha": 0.05,
+      "outcome": "PASSED",
+      "replicates": [
+        {
+          "accuracy": 0.918209,
+          "adequacy_level": 0.05,
+          "correct": 918209,
+          "inadequacy_level": 0.01,
+          "one_sided_lower_bound": 0.9177568392676546,
+          "one_sided_upper_bound": 0.9188453765803687,
+          "pvalue_h0_at_or_above_threshold": 1.0,
+          "pvalue_h0_at_or_below_threshold": 0.0,
+          "state": "ADEQUATE",
+          "test_examples": 1000000,
+          "threshold": 0.9
+        },
+        {
+          "accuracy": 0.917995,
+          "adequacy_level": 0.05,
+          "correct": 917995,
+          "inadequacy_level": 0.01,
+          "one_sided_lower_bound": 0.9175423030168657,
+          "one_sided_upper_bound": 0.9186321365048532,
+          "pvalue_h0_at_or_above_threshold": 1.0,
+          "pvalue_h0_at_or_below_threshold": 0.0,
+          "state": "ADEQUATE",
+          "test_examples": 1000000,
+          "threshold": 0.9
+        },
+        {
+          "accuracy": 0.918226,
+          "adequacy_level": 0.05,
+          "correct": 918226,
+          "inadequacy_level": 0.01,
+          "one_sided_lower_bound": 0.9177738819062037,
+          "one_sided_upper_bound": 0.9188623161571117,
+          "pvalue_h0_at_or_above_threshold": 1.0,
+          "pvalue_h0_at_or_below_threshold": 0.0,
+          "state": "ADEQUATE",
+          "test_examples": 1000000,
+          "threshold": 0.9
+        },
+        {
+          "accuracy": 0.918061,
+          "adequacy_level": 0.05,
+          "correct": 918061,
+          "inadequacy_level": 0.01,
+          "one_sided_lower_bound": 0.9176084683052381,
+          "one_sided_upper_bound": 0.9186979022733548,
+          "pvalue_h0_at_or_above_threshold": 1.0,
+          "pvalue_h0_at_or_below_threshold": 0.0,
+          "state": "ADEQUATE",
+          "test_examples": 1000000,
+          "threshold": 0.9
+        },
+        {
+          "accuracy": 0.918288,
+          "adequacy_level": 0.05,
+          "correct": 918288,
+          "inadequacy_level": 0.01,
+          "one_sided_lower_bound": 0.9178360374604569,
+          "one_sided_upper_bound": 0.9189240957206979,
+          "pvalue_h0_at_or_above_threshold": 1.0,
+          "pvalue_h0_at_or_below_threshold": 0.0,
+          "state": "ADEQUATE",
+          "test_examples": 1000000,
+          "threshold": 0.9
+        }
+      ],
+      "threshold": 0.9
+    },
+    "descriptive": {
+      "bootstrap_ci_mean_difference": {
+        "confidence_level": 0.95,
+        "high": -0.4127522,
+        "low": -0.41695139999999997,
+        "role": "descriptive only; not used by the decision"
+      },
+      "class_conditional_rates": "per fit in <condition>_predictions.class_counts; descriptive only",
+      "mean_accuracy_difference": -0.4148404,
+      "mean_baseline_accuracy": 0.9181557999999999,
+      "mean_perturbed_accuracy": 0.5033154,
+      "sd_accuracy_difference": 0.0027607389047137553
+    },
+    "perturbation": "label_shuffle",
+    "primary_endpoint": {
+      "alpha": 0.05,
+      "chance": 0.5,
+      "margin": 0.005,
+      "outcome": "INCONCLUSIVE",
+      "replicates": [
+        {
+          "accuracy": 0.500785,
+          "band": [
+            0.495,
+            0.505
+          ],
+          "correct": 500785,
+          "departure_interval": [
+            0.4994965856602172,
+            0.5020734068678989
+          ],
+          "departure_level_per_side": 0.005,
+          "departure_pvalue_above_band": 1.0,
+          "departure_pvalue_below_band": 1.0,
+          "equivalence_interval": [
+            0.49996207328421877,
+            0.5016079233580675
+          ],
+          "equivalence_level": 0.05,
+          "state": "EQUIVALENT",
+          "test_examples": 1000000,
+          "tost_pvalue_h0_at_or_above_upper": 1.7396289101548824e-17,
+          "tost_pvalue_h0_at_or_below_lower": 2.949333826157802e-31
+        },
+        {
+          "accuracy": 0.505379,
+          "band": [
+            0.495,
+            0.505
+          ],
+          "correct": 505379,
+          "departure_interval": [
+            0.5040906367393339,
+            0.5066673120616028
+          ],
+          "departure_level_per_side": 0.005,
+          "departure_pvalue_above_band": 0.22451402678339008,
+          "departure_pvalue_below_band": 1.0,
+          "equivalence_interval": [
+            0.5045561100384519,
+            0.5062018669537227
+          ],
+          "equivalence_level": 0.05,
+          "state": "INDETERMINATE",
+          "test_examples": 1000000,
+          "tost_pvalue_h0_at_or_above_upper": 0.7760846425031194,
+          "tost_pvalue_h0_at_or_below_lower": 5.260693164630097e-96
+        },
+        {
+          "accuracy": 0.504909,
+          "band": [
+            0.495,
+            0.505
+          ],
+          "correct": 504909,
+          "departure_interval": [
+            0.503620626520465,
+            0.506197326754084
+          ],
+          "departure_level_per_side": 0.005,
+          "departure_pvalue_above_band": 0.5726058388705367,
+          "departure_pvalue_below_band": 1.0,
+          "equivalence_interval": [
+            0.5040861030897619,
+            0.5057318759127638
+          ],
+          "equivalence_level": 0.05,
+          "state": "INDETERMINATE",
+          "test_examples": 1000000,
+          "tost_pvalue_h0_at_or_above_upper": 0.42817897630024054,
+          "tost_pvalue_h0_at_or_below_lower": 1.055012705372717e-87
+        },
+        {
+          "accuracy": 0.505455,
+          "band": [
+            0.495,
+            0.505
+          ],
+          "correct": 505455,
+          "departure_interval": [
+            0.5041666384986504,
+            0.5067433095788936
+          ],
+          "departure_level_per_side": 0.005,
+          "departure_pvalue_above_band": 0.18166322295461257,
+          "departure_pvalue_below_band": 1.0,
+          "equivalence_interval": [
+            0.5046321112303358,
+            0.5062778654367607
+          ],
+          "equivalence_level": 0.05,
+          "state": "INDETERMINATE",
+          "test_examples": 1000000,
+          "tost_pvalue_h0_at_or_above_upper": 0.8188641611926375,
+          "tost_pvalue_h0_at_or_below_lower": 2.2008725477762487e-97
+        },
+        {
+          "accuracy": 0.500049,
+          "band": [
+            0.495,
+            0.505
+          ],
+          "correct": 500049,
+          "departure_interval": [
+            0.4987605875818595,
+            0.5013374119517426
+          ],
+          "departure_level_per_side": 0.005,
+          "departure_pvalue_above_band": 1.0,
+          "departure_pvalue_below_band": 1.0,
+          "equivalence_interval": [
+            0.4992260738486315,
+            0.5008719259417787
+          ],
+          "equivalence_level": 0.05,
+          "state": "EQUIVALENT",
+          "test_examples": 1000000,
+          "tost_pvalue_h0_at_or_above_upper": 2.0554861101281016e-23,
+          "tost_pvalue_h0_at_or_below_lower": 2.840554904098722e-24
+        }
+      ]
+    },
+    "replicates": [
+      {
+        "accuracy_difference": -0.417424,
+        "baseline_accuracy": 0.918209,
+        "baseline_correct": 918209,
+        "baseline_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 478219,
+              "rows": 499897,
+              "true_negative_rate": 0.9566350668237656
+            },
+            "label_1": {
+              "correct": 439990,
+              "rows": 500103,
+              "true_positive_rate": 0.8797987614551402
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_01_baseline.npy",
+          "sha256": "bf4a6a7f84af4c4539f87932cba13b61e697f844d8502686d24ddb1c753fbc4d",
+          "shape": [
+            1000000
+          ]
+        },
+        "baseline_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+          "checkpoint_sha256": "1f9312d7f3050190e60f477b2317cb82209c3cecec962c842de51ad7ac2b2037",
+          "comparison_round": 5,
+          "completed_steps": 50,
+          "condition": "baseline",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": 8,
+            "best_val_acc": 0.5085740089416504,
+            "executed_steps": 50,
+            "rounds_max_val_acc": [
+              0.9184899926185608,
+              0.7738469839096069,
+              0.6046149730682373,
+              0.5085740089416504,
+              0.5012649893760681
+            ],
+            "rounds_trained": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 9,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "1f9312d7f3050190e60f477b2317cb82209c3cecec962c842de51ad7ac2b2037",
+                "epoch_checkpoint_sha256": [
+                  "451527095b64da7c1e93f79af968899cad031919880a672294a4b77d919ff5ff",
+                  "6c721e8754d0b5a66ca3116fc65c46a4648810c8f98262af10236cf4747c93d9",
+                  "6be2a5e4a8fd7811310c6c19324d3870cfc8859be68075920b3208339b8bf889",
+                  "2ba26f7f275e5875f21e06c9570a67cd83bc6b8297a7bcc2af33518dac607a8a",
+                  "71535dfd149326cba0b04a1226be00bcc8b56f7052828c56c8c9434cd91a5146",
+                  "dd98369aa9708513620acb2b3a86bc3cac7eec98f4012672cdaab4d7c894c9e3",
+                  "21fd5cc9ae705138745a3fc0cc66d2e42212acdd5a21d985ad9516b6fe12bc43",
+                  "a680cd1d1a1e783614e22bb4a40d552205c3135c322f56a899e9d82cc7a5c644",
+                  "d15be43efa39dbd46683be6fbc832d397659ab3d11b316723ead9ff20bd16c67",
+                  "1f9312d7f3050190e60f477b2317cb82209c3cecec962c842de51ad7ac2b2037"
+                ],
+                "max_val_acc": 0.9184899926185608,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.9184899926185608,
+                "selected_val_loss": 0.06359435617923737,
+                "stage_round": 5
+              },
+              {
+                "checkpoint": "stage_r06/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "329663d427cf046fce1f4ea56130db986252715a4a3e1509cef943890551f06e",
+                "epoch_checkpoint_sha256": [
+                  "3cddb27fd2a3875042d18eef0e3d5d490ddf9a3ab37d56b7c866237ce4fb8a05",
+                  "d6287bcf55e8fda79e84ebef66a2c28f6ce33c1124c6f7b3ed6a117193fc5c4f",
+                  "ac2e3b81328a90a8a3b4b40ac693e3594ea4b86184927500ce8d941812b2eabb",
+                  "64363812888c9ad5349cfa6af15c6a389c59ab5d77a107dc80bd479f520b1dee",
+                  "cb00eaaf208d2d0e5e9910e1be0dc7f91e6f6d236b7eb0609d85be9ef3baffe4",
+                  "1ad42e93807518d8ac66340af35b43b972b99605b9377596af42c2cfd56c547c",
+                  "cbb75ed35fa4295e45314bffb73cd67d4f200b307d4622ef3733ca8dc5becfe1",
+                  "1c5d92064febc2642889e0be04b236e38764c93158509471c1e06dff873ac01d",
+                  "978c6ac58144200750eec867c3a0d568495039f9091a78af793f23fa8f016623",
+                  "329663d427cf046fce1f4ea56130db986252715a4a3e1509cef943890551f06e"
+                ],
+                "max_val_acc": 0.7738469839096069,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.7738469839096069,
+                "selected_val_loss": 0.1551334708929062,
+                "stage_round": 6
+              },
+              {
+                "checkpoint": "stage_r07/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "ef4f48b3c994d46fb6f4c0a0641ddada27b8488b1f6ad95058acdaeb32b3ad96",
+                "epoch_checkpoint_sha256": [
+                  "6f48f6d276e5ef035e969ea6c7248be94c6a70fdcf9b7656b596d6353a56d4d4",
+                  "6415fd31bf0e715209c8ca05dff33a99884751f88840f26530f0693bdb393635",
+                  "9183b70d02526ac69d437666c02b96a7e7e34dc6e827fd01f2a210ba47cb8230",
+                  "a7dfaf246716063085f3d68be6f2bbc155bf17d373c41b9d70c899dc4495dd63",
+                  "bea7e21c9f325041794c8fc9937edb9f70cde8d705531e40afce290f1f3f8805",
+                  "45c7e5b2b349941e0f4007cd5dfa270ed7bb1f39d654a8f80892c51465711e13",
+                  "6b05e1bac1a71f0fa5d24e657fd5e214ccef6b63d70ad7409378d374411a0c3c",
+                  "f4c32ecf40f5b59a39381ff1ed1838fa178941756f44950b9fef6b0066ddb535",
+                  "7565db1ba6268bc8563ee1dae53594e9961c6e891e1f8f41f56ad014cb5ecea7",
+                  "ef4f48b3c994d46fb6f4c0a0641ddada27b8488b1f6ad95058acdaeb32b3ad96"
+                ],
+                "max_val_acc": 0.6046149730682373,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.6046149730682373,
+                "selected_val_loss": 0.2341456264257431,
+                "stage_round": 7
+              },
+              {
+                "checkpoint": "stage_r08/checkpoint_epoch_006.keras",
+                "checkpoint_sha256": "d416a870a83b5d98c83bbde52e67fa5f53bc160d5514c9aa7a704e8ac028208c",
+                "epoch_checkpoint_sha256": [
+                  "557631a5f3790b21e1989fc059a2c8cac3e4b017fc1622e0d513627cf68cc2f7",
+                  "64acb4eeb69371884f82aa8827f16d1dfb404d763fcf0c7e39e8ecdb4724feac",
+                  "fd556500dae7807697f706f2b16a7e64c19de13a3d67d557fd3479918814e8aa",
+                  "c4eaea127de752b8024a1cf6d9f8cd7d9ae1b08c233141bde63078feed537a84",
+                  "3674961353ce08ae9d8c85ccdb0c53ea08387a07a75250c6aba09805de0f9b3b",
+                  "d416a870a83b5d98c83bbde52e67fa5f53bc160d5514c9aa7a704e8ac028208c",
+                  "0256201cdc84f2c4ed211215542dd79c079b78bc6d55b515de98907b86f837fc",
+                  "5dd97630d4f4a7da45ec15c1a35992c8506d58fbe82da1ed841337d201a4c16e",
+                  "b88cc8cd120bd7d14bb5fb6f0bd9d4394615b584793d68c5d9a3f22a8af527c6",
+                  "e22a245d7d78ddea5641fd4ac4ba16582cc7d61864d75d60e588ebe0da0d5207"
+                ],
+                "max_val_acc": 0.5085740089416504,
+                "passed": true,
+                "selected_epoch": 6,
+                "selected_val_acc": 0.5085740089416504,
+                "selected_val_loss": 0.2501683235168457,
+                "stage_round": 8
+              },
+              {
+                "checkpoint": "stage_r09/checkpoint_epoch_003.keras",
+                "checkpoint_sha256": "2267c062fdad9b18fd7809003760de531d5da5f02d3e13dd545afcc2783befe4",
+                "epoch_checkpoint_sha256": [
+                  "a4c4cc76352fd51527771cd21298e9a5c6428400f083cd9d72ded53db564059a",
+                  "e359cd6b5a48b4b2113d1da8c3bf1235142a89d422965ace3ec000588e775d1c",
+                  "2267c062fdad9b18fd7809003760de531d5da5f02d3e13dd545afcc2783befe4",
+                  "7f6f2f5f2691733328965a6652c9e49c2493652adc333d73d423bf94172acbdf",
+                  "bc95ac7c2783eecaf6cb69715669121cb4e780701b2093ce7ca1e062c6af1fd9",
+                  "dddf88e98619e6c5abce558c36908d71a9fec171a72c528c8f77cf6dde9474b8",
+                  "b1d5c47451462be6dad729c56d9d197757245bc8122ba096b9be50bf6eea361f",
+                  "9cb91d446790b2a53ae0751a0b71f0c6d3c6d8bb8c467324186f82e9132d5124",
+                  "d0969f4644c91ee5df53f1c4e6e407e2768b2a84853111f39aac1369f7143200",
+                  "2593674e336149bf6f6e6bbedff7c57d313699ca5d72717975ef4ccaf324a0b7"
+                ],
+                "max_val_acc": 0.5012649893760681,
+                "passed": false,
+                "selected_epoch": 3,
+                "selected_val_acc": 0.49935901165008545,
+                "selected_val_loss": 0.2501143515110016,
+                "stage_round": 9
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "d2ae8dd17823eaaed1aaf9dc619fa0f9ff937fc96a38b41a3c94acb7e7919d58",
+          "replicate": 1,
+          "retries": [],
+          "round_train_digests": [
+            "2b8c56ce37a1bc96e29743aec0f3c2740fc16e75e5578974d96bac72a7d06e8f",
+            "512dd44e0d34c4dd4989b477f29c7e32a4f5566ac9b858af10e4369e73ed83e7",
+            "3f2696b1bc6792f3bf0ec43be3bf49138992b83f87a24b8ae8b2b996ffa6246f",
+            "691c34717fbb97b8eafa2ec0ed76e76dc34bbaab75b5ef67a96e9b147c2e09c4",
+            "b88a6565c7db7f3adebb952642c0b87db680c5522a2b92bf3efdeeee4b6bcc59"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 3757552657,
+          "selected_epoch": 10,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.06359435617923737,
+          "selection_partition": "validation (per round)",
+          "train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "mcnemar_b": 46283,
+        "mcnemar_c": 463707,
+        "mcnemar_one_sided_pvalue": 0.0,
+        "mcnemar_pvalue": 0.0,
+        "perturbation_record": {
+          "audit_seed": 0,
+          "condition": "perturbed",
+          "files": {
+            "indices": {
+              "dtype": "<i8",
+              "file": "replicate_01_indices.npy",
+              "sha256": "805490650eac89ded9539692a02d2ca23c09ce97a2c1c5acf01f929b81f517aa",
+              "shape": [
+                50000000
+              ]
+            }
+          },
+          "kind": "permutation_indices",
+          "perturbation": "label_shuffle",
+          "perturbed_train_digest": "04566b3176e652a36869262e52fbab4a466a3264faa8052038a4438aecaf0f99",
+          "replicate": 1,
+          "schema_version": "d4-perturbation-3",
+          "seed": 3757552657,
+          "source_label_digest": "7fcb49ff77bb6f73d7092ff6502e06b03bd278391b3bd69c7d87e05d27364cba",
+          "source_train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e"
+        },
+        "perturbed_accuracy": 0.500785,
+        "perturbed_correct": 500785,
+        "perturbed_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 181171,
+              "rows": 499897,
+              "true_negative_rate": 0.3624166578315133
+            },
+            "label_1": {
+              "correct": 319614,
+              "rows": 500103,
+              "true_positive_rate": 0.6390963461526925
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_01_perturbed.npy",
+          "sha256": "d8d74b7928ba35805c5e6d04961f404dd6e868dbbba1850997477d422efb6ba9",
+          "shape": [
+            1000000
+          ]
+        },
+        "perturbed_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+          "checkpoint_sha256": "536e63a8cf95ac9889ae638ba8ebb29d280d5e754f01d5ba678259b92ebcb6bc",
+          "comparison_round": 5,
+          "completed_steps": 10,
+          "condition": "perturbed",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": null,
+            "best_val_acc": null,
+            "executed_steps": 10,
+            "rounds_max_val_acc": [
+              0.5048360228538513
+            ],
+            "rounds_trained": [
+              5
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 5,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "536e63a8cf95ac9889ae638ba8ebb29d280d5e754f01d5ba678259b92ebcb6bc",
+                "epoch_checkpoint_sha256": [
+                  "2d98d4eb1d96203103e22496eaeeef233169ead68c4121745f09592cd3fcd6ca",
+                  "9c9ae168ddff1932ad1e77a033c52d62c5e0473981cc0abc32656ce00b0069af",
+                  "faf3e70740d3807b8531bf323e57a4448f307d770123344095bc1afe220ecfea",
+                  "b3f57f2dc05d1eeba298a347b66e32595ae88e30d3d881ed15751fc77d08e4fc",
+                  "721f151ae9d097df27151247db5383c8a8f942badb9f1860d86b4fb5b5e8cfe0",
+                  "3299f398eb9b4012abe5b7b521c30e75171525ce72bafa43b2e83760954c7aba",
+                  "9b013f993164c09ba210332dd549f0b0e4f5a775ef729a51954378ed393107c2",
+                  "a39bf6e5cf5df53c74bfe3f4b9f558e24e7801ed8e29fec4a0defe3e2fa2972c",
+                  "8b289e544be0aacd48cdfba9cff3780001b836263e1ecd47aaaee4acf8040c4c",
+                  "536e63a8cf95ac9889ae638ba8ebb29d280d5e754f01d5ba678259b92ebcb6bc"
+                ],
+                "max_val_acc": 0.5048360228538513,
+                "passed": false,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.5002139806747437,
+                "selected_val_loss": 0.25002363324165344,
+                "stage_round": 5
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "c76e327922e6269a45728ce9bf2dd0186ed847eb762146cc56baf33a8c24e92a",
+          "replicate": 1,
+          "retries": [],
+          "round_train_digests": [
+            "ba88e33824e65b2b30bf5147dd12b655dfbee2b4d497dc09daeae375a23b649e",
+            "9c83690969be27c47145de2993a210f6d792a87ef539379aaad6465d61a0063e",
+            "1de0f9e67dbf647271fdcc531a92ae611ce38469d521e31635ac2c733878524b",
+            "fabe0a81a80e36c753e8e4102793be0ffebe5ec91be39c6a486cd8e20d55892c",
+            "b25d6a5b0e002de8bcc7ca5731e3ce97abf01d5af95cc7bd636e955880ba8954"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 3757552657,
+          "selected_epoch": 10,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.25002363324165344,
+          "selection_partition": "validation (per round)",
+          "train_digest": "04566b3176e652a36869262e52fbab4a466a3264faa8052038a4438aecaf0f99",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "replicate": 1,
+        "seed": 3757552657,
+        "test_examples": 1000000
+      },
+      {
+        "accuracy_difference": -0.412616,
+        "baseline_accuracy": 0.917995,
+        "baseline_correct": 917995,
+        "baseline_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 477360,
+              "rows": 499897,
+              "true_negative_rate": 0.9549167128428456
+            },
+            "label_1": {
+              "correct": 440635,
+              "rows": 500103,
+              "true_positive_rate": 0.8810884957698714
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_02_baseline.npy",
+          "sha256": "0695ec2931e968c224aeb9facb47182679025cc48cadf6bca375c5a81c049f41",
+          "shape": [
+            1000000
+          ]
+        },
+        "baseline_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+          "checkpoint_sha256": "4ab0b0a6a2aad4cf72eb35e4b76aeef722af34e9b4a9e6e31559e3f753e35ee3",
+          "comparison_round": 5,
+          "completed_steps": 50,
+          "condition": "baseline",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": 8,
+            "best_val_acc": 0.5104529857635498,
+            "executed_steps": 50,
+            "rounds_max_val_acc": [
+              0.9184769988059998,
+              0.7837550044059753,
+              0.6117630004882812,
+              0.5104529857635498,
+              0.5008130073547363
+            ],
+            "rounds_trained": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 9,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "4ab0b0a6a2aad4cf72eb35e4b76aeef722af34e9b4a9e6e31559e3f753e35ee3",
+                "epoch_checkpoint_sha256": [
+                  "1c716c0801313a08ee7b9c813ee9570dd306757a5623338148b631a008fbb398",
+                  "a0e24a82e50001c2a4cc595c4ba84a9cf90aa3fdfa6c897e9581ffd547dab406",
+                  "ce3e66d257c69da51ad89bd8f50e908fc1791cce2f5c2fad30c5cf360ed99889",
+                  "13a94df324715e399e7cae4703c0e2259b549d47bbf1e4f97d935f19797c9941",
+                  "d5c182969a60ada0565156dec5e408382fb7a83673e000e78e332accd104659f",
+                  "f2f2acdb5246cc9914cbdea0d25f4716fa4efe70fa67538c6117448e17cdc35a",
+                  "99fb81db97c7e81c1d153ea6298d3574cf9e5eab2bab2e23c7798837912b2fbf",
+                  "ee266211a3eda3b513714f6fe0b64b4728db29e0f144ed0dd8acc58c07d408d3",
+                  "80edacf9dcce284b4e14f76065ec99f47b4d0f89119c482174dd729779bab4c6",
+                  "4ab0b0a6a2aad4cf72eb35e4b76aeef722af34e9b4a9e6e31559e3f753e35ee3"
+                ],
+                "max_val_acc": 0.9184769988059998,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.9184769988059998,
+                "selected_val_loss": 0.06372807919979095,
+                "stage_round": 5
+              },
+              {
+                "checkpoint": "stage_r06/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "dd8882730604f71f075b78a61633e54f49862e80adf48f4e99f6799610dd0f15",
+                "epoch_checkpoint_sha256": [
+                  "0c176575ad0a7436f892b031d1891ce070b97b12bedd1aa72536ec829344af61",
+                  "0c7cb34142f0a2a55e346e472a3b938df85049e9ebbc9f5d6916772bdf9d68ae",
+                  "552db3d835dcdbc87720929dd70ebc11c60d41d6dbe326260004b5175fef4b1e",
+                  "9ae0c7b86e1bcb77bbed3966da9a1ee53c41b5e1290ab2637335bb1b36ee6e10",
+                  "c565730259a79b997912802091c24204c7e09e3445eaf41356ee6c4bf6fd99ae",
+                  "2a3332c3dea9a2d0f221eff77263f5ce1e2835f69719780cbe52211290ecbd1e",
+                  "901c4547096a4e7ec8e18425d8dd045e017e3b16116f10c81722f10de7408e89",
+                  "42374a403f608fd4346342ac2a693e5e9f556c3e29eea19c63ac50411b4b397e",
+                  "379dc290f8ac985fe95fcdc96d8f41a107f4d1807e31af4f809e2a6a47c8da38",
+                  "dd8882730604f71f075b78a61633e54f49862e80adf48f4e99f6799610dd0f15"
+                ],
+                "max_val_acc": 0.7837550044059753,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.7837550044059753,
+                "selected_val_loss": 0.15009751915931702,
+                "stage_round": 6
+              },
+              {
+                "checkpoint": "stage_r07/checkpoint_epoch_009.keras",
+                "checkpoint_sha256": "745c7a2b738140a62edfc14170b67ed3414a83ce563e9e9ef1103b530ee9dd22",
+                "epoch_checkpoint_sha256": [
+                  "4aa9147e186080c908e7b75644e05be561f8d1337d0daa047357b6b2c8553c0f",
+                  "b806f0890881d453c2052230152d51e6202cf8a2f16209413175541b2b68340d",
+                  "606fc072e24f5daa9c309e708af3e724a4e63726eecbe4bf9d45a28233b7c038",
+                  "d4f07a78efaacc9b00a3e3032eee5eaa080aea80bf95923782234b9bf55e3c6f",
+                  "68f279f43e2b98073aacfb90168961007ecf66762881b8c7864b61633bc6a4bc",
+                  "b62fbec290a75487ae4ed3e2e57632b346bfb807d5d152dee8f12eabdce9f776",
+                  "110922c6dbb889d3384362cae7e81212345e67703e4f6cdbafca739ff0080604",
+                  "cbe0c0d59733b52ad4f54366a9acc4b0dd6e5e6dea0d15789688396e0a90c215",
+                  "745c7a2b738140a62edfc14170b67ed3414a83ce563e9e9ef1103b530ee9dd22",
+                  "8df8eb42c70ed3d0583d255431d5a85fe93055d72c1a4cd1b25778af51739a00"
+                ],
+                "max_val_acc": 0.6117630004882812,
+                "passed": true,
+                "selected_epoch": 9,
+                "selected_val_acc": 0.6117630004882812,
+                "selected_val_loss": 0.232469379901886,
+                "stage_round": 7
+              },
+              {
+                "checkpoint": "stage_r08/checkpoint_epoch_005.keras",
+                "checkpoint_sha256": "5757f006af65db483dec8869916771d6255131335b3c3bf4916d65914c264307",
+                "epoch_checkpoint_sha256": [
+                  "b96c951b98dc6732bf2b70a0039ab0142cd38fed9dded7a1893bf2a5b61b8b1a",
+                  "eb89a044eb33e8f55116768dfe8e7b7362e1dea1d3ec7ddb77cb86fa5194ce5e",
+                  "64cd0be7cc63df6e84b96a261e40d25686b04e19a0739150d965befb407888cc",
+                  "146e5d2f19083c46b9e129917aaab7c2a0601c134353cf7cece415312a760f8c",
+                  "5757f006af65db483dec8869916771d6255131335b3c3bf4916d65914c264307",
+                  "c7512d7bbf7027379dbfa35cebac67f7eb61f29a80e94103dce9813d392552d9",
+                  "b579d1bbef1d07b382bcd081a11aa72614dbc96016573b81096a56786481cce6",
+                  "b4ecaa66ee6fa54a42d92028c97a4ea98abe2e101e08763fee41d21fe444db6b",
+                  "c03991cee07d0dd317bd683f0344ba490ccd532d9c6acb81b206c9bf65ca639c",
+                  "a7fa44d37f5b4ba1c7342e2f9dd9a126991134adc35dfd1f2fe303aa082698a3"
+                ],
+                "max_val_acc": 0.5104529857635498,
+                "passed": true,
+                "selected_epoch": 5,
+                "selected_val_acc": 0.5098310112953186,
+                "selected_val_loss": 0.2501685321331024,
+                "stage_round": 8
+              },
+              {
+                "checkpoint": "stage_r09/checkpoint_epoch_004.keras",
+                "checkpoint_sha256": "240cf3023c0d2cfc90bd4b37efb9d6306f1d305f685d2ed7d28169a08184aa1a",
+                "epoch_checkpoint_sha256": [
+                  "99928afc4576baf6f70de5032b7c2e26720f832a330b69353ec3c7e62c2e9d4e",
+                  "b48d782d151ba0115b6013a35ecc3d3bd72b2e20417a6761cb826e4a2648a5b2",
+                  "f5390d3c68a07649625fc5d1ed1fbe71b5a0cbab5a9bfb60141d8973eeeec16a",
+                  "240cf3023c0d2cfc90bd4b37efb9d6306f1d305f685d2ed7d28169a08184aa1a",
+                  "134966e34c14f087a20f8ab5befc31d2839217ed5898efd62e807a8beda0a833",
+                  "b3f6ba45872eb6a6787cf651fea0b4312605a0e76d230e4901ada160d7ca8fef",
+                  "73f5bbe7b647fb73f32f620ea7afb1e49f38aea0ee0dc8b98e1d66d8e9365369",
+                  "3a6a377d282445e737463fc6e5488175368e6fb9014650e8ce8f889d30c94b24",
+                  "bddf76be945b8f9ac2d7b1e999c0d58b30faccaad0a37dfbd219c7d18501a228",
+                  "4750cf96a3b11aa974fa3ba8e44b9818ae6744aca6025cc5ffcb5f324f3cbc34"
+                ],
+                "max_val_acc": 0.5008130073547363,
+                "passed": false,
+                "selected_epoch": 4,
+                "selected_val_acc": 0.49916699528694153,
+                "selected_val_loss": 0.25014728307724,
+                "stage_round": 9
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "290c8c0f959f6bb363aca8fc17f1b5f2b6ac7937b86e57e6246ac1827695b41c",
+          "replicate": 2,
+          "retries": [],
+          "round_train_digests": [
+            "2b8c56ce37a1bc96e29743aec0f3c2740fc16e75e5578974d96bac72a7d06e8f",
+            "512dd44e0d34c4dd4989b477f29c7e32a4f5566ac9b858af10e4369e73ed83e7",
+            "3f2696b1bc6792f3bf0ec43be3bf49138992b83f87a24b8ae8b2b996ffa6246f",
+            "691c34717fbb97b8eafa2ec0ed76e76dc34bbaab75b5ef67a96e9b147c2e09c4",
+            "b88a6565c7db7f3adebb952642c0b87db680c5522a2b92bf3efdeeee4b6bcc59"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 673228719,
+          "selected_epoch": 10,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.06372807919979095,
+          "selection_partition": "validation (per round)",
+          "train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "mcnemar_b": 35533,
+        "mcnemar_c": 448149,
+        "mcnemar_one_sided_pvalue": 0.0,
+        "mcnemar_pvalue": 0.0,
+        "perturbation_record": {
+          "audit_seed": 0,
+          "condition": "perturbed",
+          "files": {
+            "indices": {
+              "dtype": "<i8",
+              "file": "replicate_02_indices.npy",
+              "sha256": "c8f9827a176c075fc5c225196fd5606e78adf9da59dae5e356b8fa68fd633d29",
+              "shape": [
+                50000000
+              ]
+            }
+          },
+          "kind": "permutation_indices",
+          "perturbation": "label_shuffle",
+          "perturbed_train_digest": "a7815dc421a3c213b2a6c275aab99b93ed5a0c602124f4b555f962707ef94269",
+          "replicate": 2,
+          "schema_version": "d4-perturbation-3",
+          "seed": 673228719,
+          "source_label_digest": "7fcb49ff77bb6f73d7092ff6502e06b03bd278391b3bd69c7d87e05d27364cba",
+          "source_train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e"
+        },
+        "perturbed_accuracy": 0.505379,
+        "perturbed_correct": 505379,
+        "perturbed_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 323303,
+              "rows": 499897,
+              "true_negative_rate": 0.6467392282810259
+            },
+            "label_1": {
+              "correct": 182076,
+              "rows": 500103,
+              "true_positive_rate": 0.36407700013797156
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_02_perturbed.npy",
+          "sha256": "abd35bf799a3e4e125bfd7a9f37d4f7ae86b3d07f509179d881f17d261f2a4af",
+          "shape": [
+            1000000
+          ]
+        },
+        "perturbed_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_007.keras",
+          "checkpoint_sha256": "b96c4f8bdae3a33f8f1d9d9e2796bf286a0f7807b53aeaba70e50e0e5c1a5408",
+          "comparison_round": 5,
+          "completed_steps": 20,
+          "condition": "perturbed",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": 5,
+            "best_val_acc": 0.5060949921607971,
+            "executed_steps": 20,
+            "rounds_max_val_acc": [
+              0.5060949921607971,
+              0.5022460222244263
+            ],
+            "rounds_trained": [
+              5,
+              6
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 6,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_007.keras",
+                "checkpoint_sha256": "b96c4f8bdae3a33f8f1d9d9e2796bf286a0f7807b53aeaba70e50e0e5c1a5408",
+                "epoch_checkpoint_sha256": [
+                  "dbd4b511f77424ac5b86899d7c234a830c79ed4864b357df54773c05c66152ec",
+                  "fe976e9ac8ca808caadd9118dd86e8224e4a41ad00f0309c4755aab3abf18431",
+                  "df3a6108793978c786744ab2ad6bdd9855958add567b1047571850dca10530e4",
+                  "b664f8c1f6a7f13619446a8a3d1b89cedb94168d676147eec2e6a37c4a58a3ff",
+                  "47ccd172e01441d845bfea259ac67f8a4e7735498e4a6ac1ff7e3530f42500bc",
+                  "0360034db1a060cbd05dc99c4ea4f5b78a283d3b2cb50dd06b323222d5ffb6fe",
+                  "b96c4f8bdae3a33f8f1d9d9e2796bf286a0f7807b53aeaba70e50e0e5c1a5408",
+                  "f5d6585c7c81bf3051c375f912f86eae3ca915c34f91dbefbcb1bc43e7832ee7",
+                  "f49e0ed8584f2358b3dfb822972e0c5744c3b2659956191d243d77ad9751f8bf",
+                  "077eb5ad5347c8f52c15929e1653a8b22a8afe65ce44e7e9281fe69355322551"
+                ],
+                "max_val_acc": 0.5060949921607971,
+                "passed": true,
+                "selected_epoch": 7,
+                "selected_val_acc": 0.5060949921607971,
+                "selected_val_loss": 0.2500203847885132,
+                "stage_round": 5
+              },
+              {
+                "checkpoint": "stage_r06/checkpoint_epoch_008.keras",
+                "checkpoint_sha256": "2c053e2a511060bdb8d8a71a24ff94c0ffeb57c66c38b4003f3cd5249f7cc792",
+                "epoch_checkpoint_sha256": [
+                  "fe5a85674f9f370edaaf5a87c5ab230d636ab4ccd7844988154abfde6143c9d6",
+                  "8b1aecb3e35c80bd88f07cef09ba6ec5eb955735396246c36b08cfcb22c8eb53",
+                  "a34933acdede34b486146f3a7058764ba3ee065822f5453d66c68a7687fbc27f",
+                  "c6aa125786d1cf2ed64115cda6e8c1c108fee130ebcb551ad7fbd0ce74777f0f",
+                  "88a3e0af526587346e386e6b4cc863b379f61affb323544924808e754f039c8b",
+                  "6f8bbf99db4360d2868a59f796d69d7d3f4117a67edf3e84a92abd436017a740",
+                  "f6d22efc4d9268c403b1d56dccd5ad7a10996d3efe6ac95f34d750b73d7bcd84",
+                  "2c053e2a511060bdb8d8a71a24ff94c0ffeb57c66c38b4003f3cd5249f7cc792",
+                  "ea6b0cc072dcbc62c4b73eab914f9080854788d9a7f9a514cabb46eab47b245a",
+                  "e53b5a5298065d5c613f2724a1f2c0bf7899232cea940d45cd97f08908844b0c"
+                ],
+                "max_val_acc": 0.5022460222244263,
+                "passed": false,
+                "selected_epoch": 8,
+                "selected_val_acc": 0.5018150210380554,
+                "selected_val_loss": 0.25001639127731323,
+                "stage_round": 6
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "975c3fcdc0cb3d0227b89551435636cd7a7ea7732f9e831171f1a4178b530848",
+          "replicate": 2,
+          "retries": [],
+          "round_train_digests": [
+            "d34474cb08e397910127aa6542c32f7cb442e25b550323caa2fc6c8618386f14",
+            "fb676e446cc67ea8b1a129a763e79b10c1daf1589675c945a2f8f2ed99a9d27d",
+            "90c727278bafc8a3ee6a479354b4f617409c67a767648b77852e4b32bf37bec6",
+            "39ff9f2d3255a8ef96a846c71429fde4acf0f673e887a94cf5ba0b0576d74dff",
+            "f741f305614ea28af5ad70d9cf9ab0aafcf132a11da7016e0fd871f03551cb05"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 673228719,
+          "selected_epoch": 7,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.2500203847885132,
+          "selection_partition": "validation (per round)",
+          "train_digest": "a7815dc421a3c213b2a6c275aab99b93ed5a0c602124f4b555f962707ef94269",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "replicate": 2,
+        "seed": 673228719,
+        "test_examples": 1000000
+      },
+      {
+        "accuracy_difference": -0.41331699999999993,
+        "baseline_accuracy": 0.918226,
+        "baseline_correct": 918226,
+        "baseline_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 477252,
+              "rows": 499897,
+              "true_negative_rate": 0.9547006683376775
+            },
+            "label_1": {
+              "correct": 440974,
+              "rows": 500103,
+              "true_positive_rate": 0.8817663561306371
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_03_baseline.npy",
+          "sha256": "8b7c807ef681cbf41125f3220a5f45a943ca59d8b6c5a5a60ed7aa5b442e1a7a",
+          "shape": [
+            1000000
+          ]
+        },
+        "baseline_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+          "checkpoint_sha256": "ba5a9ab6167521d235835244ebab6f7afc08f43bd2bd6cb0f05417b8e0ada23e",
+          "comparison_round": 5,
+          "completed_steps": 50,
+          "condition": "baseline",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": 8,
+            "best_val_acc": 0.5096359848976135,
+            "executed_steps": 50,
+            "rounds_max_val_acc": [
+              0.9186310172080994,
+              0.7838190197944641,
+              0.6088520288467407,
+              0.5096359848976135,
+              0.5009890198707581
+            ],
+            "rounds_trained": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 9,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "ba5a9ab6167521d235835244ebab6f7afc08f43bd2bd6cb0f05417b8e0ada23e",
+                "epoch_checkpoint_sha256": [
+                  "8a1e5f97afa00121460b1e85c688a7c7e690f568e251330ede284174321deefc",
+                  "79beb4316420b2a82d530abdcdf03b425d1ad8ac7a1f1b6c89ec70dc3ea6d1e9",
+                  "23210197e9c2dcffbb692f3704a09b272186057d6eef831ff39a1a683db35bb3",
+                  "fa75ceda782a989704f3f399e8f13703cb6f84b1982bebe9403eee90c1a54f99",
+                  "158664bf7ebbf710e96a5b38051c85848cf730c63e82b0b5afe17a9a35ce2bd8",
+                  "165829f24a6850b4d2c1a117b27db24ade048c64f56b0a66546596e491cd58a8",
+                  "ceed0611c7c7e4be6dadf9351e70ed403288fb8af8a42625c9be5303fa18c962",
+                  "a36580131f981fad4f696692c1b5f4dea274c30a2e067f521f8d37f6499f2903",
+                  "a38affc780ea7dee00f7ae6f0704ed80c37db3e026e59ae0cc2ed3d931465e55",
+                  "ba5a9ab6167521d235835244ebab6f7afc08f43bd2bd6cb0f05417b8e0ada23e"
+                ],
+                "max_val_acc": 0.9186310172080994,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.9186310172080994,
+                "selected_val_loss": 0.0636252909898758,
+                "stage_round": 5
+              },
+              {
+                "checkpoint": "stage_r06/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "d9956129d4b893863e50d75b9a245b6c3821f03fffe1ceca89a20120640f8988",
+                "epoch_checkpoint_sha256": [
+                  "a13c551582786d2a6335a37829940c8e78a2b11ddbde7d62a5dddf7be1c9e4a0",
+                  "38dbd5b4438b13d8c82dd40ef8d24ed38caa8b43f9e38d9aa33c425009d1ce3c",
+                  "7d9b5cb194c7f1f860c81994f748b97a51b407d31c58043ecd7352f5d7e77c6b",
+                  "27e5a1a84223ba10919f498ca904e0bc5cdd7ee5cfd6608f746e902fe73a8bb0",
+                  "ff44a1b3fd75e05d7b3e1fe46ca51e911afda40d66ce81c6441d6d7800659374",
+                  "c0ce3bccb339baedeb8bc731a537e2a91c09ad6a11ead5c59dbdbb2b1ea642fa",
+                  "4e0bae79d288e60d994ebf0a795b3d4b2fa29fa82a599dcff03db6036026f90b",
+                  "0de58e20eef03acca50737e4ce4c3b4ca7c9706b81990b1d3ad8d88fd5fc152c",
+                  "c26b3687a51a9a3e07625a3e64ddee3eb2482a34fb116c3221a26d64f01048e0",
+                  "d9956129d4b893863e50d75b9a245b6c3821f03fffe1ceca89a20120640f8988"
+                ],
+                "max_val_acc": 0.7838190197944641,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.7838190197944641,
+                "selected_val_loss": 0.15012967586517334,
+                "stage_round": 6
+              },
+              {
+                "checkpoint": "stage_r07/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "9cab8602bb2943390b570f3a8a65df729244881781cd949d008a582b588c7109",
+                "epoch_checkpoint_sha256": [
+                  "d6a386d933b8c9e5644cc2083231fb8d8349ec674c52bd03b35117dada3e8f5f",
+                  "3657d62ed4a07942bf14fd1e3a3ae701707d070eb826b5d9fe5d7009d4d39bae",
+                  "f2f4ffc4a8c0982a59c78a91f4d982ab220daf2d0e7094b03fee1b5cc40a6011",
+                  "aaf23d3f140ac86de33bb495bf46f9915dd6d1f017aa5d3070ffa819bbb54593",
+                  "1e1ef45d747638cff5269701dee474399b654fe4fab4bada0ce827845f9d397d",
+                  "009e421e029e4004629e5abe25e5220039411e4a9052dd880a4a558d1f683735",
+                  "33bcbb5f9cca866a38cf7bf8f2f5bc49eb2144eef8fad136e945e6eca46ca276",
+                  "0addca999c9647e29c7b87d32fe895189b67e4d3b0b8cce9340e8ba13cfa2c39",
+                  "3bfa48bacee58804b7d6cf5783cf1bf77ffed3b491c498d4c12e5758ac091afe",
+                  "9cab8602bb2943390b570f3a8a65df729244881781cd949d008a582b588c7109"
+                ],
+                "max_val_acc": 0.6088520288467407,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.6088520288467407,
+                "selected_val_loss": 0.23322513699531555,
+                "stage_round": 7
+              },
+              {
+                "checkpoint": "stage_r08/checkpoint_epoch_005.keras",
+                "checkpoint_sha256": "21d0c7ff0a929180b010a68838a85a43aa270c588c25ef7c071a4928619ddbfa",
+                "epoch_checkpoint_sha256": [
+                  "1cb5cbe8b47de735ac788bde0b2cf22875204cecf4dd0f19d2794053c3358974",
+                  "948d917a117445f7a66e5a12e6b962d339beaae78285c1e8c0790f6e09afea7d",
+                  "cb24ae4db0f7ff1d9fe7530f0cf68e1b5785f32b19dd21806cd9575d3b6c70bf",
+                  "a681a2a24b7682c6a21ce5a239773f718517a0864fa4fae3cd37ddaf61b5a536",
+                  "21d0c7ff0a929180b010a68838a85a43aa270c588c25ef7c071a4928619ddbfa",
+                  "17f9b4edea49e76ec4b8a6700013499ab8f416241fc4aec5cf9c7f2492c6f38a",
+                  "c87f3fd86abf7b1d0b4fbd96daf95aed4e5930687e80c6bb767cff1dc570d2a7",
+                  "fe6443fc6b7b9e7c2f5299d70eb273e5a3bf4f3ba09a7c32c61f7c8293afa69a",
+                  "8b5b81c983bf5c89ded91198c10b2087caadb5acecbfe17889675de9929b7a69",
+                  "ffc119b4b7b24532315879028ce45aaa5c144ba3923a6ba53196fcb11704de23"
+                ],
+                "max_val_acc": 0.5096359848976135,
+                "passed": true,
+                "selected_epoch": 5,
+                "selected_val_acc": 0.5080400109291077,
+                "selected_val_loss": 0.2501865327358246,
+                "stage_round": 8
+              },
+              {
+                "checkpoint": "stage_r09/checkpoint_epoch_003.keras",
+                "checkpoint_sha256": "48faae053c97df5937e698c998afc86b82dfab60c0f79b29a3b1ec8040c3f55a",
+                "epoch_checkpoint_sha256": [
+                  "06b2b308a6131e45862737e97a8341b9a05172c6da8b67345a2202fa1d3f8a96",
+                  "85de00d2ec610b1dea13758bcb020197b8326797c86ff66b396ec6d04b736203",
+                  "48faae053c97df5937e698c998afc86b82dfab60c0f79b29a3b1ec8040c3f55a",
+                  "ddab5c8240020bfe1cf056194654bf897aa83fa52346ad3a59f2089509c4dd04",
+                  "5b1d3d8dc6c24d2ba02d3b0ca55e21840679cce2308ae1941907455cae968681",
+                  "a53371fa4190275718ece547c6d93104732564ace42f4301f9dbe19a8296661e",
+                  "78a73b61c3b9a0a7012ccd71d5c550d1a84a1c711963c7fcdcdaa7dbc60c4e9e",
+                  "81ac336990a768ec4fe91a2ab6349350244da166ac0e03837ab46285ead6ed6d",
+                  "1a3c03b063335ef0005abb4d6add6cc472568f913b59e25cf00b4e54531ebb2b",
+                  "472134048b150dc2f8b252f41dca12a06a4f3c43773da6d5f62717548234a60c"
+                ],
+                "max_val_acc": 0.5009890198707581,
+                "passed": false,
+                "selected_epoch": 3,
+                "selected_val_acc": 0.49965900182724,
+                "selected_val_loss": 0.2501402199268341,
+                "stage_round": 9
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "733ee64d8da069ff667ee24e6fb876cf996626df72b768a603093f3730940bc6",
+          "replicate": 3,
+          "retries": [],
+          "round_train_digests": [
+            "2b8c56ce37a1bc96e29743aec0f3c2740fc16e75e5578974d96bac72a7d06e8f",
+            "512dd44e0d34c4dd4989b477f29c7e32a4f5566ac9b858af10e4369e73ed83e7",
+            "3f2696b1bc6792f3bf0ec43be3bf49138992b83f87a24b8ae8b2b996ffa6246f",
+            "691c34717fbb97b8eafa2ec0ed76e76dc34bbaab75b5ef67a96e9b147c2e09c4",
+            "b88a6565c7db7f3adebb952642c0b87db680c5522a2b92bf3efdeeee4b6bcc59"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 3241444873,
+          "selected_epoch": 10,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.0636252909898758,
+          "selection_partition": "validation (per round)",
+          "train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "mcnemar_b": 48721,
+        "mcnemar_c": 462038,
+        "mcnemar_one_sided_pvalue": 0.0,
+        "mcnemar_pvalue": 0.0,
+        "perturbation_record": {
+          "audit_seed": 0,
+          "condition": "perturbed",
+          "files": {
+            "indices": {
+              "dtype": "<i8",
+              "file": "replicate_03_indices.npy",
+              "sha256": "288e6273ccbb0595d9cabb62aecef459175dff61da2f4693e99043dbdfe2566c",
+              "shape": [
+                50000000
+              ]
+            }
+          },
+          "kind": "permutation_indices",
+          "perturbation": "label_shuffle",
+          "perturbed_train_digest": "00d055c6b0dd7d69aa4050218724520abec9ef3984ffa4ce701204bc97fc5504",
+          "replicate": 3,
+          "schema_version": "d4-perturbation-3",
+          "seed": 3241444873,
+          "source_label_digest": "7fcb49ff77bb6f73d7092ff6502e06b03bd278391b3bd69c7d87e05d27364cba",
+          "source_train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e"
+        },
+        "perturbed_accuracy": 0.504909,
+        "perturbed_correct": 504909,
+        "perturbed_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 140797,
+              "rows": 499897,
+              "true_negative_rate": 0.28165202031618514
+            },
+            "label_1": {
+              "correct": 364112,
+              "rows": 500103,
+              "true_positive_rate": 0.728074016752549
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_03_perturbed.npy",
+          "sha256": "fa0ea12ce023e3ff571dfbf346d2fe5a26a79d8d31a4428f7ee9c65f98ea6e6a",
+          "shape": [
+            1000000
+          ]
+        },
+        "perturbed_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+          "checkpoint_sha256": "f8f9425d5f2a560c65ef485058e77117ae1a289caf1e4dc1150bc88a9c88a911",
+          "comparison_round": 5,
+          "completed_steps": 20,
+          "condition": "perturbed",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": 5,
+            "best_val_acc": 0.5052779912948608,
+            "executed_steps": 20,
+            "rounds_max_val_acc": [
+              0.5052779912948608,
+              0.501039981842041
+            ],
+            "rounds_trained": [
+              5,
+              6
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 6,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+                "checkpoint_sha256": "f8f9425d5f2a560c65ef485058e77117ae1a289caf1e4dc1150bc88a9c88a911",
+                "epoch_checkpoint_sha256": [
+                  "8d3f555b62ba3d1602d031c1b22547e856cb428bb46a5a733d7af72d5496edd5",
+                  "fde53a1e0e247e51f4065b9a040e80ab2815d016c04575f9326828b4bf50b70c",
+                  "871aeab264786a41a876b444c384cc8392ce84efae42ecfada67c8b1f15aba3c",
+                  "8750a1a7d8620f368d967ff9ac67dbc5cf82a48f47c0fa4d4d0374e0558e956d",
+                  "7106050b7e24d349105fba08c269a2dc91c721363ab1e7b96e99dcc36bf670bb",
+                  "0c089cba2d1d5a15ac6268c2063b335610ec237681d417004c9c4747fa02f522",
+                  "df66c5491b12d1821776a2530bd2ab390ea990b58b3125783a0391b884237a52",
+                  "a2b8bfd15ec64dbb41d800606a675357d1642edfa649107fb12848cc1a1ba43e",
+                  "f8f9425d5f2a560c65ef485058e77117ae1a289caf1e4dc1150bc88a9c88a911",
+                  "50bcbe448f301746d665be5ba709fba15d10d7de93869199f9a902d6b57e5712"
+                ],
+                "max_val_acc": 0.5052779912948608,
+                "passed": true,
+                "selected_epoch": 9,
+                "selected_val_acc": 0.5052779912948608,
+                "selected_val_loss": 0.24998460710048676,
+                "stage_round": 5
+              },
+              {
+                "checkpoint": "stage_r06/checkpoint_epoch_004.keras",
+                "checkpoint_sha256": "ed497853b5f6e305f64df969ba76c34843b782aa8ba3db6280f1a1f1fee01ac3",
+                "epoch_checkpoint_sha256": [
+                  "1b9c882b71c2c69b81da637f75cd88c2ffe3749fe951689398511ca7b7829660",
+                  "41d9c52c89977e498d20f819eed9ba0077def98e15f0adcb737d67e456dfcafa",
+                  "5b0b19681e55d80bc1d9aa388e945993f92ffdab50d5d87d32ac3dc778861fed",
+                  "ed497853b5f6e305f64df969ba76c34843b782aa8ba3db6280f1a1f1fee01ac3",
+                  "04d4acbfa03a609f8b2136a2d3a34615c679d4fbab7cd07868c64ac6ef33a1e0",
+                  "2e7416b726803cd1f822ce0db04fa57515488716b6b4fb98b53ac1b105a1f6f3",
+                  "d16b95aed139c05ffeefbf88c17d48a49c2fa1632fd24e76bb3e05cbbb873797",
+                  "af5192967c3c52c9cf6aaad511efe650e371164f07e0232e35c6241c9feed466",
+                  "aff0c4777d98af7de3a94632d2f84b458d03d060fd19c24786fad0d1bb8c6d61",
+                  "518263eeb41004260218faa6861d69571ad4f4451c81daaf8559515050e775f4"
+                ],
+                "max_val_acc": 0.501039981842041,
+                "passed": false,
+                "selected_epoch": 4,
+                "selected_val_acc": 0.501039981842041,
+                "selected_val_loss": 0.25001490116119385,
+                "stage_round": 6
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "6f5c5c76f0dd1a50452a5b82e4d4b9861bcc749e923732c9bcb3767b8a0abee3",
+          "replicate": 3,
+          "retries": [],
+          "round_train_digests": [
+            "0c78cc38167149428cb6df20a7802d1a207f5bc45a683db443ca97644f8f0810",
+            "4c926fc65450b22a69db99749f9830829c8e0257d222b9792415c72b32e51a37",
+            "36e4d0d56eb2b0980a619eef6a846be849038da74e53dd3ecb98b614af81db67",
+            "e84ca291efd28a822a4836b861d079e62b1a77a03b13695aaf81f4b86349df60",
+            "cbad88da2756b83f5ffafb3f58837b816ab1dfb319a3af492c736ee0c1689459"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 3241444873,
+          "selected_epoch": 9,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.24998460710048676,
+          "selection_partition": "validation (per round)",
+          "train_digest": "00d055c6b0dd7d69aa4050218724520abec9ef3984ffa4ce701204bc97fc5504",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "replicate": 3,
+        "seed": 3241444873,
+        "test_examples": 1000000
+      },
+      {
+        "accuracy_difference": -0.41260600000000003,
+        "baseline_accuracy": 0.918061,
+        "baseline_correct": 918061,
+        "baseline_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 475951,
+              "rows": 499897,
+              "true_negative_rate": 0.9520981322152363
+            },
+            "label_1": {
+              "correct": 442110,
+              "rows": 500103,
+              "true_positive_rate": 0.8840378881950318
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_04_baseline.npy",
+          "sha256": "3b25e62ea69c283ae7a671485a8277ac34d72bf962fa830ae42abcf8ef38020f",
+          "shape": [
+            1000000
+          ]
+        },
+        "baseline_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+          "checkpoint_sha256": "ebe586eff45ff98d1be56341681d3b142aee1668f0aae66688e2f83afcd799f7",
+          "comparison_round": 5,
+          "completed_steps": 50,
+          "condition": "baseline",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": 8,
+            "best_val_acc": 0.5085160136222839,
+            "executed_steps": 50,
+            "rounds_max_val_acc": [
+              0.918599009513855,
+              0.7738249897956848,
+              0.6054869890213013,
+              0.5085160136222839,
+              0.5008730292320251
+            ],
+            "rounds_trained": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 9,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "ebe586eff45ff98d1be56341681d3b142aee1668f0aae66688e2f83afcd799f7",
+                "epoch_checkpoint_sha256": [
+                  "460263266dd1472aa977444015a73400e22dcc92a4c075b380f8f28e7f70ecc6",
+                  "40a02478b29dc61eb1856ba6f81da1a68967517f76856534af57c8177ad6d187",
+                  "f05218f1be6e2e37b920e6f95712b97d2fcb48bfa30ff2728369b6a3e8721b75",
+                  "8c658420a5bb5b248bdaf5233a59bc583425bc70c89cf9b4084450cd9bd4ea1e",
+                  "8843eb224261c08cb15d917dba2e72e2da0ecafbb29b75df287c2836c6aaf8e3",
+                  "bcc9ceb3d661e4bdcccbabe36ed214645d5bc702b57ed1c97fd6aba9a8f368f5",
+                  "6337016a70601bea7dfe5c09c3c551721cc1c3e700a2a8d556f78aac83e36421",
+                  "896eb2390551185b2839acdcf99d422ed1939597742801ea67eec60dd1c155c1",
+                  "8b575285cc34f12a0077ebe88280167be2ef76c4136900142f78d01714026f74",
+                  "ebe586eff45ff98d1be56341681d3b142aee1668f0aae66688e2f83afcd799f7"
+                ],
+                "max_val_acc": 0.918599009513855,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.9184579849243164,
+                "selected_val_loss": 0.06367793679237366,
+                "stage_round": 5
+              },
+              {
+                "checkpoint": "stage_r06/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "2bd5afdf7bcaf0cd5b7c8a8dc1d172fc29b693ac68711a63501c8905385316ab",
+                "epoch_checkpoint_sha256": [
+                  "0d44858e27b4e3119bc4f1adfe21354f83967b0dc4cc27b279c38db1becd966c",
+                  "db28842dff1b9c4a190bce8fb9b12a746c7195f65d9c9dbe60369dabef11f111",
+                  "dce144abe7f6715ba3cf8a61c83f0795b61ff8ba534ea143d05a1eccb00e5769",
+                  "57927345c92cdf38556ba099fc64844429c903c2434dc7f3733fa5fa62dac556",
+                  "cc1593c3a6dee430f35195caf171a25c4f5d015795a652ba120533d40811093b",
+                  "98165983b7c4c7dac32c638d5567f74bb3dbe287260f2bcf318c20437481aafa",
+                  "b6c5144af8f00c574627efd7a0fa8fa1375adbd7b8f74709f4e3613ff5ca0d84",
+                  "45b2019c3ea4d0547aec0b81e63a331f6eb005a7430a8a48886dcb36f7cf9924",
+                  "49782bd3e3644e4896698bcc1621c8070ae9f9587d70dd360986e5be6288b848",
+                  "2bd5afdf7bcaf0cd5b7c8a8dc1d172fc29b693ac68711a63501c8905385316ab"
+                ],
+                "max_val_acc": 0.7738249897956848,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.7738249897956848,
+                "selected_val_loss": 0.15537221729755402,
+                "stage_round": 6
+              },
+              {
+                "checkpoint": "stage_r07/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "58cb8d13c4e1321d370697d7dbdcecb9b2500f92dd2b8c20b78deeacb261da78",
+                "epoch_checkpoint_sha256": [
+                  "76109ffb864a68b3b67377e3685c02ba1cec2f773b2596a58a6db93c1447165e",
+                  "0b3fc17cc299137cb0d227b3cb5fe6f0dbf933bc6dc410cb9a29b2c64868ac6b",
+                  "eabb94b60f124cafc54851cd16f61747ad200f92c64c6a6a5a77821cac27400a",
+                  "1869dab1a2637d5d3ec8e0156a4b29f3ac6bf975c449f8e130dc9a183def71a1",
+                  "ca4204727f63d2e6cf3b4ec9c1fb379c8786446c63d0fcd0bb888e47631c70c8",
+                  "901e829bc16ce1ec5c0ce25613b4b27dd157e72ae4a5b61dae642b63a20e153e",
+                  "b04308569290faccc0c5d815d5045e6af81cc279e31357435207f2c0ffc4253f",
+                  "0ea79a2f9403bafb9312cec7efc672bf0f534a4dc6fb09fadfbe8a947984f974",
+                  "8945c1359c06d3eefac6e03bfb3cc5f54deb2e80470b5713b901869c19b1db53",
+                  "58cb8d13c4e1321d370697d7dbdcecb9b2500f92dd2b8c20b78deeacb261da78"
+                ],
+                "max_val_acc": 0.6054869890213013,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.6054869890213013,
+                "selected_val_loss": 0.23411720991134644,
+                "stage_round": 7
+              },
+              {
+                "checkpoint": "stage_r08/checkpoint_epoch_005.keras",
+                "checkpoint_sha256": "71e23afa617d2177cbf76cdcd5c2e0ab769ac8b8d54fa6679047a9bf3c336ade",
+                "epoch_checkpoint_sha256": [
+                  "6d312ec2ac434b8598118ee90e8eb9c3cbb69d5484d198c491465cc1d4042666",
+                  "4a92cbbe4ff0a5e929830e6d434f8cdf8fc0b87698bbaa5c903a946d4be4d1e6",
+                  "e835db2d404ceaea948635eac5ea2bba27d2aff439f0ff82999036433c488cb3",
+                  "2d9f607f7ceb121cd2bfd72942f9506e7593c355c2f8c39cc43fe2886b2f0ae6",
+                  "71e23afa617d2177cbf76cdcd5c2e0ab769ac8b8d54fa6679047a9bf3c336ade",
+                  "887e537f69e4fbad8ec6d692b77ef47e3fa2cd0e13328a09265204029752055e",
+                  "7568ea1f2f4ca0b5ef6a2b9e7c42799e9dc0dc90ae4ce7950fc212d664146ed5",
+                  "115138e6c656c6e1dffe83cbfd5ec4fc084b9e40cc49814615af5a68d330c631",
+                  "1ebb43e45ee6139e7847c38dafc00f32eaf637d601e1b6754eaa851a1842181d",
+                  "8bd352636a91aa2972d170b1f9b65d94a5ad3f53c5c218a7baa401f5614d45d7"
+                ],
+                "max_val_acc": 0.5085160136222839,
+                "passed": true,
+                "selected_epoch": 5,
+                "selected_val_acc": 0.5085160136222839,
+                "selected_val_loss": 0.25016269087791443,
+                "stage_round": 8
+              },
+              {
+                "checkpoint": "stage_r09/checkpoint_epoch_005.keras",
+                "checkpoint_sha256": "0315461887e0b6e5da49945319e17a05cd1de881f508faff445e0abc503ba5c9",
+                "epoch_checkpoint_sha256": [
+                  "e2bc5099e9a6e85f193b3337451c14246639c05b31416bb1bf5bc26bb3597429",
+                  "87625b9eb6db1ee0a6e5e3551b9af9426bbf6ec1c78ae41b8c416c15e066efca",
+                  "32e4afc47ae022d90a75867c5ce4e45e23dd8fce0ce4e7c6c17c4207d821db57",
+                  "e7795bc2468848bdc5a3f12859ea65cdb33c6632e0f719af54c688bbd1a2053b",
+                  "0315461887e0b6e5da49945319e17a05cd1de881f508faff445e0abc503ba5c9",
+                  "74970607e6afebecc132ce87ff1db7aae560a445eb29a799fadc28fca19878ce",
+                  "e755261c7a6d298c1eae214f8b506169adee0c4ae27e08bde1c4bea077a0056a",
+                  "4b0c8bf0b38a9a3fd8ea2d78efd2bd3d4d5971275b7b0aeb7eed00d63888a41e",
+                  "06d33060db26961990c665143ded9189afe9d230fe40408789e803bd46960b4d",
+                  "3e76061b4077cbf041a28482a9a3934e83b3ae9fdaf6544e4ff39e12fabd0bc8"
+                ],
+                "max_val_acc": 0.5008730292320251,
+                "passed": false,
+                "selected_epoch": 5,
+                "selected_val_acc": 0.49983900785446167,
+                "selected_val_loss": 0.25010716915130615,
+                "stage_round": 9
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "8003a0d3058228cb96586f410c1710f8dbfb4524b344ea4b5b445c5d5472995f",
+          "replicate": 4,
+          "retries": [],
+          "round_train_digests": [
+            "2b8c56ce37a1bc96e29743aec0f3c2740fc16e75e5578974d96bac72a7d06e8f",
+            "512dd44e0d34c4dd4989b477f29c7e32a4f5566ac9b858af10e4369e73ed83e7",
+            "3f2696b1bc6792f3bf0ec43be3bf49138992b83f87a24b8ae8b2b996ffa6246f",
+            "691c34717fbb97b8eafa2ec0ed76e76dc34bbaab75b5ef67a96e9b147c2e09c4",
+            "b88a6565c7db7f3adebb952642c0b87db680c5522a2b92bf3efdeeee4b6bcc59"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 3685993406,
+          "selected_epoch": 10,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.06367793679237366,
+          "selection_partition": "validation (per round)",
+          "train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "mcnemar_b": 33541,
+        "mcnemar_c": 446147,
+        "mcnemar_one_sided_pvalue": 0.0,
+        "mcnemar_pvalue": 0.0,
+        "perturbation_record": {
+          "audit_seed": 0,
+          "condition": "perturbed",
+          "files": {
+            "indices": {
+              "dtype": "<i8",
+              "file": "replicate_04_indices.npy",
+              "sha256": "ee166a10f12340f8ae5a7f8aee7e6eb9e6aa668bef729039a7ace1a5af274127",
+              "shape": [
+                50000000
+              ]
+            }
+          },
+          "kind": "permutation_indices",
+          "perturbation": "label_shuffle",
+          "perturbed_train_digest": "4dcbccc45ec4b3f5af4855fc63df010e22f70ef8731357bb8f34b7d3663689fa",
+          "replicate": 4,
+          "schema_version": "d4-perturbation-3",
+          "seed": 3685993406,
+          "source_label_digest": "7fcb49ff77bb6f73d7092ff6502e06b03bd278391b3bd69c7d87e05d27364cba",
+          "source_train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e"
+        },
+        "perturbed_accuracy": 0.505455,
+        "perturbed_correct": 505455,
+        "perturbed_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 359447,
+              "rows": 499897,
+              "true_negative_rate": 0.7190421226772715
+            },
+            "label_1": {
+              "correct": 146008,
+              "rows": 500103,
+              "true_positive_rate": 0.29195585709343874
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_04_perturbed.npy",
+          "sha256": "b9567122ef3a876d03ca785ea3a64838c824066b5742a1aeaede60e963c7d74e",
+          "shape": [
+            1000000
+          ]
+        },
+        "perturbed_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+          "checkpoint_sha256": "73049443490bfed653c310b7e2cf2b00cc9be09f2aaca7fe27e24cf259208476",
+          "comparison_round": 5,
+          "completed_steps": 20,
+          "condition": "perturbed",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": 5,
+            "best_val_acc": 0.505282998085022,
+            "executed_steps": 20,
+            "rounds_max_val_acc": [
+              0.505282998085022,
+              0.5037109851837158
+            ],
+            "rounds_trained": [
+              5,
+              6
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 6,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+                "checkpoint_sha256": "73049443490bfed653c310b7e2cf2b00cc9be09f2aaca7fe27e24cf259208476",
+                "epoch_checkpoint_sha256": [
+                  "9abe7e24848d306612391e328e3ec9645d814eecdaf9557ac73238fb09031f36",
+                  "8cdc00f81a02df4635e0360d90fcdce521565e84e43fbc56c8288feccc4da97e",
+                  "9aac19c2e53e36173956424011798f43edf610a82789ff1cd20e92731a92da44",
+                  "ac98329dc13ea1644e038f6d85949b0cec8af3b8c53a85c9c2d131c11cc7f58c",
+                  "9bc6186dcadd8c38e227822966bf337708a04ae1b8eed4bd84e41b2c508d2f5b",
+                  "b9bc4b212dcffd7ca22d1d13169308fc2b982baf1a5e544bced62d4e6a882d69",
+                  "bc20a2576fabb2b3283147627edd2dfa866471c12769d35677e19da6586e6134",
+                  "fca056895d1866a48a886e775eaa9f53df47a011ab42a8a28b133aecee3cce88",
+                  "73049443490bfed653c310b7e2cf2b00cc9be09f2aaca7fe27e24cf259208476",
+                  "55fa45ce0a41093b7b7d41f1fbe44718f8ca32dcd7a6447de44e06ad07c01987"
+                ],
+                "max_val_acc": 0.505282998085022,
+                "passed": true,
+                "selected_epoch": 9,
+                "selected_val_acc": 0.505282998085022,
+                "selected_val_loss": 0.24998034536838531,
+                "stage_round": 5
+              },
+              {
+                "checkpoint": "stage_r06/checkpoint_epoch_003.keras",
+                "checkpoint_sha256": "f520b7535e65372002f1dcda23aab8dd5c9c15e0444a8216268f6aab72335e3b",
+                "epoch_checkpoint_sha256": [
+                  "6260193b9d074b84f217971d9d42665c8ae208340b9c88fb7812db8cf219ab49",
+                  "3038163a288bcdd8c813117b456f7595600600c07f39258a5355033a17668c6c",
+                  "f520b7535e65372002f1dcda23aab8dd5c9c15e0444a8216268f6aab72335e3b",
+                  "ffe27918e00cd531e6928d80fea1ccb5a0a12516fcc213a928a830b0982f94fa",
+                  "184e57e9cc91050abd172a0d07c1adb230296306a568006449587b16450f321a",
+                  "3e4e0bd2e0126a2a5b0566e87bb044ec66202a7a7931ebdc146d5a1b70850671",
+                  "2740d200e8c084cd583ed0a4077311b83c35cec0c69eca0cb1f0aff62804def6",
+                  "c11f95b8c1c1cd5246e733b4082938e99d17ee2aa1b2f6aaa5cc1f93880ecbc6",
+                  "8dadf26b29ac9b36446a3bffd85830da7d9f8f21fb6e9ef4237a2866990a8824",
+                  "7abed522df9d9b53c65d7ab3b3eea784c8b604dfcd8d139df88d12d7db3f7aec"
+                ],
+                "max_val_acc": 0.5037109851837158,
+                "passed": false,
+                "selected_epoch": 3,
+                "selected_val_acc": 0.5037109851837158,
+                "selected_val_loss": 0.24999530613422394,
+                "stage_round": 6
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "ffea6f1097cad5a8cb672941bdeca3702af95fdedf5cdb84393dd59a72788b18",
+          "replicate": 4,
+          "retries": [],
+          "round_train_digests": [
+            "07432696312772ba4c428f2798c6a247eb9ff48d51de067a5544fc832480dd9c",
+            "10d4db394681be95d05d1a50bbe8b74f570f400b6af70448ac7f6b7c95f46cc3",
+            "5c2f12db9e2f3786291edbb7752dd977c68983412c274cb9fb21d72e94ae2adc",
+            "45fa84b2aa4d5037681e51560533015e91db0c6e03a05de4b3bf0c0060517056",
+            "ba6e5176951b061f6801bdba65e0f355f0d55f484ae847799df7528ead270d51"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 3685993406,
+          "selected_epoch": 9,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.24998034536838531,
+          "selection_partition": "validation (per round)",
+          "train_digest": "4dcbccc45ec4b3f5af4855fc63df010e22f70ef8731357bb8f34b7d3663689fa",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "replicate": 4,
+        "seed": 3685993406,
+        "test_examples": 1000000
+      },
+      {
+        "accuracy_difference": -0.418239,
+        "baseline_accuracy": 0.918288,
+        "baseline_correct": 918288,
+        "baseline_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 477786,
+              "rows": 499897,
+              "true_negative_rate": 0.9557688883910086
+            },
+            "label_1": {
+              "correct": 440502,
+              "rows": 500103,
+              "true_positive_rate": 0.8808225505545858
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_05_baseline.npy",
+          "sha256": "9ff80bf14dd63b3ffb97e35d2754b5c053acbbc410583614ffe26b4d42bc7dc3",
+          "shape": [
+            1000000
+          ]
+        },
+        "baseline_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+          "checkpoint_sha256": "b192d1fa57251737fb8712949f7ae57dc3511cd9be3eabff78e7182fa1357bb2",
+          "comparison_round": 5,
+          "completed_steps": 50,
+          "condition": "baseline",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": 8,
+            "best_val_acc": 0.5098350048065186,
+            "executed_steps": 50,
+            "rounds_max_val_acc": [
+              0.9187620282173157,
+              0.7835100293159485,
+              0.6107630133628845,
+              0.5098350048065186,
+              0.5002449750900269
+            ],
+            "rounds_trained": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 9,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "b192d1fa57251737fb8712949f7ae57dc3511cd9be3eabff78e7182fa1357bb2",
+                "epoch_checkpoint_sha256": [
+                  "41a22e0000f8ab755fb2c31dc1c428d6794461503f93945906392d873cb9ded8",
+                  "dd6294c66f5a2cb890680bb92407dc03ea54d176dde681fe534df176ebd04676",
+                  "737f3bac85c0bb88ceb24fbe9d4fbdf794989b33b2a8781bd696b7189df709e8",
+                  "bdfd270efd88e5024637b7f49d18f0e2496d03c33323b2e7ca53721ffe36a547",
+                  "df72e59ef09059f4ee9efa415bedf4a40df93547017ed2952675a4c42db5f0be",
+                  "45b99452fc6d14abbbb0f16b3a86eb3db6d4ca8245e7f4d4198033954d3ad633",
+                  "13477c12ee61aa46883548551027eb515c34327c83d2569b033aa619a11d0596",
+                  "be36e3ce28311499f7ab0fda2ad2579b577b3c565d919dede2fc8f6492a652fb",
+                  "e8d42cdc602529d9d2dfd33440b1a8e7e02a95684d71e6b7934e463ec3b62d6b",
+                  "b192d1fa57251737fb8712949f7ae57dc3511cd9be3eabff78e7182fa1357bb2"
+                ],
+                "max_val_acc": 0.9187620282173157,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.9187620282173157,
+                "selected_val_loss": 0.06348489969968796,
+                "stage_round": 5
+              },
+              {
+                "checkpoint": "stage_r06/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "621a0e611eaab87c51f3c1ca5f846a0339b693a25e6b9fb4d7f7713945736189",
+                "epoch_checkpoint_sha256": [
+                  "3f6c62ba8c7c8d3fc145bdf077bb1de0b7d2c171b38e2ea5d8be7cebb7a38827",
+                  "67a6373e2c1ead7921d2e4932b081762554fd7ab197f4b4bc123465875e72ca3",
+                  "13ee8614b2a420cfb1fafe7017ee9024a1afb071e344f23e52efbeb2bb63be37",
+                  "d7d879602051cd3092034671f0fa34f056fb2f245f80031d81a525147f4860fb",
+                  "407aaaacfa7b47ffbf1389bdb6920680ae1e5542844ce6cd8bd69e6b07680d98",
+                  "bb5e6f81d8cdc6fe774c9a069b5a9f7f8b5e99760eec3f88aa93f7b6c37d97e0",
+                  "03201ebf02d247514bbaf81e5994e76f5b705f5cebc07111f1afc555beb512ee",
+                  "6d1d577cc63e72bbd675f129826a1190cbe280013dff3d6468df5be8bdbebd93",
+                  "c932d708c4367a219b671bb4f9dff673d17d4a693b6fcd69de038da519728f30",
+                  "621a0e611eaab87c51f3c1ca5f846a0339b693a25e6b9fb4d7f7713945736189"
+                ],
+                "max_val_acc": 0.7835100293159485,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.7835100293159485,
+                "selected_val_loss": 0.15016674995422363,
+                "stage_round": 6
+              },
+              {
+                "checkpoint": "stage_r07/checkpoint_epoch_010.keras",
+                "checkpoint_sha256": "7b20f3465c1638ee3174c097ed79aa5cb98b0eaa36fd67a3aef115e9d195b382",
+                "epoch_checkpoint_sha256": [
+                  "2915401d653cc3fc42a7d259973dd3b3687e01e9db73266176dd7de610842503",
+                  "7a4009b28f1708a5da992d649276e84813d86f606a62b519c90310889ad90df2",
+                  "e99c8e00937e6bfda9d27a32680a8f706c165e8e242827e94384dc8c875a220b",
+                  "6d0ad83553085c44e041c70ae74f4a35b273bc6d1be085149ff311cfd2a4f04a",
+                  "9b2f2675d42e6db366c25e18df61466644277372021f30d3411d078843d5781a",
+                  "74d8582e529f6d5bea15acc54ac29378b911e82c2ddc129fbff540224425b0eb",
+                  "2254d10e3f8d6f17e4e11dad7aaf7f5c31f4d73127f6e943947cc266d716b8de",
+                  "d1acd1bd450e5a3f2d28311d6dc093573afa4bd29ee98710edefa53769714f6b",
+                  "acc5f59988e76baab0097f77ce684c75c846d91d0976eae551fdb6fa21ed5909",
+                  "7b20f3465c1638ee3174c097ed79aa5cb98b0eaa36fd67a3aef115e9d195b382"
+                ],
+                "max_val_acc": 0.6107630133628845,
+                "passed": true,
+                "selected_epoch": 10,
+                "selected_val_acc": 0.6107630133628845,
+                "selected_val_loss": 0.23275068402290344,
+                "stage_round": 7
+              },
+              {
+                "checkpoint": "stage_r08/checkpoint_epoch_005.keras",
+                "checkpoint_sha256": "bf55822419a28f78641bb068d5da63bb26db9ac7ff04e791d588cf721940797b",
+                "epoch_checkpoint_sha256": [
+                  "3e37aa8ba66862548101543cda39e89bf5d67aee96a184de84a3cf1778d1cafd",
+                  "deafca241fb48630a2dc45f1c23e29efb052420501e3d58c541ef4d449a69a1b",
+                  "fe62c5f6031aac90d54d29950cfe60e5a1ddd9abd06351727f531a2d03e56a27",
+                  "ad4e6f6159eab8c2d003fc44d28ed9bea46d1800c42a5d1c6de2abd420c120c4",
+                  "bf55822419a28f78641bb068d5da63bb26db9ac7ff04e791d588cf721940797b",
+                  "1f2d48bd698899d85a516d96cebdd2776219d6b1eb340b184391df3b489fa9d7",
+                  "9f3b235101dd7d975edea5e7bb9eb30bcfa9e63d35ae7d8085206c743ba2a7d4",
+                  "5fc464361df4ff38f99c7c1e89a78539b1f4b2247567534585bbf4b0c17a1b58",
+                  "dc21e5c5f9a842c87594d9f65d10b6101d2e88bb671e8a189e290e7f5cb94f97",
+                  "ef9c0d060cd6ab96ed5df73250949f22aa7512c4b64e8225afc13c816a2169b8"
+                ],
+                "max_val_acc": 0.5098350048065186,
+                "passed": true,
+                "selected_epoch": 5,
+                "selected_val_acc": 0.5086060166358948,
+                "selected_val_loss": 0.2501876950263977,
+                "stage_round": 8
+              },
+              {
+                "checkpoint": "stage_r09/checkpoint_epoch_005.keras",
+                "checkpoint_sha256": "0a6201ef63f8c8bebe3bc22cde626ca1e66c17f8c9a7adf2fd21fbbbf058e17f",
+                "epoch_checkpoint_sha256": [
+                  "e605b64b1c516c85b4757ff3b8258631e3289acdd356ff8ee9c15f7110da7baf",
+                  "453f8fdb5ff8b4499770c45b94d73e906074d15695b250b8ecf699bbe4a12094",
+                  "1e35cdabc753f6526876791f03768db376c99cf76d3eaab8721cc41de39bf065",
+                  "07943d8e71a48e81fe0167b348e9aac1733c6a72d6922ec5b40cfe02cab70f64",
+                  "0a6201ef63f8c8bebe3bc22cde626ca1e66c17f8c9a7adf2fd21fbbbf058e17f",
+                  "566988cb86d625681cd3e627e3b62012bef707097c2413209e8690e7644ac61a",
+                  "fca8a22ae3f2e9055706d80a7ac9a57e509543a406e7c346e2ee093408e2546c",
+                  "96dafffa14975fa9c66686a8b34aef02308c349ee9c7a3668daebbf34b5d67d3",
+                  "7c02e607574607424bed2bd4cb7cc8942e18379a9dc1cb5222dfe03296809995",
+                  "55f1db870e0519f1bdeaa2e726c0f705eed1b5aa718bcc266ae4ade34654cf10"
+                ],
+                "max_val_acc": 0.5002449750900269,
+                "passed": false,
+                "selected_epoch": 5,
+                "selected_val_acc": 0.4994100034236908,
+                "selected_val_loss": 0.2501510679721832,
+                "stage_round": 9
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "817fd0b00b5081b8942021d11cb93a1146fb64989234a460fb43a898679bb36f",
+          "replicate": 5,
+          "retries": [],
+          "round_train_digests": [
+            "2b8c56ce37a1bc96e29743aec0f3c2740fc16e75e5578974d96bac72a7d06e8f",
+            "512dd44e0d34c4dd4989b477f29c7e32a4f5566ac9b858af10e4369e73ed83e7",
+            "3f2696b1bc6792f3bf0ec43be3bf49138992b83f87a24b8ae8b2b996ffa6246f",
+            "691c34717fbb97b8eafa2ec0ed76e76dc34bbaab75b5ef67a96e9b147c2e09c4",
+            "b88a6565c7db7f3adebb952642c0b87db680c5522a2b92bf3efdeeee4b6bcc59"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 1216546553,
+          "selected_epoch": 10,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.06348489969968796,
+          "selection_partition": "validation (per round)",
+          "train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "mcnemar_b": 59417,
+        "mcnemar_c": 477656,
+        "mcnemar_one_sided_pvalue": 0.0,
+        "mcnemar_pvalue": 0.0,
+        "perturbation_record": {
+          "audit_seed": 0,
+          "condition": "perturbed",
+          "files": {
+            "indices": {
+              "dtype": "<i8",
+              "file": "replicate_05_indices.npy",
+              "sha256": "3bc1d7e9461dc49211a9c8d1148548b206bb68d1199f462f7ad07b99dd3aaa3b",
+              "shape": [
+                50000000
+              ]
+            }
+          },
+          "kind": "permutation_indices",
+          "perturbation": "label_shuffle",
+          "perturbed_train_digest": "7b0211c57a5e7ce17bf968b9a2512cfaf4017c2b0420482bde774fa8b44015e6",
+          "replicate": 5,
+          "schema_version": "d4-perturbation-3",
+          "seed": 1216546553,
+          "source_label_digest": "7fcb49ff77bb6f73d7092ff6502e06b03bd278391b3bd69c7d87e05d27364cba",
+          "source_train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e"
+        },
+        "perturbed_accuracy": 0.500049,
+        "perturbed_correct": 500049,
+        "perturbed_predictions": {
+          "class_counts": {
+            "label_0": {
+              "correct": 2721,
+              "rows": 499897,
+              "true_negative_rate": 0.005443121282984294
+            },
+            "label_1": {
+              "correct": 497328,
+              "rows": 500103,
+              "true_positive_rate": 0.9944511430645288
+            }
+          },
+          "dtype": "<f4",
+          "file": "replicate_05_perturbed.npy",
+          "sha256": "0cd40af16b9724edee78993154a32196bdfad7562e279ade58b959fe8a3cfde7",
+          "shape": [
+            1000000
+          ]
+        },
+        "perturbed_selection": {
+          "adapter": {
+            "module": "audit.dataset.adapters.autond_d4",
+            "record_schema": "d4-autond-epoch-record-2",
+            "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+            "selection_schema": "d4-autond-selection-2",
+            "state_schema": "d4-autond-fit-state-2"
+          },
+          "checkpoint": "stage_r05/checkpoint_epoch_007.keras",
+          "checkpoint_sha256": "4c11dcd7ed975c50cc7698b78936aa81dbec30f8c1c87710c1b510cb28c89a66",
+          "comparison_round": 5,
+          "completed_steps": 10,
+          "condition": "perturbed",
+          "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+          "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+          "model": {
+            "architecture": "dbitnet",
+            "batch_size": 5000,
+            "builder": "dbitnet.make_model(2 * plain_bits)",
+            "cipher": "speck3264",
+            "comparison_round": 5,
+            "delta_plain_hex": "0x400000",
+            "epochs_per_round": 10,
+            "input_bits": 64,
+            "loss": "mse",
+            "metrics": [
+              "acc"
+            ],
+            "optimizer": "Adam(amsgrad=True)",
+            "round_rows": [
+              10000000,
+              10000000,
+              10000000,
+              10000000,
+              10000000
+            ],
+            "rounds": [
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "shuffle": true,
+            "stop_threshold": 0.505,
+            "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+          },
+          "progression": {
+            "best_round": null,
+            "best_val_acc": null,
+            "executed_steps": 10,
+            "rounds_max_val_acc": [
+              0.5001569986343384
+            ],
+            "rounds_trained": [
+              5
+            ],
+            "status": "stopped_at_threshold",
+            "stop_round": 5,
+            "summaries": [
+              {
+                "checkpoint": "stage_r05/checkpoint_epoch_007.keras",
+                "checkpoint_sha256": "4c11dcd7ed975c50cc7698b78936aa81dbec30f8c1c87710c1b510cb28c89a66",
+                "epoch_checkpoint_sha256": [
+                  "859dd70a762c3d8e98cb10d7f2756168c488bbd095c14c67b20616d3a0a73a54",
+                  "7688515a96c5d5362f181511a417e1beb9a1636d97cf8b4e2d7aeca3667ac23b",
+                  "6ac232ec1b9fb96f5aeba28551565ce6412ca9d681fa2a1ee1a537471db19f01",
+                  "4c927a13f1e1b19fee807c7a72a30d6194f1d750a56990adb0e8cbae637b2e4d",
+                  "40217f7a8001efc047b516edc5990f848f55d9778368cffa09782762a775d02c",
+                  "41c76c6b9dddebed0f9648fa5ea3606bf052cbc7b7d8c4fc637520abc93e7a26",
+                  "4c11dcd7ed975c50cc7698b78936aa81dbec30f8c1c87710c1b510cb28c89a66",
+                  "57a20aac8f5a8a9f15a792450e1e44ba5277fe75cc78aba1b3011237c429bdd8",
+                  "4b62fc201ee837c799fd7e5d76a1aa9146d62d430fed7de64be9a75be505b2ce",
+                  "b86aac6a023b49efa7cce5940bbc45df89c7b9cf1ec0829e11e1496de2941b26"
+                ],
+                "max_val_acc": 0.5001569986343384,
+                "passed": false,
+                "selected_epoch": 7,
+                "selected_val_acc": 0.4999620020389557,
+                "selected_val_loss": 0.2500787377357483,
+                "stage_round": 5
+              }
+            ],
+            "threshold": 0.505
+          },
+          "record_chain_head": "763e724fae8e98104e3860ac8efa4ca8e536a80e7342b051196d81d5ee57abf1",
+          "replicate": 5,
+          "retries": [],
+          "round_train_digests": [
+            "1f6c6a10c44f61050da0aa989db3edcfeb1c8ec853bb2a1f2737d785f60c9a62",
+            "5e640744ed3a9c41d5f0f080269bd11aeb986acfa7857676ff6d67a950f51e41",
+            "0bfb0aaa77b5293c84ad19877a461d845de610f38a9fe344356a4b07defa7963",
+            "2c1a98128a0de47d1a1ad049ae6ef3cae0c7d5358aa37b27a1bb93f4b93522f2",
+            "7f1b963f9e003198a7700fdd27b525ae3de4aa6bb5fe74e94da67c10b207640f"
+          ],
+          "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+          "run_binding": {
+            "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+            "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+            "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+          },
+          "schema_version": "d4-autond-selection-2",
+          "seed": 1216546553,
+          "selected_epoch": 7,
+          "selected_stage_round": 5,
+          "selected_val_loss": 0.2500787377357483,
+          "selection_partition": "validation (per round)",
+          "train_digest": "7b0211c57a5e7ce17bf968b9a2512cfaf4017c2b0420482bde774fa8b44015e6",
+          "validation_digests": [
+            "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+            "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+            "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+            "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+            "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+          ]
+        },
+        "replicate": 5,
+        "seed": 1216546553,
+        "test_examples": 1000000
+      }
+    ],
+    "supporting_endpoint": {
+      "alpha": 0.05,
+      "effect_threshold": 0.01,
+      "established": true,
+      "replicates": [
+        {
+          "conditional_delta_interval": [
+            -0.41822676389611113,
+            -0.41661649035563936
+          ],
+          "delta": -0.417424,
+          "discordant": 509990,
+          "mcnemar_b": 46283,
+          "mcnemar_c": 463707,
+          "one_sided_pvalue": 0.0,
+          "practical": true,
+          "significant": true,
+          "two_sided_pvalue": 0.0
+        },
+        {
+          "conditional_delta_interval": [
+            -0.413325782025096,
+            -0.41190127067405136
+          ],
+          "delta": -0.412616,
+          "discordant": 483682,
+          "mcnemar_b": 35533,
+          "mcnemar_c": 448149,
+          "one_sided_pvalue": 0.0,
+          "practical": true,
+          "significant": true,
+          "two_sided_pvalue": 0.0
+        },
+        {
+          "conditional_delta_interval": [
+            -0.4141385919373963,
+            -0.41249071625866357
+          ],
+          "delta": -0.413317,
+          "discordant": 510759,
+          "mcnemar_b": 48721,
+          "mcnemar_c": 462038,
+          "one_sided_pvalue": 0.0,
+          "practical": true,
+          "significant": true,
+          "two_sided_pvalue": 0.0
+        },
+        {
+          "conditional_delta_interval": [
+            -0.4132968565266969,
+            -0.41191015484772564
+          ],
+          "delta": -0.412606,
+          "discordant": 479688,
+          "mcnemar_b": 33541,
+          "mcnemar_c": 446147,
+          "one_sided_pvalue": 0.0,
+          "practical": true,
+          "significant": true,
+          "two_sided_pvalue": 0.0
+        },
+        {
+          "conditional_delta_interval": [
+            -0.4191388453626835,
+            -0.41733464020345507
+          ],
+          "delta": -0.418239,
+          "discordant": 537073,
+          "mcnemar_b": 59417,
+          "mcnemar_c": 477656,
+          "one_sided_pvalue": 0.0,
+          "practical": true,
+          "significant": true,
+          "two_sided_pvalue": 0.0
+        }
+      ],
+      "role": "secondary_non_gating"
+    }
+  },
+  "interpretation": "The registered evidence establishes neither a successful control (every shuffled fit near chance and every baseline adequate) nor a failure (a shuffled fit outside the band, or a baseline below the floor). This is not evidence of near-chance behaviour.",
+  "limitations": [
+    "Label shuffling is a blunt control: it removes genuine signal and label-correlated artifacts together. Near-chance accuracy does not show that no leakage of any form exists; targeted generation-order and label-leakage checks are a separate, complementary audit not performed here.",
+    "Inference is conditional on each fitted model and assumes test rows i.i.d. from the generator, independent of training. It is a statement about these k fits per condition, not a population estimate over training seeds; seed-to-seed variance is not estimated by any confidence bound here.",
+    "The chance reference 0.5 assumes labels are fair coin flips independent of the features under the generator; observed test class counts and class-conditional rates are descriptive only.",
+    "The baseline adequacy floor is a registered practical tolerance below the published 5-round benchmark, not a value prescribed by Gohr or by the audit methodology."
+  ],
+  "methodology": {
+    "alpha": 0.05,
+    "baseline_adequacy_threshold": 0.9,
+    "baseline_procedure": {
+      "adequacy_aggregation": "intersection_union_every_baseline_adequate",
+      "adequacy_bound": "clopper_pearson_one_sided_1_minus_alpha_lower_bound_strictly_above_threshold",
+      "adequacy_test": "exact_one_sided_binomial_h0_q_at_most_threshold_at_alpha",
+      "estimand": "per intact-label baseline fit: test accuracy q_r of the reloaded selected model, conditional on that model",
+      "inadequacy_aggregation": "bonferroni_any_baseline_inadequate",
+      "inadequacy_test": "exact_one_sided_binomial_h0_q_at_least_threshold_at_alpha_over_k",
+      "outcomes": [
+        "PASSED",
+        "FAILED",
+        "INDETERMINATE",
+        "NOT_COMPLETED"
+      ],
+      "rejection": "p_value_strictly_less_than_level",
+      "sampling_model": "same test rows and binomial model as the near-chance endpoint"
+    },
+    "chance_margin": 0.005,
+    "chance_margin_units": "accuracy_fraction",
+    "effect_threshold": 0.01,
+    "overall_rule": {
+      "BASELINE_INADEQUATE": "otherwise, baseline-adequacy gate FAILED",
+      "INCONCLUSIVE": "otherwise",
+      "NOT_COMPLETED": "any planned fit missing",
+      "NOT_SUPPORTED": "near-chance endpoint NOT_SUPPORTED",
+      "SUPPORTED": "otherwise, near-chance endpoint SUPPORTED and baseline-adequacy gate PASSED",
+      "paired_degradation": "reported, never gating"
+    },
+    "paired_endpoint_role": "secondary",
+    "primary_procedure": {
+      "chance_reference": 0.5,
+      "departure_aggregation": "bonferroni_any_replicate_departs",
+      "departure_test": "exact_one_sided_binomial_each_side_at_alpha_over_2k",
+      "equivalence_aggregation": "intersection_union_every_replicate_equivalent",
+      "equivalence_interval": "clopper_pearson_two_sided_1_minus_2alpha_strictly_inside_band",
+      "equivalence_test": "exact_binomial_tost_each_one_sided_test_at_alpha",
+      "estimand": "per perturbed fit: test accuracy p_r of the reloaded selected model, conditional on that model",
+      "outcomes": [
+        "SUPPORTED",
+        "NOT_SUPPORTED",
+        "INCONCLUSIVE",
+        "NOT_COMPLETED"
+      ],
+      "rejection": "p_value_strictly_less_than_level",
+      "sampling_model": "test rows i.i.d. from make_train_data (labels independent urandom bits, class counts not fixed); X_r ~ Binomial(n, p_r) given the model"
+    },
+    "supporting_procedure": {
+      "aggregation": "intersection_union_every_replicate_degrades",
+      "discordance": "b = baseline wrong & perturbed right; c = baseline right & perturbed wrong",
+      "estimand": "per replicate: delta_r = acc(perturbed_r) - acc(baseline_r) = (b - c) / n on the same test rows",
+      "practical": "delta_r_at_most_minus_effect_threshold",
+      "rejection": "p_value_strictly_less_than_level",
+      "role": "secondary_supporting_never_gates_the_outcome",
+      "test": "exact_mcnemar_one_sided_h1_perturbed_worse_p_equals_P(B<=b|b+c,0.5)",
+      "zero_discordant": "p_value_1"
+    },
+    "unit_of_inference": "each fitted model, conditional on it; the k fits per condition share one test sample and are never pooled or treated as independent test sets",
+    "verifiability": {
+      "not_recomputed": [
+        "without --rerun-models, that the persisted predictions are what the selected checkpoint outputs (only checkpoint and prediction digests are checked)",
+        "the training itself: TensorFlow training is not bitwise reproducible, so fits are not re-trained",
+        "the data generator's assumptions (i.i.d. rows, fair labels), which are D3's subject"
+      ],
+      "recomputed_from_persisted_evidence": [
+        "per-fit correct counts, class-conditional counts and McNemar (b, c), from the persisted raw predictions and the test labels",
+        "every p-value, bound, interval, per-fit state, endpoint and gate result and the overall outcome, from those counts",
+        "the test partition, by its SHA-256 and canonical digest recorded at preflight",
+        "the identity of each selected checkpoint, by SHA-256, and its validation-loss selection history",
+        "with verify --rerun-models: that each reloaded selected checkpoint reproduces its persisted thresholded test predictions exactly"
+      ]
+    }
+  },
+  "provenance": {
+    "overlap_audit": {
+      "cross": {
+        "train_r05__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r05__train_r06": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r05__train_r07": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r05__train_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r05__train_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r05__validation_r05": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r05__validation_r06": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r05__validation_r07": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r05__validation_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r05__validation_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r06__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r06__train_r07": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r06__train_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r06__train_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r06__validation_r06": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r06__validation_r07": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r06__validation_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r06__validation_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r07__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r07__train_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r07__train_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r07__validation_r07": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r07__validation_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r07__validation_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r08__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r08__train_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r08__validation_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r08__validation_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r09__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "train_r09__validation_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r05__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r05__train_r06": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r05__train_r07": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r05__train_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r05__train_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r05__validation_r06": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r05__validation_r07": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r05__validation_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r05__validation_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r06__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r06__train_r07": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r06__train_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r06__train_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r06__validation_r07": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r06__validation_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r06__validation_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r07__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r07__train_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r07__train_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r07__validation_r08": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r07__validation_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r08__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r08__train_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r08__validation_r09": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        },
+        "validation_r09__test": {
+          "distinct": 0,
+          "label_conflicts": 0,
+          "rows": 0
+        }
+      },
+      "key_scheme": "bit-packed if binary else raw bytes; uint64 when <= 8 bytes else void",
+      "method": "exact_row_equality",
+      "rows": {
+        "test": 1000000,
+        "train_r05": 10000000,
+        "train_r06": 10000000,
+        "train_r07": 10000000,
+        "train_r08": 10000000,
+        "train_r09": 10000000,
+        "validation_r05": 1000000,
+        "validation_r06": 1000000,
+        "validation_r07": 1000000,
+        "validation_r08": 1000000,
+        "validation_r09": 1000000
+      },
+      "within": {
+        "test": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "train_r05": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "train_r06": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "train_r07": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "train_r08": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "train_r09": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "validation_r05": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "validation_r06": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "validation_r07": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "validation_r08": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        },
+        "validation_r09": {
+          "duplicate_rows": 0,
+          "label_conflicts": 0
+        }
+      }
+    },
+    "partitions": {
+      "test": {
+        "digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+        "rows": 1000000,
+        "x_file": "dataset/test_x.npy",
+        "x_sha256": "0cf213d1cf2edac5028e2d0f9e7d652a76ad5112c500513feb7106e3b842d9a7",
+        "y_file": "dataset/test_y.npy",
+        "y_sha256": "628465ac1eca960636db10974119c98c24f15b566e0e00cf7ae30b40be1334a9"
+      },
+      "train": {
+        "digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e",
+        "layout": "round-major concatenation of the train_rRR partitions",
+        "round_digests": [
+          "2b8c56ce37a1bc96e29743aec0f3c2740fc16e75e5578974d96bac72a7d06e8f",
+          "512dd44e0d34c4dd4989b477f29c7e32a4f5566ac9b858af10e4369e73ed83e7",
+          "3f2696b1bc6792f3bf0ec43be3bf49138992b83f87a24b8ae8b2b996ffa6246f",
+          "691c34717fbb97b8eafa2ec0ed76e76dc34bbaab75b5ef67a96e9b147c2e09c4",
+          "b88a6565c7db7f3adebb952642c0b87db680c5522a2b92bf3efdeeee4b6bcc59"
+        ],
+        "round_rows": [
+          10000000,
+          10000000,
+          10000000,
+          10000000,
+          10000000
+        ],
+        "rounds": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "rows": 50000000,
+        "x_file": "dataset/train_x.npy",
+        "x_sha256": "82fa2eba81614b577b87dda785c15a07fccca50778ca53e4282d8631c17543fc",
+        "y_file": "dataset/train_y.npy",
+        "y_sha256": "b0e60a1513639e98f48937a7e4364888e23e9a97ea5646d6924bf51774c97808"
+      },
+      "validation_r05": {
+        "digest": "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+        "rows": 1000000,
+        "x_file": "dataset/validation_r05_x.npy",
+        "x_sha256": "ef5e948e779e5c8e2a3de3133686818c686e84e1d5ef692e82782daa3cb69f6b",
+        "y_file": "dataset/validation_r05_y.npy",
+        "y_sha256": "395a0cca1d7bafc28f7a8a2ed97d62443366357fcc3f3d1c2cfdffd052e82d19"
+      },
+      "validation_r06": {
+        "digest": "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+        "rows": 1000000,
+        "x_file": "dataset/validation_r06_x.npy",
+        "x_sha256": "8db8ab649c5f04768898897ebc05798d8d62a2b05a69302a8eab22bd5a08bc67",
+        "y_file": "dataset/validation_r06_y.npy",
+        "y_sha256": "980670036d6e9894bb506e9d0ddac3cc726719075ef2ed8fe529cd6de32d1775"
+      },
+      "validation_r07": {
+        "digest": "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+        "rows": 1000000,
+        "x_file": "dataset/validation_r07_x.npy",
+        "x_sha256": "e142efeafefff1c21001f84ba66ffab230405e9fa245adac8a87f8bde76f45ac",
+        "y_file": "dataset/validation_r07_y.npy",
+        "y_sha256": "160174aaee67e5658b2a529901edc51922cb4b5f33da9c886cd251457c04dfbe"
+      },
+      "validation_r08": {
+        "digest": "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+        "rows": 1000000,
+        "x_file": "dataset/validation_r08_x.npy",
+        "x_sha256": "f6626cfbbc304dd7051ddc9bbf13827b09a45addc32af9777c5306b6fd247a55",
+        "y_file": "dataset/validation_r08_y.npy",
+        "y_sha256": "f041201badc26fd5a5f25215e0687e001fe3c9c56c669b97dd51f71e75148101"
+      },
+      "validation_r09": {
+        "digest": "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511",
+        "rows": 1000000,
+        "x_file": "dataset/validation_r09_x.npy",
+        "x_sha256": "5f8eae54919f3f0fd2088d3da424db95deb3a85dc538f64a1e5edc3e64e59f55",
+        "y_file": "dataset/validation_r09_y.npy",
+        "y_sha256": "98c73a7b6f6060017d30f2acca77fa349a968a305dfa543dac5da8f2318e578f"
+      }
+    },
+    "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+    "preregistration": {
+      "commit": "d976a8cf864dcdb14e46c1c62f61e2fb69e2d1af",
+      "path": "audit/targets/autond/preregistrations/d4_autond_speck3264_full_pipeline_label_shuffle.json",
+      "sha256": "9bc14145739a6e7fc10f0a2dbb17a98fcd23b28b1bb635cd64c8ebffcad49f85"
+    },
+    "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+    "run_id": "c7422236c5594a56b2ab5e313fabd6f7",
+    "source_identity": {
+      "files": {
+        "audit/dataset/adapters/autond.py": {
+          "clean_at_head": true,
+          "sha256": "be81a5dc0f1f8f68a68fdc1bd7884ada90578c634b9d97150251e70732bd9dd1"
+        },
+        "audit/dataset/adapters/autond_d4.py": {
+          "clean_at_head": true,
+          "sha256": "cad54c6214e4970fa1fb57039cf9161b60474074a3066b7c0c67fe7aff063899"
+        },
+        "audit/dataset/d4_controlled_perturbation.py": {
+          "clean_at_head": true,
+          "sha256": "060ddbb170666dc4d3ef23a0e7c29099a8bf41c35c6ca9e9bfec3717fc4dc7d3"
+        },
+        "audit/dataset/experiments/d0_autond_canonical.py": {
+          "clean_at_head": true,
+          "sha256": "f5145ed28a9be250b60e9c39ef71efdd986e8b77cc8a994ebdb2f311857f8b20"
+        },
+        "audit/dataset/experiments/d4_autond_label_shuffle.py": {
+          "clean_at_head": true,
+          "sha256": "21d9246922492270d942f5ec13ed4aa115063c4fc1de0a526641d50d5f5b5fef"
+        },
+        "audit/dataset/experiments/d4_autond_two_gpu.py": {
+          "clean_at_head": true,
+          "sha256": "d0a9da7b46705c664321fa53d3b142e322564e80d74fc17e5c799b338ccf445e"
+        },
+        "audit/dataset/integrity.py": {
+          "clean_at_head": true,
+          "sha256": "e1bf42ccadb7a8a8c961b8dcea1f6dd245d5278203c191ebbca0163d2db0caff"
+        },
+        "audit/dataset/perturbations/label_shuffle.py": {
+          "clean_at_head": true,
+          "sha256": "e225a80a1603673f5df8fd721f1be98c6052e6f888f8b8933f4ce25d38dc41bf"
+        }
+      },
+      "git_head": "3ad26073acf0fef6655fed2b0e530080d6449dee"
+    },
+    "test_label_counts": {
+      "ones": 500103,
+      "zeros": 499897
+    },
+    "upstream_identity": {
+      "commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+      "source_digests": {
+        "ciphers/speck3264.py": "fd4a04be7fb632cea422338e6ae8446e421049649944f9dab87cc05e0e5ca9fe",
+        "dbitnet.py": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+        "gohrnet.py": "324c3768e19a6230dbedbe0446f54c6139d72f5dc642f5cfb60a8fa9a9ea1d56",
+        "main.py": "52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665",
+        "optimizer.py": "2d58e4fd94973040e1ead21166b188527b6935d499a7a818a3c613ac4888d505",
+        "train_nets.py": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e"
+      }
+    }
+  },
+  "reproducibility": {
+    "audit_seed": 0
+  },
+  "schema_version": "d4-certificate-5",
+  "settings": {
+    "alpha": 0.05,
+    "audit_seed": 0,
+    "baseline_adequacy_threshold": 0.9,
+    "bootstrap_replicates": 5000,
+    "chance_level": 0.5,
+    "chance_margin": 0.005,
+    "confidence_level": 0.95,
+    "decision_rule": "near_chance_baseline_gated_v4",
+    "effect_threshold": 0.01,
+    "paired_endpoint_role": "secondary",
+    "replicates": 5,
+    "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+    "source_train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e",
+    "test_examples": 1000000
+  }
+}

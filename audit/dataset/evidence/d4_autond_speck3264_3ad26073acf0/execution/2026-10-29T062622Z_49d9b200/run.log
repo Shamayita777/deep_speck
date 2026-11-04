@@ -1,0 +1,60 @@
+
+Running D4 replicate 1/5 (seed=3757552657)...
+
+Running D4 replicate 2/5 (seed=673228719)...
+
+Running D4 replicate 3/5 (seed=3241444873)...
+
+Running D4 replicate 4/5 (seed=3685993406)...
+
+Running D4 replicate 5/5 (seed=1216546553)...
+========================================================================
+Dataset Integrity Audit
+D4 - Controlled Perturbation Audit
+========================================================================
+
+Perturbation                 : label_shuffle
+Independent replicates      : 5
+
+Aggregate performance
+------------------------------------------------------------------------
+Mean baseline accuracy      : 0.91815580
+Mean perturbed accuracy     : 0.50331540
+Mean accuracy difference    : -0.41484040
+SD accuracy difference      : 0.00276074
+Mean relative difference    : -45.1819%
+
+Replicate-level paired inference
+------------------------------------------------------------------------
+Replicate  1 | baseline=0.918209 | perturbed=0.500785 | diff=-0.417424 | McNemar p=0
+Replicate  2 | baseline=0.917995 | perturbed=0.505379 | diff=-0.412616 | McNemar p=0
+Replicate  3 | baseline=0.918226 | perturbed=0.504909 | diff=-0.413317 | McNemar p=0
+Replicate  4 | baseline=0.918061 | perturbed=0.505455 | diff=-0.412606 | McNemar p=0
+Replicate  5 | baseline=0.918288 | perturbed=0.500049 | diff=-0.418239 | McNemar p=0
+
+Replicate-level bootstrap
+------------------------------------------------------------------------
+95% CI for mean accuracy difference: [-0.41695140, -0.41275220]
+
+Decision
+------------------------------------------------------------------------
+Rule                          : near_chance_baseline_gated_v4 (paired endpoint secondary)
+Near-chance band              : [0.495, 0.505]
+Shuffled fit  1               : acc=0.500785 90% CP=[0.49996207328421877, 0.5016079233580675] -> EQUIVALENT
+Shuffled fit  2               : acc=0.505379 90% CP=[0.5045561100384519, 0.5062018669537227] -> INDETERMINATE
+Shuffled fit  3               : acc=0.504909 90% CP=[0.5040861030897619, 0.5057318759127638] -> INDETERMINATE
+Shuffled fit  4               : acc=0.505455 90% CP=[0.5046321112303358, 0.5062778654367607] -> INDETERMINATE
+Shuffled fit  5               : acc=0.500049 90% CP=[0.4992260738486315, 0.5008719259417787] -> EQUIVALENT
+Shuffled near-chance endpoint : INCONCLUSIVE
+Baseline fit  1               : acc=0.918209 one-sided LB=0.917757 vs 0.9 -> ADEQUATE
+Baseline fit  2               : acc=0.917995 one-sided LB=0.917542 vs 0.9 -> ADEQUATE
+Baseline fit  3               : acc=0.918226 one-sided LB=0.917774 vs 0.9 -> ADEQUATE
+Baseline fit  4               : acc=0.918061 one-sided LB=0.917608 vs 0.9 -> ADEQUATE
+Baseline fit  5               : acc=0.918288 one-sided LB=0.917836 vs 0.9 -> ADEQUATE
+Baseline adequacy gate        : PASSED
+Paired degradation (secondary, non-gating): True
+OVERALL D4 OUTCOME            : INCONCLUSIVE
+Interpretation                : The registered evidence establishes neither a successful control (every shuffled fit near chance and every baseline adequate) nor a failure (a shuffled fit outside the band, or a baseline below the floor). This is not evidence of near-chance behaviour.
+========================================================================
+Pipeline progression (co_primary): {"perturbed_stopped_at_first_round": 2, "perturbed_with_no_best_round": 2, "baseline_best_rounds": [8, 8, 8, 8, 8], "baseline_stop_rounds": [9, 9, 9, 9, 9], "cap_reached": []}
+D4 RUN COMPLETE. Engine outcome: INCONCLUSIVE; AutoND overall outcome: INCONCLUSIVE (NOT a scientific pass)  ->  /kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/result

@@ -1,0 +1,104 @@
+{
+  "arm_assignment": {
+    "baseline": "GPU 0",
+    "perturbed": "GPU 1"
+  },
+  "cpu": false,
+  "gpu_inventory": [
+    {
+      "index": 0,
+      "memory_total": "15360 MiB",
+      "name": "Tesla T4",
+      "uuid": "GPU-4d1b5c21-af59-6605-4e2b-6dd9342c0601"
+    },
+    {
+      "index": 1,
+      "memory_total": "15360 MiB",
+      "name": "Tesla T4",
+      "uuid": "GPU-805dd36c-cc85-2c39-b1a0-0e87a994a630"
+    }
+  ],
+  "initial_fit_states": [
+    {
+      "completed_steps": 0,
+      "condition": "baseline",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_01/baseline",
+      "replicate": 1,
+      "status": "absent"
+    },
+    {
+      "completed_steps": 0,
+      "condition": "baseline",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_02/baseline",
+      "replicate": 2,
+      "status": "absent"
+    },
+    {
+      "completed_steps": 0,
+      "condition": "baseline",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_03/baseline",
+      "replicate": 3,
+      "status": "absent"
+    },
+    {
+      "completed_steps": 0,
+      "condition": "baseline",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_04/baseline",
+      "replicate": 4,
+      "status": "absent"
+    },
+    {
+      "completed_steps": 0,
+      "condition": "baseline",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_05/baseline",
+      "replicate": 5,
+      "status": "absent"
+    },
+    {
+      "completed_steps": 0,
+      "condition": "perturbed",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_01/perturbed",
+      "replicate": 1,
+      "status": "absent"
+    },
+    {
+      "completed_steps": 0,
+      "condition": "perturbed",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_02/perturbed",
+      "replicate": 2,
+      "status": "absent"
+    },
+    {
+      "completed_steps": 0,
+      "condition": "perturbed",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_03/perturbed",
+      "replicate": 3,
+      "status": "absent"
+    },
+    {
+      "completed_steps": 0,
+      "condition": "perturbed",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_04/perturbed",
+      "replicate": 4,
+      "status": "absent"
+    },
+    {
+      "completed_steps": 0,
+      "condition": "perturbed",
+      "fit_dir": "/kaggle/working/deep_speck/audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/fits/replicate_05/perturbed",
+      "replicate": 5,
+      "status": "absent"
+    }
+  ],
+  "mode": "two-gpu",
+  "physical_two_gpu_confirmed": false,
+  "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+  "preregistration_sha256": "9bc14145739a6e7fc10f0a2dbb17a98fcd23b28b1bb635cd64c8ebffcad49f85",
+  "purpose": "execution scheduling only; no design change",
+  "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+  "scheduler_path": "/kaggle/working/deep_speck/audit/dataset/experiments/d4_autond_two_gpu.py",
+  "scheduler_sha256": "d0a9da7b46705c664321fa53d3b142e322564e80d74fc17e5c799b338ccf445e",
+  "scheduler_token": "215de19b048d44fb8eeb22b329b8f23e",
+  "schema_version": "d4-autond-execution-1",
+  "started_utc": "2026-10-29T06:26:22Z"
+}

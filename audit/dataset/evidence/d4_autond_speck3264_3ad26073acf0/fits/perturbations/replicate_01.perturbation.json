@@ -1,0 +1,22 @@
+{
+  "audit_seed": 0,
+  "condition": "perturbed",
+  "files": {
+    "indices": {
+      "dtype": "<i8",
+      "file": "replicate_01_indices.npy",
+      "sha256": "805490650eac89ded9539692a02d2ca23c09ce97a2c1c5acf01f929b81f517aa",
+      "shape": [
+        50000000
+      ]
+    }
+  },
+  "kind": "permutation_indices",
+  "perturbation": "label_shuffle",
+  "perturbed_train_digest": "04566b3176e652a36869262e52fbab4a466a3264faa8052038a4438aecaf0f99",
+  "replicate": 1,
+  "schema_version": "d4-perturbation-3",
+  "seed": 3757552657,
+  "source_label_digest": "7fcb49ff77bb6f73d7092ff6502e06b03bd278391b3bd69c7d87e05d27364cba",
+  "source_train_digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e"
+}

@@ -1,0 +1,49 @@
+{
+  "files": {
+    "d4_certificate.json": "b4527041ff788e53f9781095897841aadb6bfaa4e0287aa3627c3bfbffbbd244"
+  },
+  "finished_utc": "2026-10-29T14:36:15Z",
+  "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+  "preregistration_sha256": "9bc14145739a6e7fc10f0a2dbb17a98fcd23b28b1bb635cd64c8ebffcad49f85",
+  "run_id": "c7422236c5594a56b2ab5e313fabd6f7",
+  "run_status": "COMPLETE",
+  "schema_version": "d4-run-manifest-1",
+  "source_identity": {
+    "files": {
+      "audit/dataset/adapters/autond.py": {
+        "clean_at_head": true,
+        "sha256": "be81a5dc0f1f8f68a68fdc1bd7884ada90578c634b9d97150251e70732bd9dd1"
+      },
+      "audit/dataset/adapters/autond_d4.py": {
+        "clean_at_head": true,
+        "sha256": "cad54c6214e4970fa1fb57039cf9161b60474074a3066b7c0c67fe7aff063899"
+      },
+      "audit/dataset/d4_controlled_perturbation.py": {
+        "clean_at_head": true,
+        "sha256": "060ddbb170666dc4d3ef23a0e7c29099a8bf41c35c6ca9e9bfec3717fc4dc7d3"
+      },
+      "audit/dataset/experiments/d0_autond_canonical.py": {
+        "clean_at_head": true,
+        "sha256": "f5145ed28a9be250b60e9c39ef71efdd986e8b77cc8a994ebdb2f311857f8b20"
+      },
+      "audit/dataset/experiments/d4_autond_label_shuffle.py": {
+        "clean_at_head": true,
+        "sha256": "21d9246922492270d942f5ec13ed4aa115063c4fc1de0a526641d50d5f5b5fef"
+      },
+      "audit/dataset/experiments/d4_autond_two_gpu.py": {
+        "clean_at_head": true,
+        "sha256": "d0a9da7b46705c664321fa53d3b142e322564e80d74fc17e5c799b338ccf445e"
+      },
+      "audit/dataset/integrity.py": {
+        "clean_at_head": true,
+        "sha256": "e1bf42ccadb7a8a8c961b8dcea1f6dd245d5278203c191ebbca0163d2db0caff"
+      },
+      "audit/dataset/perturbations/label_shuffle.py": {
+        "clean_at_head": true,
+        "sha256": "e225a80a1603673f5df8fd721f1be98c6052e6f888f8b8933f4ce25d38dc41bf"
+      }
+    },
+    "git_head": "3ad26073acf0fef6655fed2b0e530080d6449dee"
+  },
+  "started_utc": "2026-10-29T14:28:33Z"
+}

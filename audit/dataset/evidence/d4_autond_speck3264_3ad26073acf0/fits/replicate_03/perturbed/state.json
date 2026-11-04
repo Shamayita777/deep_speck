@@ -1,0 +1,73 @@
+{
+  "completed_steps": 20,
+  "identity": {
+    "adapter": {
+      "module": "audit.dataset.adapters.autond_d4",
+      "record_schema": "d4-autond-epoch-record-2",
+      "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+      "selection_schema": "d4-autond-selection-2",
+      "state_schema": "d4-autond-fit-state-2"
+    },
+    "condition": "perturbed",
+    "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+    "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+    "model": {
+      "architecture": "dbitnet",
+      "batch_size": 5000,
+      "builder": "dbitnet.make_model(2 * plain_bits)",
+      "cipher": "speck3264",
+      "comparison_round": 5,
+      "delta_plain_hex": "0x400000",
+      "epochs_per_round": 10,
+      "input_bits": 64,
+      "loss": "mse",
+      "metrics": [
+        "acc"
+      ],
+      "optimizer": "Adam(amsgrad=True)",
+      "round_rows": [
+        10000000,
+        10000000,
+        10000000,
+        10000000,
+        10000000
+      ],
+      "rounds": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "shuffle": true,
+      "stop_threshold": 0.505,
+      "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+    },
+    "replicate": 3,
+    "round_train_digests": [
+      "0c78cc38167149428cb6df20a7802d1a207f5bc45a683db443ca97644f8f0810",
+      "4c926fc65450b22a69db99749f9830829c8e0257d222b9792415c72b32e51a37",
+      "36e4d0d56eb2b0980a619eef6a846be849038da74e53dd3ecb98b614af81db67",
+      "e84ca291efd28a822a4836b861d079e62b1a77a03b13695aaf81f4b86349df60",
+      "cbad88da2756b83f5ffafb3f58837b816ab1dfb319a3af492c736ee0c1689459"
+    ],
+    "run_binding": {
+      "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+      "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+      "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+    },
+    "seed": 3241444873,
+    "train_digest": "00d055c6b0dd7d69aa4050218724520abec9ef3984ffa4ce701204bc97fc5504",
+    "validation_digests": [
+      "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+      "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+      "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+      "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+      "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+    ]
+  },
+  "record_chain_head": "6f5c5c76f0dd1a50452a5b82e4d4b9861bcc749e923732c9bcb3767b8a0abee3",
+  "retries": [],
+  "schema_version": "d4-autond-fit-state-2",
+  "total_steps": 50
+}

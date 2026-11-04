@@ -1,0 +1,581 @@
+{
+  "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+  "autond_root": "/kaggle/working/AutoND-upstream",
+  "created_utc": "2026-10-29T06:24:05Z",
+  "design": {
+    "alpha": 0.05,
+    "audit": "D4",
+    "audit_seed": 0,
+    "baseline_adequacy_threshold": 0.9,
+    "baseline_procedure": {
+      "adequacy_aggregation": "intersection_union_every_baseline_adequate",
+      "adequacy_bound": "clopper_pearson_one_sided_1_minus_alpha_lower_bound_strictly_above_threshold",
+      "adequacy_test": "exact_one_sided_binomial_h0_q_at_most_threshold_at_alpha",
+      "estimand": "per intact-label baseline fit: test accuracy q_r of the reloaded selected model, conditional on that model",
+      "inadequacy_aggregation": "bonferroni_any_baseline_inadequate",
+      "inadequacy_test": "exact_one_sided_binomial_h0_q_at_least_threshold_at_alpha_over_k",
+      "outcomes": [
+        "PASSED",
+        "FAILED",
+        "INDETERMINATE",
+        "NOT_COMPLETED"
+      ],
+      "rejection": "p_value_strictly_less_than_level",
+      "sampling_model": "same test rows and binomial model as the near-chance endpoint"
+    },
+    "batch_size": 5000,
+    "bootstrap_replicates": 5000,
+    "calibration": "none_required",
+    "chance_level": 0.5,
+    "chance_margin": 0.005,
+    "cipher": "speck3264",
+    "confidence_level": 0.95,
+    "decision_rule": "near_chance_baseline_gated_v4",
+    "delta_plain_hex": "0x400000",
+    "effect_threshold": 0.01,
+    "epochs_per_round": 10,
+    "failure_handling": "abort_whole_run_no_exclusions",
+    "input_encoding": "raw_bits_uint8_0_1_width64_hstack_C0_C1_no_scaling",
+    "label_conflict_reporting": "report_separately_non_gating",
+    "max_round": 9,
+    "model_selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+    "overall_rule": {
+      "BASELINE_INADEQUATE": "otherwise, baseline-adequacy gate FAILED",
+      "INCONCLUSIVE": "otherwise",
+      "NOT_COMPLETED": "any planned fit missing",
+      "NOT_SUPPORTED": "near-chance endpoint NOT_SUPPORTED",
+      "SUPPORTED": "otherwise, near-chance endpoint SUPPORTED and baseline-adequacy gate PASSED",
+      "paired_degradation": "reported, never gating"
+    },
+    "paired_endpoint_role": "secondary",
+    "partition_overlap_policy": "refuse_on_any_cross_partition_feature_row",
+    "perturbation": "label_shuffle",
+    "pipeline_progression_role": "co_primary",
+    "preregistration_sha256": "9bc14145739a6e7fc10f0a2dbb17a98fcd23b28b1bb635cd64c8ebffcad49f85",
+    "primary_procedure": {
+      "chance_reference": 0.5,
+      "departure_aggregation": "bonferroni_any_replicate_departs",
+      "departure_test": "exact_one_sided_binomial_each_side_at_alpha_over_2k",
+      "equivalence_aggregation": "intersection_union_every_replicate_equivalent",
+      "equivalence_interval": "clopper_pearson_two_sided_1_minus_2alpha_strictly_inside_band",
+      "equivalence_test": "exact_binomial_tost_each_one_sided_test_at_alpha",
+      "estimand": "per perturbed fit: test accuracy p_r of the reloaded selected model, conditional on that model",
+      "outcomes": [
+        "SUPPORTED",
+        "NOT_SUPPORTED",
+        "INCONCLUSIVE",
+        "NOT_COMPLETED"
+      ],
+      "rejection": "p_value_strictly_less_than_level",
+      "sampling_model": "test rows i.i.d. from make_train_data (labels independent urandom bits, class counts not fixed); X_r ~ Binomial(n, p_r) given the model"
+    },
+    "replicates": 5,
+    "sample_sizes": {
+      "test": 1000000,
+      "train_per_round": 10000000,
+      "validation_per_round": 1000000
+    },
+    "scenario": "single-key",
+    "starting_round": 5,
+    "stop_threshold": 0.505,
+    "supporting_procedure": {
+      "aggregation": "intersection_union_every_replicate_degrades",
+      "discordance": "b = baseline wrong & perturbed right; c = baseline right & perturbed wrong",
+      "estimand": "per replicate: delta_r = acc(perturbed_r) - acc(baseline_r) = (b - c) / n on the same test rows",
+      "practical": "delta_r_at_most_minus_effect_threshold",
+      "rejection": "p_value_strictly_less_than_level",
+      "role": "secondary_supporting_never_gates_the_outcome",
+      "test": "exact_mcnemar_one_sided_h1_perturbed_worse_p_equals_P(B<=b|b+c,0.5)",
+      "zero_discordant": "p_value_1"
+    },
+    "target": "autond-speck3264-single-key-0x400000-staged-dbitnet-full-pipeline",
+    "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+    "upstream_source_digests": {
+      "ciphers/speck3264.py": "fd4a04be7fb632cea422338e6ae8446e421049649944f9dab87cc05e0e5ca9fe",
+      "dbitnet.py": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+      "gohrnet.py": "324c3768e19a6230dbedbe0446f54c6139d72f5dc642f5cfb60a8fa9a9ea1d56",
+      "main.py": "52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665",
+      "optimizer.py": "2d58e4fd94973040e1ead21166b188527b6935d499a7a818a3c613ac4888d505",
+      "train_nets.py": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e"
+    },
+    "within_partition_duplicates_policy": "record_only"
+  },
+  "input_encoding": "raw_bits_uint8_0_1_width64_hstack_C0_C1_no_scaling",
+  "outcome": "PASS",
+  "overlap_audit": {
+    "cross": {
+      "train_r05__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r05__train_r06": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r05__train_r07": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r05__train_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r05__train_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r05__validation_r05": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r05__validation_r06": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r05__validation_r07": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r05__validation_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r05__validation_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r06__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r06__train_r07": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r06__train_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r06__train_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r06__validation_r06": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r06__validation_r07": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r06__validation_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r06__validation_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r07__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r07__train_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r07__train_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r07__validation_r07": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r07__validation_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r07__validation_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r08__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r08__train_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r08__validation_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r08__validation_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r09__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "train_r09__validation_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r05__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r05__train_r06": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r05__train_r07": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r05__train_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r05__train_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r05__validation_r06": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r05__validation_r07": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r05__validation_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r05__validation_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r06__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r06__train_r07": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r06__train_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r06__train_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r06__validation_r07": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r06__validation_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r06__validation_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r07__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r07__train_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r07__train_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r07__validation_r08": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r07__validation_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r08__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r08__train_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r08__validation_r09": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      },
+      "validation_r09__test": {
+        "distinct": 0,
+        "label_conflicts": 0,
+        "rows": 0
+      }
+    },
+    "key_scheme": "bit-packed if binary else raw bytes; uint64 when <= 8 bytes else void",
+    "method": "exact_row_equality",
+    "rows": {
+      "test": 1000000,
+      "train_r05": 10000000,
+      "train_r06": 10000000,
+      "train_r07": 10000000,
+      "train_r08": 10000000,
+      "train_r09": 10000000,
+      "validation_r05": 1000000,
+      "validation_r06": 1000000,
+      "validation_r07": 1000000,
+      "validation_r08": 1000000,
+      "validation_r09": 1000000
+    },
+    "within": {
+      "test": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "train_r05": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "train_r06": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "train_r07": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "train_r08": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "train_r09": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "validation_r05": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "validation_r06": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "validation_r07": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "validation_r08": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      },
+      "validation_r09": {
+        "duplicate_rows": 0,
+        "label_conflicts": 0
+      }
+    }
+  },
+  "partitions": {
+    "test": {
+      "digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+      "rows": 1000000,
+      "x_file": "dataset/test_x.npy",
+      "x_sha256": "0cf213d1cf2edac5028e2d0f9e7d652a76ad5112c500513feb7106e3b842d9a7",
+      "y_file": "dataset/test_y.npy",
+      "y_sha256": "628465ac1eca960636db10974119c98c24f15b566e0e00cf7ae30b40be1334a9"
+    },
+    "train": {
+      "digest": "b8dd10dc2c3679697d3c0cc4fd7228039be78551923c9cac431ab807ca9f1e0e",
+      "layout": "round-major concatenation of the train_rRR partitions",
+      "round_digests": [
+        "2b8c56ce37a1bc96e29743aec0f3c2740fc16e75e5578974d96bac72a7d06e8f",
+        "512dd44e0d34c4dd4989b477f29c7e32a4f5566ac9b858af10e4369e73ed83e7",
+        "3f2696b1bc6792f3bf0ec43be3bf49138992b83f87a24b8ae8b2b996ffa6246f",
+        "691c34717fbb97b8eafa2ec0ed76e76dc34bbaab75b5ef67a96e9b147c2e09c4",
+        "b88a6565c7db7f3adebb952642c0b87db680c5522a2b92bf3efdeeee4b6bcc59"
+      ],
+      "round_rows": [
+        10000000,
+        10000000,
+        10000000,
+        10000000,
+        10000000
+      ],
+      "rounds": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "rows": 50000000,
+      "x_file": "dataset/train_x.npy",
+      "x_sha256": "82fa2eba81614b577b87dda785c15a07fccca50778ca53e4282d8631c17543fc",
+      "y_file": "dataset/train_y.npy",
+      "y_sha256": "b0e60a1513639e98f48937a7e4364888e23e9a97ea5646d6924bf51774c97808"
+    },
+    "validation_r05": {
+      "digest": "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+      "rows": 1000000,
+      "x_file": "dataset/validation_r05_x.npy",
+      "x_sha256": "ef5e948e779e5c8e2a3de3133686818c686e84e1d5ef692e82782daa3cb69f6b",
+      "y_file": "dataset/validation_r05_y.npy",
+      "y_sha256": "395a0cca1d7bafc28f7a8a2ed97d62443366357fcc3f3d1c2cfdffd052e82d19"
+    },
+    "validation_r06": {
+      "digest": "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+      "rows": 1000000,
+      "x_file": "dataset/validation_r06_x.npy",
+      "x_sha256": "8db8ab649c5f04768898897ebc05798d8d62a2b05a69302a8eab22bd5a08bc67",
+      "y_file": "dataset/validation_r06_y.npy",
+      "y_sha256": "980670036d6e9894bb506e9d0ddac3cc726719075ef2ed8fe529cd6de32d1775"
+    },
+    "validation_r07": {
+      "digest": "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+      "rows": 1000000,
+      "x_file": "dataset/validation_r07_x.npy",
+      "x_sha256": "e142efeafefff1c21001f84ba66ffab230405e9fa245adac8a87f8bde76f45ac",
+      "y_file": "dataset/validation_r07_y.npy",
+      "y_sha256": "160174aaee67e5658b2a529901edc51922cb4b5f33da9c886cd251457c04dfbe"
+    },
+    "validation_r08": {
+      "digest": "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+      "rows": 1000000,
+      "x_file": "dataset/validation_r08_x.npy",
+      "x_sha256": "f6626cfbbc304dd7051ddc9bbf13827b09a45addc32af9777c5306b6fd247a55",
+      "y_file": "dataset/validation_r08_y.npy",
+      "y_sha256": "f041201badc26fd5a5f25215e0687e001fe3c9c56c669b97dd51f71e75148101"
+    },
+    "validation_r09": {
+      "digest": "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511",
+      "rows": 1000000,
+      "x_file": "dataset/validation_r09_x.npy",
+      "x_sha256": "5f8eae54919f3f0fd2088d3da424db95deb3a85dc538f64a1e5edc3e64e59f55",
+      "y_file": "dataset/validation_r09_y.npy",
+      "y_sha256": "98c73a7b6f6060017d30f2acca77fa349a968a305dfa543dac5da8f2318e578f"
+    }
+  },
+  "preregistration": {
+    "commit": "d976a8cf864dcdb14e46c1c62f61e2fb69e2d1af",
+    "path": "audit/targets/autond/preregistrations/d4_autond_speck3264_full_pipeline_label_shuffle.json",
+    "sha256": "9bc14145739a6e7fc10f0a2dbb17a98fcd23b28b1bb635cd64c8ebffcad49f85"
+  },
+  "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+  "schema_version": "d4-autond-preflight-2",
+  "source_identity": {
+    "files": {
+      "audit/dataset/adapters/autond.py": {
+        "clean_at_head": true,
+        "sha256": "be81a5dc0f1f8f68a68fdc1bd7884ada90578c634b9d97150251e70732bd9dd1"
+      },
+      "audit/dataset/adapters/autond_d4.py": {
+        "clean_at_head": true,
+        "sha256": "cad54c6214e4970fa1fb57039cf9161b60474074a3066b7c0c67fe7aff063899"
+      },
+      "audit/dataset/d4_controlled_perturbation.py": {
+        "clean_at_head": true,
+        "sha256": "060ddbb170666dc4d3ef23a0e7c29099a8bf41c35c6ca9e9bfec3717fc4dc7d3"
+      },
+      "audit/dataset/experiments/d0_autond_canonical.py": {
+        "clean_at_head": true,
+        "sha256": "f5145ed28a9be250b60e9c39ef71efdd986e8b77cc8a994ebdb2f311857f8b20"
+      },
+      "audit/dataset/experiments/d4_autond_label_shuffle.py": {
+        "clean_at_head": true,
+        "sha256": "21d9246922492270d942f5ec13ed4aa115063c4fc1de0a526641d50d5f5b5fef"
+      },
+      "audit/dataset/experiments/d4_autond_two_gpu.py": {
+        "clean_at_head": true,
+        "sha256": "d0a9da7b46705c664321fa53d3b142e322564e80d74fc17e5c799b338ccf445e"
+      },
+      "audit/dataset/integrity.py": {
+        "clean_at_head": true,
+        "sha256": "e1bf42ccadb7a8a8c961b8dcea1f6dd245d5278203c191ebbca0163d2db0caff"
+      },
+      "audit/dataset/perturbations/label_shuffle.py": {
+        "clean_at_head": true,
+        "sha256": "e225a80a1603673f5df8fd721f1be98c6052e6f888f8b8933f4ce25d38dc41bf"
+      }
+    },
+    "git_head": "3ad26073acf0fef6655fed2b0e530080d6449dee"
+  },
+  "upstream_identity": {
+    "commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779",
+    "source_digests": {
+      "ciphers/speck3264.py": "fd4a04be7fb632cea422338e6ae8446e421049649944f9dab87cc05e0e5ca9fe",
+      "dbitnet.py": "b19adceb6e6a9ad39c648aa41e58d23b6a0b338c9bd2be9c4b0c7799ea631736",
+      "gohrnet.py": "324c3768e19a6230dbedbe0446f54c6139d72f5dc642f5cfb60a8fa9a9ea1d56",
+      "main.py": "52554c2966edefdc718f298d12476e7cd5f1faf8e99eafad2fc278a523690665",
+      "optimizer.py": "2d58e4fd94973040e1ead21166b188527b6935d499a7a818a3c613ac4888d505",
+      "train_nets.py": "f38be25f879df0ece662cea78d8dd6a78da3b9b076a4b83bc22f2cb25e53ec8e"
+    }
+  },
+  "violations": []
+}

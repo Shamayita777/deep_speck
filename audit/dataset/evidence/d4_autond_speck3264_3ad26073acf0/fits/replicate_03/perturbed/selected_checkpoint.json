@@ -1,0 +1,140 @@
+{
+  "adapter": {
+    "module": "audit.dataset.adapters.autond_d4",
+    "record_schema": "d4-autond-epoch-record-2",
+    "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+    "selection_schema": "d4-autond-selection-2",
+    "state_schema": "d4-autond-fit-state-2"
+  },
+  "checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+  "checkpoint_sha256": "f8f9425d5f2a560c65ef485058e77117ae1a289caf1e4dc1150bc88a9c88a911",
+  "comparison_round": 5,
+  "completed_steps": 20,
+  "condition": "perturbed",
+  "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+  "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+  "model": {
+    "architecture": "dbitnet",
+    "batch_size": 5000,
+    "builder": "dbitnet.make_model(2 * plain_bits)",
+    "cipher": "speck3264",
+    "comparison_round": 5,
+    "delta_plain_hex": "0x400000",
+    "epochs_per_round": 10,
+    "input_bits": 64,
+    "loss": "mse",
+    "metrics": [
+      "acc"
+    ],
+    "optimizer": "Adam(amsgrad=True)",
+    "round_rows": [
+      10000000,
+      10000000,
+      10000000,
+      10000000,
+      10000000
+    ],
+    "rounds": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "shuffle": true,
+    "stop_threshold": 0.505,
+    "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+  },
+  "progression": {
+    "best_round": 5,
+    "best_val_acc": 0.5052779912948608,
+    "executed_steps": 20,
+    "rounds_max_val_acc": [
+      0.5052779912948608,
+      0.501039981842041
+    ],
+    "rounds_trained": [
+      5,
+      6
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 6,
+    "summaries": [
+      {
+        "checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+        "checkpoint_sha256": "f8f9425d5f2a560c65ef485058e77117ae1a289caf1e4dc1150bc88a9c88a911",
+        "epoch_checkpoint_sha256": [
+          "8d3f555b62ba3d1602d031c1b22547e856cb428bb46a5a733d7af72d5496edd5",
+          "fde53a1e0e247e51f4065b9a040e80ab2815d016c04575f9326828b4bf50b70c",
+          "871aeab264786a41a876b444c384cc8392ce84efae42ecfada67c8b1f15aba3c",
+          "8750a1a7d8620f368d967ff9ac67dbc5cf82a48f47c0fa4d4d0374e0558e956d",
+          "7106050b7e24d349105fba08c269a2dc91c721363ab1e7b96e99dcc36bf670bb",
+          "0c089cba2d1d5a15ac6268c2063b335610ec237681d417004c9c4747fa02f522",
+          "df66c5491b12d1821776a2530bd2ab390ea990b58b3125783a0391b884237a52",
+          "a2b8bfd15ec64dbb41d800606a675357d1642edfa649107fb12848cc1a1ba43e",
+          "f8f9425d5f2a560c65ef485058e77117ae1a289caf1e4dc1150bc88a9c88a911",
+          "50bcbe448f301746d665be5ba709fba15d10d7de93869199f9a902d6b57e5712"
+        ],
+        "max_val_acc": 0.5052779912948608,
+        "passed": true,
+        "selected_epoch": 9,
+        "selected_val_acc": 0.5052779912948608,
+        "selected_val_loss": 0.24998460710048676,
+        "stage_round": 5
+      },
+      {
+        "checkpoint": "stage_r06/checkpoint_epoch_004.keras",
+        "checkpoint_sha256": "ed497853b5f6e305f64df969ba76c34843b782aa8ba3db6280f1a1f1fee01ac3",
+        "epoch_checkpoint_sha256": [
+          "1b9c882b71c2c69b81da637f75cd88c2ffe3749fe951689398511ca7b7829660",
+          "41d9c52c89977e498d20f819eed9ba0077def98e15f0adcb737d67e456dfcafa",
+          "5b0b19681e55d80bc1d9aa388e945993f92ffdab50d5d87d32ac3dc778861fed",
+          "ed497853b5f6e305f64df969ba76c34843b782aa8ba3db6280f1a1f1fee01ac3",
+          "04d4acbfa03a609f8b2136a2d3a34615c679d4fbab7cd07868c64ac6ef33a1e0",
+          "2e7416b726803cd1f822ce0db04fa57515488716b6b4fb98b53ac1b105a1f6f3",
+          "d16b95aed139c05ffeefbf88c17d48a49c2fa1632fd24e76bb3e05cbbb873797",
+          "af5192967c3c52c9cf6aaad511efe650e371164f07e0232e35c6241c9feed466",
+          "aff0c4777d98af7de3a94632d2f84b458d03d060fd19c24786fad0d1bb8c6d61",
+          "518263eeb41004260218faa6861d69571ad4f4451c81daaf8559515050e775f4"
+        ],
+        "max_val_acc": 0.501039981842041,
+        "passed": false,
+        "selected_epoch": 4,
+        "selected_val_acc": 0.501039981842041,
+        "selected_val_loss": 0.25001490116119385,
+        "stage_round": 6
+      }
+    ],
+    "threshold": 0.505
+  },
+  "record_chain_head": "6f5c5c76f0dd1a50452a5b82e4d4b9861bcc749e923732c9bcb3767b8a0abee3",
+  "replicate": 3,
+  "retries": [],
+  "round_train_digests": [
+    "0c78cc38167149428cb6df20a7802d1a207f5bc45a683db443ca97644f8f0810",
+    "4c926fc65450b22a69db99749f9830829c8e0257d222b9792415c72b32e51a37",
+    "36e4d0d56eb2b0980a619eef6a846be849038da74e53dd3ecb98b614af81db67",
+    "e84ca291efd28a822a4836b861d079e62b1a77a03b13695aaf81f4b86349df60",
+    "cbad88da2756b83f5ffafb3f58837b816ab1dfb319a3af492c736ee0c1689459"
+  ],
+  "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+  "run_binding": {
+    "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+    "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+    "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+  },
+  "schema_version": "d4-autond-selection-2",
+  "seed": 3241444873,
+  "selected_epoch": 9,
+  "selected_stage_round": 5,
+  "selected_val_loss": 0.24998460710048676,
+  "selection_partition": "validation (per round)",
+  "train_digest": "00d055c6b0dd7d69aa4050218724520abec9ef3984ffa4ce701204bc97fc5504",
+  "validation_digests": [
+    "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+    "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+    "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+    "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+    "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+  ]
+}

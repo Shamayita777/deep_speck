@@ -1,0 +1,140 @@
+{
+  "adapter": {
+    "module": "audit.dataset.adapters.autond_d4",
+    "record_schema": "d4-autond-epoch-record-2",
+    "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+    "selection_schema": "d4-autond-selection-2",
+    "state_schema": "d4-autond-fit-state-2"
+  },
+  "checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+  "checkpoint_sha256": "73049443490bfed653c310b7e2cf2b00cc9be09f2aaca7fe27e24cf259208476",
+  "comparison_round": 5,
+  "completed_steps": 20,
+  "condition": "perturbed",
+  "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+  "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+  "model": {
+    "architecture": "dbitnet",
+    "batch_size": 5000,
+    "builder": "dbitnet.make_model(2 * plain_bits)",
+    "cipher": "speck3264",
+    "comparison_round": 5,
+    "delta_plain_hex": "0x400000",
+    "epochs_per_round": 10,
+    "input_bits": 64,
+    "loss": "mse",
+    "metrics": [
+      "acc"
+    ],
+    "optimizer": "Adam(amsgrad=True)",
+    "round_rows": [
+      10000000,
+      10000000,
+      10000000,
+      10000000,
+      10000000
+    ],
+    "rounds": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "shuffle": true,
+    "stop_threshold": 0.505,
+    "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+  },
+  "progression": {
+    "best_round": 5,
+    "best_val_acc": 0.505282998085022,
+    "executed_steps": 20,
+    "rounds_max_val_acc": [
+      0.505282998085022,
+      0.5037109851837158
+    ],
+    "rounds_trained": [
+      5,
+      6
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 6,
+    "summaries": [
+      {
+        "checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+        "checkpoint_sha256": "73049443490bfed653c310b7e2cf2b00cc9be09f2aaca7fe27e24cf259208476",
+        "epoch_checkpoint_sha256": [
+          "9abe7e24848d306612391e328e3ec9645d814eecdaf9557ac73238fb09031f36",
+          "8cdc00f81a02df4635e0360d90fcdce521565e84e43fbc56c8288feccc4da97e",
+          "9aac19c2e53e36173956424011798f43edf610a82789ff1cd20e92731a92da44",
+          "ac98329dc13ea1644e038f6d85949b0cec8af3b8c53a85c9c2d131c11cc7f58c",
+          "9bc6186dcadd8c38e227822966bf337708a04ae1b8eed4bd84e41b2c508d2f5b",
+          "b9bc4b212dcffd7ca22d1d13169308fc2b982baf1a5e544bced62d4e6a882d69",
+          "bc20a2576fabb2b3283147627edd2dfa866471c12769d35677e19da6586e6134",
+          "fca056895d1866a48a886e775eaa9f53df47a011ab42a8a28b133aecee3cce88",
+          "73049443490bfed653c310b7e2cf2b00cc9be09f2aaca7fe27e24cf259208476",
+          "55fa45ce0a41093b7b7d41f1fbe44718f8ca32dcd7a6447de44e06ad07c01987"
+        ],
+        "max_val_acc": 0.505282998085022,
+        "passed": true,
+        "selected_epoch": 9,
+        "selected_val_acc": 0.505282998085022,
+        "selected_val_loss": 0.24998034536838531,
+        "stage_round": 5
+      },
+      {
+        "checkpoint": "stage_r06/checkpoint_epoch_003.keras",
+        "checkpoint_sha256": "f520b7535e65372002f1dcda23aab8dd5c9c15e0444a8216268f6aab72335e3b",
+        "epoch_checkpoint_sha256": [
+          "6260193b9d074b84f217971d9d42665c8ae208340b9c88fb7812db8cf219ab49",
+          "3038163a288bcdd8c813117b456f7595600600c07f39258a5355033a17668c6c",
+          "f520b7535e65372002f1dcda23aab8dd5c9c15e0444a8216268f6aab72335e3b",
+          "ffe27918e00cd531e6928d80fea1ccb5a0a12516fcc213a928a830b0982f94fa",
+          "184e57e9cc91050abd172a0d07c1adb230296306a568006449587b16450f321a",
+          "3e4e0bd2e0126a2a5b0566e87bb044ec66202a7a7931ebdc146d5a1b70850671",
+          "2740d200e8c084cd583ed0a4077311b83c35cec0c69eca0cb1f0aff62804def6",
+          "c11f95b8c1c1cd5246e733b4082938e99d17ee2aa1b2f6aaa5cc1f93880ecbc6",
+          "8dadf26b29ac9b36446a3bffd85830da7d9f8f21fb6e9ef4237a2866990a8824",
+          "7abed522df9d9b53c65d7ab3b3eea784c8b604dfcd8d139df88d12d7db3f7aec"
+        ],
+        "max_val_acc": 0.5037109851837158,
+        "passed": false,
+        "selected_epoch": 3,
+        "selected_val_acc": 0.5037109851837158,
+        "selected_val_loss": 0.24999530613422394,
+        "stage_round": 6
+      }
+    ],
+    "threshold": 0.505
+  },
+  "record_chain_head": "ffea6f1097cad5a8cb672941bdeca3702af95fdedf5cdb84393dd59a72788b18",
+  "replicate": 4,
+  "retries": [],
+  "round_train_digests": [
+    "07432696312772ba4c428f2798c6a247eb9ff48d51de067a5544fc832480dd9c",
+    "10d4db394681be95d05d1a50bbe8b74f570f400b6af70448ac7f6b7c95f46cc3",
+    "5c2f12db9e2f3786291edbb7752dd977c68983412c274cb9fb21d72e94ae2adc",
+    "45fa84b2aa4d5037681e51560533015e91db0c6e03a05de4b3bf0c0060517056",
+    "ba6e5176951b061f6801bdba65e0f355f0d55f484ae847799df7528ead270d51"
+  ],
+  "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+  "run_binding": {
+    "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+    "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+    "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+  },
+  "schema_version": "d4-autond-selection-2",
+  "seed": 3685993406,
+  "selected_epoch": 9,
+  "selected_stage_round": 5,
+  "selected_val_loss": 0.24998034536838531,
+  "selection_partition": "validation (per round)",
+  "train_digest": "4dcbccc45ec4b3f5af4855fc63df010e22f70ef8731357bb8f34b7d3663689fa",
+  "validation_digests": [
+    "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+    "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+    "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+    "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+    "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+  ]
+}

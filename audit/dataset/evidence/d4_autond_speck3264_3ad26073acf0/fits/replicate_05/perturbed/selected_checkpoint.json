@@ -1,0 +1,116 @@
+{
+  "adapter": {
+    "module": "audit.dataset.adapters.autond_d4",
+    "record_schema": "d4-autond-epoch-record-2",
+    "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+    "selection_schema": "d4-autond-selection-2",
+    "state_schema": "d4-autond-fit-state-2"
+  },
+  "checkpoint": "stage_r05/checkpoint_epoch_007.keras",
+  "checkpoint_sha256": "4c11dcd7ed975c50cc7698b78936aa81dbec30f8c1c87710c1b510cb28c89a66",
+  "comparison_round": 5,
+  "completed_steps": 10,
+  "condition": "perturbed",
+  "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+  "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+  "model": {
+    "architecture": "dbitnet",
+    "batch_size": 5000,
+    "builder": "dbitnet.make_model(2 * plain_bits)",
+    "cipher": "speck3264",
+    "comparison_round": 5,
+    "delta_plain_hex": "0x400000",
+    "epochs_per_round": 10,
+    "input_bits": 64,
+    "loss": "mse",
+    "metrics": [
+      "acc"
+    ],
+    "optimizer": "Adam(amsgrad=True)",
+    "round_rows": [
+      10000000,
+      10000000,
+      10000000,
+      10000000,
+      10000000
+    ],
+    "rounds": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "shuffle": true,
+    "stop_threshold": 0.505,
+    "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+  },
+  "progression": {
+    "best_round": null,
+    "best_val_acc": null,
+    "executed_steps": 10,
+    "rounds_max_val_acc": [
+      0.5001569986343384
+    ],
+    "rounds_trained": [
+      5
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 5,
+    "summaries": [
+      {
+        "checkpoint": "stage_r05/checkpoint_epoch_007.keras",
+        "checkpoint_sha256": "4c11dcd7ed975c50cc7698b78936aa81dbec30f8c1c87710c1b510cb28c89a66",
+        "epoch_checkpoint_sha256": [
+          "859dd70a762c3d8e98cb10d7f2756168c488bbd095c14c67b20616d3a0a73a54",
+          "7688515a96c5d5362f181511a417e1beb9a1636d97cf8b4e2d7aeca3667ac23b",
+          "6ac232ec1b9fb96f5aeba28551565ce6412ca9d681fa2a1ee1a537471db19f01",
+          "4c927a13f1e1b19fee807c7a72a30d6194f1d750a56990adb0e8cbae637b2e4d",
+          "40217f7a8001efc047b516edc5990f848f55d9778368cffa09782762a775d02c",
+          "41c76c6b9dddebed0f9648fa5ea3606bf052cbc7b7d8c4fc637520abc93e7a26",
+          "4c11dcd7ed975c50cc7698b78936aa81dbec30f8c1c87710c1b510cb28c89a66",
+          "57a20aac8f5a8a9f15a792450e1e44ba5277fe75cc78aba1b3011237c429bdd8",
+          "4b62fc201ee837c799fd7e5d76a1aa9146d62d430fed7de64be9a75be505b2ce",
+          "b86aac6a023b49efa7cce5940bbc45df89c7b9cf1ec0829e11e1496de2941b26"
+        ],
+        "max_val_acc": 0.5001569986343384,
+        "passed": false,
+        "selected_epoch": 7,
+        "selected_val_acc": 0.4999620020389557,
+        "selected_val_loss": 0.2500787377357483,
+        "stage_round": 5
+      }
+    ],
+    "threshold": 0.505
+  },
+  "record_chain_head": "763e724fae8e98104e3860ac8efa4ca8e536a80e7342b051196d81d5ee57abf1",
+  "replicate": 5,
+  "retries": [],
+  "round_train_digests": [
+    "1f6c6a10c44f61050da0aa989db3edcfeb1c8ec853bb2a1f2737d785f60c9a62",
+    "5e640744ed3a9c41d5f0f080269bd11aeb986acfa7857676ff6d67a950f51e41",
+    "0bfb0aaa77b5293c84ad19877a461d845de610f38a9fe344356a4b07defa7963",
+    "2c1a98128a0de47d1a1ad049ae6ef3cae0c7d5358aa37b27a1bb93f4b93522f2",
+    "7f1b963f9e003198a7700fdd27b525ae3de4aa6bb5fe74e94da67c10b207640f"
+  ],
+  "rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+  "run_binding": {
+    "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+    "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+    "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+  },
+  "schema_version": "d4-autond-selection-2",
+  "seed": 1216546553,
+  "selected_epoch": 7,
+  "selected_stage_round": 5,
+  "selected_val_loss": 0.2500787377357483,
+  "selection_partition": "validation (per round)",
+  "train_digest": "7b0211c57a5e7ce17bf968b9a2512cfaf4017c2b0420482bde774fa8b44015e6",
+  "validation_digests": [
+    "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+    "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+    "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+    "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+    "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+  ]
+}
