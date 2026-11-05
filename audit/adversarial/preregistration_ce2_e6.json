@@ -1,0 +1,44 @@
+{
+  "design": {
+    "experiment_id": "E6-CE2-ADVERSARIAL",
+    "version": "1",
+    "question": "Can either registered non-distinguisher satisfy the CE2 criterion?",
+    "why": "Battery v2 tested A3 against CE3 and A4 against CE4 and registered CE2 as untested. Under CE Rule III a CE test establishes a cryptographic interpretation only if it has greater explanatory power than the remaining alternatives; a criterion that a constructed non-distinguisher satisfies cannot. This experiment decides whether CE2 can carry a claim to L3.",
+    "adversaries": {
+      "A3": {
+        "construction": "frozen constant-output model, audit/adversarial/evidence/a3_20261006: the artifact must match the freeze manifest's model SHA-256 and recorded freeze commit. battery.py and sealed_sets.py have changed since the freeze (see the A3 ERRATUM); that check is recorded in the certificate and not enforced, because E6 interprets A3 only through the frozen ce234 CE2 routine and not through the battery's own evaluation code.",
+        "seed": 20261107,
+        "predicted_outcome": "CE2_CRITERION_NOT_SATISFIED",
+        "rationale": "A constant output has no rank correlation with any target; the frozen run_ce2 excludes such runs, so fewer than the minimum 20 valid runs remain and the frozen rule returns INCONCLUSIVE."
+      },
+      "A4": {
+        "construction": "battery.A4XorResponse with key ciphermind-A4-xor-response-v1; construction VALID per audit/adversarial/evidence/a4_20261006/a4_certificate.json (AUC 0.4999)",
+        "seed": 20261108,
+        "predicted_outcome": "CE2_CRITERION_NOT_SATISFIED",
+        "rationale": "The output depends on the input only through the ciphertext-pair XOR, via a keyed hash with no order structure, so its rank correlation with the single-trail probability is expected to be near zero; development screening (screening.py, not evidence) measured Spearman -0.003."
+      }
+    },
+    "procedure": "Each adversary is passed as `model` to the frozen audit.cryptography.ce234.production.run_ce2; the frozen analyse_ce2 decides. CE2 is not re-implemented and no frozen file is modified.",
+    "ce2_replication": {
+      "n_runs": 20,
+      "samples_per_run": 1000000
+    },
+    "adversarial_outcome_rule": "CE2_CRITERION_SATISFIED iff the frozen CE2 decision is SUPPORTED; otherwise CE2_CRITERION_NOT_SATISFIED",
+    "interpretation": {
+      "if_none_satisfied": "Neither registered non-distinguisher satisfies CE2. CE2 is admitted as a test that can establish L3 under the admission condition; this is not a proof that no other non-distinguisher could satisfy it.",
+      "if_any_satisfied": "A registered non-distinguisher satisfies CE2. CE2 is corroborating only and cannot establish L3."
+    },
+    "verification": "e6_verification.json recomputes every primary rho from the raw files and re-applies analyse_ce2; any mismatch makes the certificate NOT_VERIFIED.",
+    "environment_requirement": "the CE2 production environment: Python 3.11, TensorFlow 2.21, Keras 3, numpy 2.x, scipy 1.17, CPU",
+    "not_claimed": [
+      "that CE2 cannot be satisfied by any non-distinguisher",
+      "anything about CE3 or CE4, whose adversarial results stand as registered in battery v2"
+    ]
+  },
+  "approval": {
+    "status": "APPROVED",
+    "design_sha256": "13b904fc2c35791157adb7ca929ebd9f7d42c1b05fd85ce8cf0d75ea53eded44",
+    "approved_by": "human-approver-01",
+    "approved_utc": "2026-11-05T04:10:12Z"
+  }
+}

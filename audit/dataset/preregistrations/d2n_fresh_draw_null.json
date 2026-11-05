@@ -1,0 +1,66 @@
+{
+  "design": {
+    "experiment_id": "D2N-FRESH-DRAW-NULL",
+    "version": "1",
+    "dimension": "DI",
+    "question": "Do rows of the canonical instance have another row within a small Hamming radius more often than rows of independent datasets drawn from the same generator with the same specification and partition sizes?",
+    "why": "The schema 6.5 D2.1 near-duplicate component returned INCONCLUSIVE on both pipelines through documented method defects (D21_SUPERSEDED_METHOD_DEFECTS A-D: Monte Carlo reference probability evaluating to 0.0, an unreachable statistical gate, a reference resampled from the audited data, and a numerator/denominator population mismatch). A declared closed-form null cannot replace it for structured data: a read-only closed-form re-evaluation of the legacy records found 111 radius-8 hits against 56.9 expected under a uniform row model for the Gohr round-5 data and 24 against 56.9 for AutoND round 8, so the uniform model does not describe real ciphertext pairs. The generator itself is the appropriate null: fresh i.i.d. draws share every property of the generator and none of the within-dataset dependence D2.1 exists to detect.",
+    "methodology_basis": "Dataset Integrity Stage 4, controlled perturbation by regenerating datasets with independent random seeds; Stage 6, a confounder is supported only if statistically significant, practically meaningful and attributable.",
+    "statistic": "For each partition and radius r: T = number of queried rows, among the first Q rows of a uniform without-replacement sample, whose exact minimum Hamming distance to every other row of the same partition is <= r (audit.dataset.d2_sample_dependence.near_neighbor_exact_screen, exhaustive scan).",
+    "radii": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "primary_radius": 8,
+    "queries_per_partition": 20480,
+    "queries_rationale": "the legacy production budget, so the observed count is directly comparable with the legacy record; under the fresh-draw null the budget affects power only, not validity",
+    "null_datasets": 59,
+    "null_generation": "canonical._resolve_generator(spec) with the specification recorded in the instance manifest (autond_root replaced by the local pinned checkout), called once per partition at the manifest's partition size; every fresh partition is checked by canonical.validate_generated_partition; fresh data are hashed and discarded",
+    "query_seed_base": 20261105,
+    "query_seed_rule": "partition k of dataset j uses numpy default_rng(query_seed_base + 1000*j + k); j = 0 is the canonical instance, j = 1..59 are fresh draws; k = 0 train, 1 validation, 2 test",
+    "test": "Monte Carlo rank test, p = (1 + #{j >= 1 : T_j >= T_0}) / (M + 1)",
+    "alpha": 0.05,
+    "multiplicity": "Bonferroni over the three partitions of a pipeline at the primary radius: per-partition threshold 0.05/3 = 0.0167; with M = 59 this is met only if T_0 exceeds every null count (p = 1/60). Pipelines are separate claims and are not pooled.",
+    "practical_ratio": 1.25,
+    "practical_rationale": "the same relative-excess threshold (0.25) as the D2.1 engine's practical gate",
+    "partition_rule": "EXCESS if the rank test rejects at 0.0167 and T_0 / mean(T_j) >= 1.25; INCONCLUSIVE if it rejects and the ratio is below 1.25; NO_EXCESS otherwise",
+    "detection_rule": "At radii 1, 2 and 4 the expected count is far below one. If the canonical instance has any hit at such a radius while none of the 59 fresh datasets has one, the pipeline outcome cannot be PASS.",
+    "pipeline_rule": "FAIL if any partition is EXCESS at radius 8; INCONCLUSIVE if any partition is INCONCLUSIVE at radius 8 or a detection flag is raised; PASS otherwise",
+    "predictions": {
+      "if_no_within_dataset_dependence": "T_0 lies within the spread of the 59 fresh-draw counts at every partition; pipeline outcome PASS",
+      "if_duplication_or_reuse_artifact": "T_0 exceeds every fresh-draw count by at least 25% in the affected partition; pipeline outcome FAIL"
+    },
+    "sensitivity_statement": "Rejection requires T_0 above the maximum of 59 null counts. The certificate reports the null mean, SD and maximum, so the smallest excess this design can detect is visible next to the result. A PASS means no excess detectable at this sensitivity, not independence.",
+    "pipelines": {
+      "autond": {
+        "role": "primary",
+        "canonical_instance_id": "29cd55c91cb27686f0d9e3be82a37e7965694d3cc1363793638bc554bb641a43",
+        "instance": "audit/dataset/evidence/d0_autond_speck3264_r8_production",
+        "d2_mapping": "The schema 6.5 AutoND D2 certificates (analyses A, B, C) on this same instance report no failures, and their only warnings are the radius-8 near-duplicate components in train, validation and test, which this experiment replaces. A-D2 (primary analysis A, all rows) is therefore PASS if this experiment is PASS, FAIL if it is FAIL, and INCONCLUSIVE otherwise. Analyses B and C remain secondary as registered.",
+        "claim_mapping": "A2 is artifact-scoped: its DI evidence is the released generator at round 8, the setting of the published checkpoint, i.e. A-D1, A-D2 and the A-D3 screen, all on this instance. A-D4 and A-D5 retrain the pipeline and bear on A1. This mapping is registered here, before any D2-N result exists."
+      },
+      "gohr": {
+        "role": "secondary",
+        "canonical_instance_id": "08d132684b251a5272707c5b7de1a88529dccedf9e873e05267eec714457d616",
+        "instance": "audit/dataset/evidence/d0_gohr_speck_r5_production_730516c79981",
+        "d2_mapping": "The schema 6.5 Gohr D2 certificate was produced on a different dataset instance. G-D2 is FAIL if this experiment is FAIL on the canonical instance; otherwise G-D2 remains INCONCLUSIVE until the remaining D2 components are run on the same instance. The result is reported as DI evidence about the generator either way.",
+        "claim_mapping": "G1 is a pipeline claim; this result enters G-D2 as stated above."
+      }
+    },
+    "environment_requirement": "Python 3.11, numpy 1.26.4 (the version both canonical instances were built with; NumPy 2 changes AutoND's uint16 arithmetic). AutoND generation imports the pinned upstream checkout at commit 8d66e0a4, whose main.py imports tensorflow, so a CPU tensorflow must be importable.",
+    "exclusions": "A dataset is re-drawn only after an infrastructure failure (crash, out-of-memory, killed session), with the failure kept in the run log; outcome-based exclusion is prohibited. Resume skips recorded datasets and refuses a changed design, source identity or partition size.",
+    "not_claimed": [
+      "statistical independence of the rows",
+      "absence of dependence beyond near-duplicate structure at the registered radii",
+      "anything about labels; D2-N uses features only"
+    ]
+  },
+  "approval": {
+    "status": "APPROVED",
+    "design_sha256": "164062c27b46ceb6d09db65e465e1a8a61f428b3f22ea85f5aaa6fd805086a3c",
+    "approved_by": "human-approver-01",
+    "approved_utc": "2026-11-05T04:10:12Z"
+  }
+}
