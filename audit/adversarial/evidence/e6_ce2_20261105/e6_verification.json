@@ -1,0 +1,16 @@
+{
+  "adversaries": {
+    "A3": {
+      "recomputed_decision": "INCONCLUSIVE",
+      "recorded_decision": "INCONCLUSIVE"
+    },
+    "A4": {
+      "recomputed_decision": "NOT_SUPPORTED",
+      "recorded_decision": "NOT_SUPPORTED"
+    }
+  },
+  "checks": 42,
+  "mismatches": [],
+  "status": "VERIFIED",
+  "verified_utc": "2026-11-05T04:26:24.331344+00:00"
+}
