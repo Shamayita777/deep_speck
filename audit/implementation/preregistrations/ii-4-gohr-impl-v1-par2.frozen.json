@@ -1,0 +1,165 @@
+{
+ "amendment_id": "II-4-GOHR-IMPL-V1-PAR2",
+ "amends": [
+  {
+   "record": "audit/implementation/preregistrations/ii-4-gohr-impl-v1.frozen.json",
+   "sha256": "ab02d471bff08758b9b2d6e122acc4252e269adada9ffd30cdab5837d759cc8a"
+  },
+  {
+   "amendment_id": "II-4-GOHR-IMPL-V1-PAR1",
+   "record": "audit/implementation/preregistrations/ii-4-gohr-impl-v1-par1.frozen.json",
+   "sha256": "457fa3c70bd9f10c7e25f09d1b96dc0371821d7939a5e39c28512fd73bba981e"
+  }
+ ],
+ "artifact": "ii4-par2-amendment-record-1",
+ "concurrent_memory_probe": {
+  "pass_rule": "both children exit 0 having trained both arms at scale 1.0, and no cgroup level's oom or oom_kill count increased",
+  "records": [
+   "each child's VmHWM and sampled VmRSS peak",
+   "cgroup memory.peak before and after",
+   "sampled peak memory.current",
+   "memory.events and memory.pressure before and after",
+   "the corrected measurement before and after"
+  ],
+  "required_before_execute": "a PASS probe entry with the same boot_id as the execute entry",
+  "what": "one child per GPU, concurrently, each running the frozen adapter's generate_block_datasets, load_block_datasets, build_arm_model and train_arm for both arms at scale 1.0 with one epoch; non-evidentiary probe seeds; data deleted afterwards"
+ },
+ "created_at_utc": "2026-11-06T14:34:22.314619+00:00",
+ "defect": {
+  "location": "audit/implementation/preflight.py memory_report (frozen, unchanged)",
+  "meaning_on_linux_glibc": "sysinfo().freeram, i.e. MemFree: excludes reclaimable page cache and ignores the cgroup limit",
+  "measurement": "os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_AVPHYS_PAGES')",
+  "observed_on_kaggle_as_reported": {
+   "MemAvailable_GiB": 29,
+   "MemFree_MiB": 237,
+   "inactive_file_GiB": 19.08,
+   "memory.current_GiB": 25.88,
+   "memory.events oom/max": 0,
+   "memory.max_GiB": 30,
+   "memory.pressure": "zero",
+   "preflight_available_gb": 0.24,
+   "psutil_available_GiB": 29.85
+  }
+ },
+ "experiment_id": "II-4-GOHR-IMPL-V1",
+ "gate_version": "ii4-par2-gate-1",
+ "measurement": {
+  "block_rules": [
+   "MemAvailable absent or unparseable",
+   "cgroup v1 memory controller",
+   "v2 cgroup named but no v2 hierarchy mounted",
+   "finite limit with memory.current unreadable",
+   "any interface file unparseable",
+   "memory.events oom > 0 or oom_kill > 0",
+   "memory.pressure full avg10/60/300 > 0",
+   "U(phi) below the requirement"
+  ],
+  "formula": "U(phi) = min(MemAvailable, min over visible cgroup levels with a finite limit of max(0, min(memory.max, memory.high) - memory.current) + phi * max(0, inactive_file - file_dirty - file_writeback - file_mapped))",
+  "never_credited": [
+   "active_file",
+   "slab_reclaimable",
+   "swap"
+  ],
+  "no_credit_rules": [
+   "memory.events max > 0 or high > 0",
+   "memory.pressure some avg60 > 0",
+   "memory.stat, memory.events or memory.pressure unreadable"
+  ],
+  "phi": 0.5,
+  "phi_status": "conservative policy chosen before use, not estimated from data",
+  "sensitivity_phis": [
+   0.0,
+   0.5,
+   1.0
+  ],
+  "version": "ii4-par2-memory-1"
+ },
+ "par2_sources": {
+  "par2_amendment": {
+   "bytes": 9863,
+   "path": "audit/implementation/ii4_par2/amendment.py",
+   "sha256": "b4780f6894acda6f5373e2c87c583dcd88b26a7c259710782ed2937cb4517724"
+  },
+  "par2_chain": {
+   "bytes": 2743,
+   "path": "audit/implementation/ii4_par2/chain.py",
+   "sha256": "8ede656a577e6c926fe9587658f8fb7a38e0f0b2d0c6504ccfacbd8c7a838b4a"
+  },
+  "par2_document": {
+   "bytes": 4529,
+   "path": "audit/implementation/ii4_par2/AMENDMENT.md",
+   "sha256": "fe0aa8f429441d84a0f415c454ef8263309f171fb82af5578948ec55a3f68c22"
+  },
+  "par2_gate": {
+   "bytes": 4606,
+   "path": "audit/implementation/ii4_par2/gate.py",
+   "sha256": "dc45d2e6f60993cdc68f2708ee0797e7cc35a90b4de781dea2669a1ceff6caf2"
+  },
+  "par2_launcher": {
+   "bytes": 9499,
+   "path": "audit/implementation/ii4_par2/launcher.py",
+   "sha256": "65fb425484491602478bb4d1e82e1fa8380e56ec7f8d59c0498e148b557f9c4c"
+  },
+  "par2_memory": {
+   "bytes": 15361,
+   "path": "audit/implementation/ii4_par2/memory.py",
+   "sha256": "8c168638c31149630eabada433675b0ade6f97d610b5460f9520fd8210593544"
+  },
+  "par2_memprobe": {
+   "bytes": 10130,
+   "path": "audit/implementation/ii4_par2/memprobe.py",
+   "sha256": "a148cc6bd07df46c2d8480e2e1a0d52ffd4796e6029f45c7e9ae060545046341"
+  },
+  "par2_package": {
+   "bytes": 114,
+   "path": "audit/implementation/ii4_par2/__init__.py",
+   "sha256": "9435314f19da123274ca8925fc26f4d02a90f07c650a868346731e1d9d6d8160"
+  },
+  "par2_test_chain_verify": {
+   "bytes": 5933,
+   "path": "audit/implementation/ii4_par2/tests/test_chain_verify.py",
+   "sha256": "3749930f0797a177219ddc6cb03f48734364f9418e6a5f83e50a9cb59bc35afd"
+  },
+  "par2_test_gate": {
+   "bytes": 3676,
+   "path": "audit/implementation/ii4_par2/tests/test_gate.py",
+   "sha256": "cda493a9682c8ac75697d0b48c3f24a084eb4752b89d782f543c3d92d5154c8b"
+  },
+  "par2_test_memory": {
+   "bytes": 10572,
+   "path": "audit/implementation/ii4_par2/tests/test_memory.py",
+   "sha256": "282e4d1bbcd507cb02cb5cf2157294b2f18648f48d8778774e85ec62aa4258d8"
+  },
+  "par2_test_memprobe": {
+   "bytes": 2110,
+   "path": "audit/implementation/ii4_par2/tests/test_memprobe.py",
+   "sha256": "be22e945b69822c2ab461106b979ae24cfbb1937b457fe98c5e466724d0871fe"
+  },
+  "par2_tests_package": {
+   "bytes": 0,
+   "path": "audit/implementation/ii4_par2/tests/__init__.py",
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "par2_verifier": {
+   "bytes": 7609,
+   "path": "audit/implementation/ii4_par2/verify_par2.py",
+   "sha256": "21b62c354e8b13e02b72f60ed4748599b684fbe6d73d6dea9970605ac1c89ac4"
+  }
+ },
+ "par2_sources_sha256": "668e4e918520269b08974ad0416da9f77ef428db108d316297e50fd36bf79f5e",
+ "scope": "Pre-execution readiness only: the host-memory measurement inside the readiness gate, plus a full-size concurrent memory probe that must pass in the same boot before execution. No training, evaluation, seed, design, plan, scheduler, worker, runner or decision-rule code is changed or replaced.",
+ "threshold": {
+  "changed": false,
+  "peak_host_gb_estimate": 4.0,
+  "recommended_free_host_gb": 8.0,
+  "source": "audit/implementation/preregistrations/ii4_impl_gohr_v1.py: DESIGN_RATIONALE['compute_estimate']['memory_measured']['recommended_free_host_gb']",
+  "unit": "GB = 1e9 bytes"
+ },
+ "unchanged": {
+  "config_fingerprint": "62273336a6fbad76505663c763863a76456ed8d1e817ddf707243235230abead",
+  "experiment_fingerprint_rule": "audit/implementation/ii4_parallel/scheduler.py ParallelComparisonRunner.runtime_provenance (PAR1)",
+  "frozen_readiness_gate": "audit/implementation/run_ii4_impl.py readiness_gate, called unchanged; only its memory problems are superseded",
+  "par1_source_manifest_sha256": "7479d90634773f9729dc559fc6cbe4b1806f5f9d4abb3bac4f1b600fce1705a9",
+  "preregistration_sha256": "87475062e834e0b4943b07d1edc9e719643ba6ba0d79b56f6607ef1093f7a36d"
+ }
+}
