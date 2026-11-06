@@ -1,0 +1,310 @@
+..............................................................sssss..... [ 18%]
+........................................s.s..s..ss.ss...ss..........sss. [ 37%]
+.........s.F............................................................ [ 56%]
+..............................................................FFFFF.FFFF [ 75%]
+F....................................................................... [ 94%]
+...................                                                      [100%]
+=================================== FAILURES ===================================
+________ test_epoch_resume_restores_full_optimizer_state_and_continues _________
+
+tmp_path = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_epoch_resume_restores_ful0')
+
+    @needs_tensorflow
+    def test_epoch_resume_restores_full_optimizer_state_and_continues(tmp_path):
+        import tensorflow as tf
+        from audit.cryptography.experiments.ce1.epoch_resume import train_epochs_resumable
+    
+        rng = np.random.default_rng(20261026)
+        X = rng.normal(size=(128, 4)).astype(np.float32)
+        Y = (X[:, 0] + X[:, 1] > 0).astype(np.float32)
+        Xv = rng.normal(size=(32, 4)).astype(np.float32)
+        Yv = (Xv[:, 0] + Xv[:, 1] > 0).astype(np.float32)
+    
+        def build():
+            model = tf.keras.Sequential([
+                tf.keras.layers.Input(shape=(4,)),
+                tf.keras.layers.Dense(1, activation="sigmoid"),
+            ])
+            model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
+                          loss="binary_crossentropy", metrics=["acc"])
+            return model
+    
+        contract = {"test": "epoch-resume", "run_id": "deterministic-known-answer",
+                    "max_epochs": 2, "batch_size": 16, "seed": 2026}
+        root = tmp_path / "epoch_state"
+>       first_model, first_history, first_state = train_epochs_resumable(
+            build(), X, Y, Xv, Yv, epochs=1, batch_size=16, seed=2026,
+            checkpoint_dir=root, contract=contract, resume=False, verbose=0)
+
+audit/cryptography/tests/test_autond_ce1.py:1249: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+audit/cryptography/experiments/ce1/epoch_resume.py:217: in train_epochs_resumable
+    h = model.fit(
+/Users/oishimoitra/.venvs/gohr-tf221-validation-20261031/lib/python3.11/site-packages/keras/src/utils/traceback_utils.py:122: in error_handler
+    raise e.with_traceback(filtered_tb) from None
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (<Sequential name=sequential, built=True>, <audit.cryptography.experiments.ce1.epoch_resume._epoch_sequence.<locals>.FixedEpochSequence object at 0x28439a1d0>)
+kwargs = {'epochs': 1, 'batch_size': 16, 'validation_data': (array([[ 1.9712476e+00, -2.1700847e+00,  4.1152477e-01,  2.1156739...  0., 1., 1., 0., 1., 1., 1., 0., 0., 0., 0., 0., 1., 1., 1.],
+      dtype=float32)), 'validation_batch_size': 16, ...}
+
+    @wraps(fn)
+    def error_handler(*args, **kwargs):
+        if not is_traceback_filtering_enabled():
+            return fn(*args, **kwargs)
+    
+        filtered_tb = None
+        try:
+>           return fn(*args, **kwargs)
+E           TypeError: TensorFlowTrainer.fit() got an unexpected keyword argument 'workers'
+
+/Users/oishimoitra/.venvs/gohr-tf221-validation-20261031/lib/python3.11/site-packages/keras/src/utils/traceback_utils.py:117: TypeError
+_____________ test_explicit_versioned_run_dir_is_honoured_exactly ______________
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_explicit_versioned_run_di0/deep_speck')
+
+    def test_explicit_versioned_run_dir_is_honoured_exactly(repo):
+        """The exact Kaggle command: manifest lands in production_20260930, nowhere else."""
+        legacy_before = _sha_tree(repo / LEGACY_REL)
+        p = _recover(repo, NEW_REL)
+>       assert p.returncode == 0, p.stdout[-3000:] + p.stderr[-3000:]
+E       AssertionError: run directory: [LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_explicit_versioned_run_di0/deep_speck/audit/cryptography/evidence_current/ce1/production_20260930
+E         Traceback (most recent call last):
+E           File "<frozen runpy>", line 198, in _run_module_as_main
+E           File "<frozen runpy>", line 88, in _run_code
+E           File "[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_explicit_versioned_run_di0/deep_speck/audit/cryptography/experiments/ce1/gohr_signal_destruction.py", line 554, in <module>
+E             sys.exit(main())
+E                      ^^^^^^
+E           File "[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_explicit_versioned_run_di0/deep_speck/audit/cryptography/experiments/ce1/gohr_signal_destruction.py", line 512, in main
+E             out = recover_legacy_block0(legacy_dir, run_dir, cfg)
+E                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_explicit_versioned_run_di0/deep_speck/audit/cryptography/experiments/ce1/legacy_recovery.py", line 192, in recover_legacy_block0
+E             raise LegacyRecoveryError(f"{bdir} is not empty; recovery would mix artifacts")
+E         audit.cryptography.experiments.ce1.legacy_recovery.LegacyRecoveryError: audit/cryptography/evidence_current/ce1/production_20260930/blocks/block0 is not empty; recovery would mix artifacts
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/oishimoitra/.venvs/gohr-tf221-validation-20261031/bin/python', '-m', 'audit.cryptograph...udit/cryptography/evidence_current/ce1/production_20260930/blocks/block0 is not empty; recovery would mix artifacts\n').returncode
+
+audit/cryptography/tests/test_ce1_run_dir.py:81: AssertionError
+______________ test_degenerate_run_dir_never_falls_back_to_cwd[] _______________
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_degenerate_run_dir_never_0/deep_speck')
+value = ''
+
+    @pytest.mark.parametrize("value", ["", ".", "./", "   "])
+    def test_degenerate_run_dir_never_falls_back_to_cwd(repo, value):
+        before = _sha_tree(repo)
+        p = _recover(repo, value)
+        assert p.returncode == 2, p.stdout + p.stderr                 # argparse usage error
+        assert "explicit directory" in p.stderr and "working directory" in p.stderr
+        assert "HistoricalWriteError" not in p.stderr                 # rejected BEFORE any write
+>       assert _all_manifests(repo) == [] and _sha_tree(repo) == before
+E       AssertionError: assert (['audit/crypt...anifest.json'] == []
+E         
+E         Left contains 6 more items, first extra item: 'audit/cryptography/autond_ce1/evidence/confirmatory_r3/run_manifest.json'
+E         Use -v to get more diff)
+
+audit/cryptography/tests/test_ce1_run_dir.py:126: AssertionError
+______________ test_degenerate_run_dir_never_falls_back_to_cwd[.] ______________
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_degenerate_run_dir_never_1/deep_speck')
+value = '.'
+
+    @pytest.mark.parametrize("value", ["", ".", "./", "   "])
+    def test_degenerate_run_dir_never_falls_back_to_cwd(repo, value):
+        before = _sha_tree(repo)
+        p = _recover(repo, value)
+        assert p.returncode == 2, p.stdout + p.stderr                 # argparse usage error
+        assert "explicit directory" in p.stderr and "working directory" in p.stderr
+        assert "HistoricalWriteError" not in p.stderr                 # rejected BEFORE any write
+>       assert _all_manifests(repo) == [] and _sha_tree(repo) == before
+E       AssertionError: assert (['audit/crypt...anifest.json'] == []
+E         
+E         Left contains 6 more items, first extra item: 'audit/cryptography/autond_ce1/evidence/confirmatory_r3/run_manifest.json'
+E         Use -v to get more diff)
+
+audit/cryptography/tests/test_ce1_run_dir.py:126: AssertionError
+_____________ test_degenerate_run_dir_never_falls_back_to_cwd[./] ______________
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_degenerate_run_dir_never_2/deep_speck')
+value = './'
+
+    @pytest.mark.parametrize("value", ["", ".", "./", "   "])
+    def test_degenerate_run_dir_never_falls_back_to_cwd(repo, value):
+        before = _sha_tree(repo)
+        p = _recover(repo, value)
+        assert p.returncode == 2, p.stdout + p.stderr                 # argparse usage error
+        assert "explicit directory" in p.stderr and "working directory" in p.stderr
+        assert "HistoricalWriteError" not in p.stderr                 # rejected BEFORE any write
+>       assert _all_manifests(repo) == [] and _sha_tree(repo) == before
+E       AssertionError: assert (['audit/crypt...anifest.json'] == []
+E         
+E         Left contains 6 more items, first extra item: 'audit/cryptography/autond_ce1/evidence/confirmatory_r3/run_manifest.json'
+E         Use -v to get more diff)
+
+audit/cryptography/tests/test_ce1_run_dir.py:126: AssertionError
+_____________ test_degenerate_run_dir_never_falls_back_to_cwd[   ] _____________
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_degenerate_run_dir_never_3/deep_speck')
+value = '   '
+
+    @pytest.mark.parametrize("value", ["", ".", "./", "   "])
+    def test_degenerate_run_dir_never_falls_back_to_cwd(repo, value):
+        before = _sha_tree(repo)
+        p = _recover(repo, value)
+        assert p.returncode == 2, p.stdout + p.stderr                 # argparse usage error
+        assert "explicit directory" in p.stderr and "working directory" in p.stderr
+        assert "HistoricalWriteError" not in p.stderr                 # rejected BEFORE any write
+>       assert _all_manifests(repo) == [] and _sha_tree(repo) == before
+E       AssertionError: assert (['audit/crypt...anifest.json'] == []
+E         
+E         Left contains 6 more items, first extra item: 'audit/cryptography/autond_ce1/evidence/confirmatory_r3/run_manifest.json'
+E         Use -v to get more diff)
+
+audit/cryptography/tests/test_ce1_run_dir.py:126: AssertionError
+________ test_run_dir_pointing_at_legacy_run_is_refused_without_writing ________
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_run_dir_pointing_at_legac0/deep_speck')
+
+    def test_run_dir_pointing_at_legacy_run_is_refused_without_writing(repo):
+        legacy_before = _sha_tree(repo / LEGACY_REL)
+        for target in (LEGACY_REL, f"{LEGACY_REL}/nested_run"):
+            p = _recover(repo, target)
+            assert p.returncode == 1, p.stdout + p.stderr
+            assert "RECOVERY REFUSED" in p.stdout and "legacy run" in p.stdout
+        assert _sha_tree(repo / LEGACY_REL) == legacy_before         # no file added or changed
+>       assert _all_manifests(repo) == []
+E       AssertionError: assert ['audit/crypt...anifest.json'] == []
+E         
+E         Left contains 6 more items, first extra item: 'audit/cryptography/autond_ce1/evidence/confirmatory_r3/run_manifest.json'
+E         Use -v to get more diff
+
+audit/cryptography/tests/test_ce1_run_dir.py:154: AssertionError
+_ test_production_run_dir_must_be_direct_child_of_ce1[audit/cryptography/evidence_current] _
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_production_run_dir_must_b0/deep_speck')
+target = 'audit/cryptography/evidence_current'
+
+    @pytest.mark.parametrize("target", [
+        "audit/cryptography/evidence_current",                       # evidence root
+        CE1_REL,                                                     # ce1 root (contains legacy)
+        f"{CE1_REL}/runs/production_20260930",                       # nested one level too deep
+        "production_20260930",                                       # repo root child
+    ])
+    def test_production_run_dir_must_be_direct_child_of_ce1(repo, target):
+        before = _sha_tree(repo)
+        p = _recover(repo, target)
+        assert p.returncode == 1 and "RECOVERY REFUSED" in p.stdout, p.stdout + p.stderr
+>       assert _all_manifests(repo) == [] and _sha_tree(repo) == before
+E       AssertionError: assert (['audit/crypt...anifest.json'] == []
+E         
+E         Left contains 6 more items, first extra item: 'audit/cryptography/autond_ce1/evidence/confirmatory_r3/run_manifest.json'
+E         Use -v to get more diff)
+
+audit/cryptography/tests/test_ce1_run_dir.py:167: AssertionError
+_ test_production_run_dir_must_be_direct_child_of_ce1[audit/cryptography/evidence_current/ce1] _
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_production_run_dir_must_b1/deep_speck')
+target = 'audit/cryptography/evidence_current/ce1'
+
+    @pytest.mark.parametrize("target", [
+        "audit/cryptography/evidence_current",                       # evidence root
+        CE1_REL,                                                     # ce1 root (contains legacy)
+        f"{CE1_REL}/runs/production_20260930",                       # nested one level too deep
+        "production_20260930",                                       # repo root child
+    ])
+    def test_production_run_dir_must_be_direct_child_of_ce1(repo, target):
+        before = _sha_tree(repo)
+        p = _recover(repo, target)
+        assert p.returncode == 1 and "RECOVERY REFUSED" in p.stdout, p.stdout + p.stderr
+>       assert _all_manifests(repo) == [] and _sha_tree(repo) == before
+E       AssertionError: assert (['audit/crypt...anifest.json'] == []
+E         
+E         Left contains 6 more items, first extra item: 'audit/cryptography/autond_ce1/evidence/confirmatory_r3/run_manifest.json'
+E         Use -v to get more diff)
+
+audit/cryptography/tests/test_ce1_run_dir.py:167: AssertionError
+_ test_production_run_dir_must_be_direct_child_of_ce1[audit/cryptography/evidence_current/ce1/runs/production_20260930] _
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_production_run_dir_must_b2/deep_speck')
+target = 'audit/cryptography/evidence_current/ce1/runs/production_20260930'
+
+    @pytest.mark.parametrize("target", [
+        "audit/cryptography/evidence_current",                       # evidence root
+        CE1_REL,                                                     # ce1 root (contains legacy)
+        f"{CE1_REL}/runs/production_20260930",                       # nested one level too deep
+        "production_20260930",                                       # repo root child
+    ])
+    def test_production_run_dir_must_be_direct_child_of_ce1(repo, target):
+        before = _sha_tree(repo)
+        p = _recover(repo, target)
+        assert p.returncode == 1 and "RECOVERY REFUSED" in p.stdout, p.stdout + p.stderr
+>       assert _all_manifests(repo) == [] and _sha_tree(repo) == before
+E       AssertionError: assert (['audit/crypt...anifest.json'] == []
+E         
+E         Left contains 6 more items, first extra item: 'audit/cryptography/autond_ce1/evidence/confirmatory_r3/run_manifest.json'
+E         Use -v to get more diff)
+
+audit/cryptography/tests/test_ce1_run_dir.py:167: AssertionError
+___ test_production_run_dir_must_be_direct_child_of_ce1[production_20260930] ___
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broad.XWXLak/test_production_run_dir_must_b3/deep_speck')
+target = 'production_20260930'
+
+    @pytest.mark.parametrize("target", [
+        "audit/cryptography/evidence_current",                       # evidence root
+        CE1_REL,                                                     # ce1 root (contains legacy)
+        f"{CE1_REL}/runs/production_20260930",                       # nested one level too deep
+        "production_20260930",                                       # repo root child
+    ])
+    def test_production_run_dir_must_be_direct_child_of_ce1(repo, target):
+        before = _sha_tree(repo)
+        p = _recover(repo, target)
+        assert p.returncode == 1 and "RECOVERY REFUSED" in p.stdout, p.stdout + p.stderr
+>       assert _all_manifests(repo) == [] and _sha_tree(repo) == before
+E       AssertionError: assert (['audit/crypt...anifest.json'] == []
+E         
+E         Left contains 6 more items, first extra item: 'audit/cryptography/autond_ce1/evidence/confirmatory_r3/run_manifest.json'
+E         Use -v to get more diff)
+
+audit/cryptography/tests/test_ce1_run_dir.py:167: AssertionError
+=============================== warnings summary ===============================
+audit/cryptography/tests/test_autond_ce1.py:521
+  [LOCAL_TEMP_PATH_REDACTED]/-Users-oishimoitra/7a7832ae-f52d-4525-96c1-ac80c37d287a/scratchpad/regclone/audit/cryptography/tests/test_autond_ce1.py:521: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.slow
+
+audit/cryptography/tests/test_autond_ce1.py:805
+  [LOCAL_TEMP_PATH_REDACTED]/-Users-oishimoitra/7a7832ae-f52d-4525-96c1-ac80c37d287a/scratchpad/regclone/audit/cryptography/tests/test_autond_ce1.py:805: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.slow
+
+audit/cryptography/tests/test_autond_ce1.py:863
+  [LOCAL_TEMP_PATH_REDACTED]/-Users-oishimoitra/7a7832ae-f52d-4525-96c1-ac80c37d287a/scratchpad/regclone/audit/cryptography/tests/test_autond_ce1.py:863: PytestUnknownMarkWarning: Unknown pytest.mark.slow - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.slow
+
+audit/cryptography/tests/test_ce1_integration.py: 16283 warnings
+audit/cryptography/tests/test_ce1_production_wiring.py: 606 warnings
+audit/cryptography/tests/test_ce1_resume_matrix.py: 4 warnings
+  /Users/oishimoitra/.venvs/gohr-tf221-validation-20261031/lib/python3.11/site-packages/keras/src/backend/tensorflow/core.py:172: DeprecationWarning: __array__ implementation doesn't accept a copy keyword, so passing copy=False failed. __array__ must implement 'dtype' and 'copy' keyword arguments. To learn more, see the migration guide https://numpy.org/devdocs/numpy_2_0_migration_guide.html#adapting-to-changes-in-the-copy-keyword
+    return np.array(x)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:62: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:69: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:86: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:103: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:113: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:485: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:519: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:623: pinned upstream absent
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:701: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:720: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:734: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:747: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:803: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:861: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:978: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:991: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:1008: pinned AutoND upstream not present at AutoND-upstream
+SKIPPED [1] audit/cryptography/tests/test_autond_ce1.py:1183: pinned AutoND upstream not present at AutoND-upstream
+11 failed, 350 passed, 18 skipped, 16896 warnings in 170.53s (0:02:50)

@@ -1,0 +1,76 @@
+{
+  "created_utc": "2026-11-05T11:58:25Z",
+  "excluded_from_evidence": true,
+  "environment": {
+    "python": "3.11.14",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "platform": "macOS-13.5-arm64-arm-64bit",
+    "machine": "arm64",
+    "cpu_count": 8
+  },
+  "note": "timing only; the replicate built here is discarded and no statistic is computed from it",
+  "timings": {
+    "published_2^12": {
+      "pairs": 2048,
+      "wall_seconds": 0.08135645894799381,
+      "seconds_per_pair": 3.9724833470700105e-05,
+      "cpu_utilisation": 0.9871865250593103
+    },
+    "all_2^16_test_only": {
+      "pairs": 128,
+      "wall_seconds": 0.09205612499499694,
+      "seconds_per_pair": 0.0007191884765234136,
+      "cpu_utilisation": 0.9650308440076958
+    }
+  },
+  "available_memory_bytes_at_start": 2330705920,
+  "published_loop_equals_2^16_average_exactly": true,
+  "scalar_reference_seconds_per_pair": 0.011573208248591982,
+  "scalar_reference_max_abs_difference": 0.0,
+  "full_replicate": {
+    "real_pairs": 50000,
+    "wall_seconds": 5.514633499959018,
+    "cpu_utilisation": 2.1871444403494142,
+    "seconds_per_real_pair": 0.00011029266999918036,
+    "raw_bytes_per_real_pair": 36.31504
+  },
+  "peak_rss_mib": 1058.5,
+  "pairs_rule_at_R60": {
+    "chosen": 1000000,
+    "projected_hours": {
+      "10000": 0.01838211166653006,
+      "30000": 0.05514633499959018,
+      "100000": 0.1838211166653006,
+      "300000": 0.5514633499959019,
+      "1000000": 1.838211166653006
+    },
+    "projected_bytes": {
+      "10000": 21789024.000000004,
+      "30000": 65367072.00000001,
+      "100000": 217890240.00000003,
+      "300000": 653670720.0000001,
+      "1000000": 2178902400.0
+    },
+    "budget_hours": 12.0,
+    "budget_bytes": 10000000000.0
+  }
+}
+       10.80 real        15.62 user         3.40 sys
+          1109917696  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              138113  page reclaims
+               10526  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                3776  voluntary context switches
+               40465  involuntary context switches
+        149020023208  instructions retired
+         53006624073  cycles elapsed
+           850432896  peak memory footprint

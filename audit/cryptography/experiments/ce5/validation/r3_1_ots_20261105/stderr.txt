@@ -1,0 +1,15 @@
+Assuming target filename is 'audit/dataset/preregistrations/d2n_fresh_draw_null.json'
+Hashing file, algorithm sha256
+Got digest 838ec67266130779fc1ebeeb69795791b2245727ede618c56e87502af882de7e
+Checking calendar https://finney.calendar.eternitywall.com for 6aec2446498d7e324cbebfcb39667e573f5f4bba972966b6b4a7f23d32060bb038fca0fef217602e12a2b566
+Got 1 attestation(s) from https://finney.calendar.eternitywall.com
+    BitcoinBlockHeaderAttestation(974654)
+Checking calendar https://bob.btc.calendar.opentimestamps.org for 6aec2446cf9d315ee11c17c6bf826f25ad0155ba59d448a29eaf8163619409ee080fae603098c51106af547e
+Calendar https://bob.btc.calendar.opentimestamps.org: [Errno 61] Connection refused
+Checking calendar https://alice.btc.calendar.opentimestamps.org for 6aec24471475dabd845675dc8afca7b7772e89c39d6cdd631b0612d989de18920d692f39062b736cdc4847c0
+Got 1 attestation(s) from https://alice.btc.calendar.opentimestamps.org
+    BitcoinBlockHeaderAttestation(974635)
+Checking calendar https://btc.calendar.catallaxy.com for 6aec2447b17e35ad6651d58293d501580b394eccf4ab7b0edd23daa1b53498c9152d43153ac3d3fc1bee5668
+Got 1 attestation(s) from https://btc.calendar.catallaxy.com
+    BitcoinBlockHeaderAttestation(974643)
+Could not connect to Bitcoin node: Cookie file unusable ([Errno 2] No such file or directory: '/Users/oishimoitra/Library/Application Support/Bitcoin/.cookie') and rpcpassword not specified in the configuration file: '/Users/oishimoitra/Library/Application Support/Bitcoin/bitcoin.conf'

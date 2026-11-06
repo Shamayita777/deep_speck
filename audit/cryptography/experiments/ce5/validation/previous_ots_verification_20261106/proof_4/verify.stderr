@@ -1,0 +1,15 @@
+Assuming target filename is './audit/experimental_validity/docs/autond_ev.md'
+Hashing file, algorithm sha256
+Got digest 7d13cfe11a17e48e83849d11bb1da221491d27c4ccc376f57b0109ec518a09ce
+Checking calendar https://finney.calendar.eternitywall.com for 6aec244864c72776a277f321fd89ad1633b5c75e2cb5c4a77ec3f1bf89a2db89f14e68200d77dd4a56b44dfa
+Calendar https://finney.calendar.eternitywall.com: [Errno 8] nodename nor servname provided, or not known
+Checking calendar https://bob.btc.calendar.opentimestamps.org for 6aec244967c8e4b7ebc484bfbec0e75a124a38827f5da6a9d3fbaac17567595bdbe1ade98fbf5311332bbc08
+Got 1 attestation(s) from https://bob.btc.calendar.opentimestamps.org
+    BitcoinBlockHeaderAttestation(974635)
+Checking calendar https://alice.btc.calendar.opentimestamps.org for 6aec244a2e5237ff913b5c277c9c485156463310bd565e78ecd230279746414572bb34a95de3edbfb5f842ab
+Got 1 attestation(s) from https://alice.btc.calendar.opentimestamps.org
+    BitcoinBlockHeaderAttestation(974635)
+Checking calendar https://btc.calendar.catallaxy.com for 6aec2448fc70871b8e4dd4e1e4c8c858cf87b2386de5f93349526642eab069ebf94324a2b2b73cbe3b3a3e32
+Got 1 attestation(s) from https://btc.calendar.catallaxy.com
+    BitcoinBlockHeaderAttestation(974643)
+Could not connect to Bitcoin node: Cookie file unusable ([Errno 2] No such file or directory: '/Users/oishimoitra/Library/Application Support/Bitcoin/.cookie') and rpcpassword not specified in the configuration file: '/Users/oishimoitra/Library/Application Support/Bitcoin/bitcoin.conf'

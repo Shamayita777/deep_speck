@@ -1,0 +1,134 @@
+  variability table 1/5 done
+  variability table 2/5 done
+  variability table 3/5 done
+  variability table 4/5 done
+  variability table 5/5 done
+{
+  "created_utc": "2026-11-05T11:59:28Z",
+  "excluded_from_evidence": true,
+  "randomness": "os.urandom, fresh per table and per evaluation set",
+  "n_tables": 5,
+  "table_pairs": 10000000,
+  "table_rounds": 4,
+  "n_eval_per_class": 100000,
+  "rows": [
+    {
+      "table": 0,
+      "table_sha256": "d0d593df516c90f9991a4d97d5b9e723b3d4f0681f1d9c4fbf8d7a6f3af65c15",
+      "scores_sha256": "d99086ccf12a9a5aa94e6304733c060bb7b23b5c6cffbf585c6031e6b9d806c5",
+      "confusion": {
+        "tp": 90766,
+        "fn": 9234,
+        "tn": 94907,
+        "fp": 5093
+      },
+      "accuracy": 0.928365,
+      "tpr": 0.90766,
+      "tnr": 0.94907,
+      "seconds": 10.0
+    },
+    {
+      "table": 1,
+      "table_sha256": "2c9d3991daeefa048174a9e073cf257478e74794d7b782de0940695c264b077a",
+      "scores_sha256": "bc095bbe951fb04de83f6202293185f54d6f7c85215142e28139d4ef76eff2c0",
+      "confusion": {
+        "tp": 90877,
+        "fn": 9123,
+        "tn": 94949,
+        "fp": 5051
+      },
+      "accuracy": 0.92913,
+      "tpr": 0.90877,
+      "tnr": 0.94949,
+      "seconds": 10.1
+    },
+    {
+      "table": 2,
+      "table_sha256": "c005b809577d06b31c821b9e21341c63d70638230d54de0de7539879888e95ea",
+      "scores_sha256": "8c7e67e83129151e6fe14c6c90126bb5df09e8a97d2910c898e4e361165e84f6",
+      "confusion": {
+        "tp": 90717,
+        "fn": 9283,
+        "tn": 95061,
+        "fp": 4939
+      },
+      "accuracy": 0.92889,
+      "tpr": 0.90717,
+      "tnr": 0.95061,
+      "seconds": 10.1
+    },
+    {
+      "table": 3,
+      "table_sha256": "feb260caa5d816763dd6198c7719af04c21ffb900cc06117947f47b78977dddc",
+      "scores_sha256": "4bdb65c8f455dd1c57248519a98a40ca103b2aeea99f14925864e1eadcc06663",
+      "confusion": {
+        "tp": 90881,
+        "fn": 9119,
+        "tn": 95013,
+        "fp": 4987
+      },
+      "accuracy": 0.92947,
+      "tpr": 0.90881,
+      "tnr": 0.95013,
+      "seconds": 10.0
+    },
+    {
+      "table": 4,
+      "table_sha256": "452947dbce9d0c2009cb87aefe1fdcebe003ed9cbb05ec189285ba7c398f5f7f",
+      "scores_sha256": "c3b35709a6ead73d4fa7c13e6da198630525d0cba8f77425dbbe31f8c5a15df0",
+      "confusion": {
+        "tp": 90731,
+        "fn": 9269,
+        "tn": 95068,
+        "fp": 4932
+      },
+      "accuracy": 0.928995,
+      "tpr": 0.90731,
+      "tnr": 0.95068,
+      "seconds": 10.1
+    }
+  ],
+  "sd": {
+    "accuracy": 0.0004026940526007396,
+    "tpr": 0.0007927673050775931,
+    "tnr": 0.0007029082443676457
+  },
+  "three_sd": {
+    "accuracy": 0.0012080821578022189,
+    "tpr": 0.002378301915232779,
+    "tnr": 0.002108724733102937
+  },
+  "proposed_tolerance": {
+    "accuracy": 0.005,
+    "rates": 0.01
+  },
+  "rule": "tau = max(0.005, 3 * sigma_t(accuracy)) and tau_rate = max(0.010, 3 * max(sigma_t(TPR), sigma_t(TNR))), fixed from table_variability before approval; the floors 0.005 and 0.010 are proposals awaiting the operator's decision",
+  "status": "proposal; floors 0.005 and 0.010 are not approved values",
+  "environment": {
+    "python": "3.11.14",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "platform": "macOS-13.5-arm64-arm-64bit",
+    "machine": "arm64",
+    "cpu_count": 8
+  },
+  "peak_rss_mib": 532.7
+}
+       50.99 real        44.70 user         8.97 sys
+           558596096  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              107389  page reclaims
+                 209  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 298  voluntary context switches
+                2465  involuntary context switches
+        569340548819  instructions retired
+        166683927647  cycles elapsed
+           358320768  peak memory footprint

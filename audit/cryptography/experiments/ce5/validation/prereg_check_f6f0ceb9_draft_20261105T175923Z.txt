@@ -1,0 +1,29 @@
+draft preregistration_f6f0ceb9_draft_20261105T175923Z.json 726a1b90d8019c8918ea4fa666eecf5e0941a96cf200dadf72e6329925249762
+PASS design identical to design.py
+PASS design hash f6f0ceb9…
+PASS approval hash = design hash; not approved
+PASS no unset fields
+PASS calibration and verification record hashes
+PASS R = 20 everywhere; verification VERIFIED
+PASS planning spread in disclosure = record
+PASS pairs 10^6
+PASS margin 0.10
+PASS tolerance 0.005 / 0.010 and intervals
+PASS Table 7 values; gate 100,000 per class
+PASS tables and validation
+PASS checkpoint and PDF
+PASS all code and frozen-dependency hashes
+PASS outcome rules strict
+PASS primary within real pairs; order-statistic interval; alpha 0.05; sensitivity 0.05/0.20
+PASS secondary set and Holm
+PASS exclusions, randomisation, minimum valid
+PASS blinding
+PASS disclosures explicit
+PASS planning config in code = record
+TOTAL 21 / 21
+--- stale-reference scan
+HASH edb4bb88 (design before decisions) at .design.previous_design_sha256
+HASH edb4bb88 (design before decisions) at .design.design_history[0]
+HASH b5c4ac4f (design used for calibration) at .design.design_history[1]
+PARAM '2^13-class' at .design.superseded
+HASH b5c4ac4f (design used for calibration) at .calibration_disclosure.calibrated_under_design_sha256

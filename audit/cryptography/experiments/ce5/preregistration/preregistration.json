@@ -1,0 +1,149 @@
+{
+  "design": {
+    "experiment_id": "GOHR-CE5-DISTRIBUTIONAL-COMPARATOR",
+    "version": "Gohr-CE5-design-2026-11-r3",
+    "dimension": "CE",
+    "claim": "G1",
+    "question": "Within real 5-round pairs, is the rank association between the bound network's output N and the average-key-rank score D greater than, smaller than, or practically equal to its rank association with the CE2 single-trail probability T?",
+    "why": "G-CE2 (median Spearman 0.807 between N and T, 20/20 positive) excludes the registered alternatives of CE2 but not a distributional account: Benamira et al. build a key-averaged distinguisher from a masked difference distribution that closely matches the network's 5-round accuracy. CE5 tests which registered account agrees better with the fixed network.",
+    "hypotheses_wording": "Both D and T are differential-cryptanalytic quantities. CE5 compares two cryptanalytic explanations of the network's score; it does not test whether the signal is cryptographic, a result favouring one account does not disprove the other, and no outcome establishes a causal mechanism.",
+    "model": {
+      "checkpoint": "Archive/best5depth10.h5",
+      "sha256": "256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737",
+      "binding": "audit.cryptography.ce234.production.verify_reference_model(behavioural=True), unmodified",
+      "provenance": "output of the authors' re-execution of Gohr's train_nets.py (depth 10, 5 rounds, 200 epochs), commit 2b54425; not Gohr's released weights",
+      "retraining": "none"
+    },
+    "cipher": {
+      "name": "SPECK32/64",
+      "rounds": 5,
+      "input_difference": [
+        "0x0040",
+        "0x0000"
+      ],
+      "conventions": "audit.cryptography.gohr.speck (Gohr's code); word order (l, r); MSB-first encoding"
+    },
+    "trail_proxy_T": {
+      "source": "audit.cryptography.ce234.production.generate_theory_data(n, with_factors=True), imported unmodified: product of the per-round xdp+ factors of the realised trail",
+      "domain": "real pairs only: T needs the realised intermediate differences, which a random pair does not have; the primary comparison is therefore conditional on real pairs",
+      "persisted": "T and the per-round factors F; the verifier checks T = prod(F) for feasible pairs"
+    },
+    "baseline_D": {
+      "construction": "average-key-rank differential distinguisher, Benamira et al. 2021, Sect. 4.5, Supplementary Algorithm 1 (aDDT construction) and Algorithm 2 (distinguisher), Table 7",
+      "algorithm_source_text": "docs/SOURCE_VERIFICATION.md section 2 (verbatim, P1 p. 32)",
+      "primary_source_pdf_sha256": "a0f48abeefb48358ac629d92bc653dd9d141a8d83c1116be9491bb3b22d03cae",
+      "algorithm_source_text_rule": "Algorithms 1 and 2 transcribed verbatim with page numbers into docs/SOURCE_VERIFICATION.md; every step of akr.py and reference.py is mapped to a line of that transcription",
+      "source_location": "P1 Sect. 4.5 pp. 17-18 (method, n = 10^7, mask, complexity); Supplementary A p. 32 (Algorithms 1 and 2); Table 7 p. 19",
+      "mask": [
+        "0xff8f",
+        "0xff8f"
+      ],
+      "mask_applies_to": "(dl || dv): 0xff8f on dl, 0xff8f on dv (Algorithm 1 L11)",
+      "mask_weight": 26,
+      "table_definition": "Algorithm 1: dl = l xor l', dv = l xor r xor l' xor r' at nr - 1 rounds; aDDT[(dl || dv) & m] += 1/n; stored as integer counts over the 2^26 masked cells",
+      "table_rounds": 4,
+      "table_pairs": 10000000,
+      "candidates": "Algorithm 2 L4: key = 0 .. 2^12 - 1, literal; one-round decryption of both ciphertexts per candidate",
+      "lookup": "aDDT[(dl || dv) & m]; Algorithm 2 L9 omits '& m', read as the masked cell written by Algorithm 1 L11 (interpretation recorded in docs/SOURCE_VERIFICATION.md)",
+      "score": "score / 2^12 (Algorithm 2 L11), continuous, pre-threshold, kept for the correlations",
+      "decision": "real iff score / 2^12 > 2^-HW(m) = 2^-26, strict (Algorithm 2 L11); used by the gate",
+      "smoothing": "none: Algorithm 1 L2 initialises to zero and unseen cells contribute 0",
+      "table_check": "an independent 10^5-pair sample from reference.py (own SPECK, own random stream) is compared with the recorded table over its 200 most frequent cells with expected count >= 5 plus a pooled remainder; PASS iff chi-square p >= 0.001 at the registered rounds and p < 1e-12 at one round fewer and one more",
+      "implementation": "experiments/ce5/akr.py; independent scalar reference experiments/ce5/reference.py",
+      "table_sha256": "09ff9388871fc6e41d2099d3a41619430528e49ce78c6ee5e919531f2cf54be6",
+      "table_record": "experiments/ce5/tables/tables_manifest.json (r3, Algorithm 1; table check PASS)"
+    },
+    "secondary_comparator_LR": {
+      "construction": "Algorithm 1 table at nr = 5 rounds (10^7 pairs, independent of the aKR table), read at the masked (dl || dv) of the ciphertexts themselves, no key guessing; secondary, not a published distinguisher",
+      "table_sha256": "2ba703dbfaf4e5d5bfb0f1c83135dbae890dd816725ce1a791187a97f9d91e48"
+    },
+    "instrument_order": "tables are built once, hashed and recorded here before calibration; calibration, gate and production all use the recorded tables",
+    "superseded": "design r2 (2^13-class average of all 2^16 subkeys, (delta_l, delta_r) table) is kept in historical/r2_superseded_20261105 and is not evidence for this design",
+    "not_run": [
+      "M-ODT/LightGBM (its masks are derived from the network, so it is not an independent baseline)"
+    ],
+    "gate": {
+      "purpose": "the baseline must reproduce the published aKR result, not merely beat the DDT, before any confirmatory data exist",
+      "published_akr": {
+        "accuracy": 0.9298,
+        "tpr": 0.9076,
+        "tnr": 0.9522,
+        "location": "P1 Table 7, p. 19, row 5 (92.98%, 90.76%, 95.22%)"
+      },
+      "published_ddt_accuracy": 0.911,
+      "published_ddt_location": "P1 Table 1, p. 9, row D5 (0.911, 0.877, 0.947; taken from Table 2 of Gohr 2019); also P1 Table 10, p. 27",
+      "published_evaluation_size": "not stated for Table 7; Table 8 (p. 19) uses 10^5 pairs, about 50,000 per class",
+      "pairs_per_class": 100000,
+      "table_variability": "before approval, non-confirmatory: 5 independent tables built from fresh data, each scored on its own fresh 10^5 + 10^5 pairs; sigma_t = SD of the 5 accuracies (and of TPR, TNR)",
+      "tolerance_rule": "tau = max(0.005, 3 * sigma_t) for accuracy and tau_rate = max(0.010, 3 * sigma_t(rate)) for TPR and TNR, fixed from table_variability before approval",
+      "tolerance": "NOT_YET_RECORDED",
+      "rule": "REPRODUCED iff the Clopper-Pearson 95% interval of accuracy lies inside [0.9298 - tau, 0.9298 + tau] and the CP intervals of TPR and TNR lie inside their published values +- tau_rate. SEPARATED (reported) iff the accuracy CP lower limit exceeds (0.9298 + 0.911) / 2. CE5 proceeds only on REPRODUCED; SEPARATED without REPRODUCED is reported as an adequacy result and CE5 is UNADJUDICATED",
+      "data": "fresh pairs from os.urandom after approval, independent of the tables and of every replicate",
+      "reported": "accuracy, TPR, TNR, full confusion matrix, both gate components",
+      "on_failure": "CE5 is UNADJUDICATED and the failure is reported; no replicate is run and no substitute baseline is run under this design"
+    },
+    "replicate": {
+      "unit": "replicate (independent fresh data); never the pair",
+      "real_pairs_per_replicate": 1000000,
+      "real_pairs_record": "validation/benchmark.json (r3, 2026-11-05T11:16:06Z): 0.109 ms and 36.3 bytes per real pair, covering one real and one random pair (generation, inference, aKR and LR scoring); 1.8 h and 2.2 GB at R = 60; peak footprint 885 MB",
+      "random_pairs_per_replicate": "equal to real_pairs_per_replicate",
+      "n_replicates": "NOT_YET_RECORDED",
+      "minimum_valid_replicates": "all registered replicates",
+      "rules": {
+        "real_pairs_per_replicate": "largest of 10^4, 3x10^4, 10^5, 3x10^5, 10^6 whose projected production time (trail generation, network inference and aKR scoring of real and random pairs, each measured by the benchmark) at the worst-case R = 60 is at most 12 hours on the registered machine and whose raw files at R = 60 fit in 10 GB; fixed before calibration",
+        "n_replicates": "smallest R in {20, 25, ..., 60} for which, under a normal model with SD equal to the 80% upper confidence bound of the calibration SD of Delta, P(EQUIVALENT | Delta = 0) >= 0.80, P(DISTRIBUTION_GREATER | Delta = 2m) >= 0.80 and P(TRAIL_GREATER | Delta = -2m) >= 0.80; 60 if none, with the shortfall reported",
+        "calibration": "10 blinded replicates at the chosen pair count on fresh data, after the margin is fixed: only the spread of Delta is kept, its location and all correlations are discarded; never evidence. The SD used is the 80% upper confidence bound of max(sample SD, 1.4826 * MAD)"
+      },
+      "data": "fresh per replicate from os.urandom; raw arrays persisted before analysis"
+    },
+    "primary": {
+      "statistic": "Delta_r = atanh(rho_s(N, D | real)) - atanh(rho_s(N, T | real)) on the same real pairs of replicate r, rho_s = Spearman with average ranks for ties",
+      "dependence": "the two correlations share N and the pairs; their dependence is absorbed by taking the paired difference within each replicate and inferring across independent replicates",
+      "interval": "distribution-free interval for the median of Delta_r from binomial order statistics, coverage >= 95% (95.9% at R = 20)",
+      "margin": "NOT_YET_RECORDED",
+      "margin_proposal": 0.1,
+      "margin_rationale": "proposal only: on the Fisher-z scale, which roughly stabilises the variance of a correlation; at the G-CE2 level (rho = 0.807) 0.10 moves rho by about 0.03 and the squared rank association by about 0.05. Under the revised outcomes a DISTRIBUTION_GREATER or TRAIL_GREATER verdict needs the whole interval beyond the margin, so the margin is the smallest difference the experiment can certify. The operator sets the value before calibration; no data have informed it.",
+      "margin_sensitivity": [
+        0.05,
+        0.2
+      ],
+      "outcomes": {
+        "DISTRIBUTION_GREATER": "lower limit >= margin (a practically meaningful difference is demonstrated)",
+        "TRAIL_GREATER": "upper limit <= -margin",
+        "EQUIVALENT": "-margin < lower limit and upper limit < margin",
+        "INCONCLUSIVE": "otherwise; a non-significant difference is never read as equivalence, and a difference whose interval excludes 0 but crosses the margin is reported only as a direction (qualifier DIRECTION_D or DIRECTION_T), never as practically meaningful"
+      },
+      "alpha": 0.05
+    },
+    "secondary": {
+      "resolution_matched": "T takes few distinct values and D is nearly continuous, which caps rho(N, T) below rho(N, D) for reasons of resolution alone. Delta_matched_r uses D re-ranked with T's tie structure (D's order, T's tie groups) in place of D; same interval and outcomes, descriptive",
+      "margin_sensitivity": "the primary outcome at each margin in primary.margin_sensitivity, descriptive",
+      "class_conditional": "rho_s(N, D | real) and rho_s(N, D | random), descriptive; T is undefined for random pairs",
+      "lr_comparator": "Delta_LR_r = atanh(rho_s(N, LR)) - atanh(rho_s(N, T)), same interval, descriptive",
+      "incremental_value": {
+        "target": "van der Waerden normal scores of N",
+        "features": "normal scores of T and D, each with degree-3 polynomial terms; M_TD adds T*D",
+        "fit": "ordinary least squares on the first half of each replicate's real pairs",
+        "loss": "mean squared error on the second half; the same evaluation pairs for all three models",
+        "statistics": "Delta_D = L(M_T) - L(M_TD); Delta_T = L(M_D) - L(M_TD)",
+        "test": "exact two-sided sign test over replicates for each; Holm over the two",
+        "interpretation": "predictive information about N beyond the competing predictor; not causal reliance or mechanism"
+      }
+    },
+    "anchoring": "preregistration.json must have an OpenTimestamps proof preregistration.json.ots whose embedded SHA-256 equals the file's; production refuses otherwise",
+    "verification": "verify.py consumes the raw files and the tables only. It recomputes table hashes, the table check, gate accuracy and confusion matrix, D for 32 random pairs per class per replicate with reference.py (literal 2^16 enumeration), T = prod(F), every correlation, Fisher transform, paired difference, interval, incremental value and decision, and optionally N for 256 pairs per replicate from the checkpoint. Any mismatch makes the certificate NOT_VERIFIED",
+    "exclusions": "a replicate is re-drawn only after an infrastructure failure, kept in the log",
+    "environment_requirement": "Python 3.11, TensorFlow 2.21, Keras 3, numpy 2.x, scipy 1.17, CPU",
+    "not_claimed": [
+      "that the network computes D or T",
+      "that rejecting the single-trail account rejects cryptographic learning",
+      "anything about other checkpoints, rounds or input differences"
+    ]
+  },
+  "approval": {
+    "status": "PROPOSED_PENDING_APPROVAL",
+    "design_sha256": "5bca223e85fd4d91eccca92d52267ab3d60b80cc11ff243ff27d15d4c382541a",
+    "approved_by": null,
+    "approved_utc": null
+  }
+}

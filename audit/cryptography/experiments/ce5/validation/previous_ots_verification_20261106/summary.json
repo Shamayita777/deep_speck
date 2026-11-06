@@ -1,0 +1,178 @@
+{
+  "proofs": [
+    {
+      "proof": "./audit/dataset/experiments/d2n_fresh_draw_null.py.ots",
+      "source": "./audit/dataset/experiments/d2n_fresh_draw_null.py",
+      "source_sha256": "069c0bc5c51f69ea678c8543427929e8a9005f423c8f19cea6db4c3f02235c5d",
+      "proof_sha256": "673e12434183ad77afdd8a1c9d0a62a411d9e00046ffc5152693cee5e3397352",
+      "embedded_digest": "069c0bc5c51f69ea678c8543427929e8a9005f423c8f19cea6db4c3f02235c5d",
+      "digest_matches_source": true,
+      "files_unchanged": true,
+      "in_file_attestations": {
+        "pending": 4,
+        "bitcoin": 0
+      },
+      "calendar_bitcoin_attestations": [
+        974635,
+        974643
+      ],
+      "verify_exit": 1,
+      "verify_failure": "Could not connect to Bitcoin node",
+      "expected_merkle_roots": {
+        "974635": "73abfe6635988cf34a75231fc8d7450a2932edd89d735213985103cdba9c36c0",
+        "974643": "a95b2a77d3bef045c24ada287631ce15cc9257ff877c6b267376f0182377ccbc"
+      }
+    },
+    {
+      "proof": "./audit/dataset/preregistrations/d2n_fresh_draw_null.json.ots",
+      "source": "./audit/dataset/preregistrations/d2n_fresh_draw_null.json",
+      "source_sha256": "838ec67266130779fc1ebeeb69795791b2245727ede618c56e87502af882de7e",
+      "proof_sha256": "3127c59e224c05a47ff393c8652be6a93689d9e9860a693d2bd074a29577007b",
+      "embedded_digest": "838ec67266130779fc1ebeeb69795791b2245727ede618c56e87502af882de7e",
+      "digest_matches_source": true,
+      "files_unchanged": true,
+      "in_file_attestations": {
+        "pending": 4,
+        "bitcoin": 0
+      },
+      "calendar_bitcoin_attestations": [
+        974635,
+        974643
+      ],
+      "verify_exit": 1,
+      "verify_failure": "Could not connect to Bitcoin node",
+      "expected_merkle_roots": {
+        "974635": "73abfe6635988cf34a75231fc8d7450a2932edd89d735213985103cdba9c36c0",
+        "974643": "a95b2a77d3bef045c24ada287631ce15cc9257ff877c6b267376f0182377ccbc"
+      }
+    },
+    {
+      "proof": "./audit/experimental_validity/configs/autond_ev.yaml.ots",
+      "source": "./audit/experimental_validity/configs/autond_ev.yaml",
+      "source_sha256": "59caad72bdde576074730086615764b4cab685c81465e3215f74fddeb916e562",
+      "proof_sha256": "38b5a7fac029c76fdc729b980b48fed232a08543402e476752223b4e6ddede9f",
+      "embedded_digest": "59caad72bdde576074730086615764b4cab685c81465e3215f74fddeb916e562",
+      "digest_matches_source": true,
+      "files_unchanged": true,
+      "in_file_attestations": {
+        "pending": 4,
+        "bitcoin": 0
+      },
+      "calendar_bitcoin_attestations": [
+        974635,
+        974643
+      ],
+      "verify_exit": 1,
+      "verify_failure": "Could not connect to Bitcoin node",
+      "expected_merkle_roots": {
+        "974635": "73abfe6635988cf34a75231fc8d7450a2932edd89d735213985103cdba9c36c0",
+        "974643": "a95b2a77d3bef045c24ada287631ce15cc9257ff877c6b267376f0182377ccbc"
+      }
+    },
+    {
+      "proof": "./audit/experimental_validity/docs/autond_ev.md.ots",
+      "source": "./audit/experimental_validity/docs/autond_ev.md",
+      "source_sha256": "7d13cfe11a17e48e83849d11bb1da221491d27c4ccc376f57b0109ec518a09ce",
+      "proof_sha256": "4dc4e694d38cf557582e0521cd5d4ea356c5fed92120c14363c6e174e690ddff",
+      "embedded_digest": "7d13cfe11a17e48e83849d11bb1da221491d27c4ccc376f57b0109ec518a09ce",
+      "digest_matches_source": true,
+      "files_unchanged": true,
+      "in_file_attestations": {
+        "pending": 4,
+        "bitcoin": 0
+      },
+      "calendar_bitcoin_attestations": [
+        974635,
+        974643
+      ],
+      "verify_exit": 1,
+      "verify_failure": "Could not connect to Bitcoin node",
+      "expected_merkle_roots": {
+        "974635": "73abfe6635988cf34a75231fc8d7450a2932edd89d735213985103cdba9c36c0",
+        "974643": "a95b2a77d3bef045c24ada287631ce15cc9257ff877c6b267376f0182377ccbc"
+      }
+    },
+    {
+      "proof": "./e3_commit.txt.ots",
+      "source": "./e3_commit.txt",
+      "source_sha256": "3581301d78a1fa27524713a8c64ea59099592caf6bf9ecee61971587684438e1",
+      "proof_sha256": "5be7a03eae2b1471053145e6e644871c010b5e1d85cc0b3aec74684c30e296c6",
+      "embedded_digest": "3581301d78a1fa27524713a8c64ea59099592caf6bf9ecee61971587684438e1",
+      "digest_matches_source": true,
+      "files_unchanged": true,
+      "in_file_attestations": {
+        "pending": 4,
+        "bitcoin": 0
+      },
+      "calendar_bitcoin_attestations": [
+        974635,
+        974643
+      ],
+      "verify_exit": 1,
+      "verify_failure": "Could not connect to Bitcoin node",
+      "expected_merkle_roots": {
+        "974635": "73abfe6635988cf34a75231fc8d7450a2932edd89d735213985103cdba9c36c0",
+        "974643": "a95b2a77d3bef045c24ada287631ce15cc9257ff877c6b267376f0182377ccbc"
+      }
+    },
+    {
+      "proof": "./ev_commit.txt.ots",
+      "source": "./ev_commit.txt",
+      "source_sha256": "edc95d9bfcc60514d88600ac346c7a9fce30bb7c5b306d41ef2bfe5fe7dade30",
+      "proof_sha256": "3928665aa6fcb2fd7872b2a68dd380ac879f128bf2e0d4f900d5dd416474af21",
+      "embedded_digest": "edc95d9bfcc60514d88600ac346c7a9fce30bb7c5b306d41ef2bfe5fe7dade30",
+      "digest_matches_source": true,
+      "files_unchanged": true,
+      "in_file_attestations": {
+        "pending": 4,
+        "bitcoin": 0
+      },
+      "calendar_bitcoin_attestations": [
+        974635,
+        974643
+      ],
+      "verify_exit": 1,
+      "verify_failure": "Could not connect to Bitcoin node",
+      "expected_merkle_roots": {
+        "974635": "73abfe6635988cf34a75231fc8d7450a2932edd89d735213985103cdba9c36c0",
+        "974643": "a95b2a77d3bef045c24ada287631ce15cc9257ff877c6b267376f0182377ccbc"
+      }
+    }
+  ],
+  "explorer_blocks": {
+    "974635": [
+      {
+        "explorer": "https://blockstream.info/api",
+        "block_hash": "00000000000000000001152c132b54b5b62515240ae340901f14457c0e126b30",
+        "merkle_root": "73abfe6635988cf34a75231fc8d7450a2932edd89d735213985103cdba9c36c0",
+        "time": "2026-11-05 07:19:14 UTC",
+        "height": 974635
+      },
+      {
+        "explorer": "https://mempool.space/api",
+        "block_hash": "00000000000000000001152c132b54b5b62515240ae340901f14457c0e126b30",
+        "merkle_root": "73abfe6635988cf34a75231fc8d7450a2932edd89d735213985103cdba9c36c0",
+        "time": "2026-11-05 07:19:14 UTC",
+        "height": 974635
+      }
+    ],
+    "974643": [
+      {
+        "explorer": "https://blockstream.info/api",
+        "block_hash": "0000000000000000000172c8295241d08616b8fa4e52e829601d27cad40fabd4",
+        "merkle_root": "a95b2a77d3bef045c24ada287631ce15cc9257ff877c6b267376f0182377ccbc",
+        "time": "2026-11-05 08:12:49 UTC",
+        "height": 974643
+      },
+      {
+        "explorer": "https://mempool.space/api",
+        "block_hash": "0000000000000000000172c8295241d08616b8fa4e52e829601d27cad40fabd4",
+        "merkle_root": "a95b2a77d3bef045c24ada287631ce15cc9257ff877c6b267376f0182377ccbc",
+        "time": "2026-11-05 08:12:49 UTC",
+        "height": 974643
+      }
+    ]
+  },
+  "all_merkle_roots_match_both_explorers": true,
+  "status": "submitted to calendars; proof files hold only pending attestations (not upgraded); calendars return Bitcoin attestations for blocks 974635 and 974643; local ots verify not possible (no Bitcoin node: infrastructure limitation); merkle roots cross-checked against two public block explorers"
+}

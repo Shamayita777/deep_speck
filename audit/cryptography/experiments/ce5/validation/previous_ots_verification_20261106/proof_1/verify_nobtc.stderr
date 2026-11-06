@@ -1,0 +1,18 @@
+Assuming target filename is './audit/dataset/experiments/d2n_fresh_draw_null.py'
+Hashing file, algorithm sha256
+Got digest 069c0bc5c51f69ea678c8543427929e8a9005f423c8f19cea6db4c3f02235c5d
+Checking calendar https://finney.calendar.eternitywall.com for 6aec2446498d7e324cbebfcb39667e573f5f4bba972966b6b4a7f23d32060bb038fca0fef217602e12a2b566
+Calendar https://finney.calendar.eternitywall.com: [Errno 8] nodename nor servname provided, or not known
+Checking calendar https://bob.btc.calendar.opentimestamps.org for 6aec2446cf9d315ee11c17c6bf826f25ad0155ba59d448a29eaf8163619409ee080fae603098c51106af547e
+Got 1 attestation(s) from https://bob.btc.calendar.opentimestamps.org
+    BitcoinBlockHeaderAttestation(974635)
+Checking calendar https://alice.btc.calendar.opentimestamps.org for 6aec24471475dabd845675dc8afca7b7772e89c39d6cdd631b0612d989de18920d692f39062b736cdc4847c0
+Got 1 attestation(s) from https://alice.btc.calendar.opentimestamps.org
+    BitcoinBlockHeaderAttestation(974635)
+Checking calendar https://btc.calendar.catallaxy.com for 6aec2447b17e35ad6651d58293d501580b394eccf4ab7b0edd23daa1b53498c9152d43153ac3d3fc1bee5668
+Got 1 attestation(s) from https://btc.calendar.catallaxy.com
+    BitcoinBlockHeaderAttestation(974643)
+Not checking Bitcoin attestation; Bitcoin disabled
+To verify manually, check that Bitcoin block 974635 has merkleroot 73abfe6635988cf34a75231fc8d7450a2932edd89d735213985103cdba9c36c0
+Not checking Bitcoin attestation; Bitcoin disabled
+To verify manually, check that Bitcoin block 974643 has merkleroot a95b2a77d3bef045c24ada287631ce15cc9257ff877c6b267376f0182377ccbc

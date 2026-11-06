@@ -1,0 +1,6 @@
+./audit/dataset/experiments/d2n_fresh_draw_null.py.ots | embedded=069c0bc5c51f69ea | current=069c0bc5c51f69ea | match=YES | bitcoin_in_proof=0 pending=4 | exit=0
+./audit/dataset/preregistrations/d2n_fresh_draw_null.json.ots | embedded=838ec67266130779 | current=838ec67266130779 | match=YES | bitcoin_in_proof=0 pending=4 | exit=0
+./audit/experimental_validity/configs/autond_ev.yaml.ots | embedded=59caad72bdde5760 | current=59caad72bdde5760 | match=YES | bitcoin_in_proof=0 pending=4 | exit=0
+./audit/experimental_validity/docs/autond_ev.md.ots | embedded=7d13cfe11a17e48e | current=7d13cfe11a17e48e | match=YES | bitcoin_in_proof=0 pending=4 | exit=0
+./e3_commit.txt.ots | embedded=3581301d78a1fa27 | current=3581301d78a1fa27 | match=YES | bitcoin_in_proof=0 pending=4 | exit=0
+./ev_commit.txt.ots | embedded=edc95d9bfcc60514 | current=edc95d9bfcc60514 | match=YES | bitcoin_in_proof=0 pending=4 | exit=0

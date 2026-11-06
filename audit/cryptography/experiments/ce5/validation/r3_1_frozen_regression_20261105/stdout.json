@@ -1,0 +1,89 @@
+{
+ "returncode": 0,
+ "summary": "64 passed, 1 skipped, 12 warnings in 74.56s (0:01:14)",
+ "copy": null,
+ "tamper_log_prefix_preserved": true,
+ "tamper_log_lines_appended": 22,
+ "appended_tamper_audit": {
+  "file": "/var/folders/tb/0j2m_8xn297b0g9xqvyxzdlr0000gn/T/ce234_isolated_a2j73v72/appended_tamper_log.jsonl",
+  "sha256": "4af542c54fa0c6e0f18d71991cc68333978e3a1a8b8edc0e92c9c472947c0f14",
+  "lines": 22,
+  "distinct_mutations": 22,
+  "passes": 1,
+  "passes_complete_and_ordered": true,
+  "passes_byte_identical_records": true,
+  "prefix_sha256_by_pass": [
+   "4af542c54fa0c6e0f18d71991cc68333978e3a1a8b8edc0e92c9c472947c0f14"
+  ],
+  "mutations_ever_not_rejected": [],
+  "consistent": true,
+  "per_mutation_status_history": {
+   "MUT-CE2-model_hash": [
+    "REJECTED"
+   ],
+   "MUT-CE2-realized_depth": [
+    "REJECTED"
+   ],
+   "MUT-CE2-architecture": [
+    "REJECTED"
+   ],
+   "MUT-CE2-rounds": [
+    "REJECTED"
+   ],
+   "MUT-CE2-differential": [
+    "REJECTED"
+   ],
+   "MUT-CE2-sample_count": [
+    "REJECTED"
+   ],
+   "MUT-CE2-seed": [
+    "REJECTED"
+   ],
+   "MUT-CE2-rho_estimate": [
+    "REJECTED"
+   ],
+   "MUT-CE2-control_estimate": [
+    "REJECTED"
+   ],
+   "MUT-CE2-raw_file_hash": [
+    "REJECTED"
+   ],
+   "MUT-CE2-plan_hash": [
+    "REJECTED"
+   ],
+   "MUT-CE2-nan_raw": [
+    "REJECTED"
+   ],
+   "MUT-CE4-gap_estimate": [
+    "REJECTED"
+   ],
+   "MUT-CE4-null_control": [
+    "REJECTED"
+   ],
+   "MUT-CE4-xor_invariant": [
+    "REJECTED"
+   ],
+   "MUT-CE4-per_word_match": [
+    "REJECTED"
+   ],
+   "MUT-CE4-rounds": [
+    "REJECTED"
+   ],
+   "MUT-CE4-raw_file_hash": [
+    "REJECTED"
+   ],
+   "MUT-CE4-primary_magnitude": [
+    "REJECTED"
+   ],
+   "MUT-CE4-statistical_unit": [
+    "REJECTED"
+   ],
+   "MUT-CE4-threshold_policy": [
+    "REJECTED"
+   ],
+   "MUT-CE4-raw_gap_values": [
+    "REJECTED"
+   ]
+  }
+ }
+}

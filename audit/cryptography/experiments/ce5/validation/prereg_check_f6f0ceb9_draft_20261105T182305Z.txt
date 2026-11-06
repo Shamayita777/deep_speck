@@ -1,0 +1,27 @@
+draft preregistration_f6f0ceb9_draft_20261105T182305Z.json 8cb01392b54b5b125e7f0991d3a0edc0352abffa1e56222ad56f354932a29a47
+PASS design identical to design.py
+PASS design hash f6f0ceb9 unchanged
+PASS approval block unapproved, hash = design
+PASS no unset fields
+PASS calibration + verification hashes
+PASS calibration binds: R = 20 everywhere, VERIFIED, re-verified now
+PASS calibrated design differs only in n_replicates/provenance
+PASS margin, tolerances, intervals, Table 7, gate size
+PASS tables, validation, checkpoint, PDF
+PASS source manifest = files on disk (production integrity check PASS)
+PASS manifest covers every CE5 .py file
+PASS explicit-path loader accepts this file only with its own hash
+PASS production refuses this draft because it is not approved
+PASS outcomes strict; primary within real pairs; interval; alpha; sensitivity
+PASS secondary set and Holm; exclusions; randomisation; minimum valid; blinding
+PASS disclosures explicit
+PASS planning config in code = record
+PASS no AI/assistant wording in the draft
+TOTAL 18 / 18
+operator wording (inside the hashed design): 5
+--- stale-reference scan
+HASH edb4bb88 (design before decisions) at .design.previous_design_sha256
+HASH edb4bb88 (design before decisions) at .design.design_history[0]
+HASH b5c4ac4f (design used for calibration) at .design.design_history[1]
+PARAM '2^13-class' at .design.superseded
+HASH b5c4ac4f (design used for calibration) at .calibration_disclosure.calibrated_under_design_sha256

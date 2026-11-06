@@ -1,0 +1,32 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_explicit_versioned_run_dir_is_honoured_exactly ______________
+
+repo = PosixPath('[LOCAL_TEMP_PATH_REDACTED]/broadorig.uqPBfO/test_explicit_versioned_run_di0/deep_speck')
+
+    def test_explicit_versioned_run_dir_is_honoured_exactly(repo):
+        """The exact Kaggle command: manifest lands in production_20260930, nowhere else."""
+        legacy_before = _sha_tree(repo / LEGACY_REL)
+        p = _recover(repo, NEW_REL)
+>       assert p.returncode == 0, p.stdout[-3000:] + p.stderr[-3000:]
+E       AssertionError: run directory: [LOCAL_TEMP_PATH_REDACTED]/broadorig.uqPBfO/test_explicit_versioned_run_di0/deep_speck/audit/cryptography/evidence_current/ce1/production_20260930
+E         Traceback (most recent call last):
+E           File "<frozen runpy>", line 198, in _run_module_as_main
+E           File "<frozen runpy>", line 88, in _run_code
+E           File "[LOCAL_TEMP_PATH_REDACTED]/broadorig.uqPBfO/test_explicit_versioned_run_di0/deep_speck/audit/cryptography/experiments/ce1/gohr_signal_destruction.py", line 554, in <module>
+E             sys.exit(main())
+E                      ^^^^^^
+E           File "[LOCAL_TEMP_PATH_REDACTED]/broadorig.uqPBfO/test_explicit_versioned_run_di0/deep_speck/audit/cryptography/experiments/ce1/gohr_signal_destruction.py", line 512, in main
+E             out = recover_legacy_block0(legacy_dir, run_dir, cfg)
+E                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           File "[LOCAL_TEMP_PATH_REDACTED]/broadorig.uqPBfO/test_explicit_versioned_run_di0/deep_speck/audit/cryptography/experiments/ce1/legacy_recovery.py", line 192, in recover_legacy_block0
+E             raise LegacyRecoveryError(f"{bdir} is not empty; recovery would mix artifacts")
+E         audit.cryptography.experiments.ce1.legacy_recovery.LegacyRecoveryError: audit/cryptography/evidence_current/ce1/production_20260930/blocks/block0 is not empty; recovery would mix artifacts
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/oishimoitra/.venvs/gohr-tf221-validation-20261031/bin/python', '-m', 'audit.cryptograph...udit/cryptography/evidence_current/ce1/production_20260930/blocks/block0 is not empty; recovery would mix artifacts\n').returncode
+
+audit/cryptography/tests/test_ce1_run_dir.py:81: AssertionError
+=========================== short test summary info ============================
+FAILED audit/cryptography/tests/test_ce1_run_dir.py::test_explicit_versioned_run_dir_is_honoured_exactly
+1 failed in 11.36s

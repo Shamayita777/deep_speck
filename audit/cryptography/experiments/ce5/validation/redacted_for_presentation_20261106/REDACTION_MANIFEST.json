@@ -1,0 +1,73 @@
+{
+ "purpose": "Presentation copies of seven raw test records. The originals are unchanged and remain the record.",
+ "rule": "every occurrence of the machine-specific temporary-directory prefix (22 bytes, /private/tmp/ followed by the local sandbox directory name) is replaced by [LOCAL_TEMP_PATH_REDACTED]; no other byte is changed",
+ "reversibility": "replacing [LOCAL_TEMP_PATH_REDACTED] by the original prefix reproduces each original byte for byte (checked when generated)",
+ "unchanged": "commands, outputs, exit codes, failures, test counts and all other text",
+ "generated_utc": "2026-11-06T05:06:04Z",
+ "total_replacements": 30,
+ "files": [
+  {
+   "original": "validation/r3_1_broad_suite_20261105/stdout.txt",
+   "original_sha256": "6726317ec3d21a1c9c44c406a2cc1675bd97a4c29a5287659001ef3c96463328",
+   "original_bytes": 20273,
+   "redacted": "validation/redacted_for_presentation_20261106/r3_1_broad_suite_20261105/stdout.txt",
+   "redacted_sha256": "70840d0a357032eaaef70d2916d479a0f5953a1ff946ed99d2f4a875780fc73d",
+   "redacted_bytes": 20327,
+   "replacements": 18
+  },
+  {
+   "original": "validation/r3_1_broad_suite_20261105/command.txt",
+   "original_sha256": "a17f6fca00599b07a435549df8c7607488d21e0d228ae5cb6da57a5a288c4feb",
+   "original_bytes": 381,
+   "redacted": "validation/redacted_for_presentation_20261106/r3_1_broad_suite_20261105/command.txt",
+   "redacted_sha256": "af8ac4418d45e97d9217f45cfbbf784804f34387cf513e23546b05bfe121926c",
+   "redacted_bytes": 390,
+   "replacements": 3
+  },
+  {
+   "original": "validation/r3_1_broad_suite_20261105/basetemp.txt",
+   "original_sha256": "007a3af5831cb1ecfd74bc9001c8ad97e81cc769e978f580213decfd0bd7d93a",
+   "original_bytes": 37,
+   "redacted": "validation/redacted_for_presentation_20261106/r3_1_broad_suite_20261105/basetemp.txt",
+   "redacted_sha256": "b2549d6517a8cd738b46131f310576989c54a39956856a60f298c471410d3a98",
+   "redacted_bytes": 40,
+   "replacements": 1
+  },
+  {
+   "original": "validation/r3_1_broad_suite_20261105/control_basetemp.txt",
+   "original_sha256": "a344f7eb602b9319f098d2d53040f6c3830a8e93e173ff52620477adacf2f259",
+   "original_bytes": 41,
+   "redacted": "validation/redacted_for_presentation_20261106/r3_1_broad_suite_20261105/control_basetemp.txt",
+   "redacted_sha256": "09937e8a384c108fefbec201b095a3a105ddbc19f4f86b380ce34b4a0095676a",
+   "redacted_bytes": 44,
+   "replacements": 1
+  },
+  {
+   "original": "validation/r3_1_broad_suite_20261105/control_original_copytree.txt",
+   "original_sha256": "099f866c47cd61b3890953453d051b8c1d3456ea5b965af73788c573267a03f8",
+   "original_bytes": 2652,
+   "redacted": "validation/redacted_for_presentation_20261106/r3_1_broad_suite_20261105/control_original_copytree.txt",
+   "redacted_sha256": "b05436d6159b69c505d7a5b4bf33e655c5f9dd39c6bf9ef6eae79ba6957399cf",
+   "redacted_bytes": 2667,
+   "replacements": 5
+  },
+  {
+   "original": "validation/r3_1_tests_20261105/basetemp_root.txt",
+   "original_sha256": "a5d9887008e115225bba4850de522b9867450834e1640a558071a047fc127c8e",
+   "original_bytes": 40,
+   "redacted": "validation/redacted_for_presentation_20261106/r3_1_tests_20261105/basetemp_root.txt",
+   "redacted_sha256": "88628d2f4055a71f2d67d2da0882957519ff70cc3899db66122250b1d67626c9",
+   "redacted_bytes": 43,
+   "replacements": 1
+  },
+  {
+   "original": "validation/r3_2_tests_20261105/basetemp.txt",
+   "original_sha256": "71aa4ebd35412867f115f9ab43fac322ffd1cdf19b35c361dabda4e210f59e54",
+   "original_bytes": 37,
+   "redacted": "validation/redacted_for_presentation_20261106/r3_2_tests_20261105/basetemp.txt",
+   "redacted_sha256": "419389995ff46d9226978eeb21dbc43ffb18043222f40f9985a8f01d48dd5a0c",
+   "redacted_bytes": 40,
+   "replacements": 1
+  }
+ ]
+}

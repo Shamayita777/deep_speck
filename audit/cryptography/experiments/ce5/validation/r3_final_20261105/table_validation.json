@@ -1,0 +1,119 @@
+{
+  "compaction_bijective": true,
+  "created_utc": "2026-11-05T11:40:46Z",
+  "dl_dr_table_rejected": {
+    "cells": 200,
+    "chi2": 53429.25116399099,
+    "df": 200,
+    "n_sample": 100000,
+    "p_value": 0.0,
+    "rounds": 4,
+    "seed": 20261106
+  },
+  "excluded_from_evidence": true,
+  "n_sample": 100000,
+  "peak_rss_mib": 1286.1,
+  "seed": 20261106,
+  "tables": {
+    "akr": {
+      "cells": 67108864,
+      "checks": {
+        "rounds_3": {
+          "cells": 200,
+          "chi2": 53354.73449771493,
+          "df": 200,
+          "n_sample": 100000,
+          "p_value": 0.0,
+          "rounds": 3,
+          "seed": 20261106
+        },
+        "rounds_4": {
+          "cells": 200,
+          "chi2": 217.06422456112546,
+          "df": 200,
+          "n_sample": 100000,
+          "p_value": 0.1940146840892069,
+          "rounds": 4,
+          "seed": 20261106
+        },
+        "rounds_5": {
+          "cells": 200,
+          "chi2": 53354.73449771493,
+          "df": 200,
+          "n_sample": 100000,
+          "p_value": 0.0,
+          "rounds": 5,
+          "seed": 20261106
+        },
+        "swapped_difference": {
+          "cells": 200,
+          "chi2": 53354.73449771493,
+          "df": 200,
+          "n_sample": 100000,
+          "p_value": 0.0,
+          "rounds": 4,
+          "seed": 20261106
+        }
+      },
+      "decision": "PASS",
+      "dtype": "uint32",
+      "file": "addt_r4_counts.npz",
+      "max_count": 171240,
+      "n_pairs": 10000000,
+      "nonzero_cells": 697494,
+      "rounds": 4,
+      "sha256": "09ff9388871fc6e41d2099d3a41619430528e49ce78c6ee5e919531f2cf54be6",
+      "sum_equals_n": true
+    },
+    "lr": {
+      "cells": 67108864,
+      "checks": {
+        "rounds_4": {
+          "cells": 200,
+          "chi2": 3406.7455735967033,
+          "df": 200,
+          "n_sample": 100000,
+          "p_value": 0.0,
+          "rounds": 4,
+          "seed": 20261106
+        },
+        "rounds_5": {
+          "cells": 200,
+          "chi2": 192.2306007538542,
+          "df": 200,
+          "n_sample": 100000,
+          "p_value": 0.640638870494714,
+          "rounds": 5,
+          "seed": 20261106
+        },
+        "rounds_6": {
+          "cells": 200,
+          "chi2": 3406.7455735967033,
+          "df": 200,
+          "n_sample": 100000,
+          "p_value": 0.0,
+          "rounds": 6,
+          "seed": 20261106
+        },
+        "swapped_difference": {
+          "cells": 200,
+          "chi2": 3406.7455735967033,
+          "df": 200,
+          "n_sample": 100000,
+          "p_value": 0.0,
+          "rounds": 5,
+          "seed": 20261106
+        }
+      },
+      "decision": "PASS",
+      "dtype": "uint32",
+      "file": "addt_r5_counts.npz",
+      "max_count": 7508,
+      "n_pairs": 10000000,
+      "nonzero_cells": 3114972,
+      "rounds": 5,
+      "sha256": "2ba703dbfaf4e5d5bfb0f1c83135dbae890dd816725ce1a791187a97f9d91e48",
+      "sum_equals_n": true
+    }
+  }
+}

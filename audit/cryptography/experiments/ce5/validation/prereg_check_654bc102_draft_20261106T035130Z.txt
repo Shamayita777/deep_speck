@@ -1,0 +1,24 @@
+draft preregistration_654bc102_draft_20261106T035130Z.json bdc2ba31d26a5e817e42ccc6ed9f5b2d975221dee53ed377abb87b9b9ba0f27a
+PASS design identical to design.py
+PASS design hash 654bc102
+PASS approval block unapproved, hash = design
+PASS no unset fields
+PASS calibration + verification hashes
+PASS R = 20 everywhere; VERIFIED; re-verified now
+PASS calibration design b5c4ac4f = archived file
+PASS final numbers = calibration-design numbers, plus only n_replicates = 20
+PASS procedures identical to calibration design (primary, secondary, model, tables, exclusions, verification)
+PASS margin, tolerances, intervals, Table 7, gate size
+PASS tables, validation, checkpoint, PDF
+PASS source manifest = files on disk (production integrity PASS)
+PASS manifest covers every CE5 .py file
+PASS explicit-path loader accepts only with its own hash
+PASS production refuses this draft because it is not approved
+PASS outcomes strict; primary real pairs; interval; alpha; sensitivity
+PASS secondary + Holm; exclusions; randomisation; minimum valid; blinding
+PASS disclosures explicit
+PASS planning config in code = record
+PASS stale 'awaiting' wording gone
+PASS no AI/assistant wording
+TOTAL 21 / 21
+'operator' remaining (inside the hashed design): ['operator', 'operator', 'operator']

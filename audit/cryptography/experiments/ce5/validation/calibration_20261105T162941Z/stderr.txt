@@ -1,0 +1,19 @@
+time: /Users/oishimoitra/.venvs/gohr-tf221-validation-20261031/bin/python -m audit.cryptography.experiments.ce5.runner calibrate audit/cryptography/experiments/ce5/validation/calibration_20261105T162941Z --tables audit/cryptography/experiments/ce5/tables: No such file or directory
+        0.00 real         0.00 user         0.00 sys
+              933888  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                  66  page reclaims
+                   0  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                   0  voluntary context switches
+                   1  involuntary context switches
+              930661  instructions retired
+              601425  cycles elapsed
+              885504  peak memory footprint

@@ -1,0 +1,21 @@
+{
+  "verified": false,
+  "status": "NOT_VERIFIED",
+  "sd": {
+    "accuracy": 0.0004026940526007396,
+    "tpr": 0.0007927673050775931,
+    "tnr": 0.0007029082443676457
+  },
+  "proposed_tolerance": {
+    "accuracy": 0.005,
+    "rates": 0.01
+  },
+  "scalar_rescored_pairs": 0,
+  "problems": [
+    "table 0: ciphertexts not stored; scores cannot be recomputed",
+    "table 1: ciphertexts not stored; scores cannot be recomputed",
+    "table 2: ciphertexts not stored; scores cannot be recomputed",
+    "table 3: ciphertexts not stored; scores cannot be recomputed",
+    "table 4: ciphertexts not stored; scores cannot be recomputed"
+  ]
+}

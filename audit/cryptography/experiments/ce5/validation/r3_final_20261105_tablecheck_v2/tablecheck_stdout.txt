@@ -1,0 +1,9 @@
+{
+  "decision": "PASS",
+  "components": {
+    "compaction_bijective": true,
+    "dl_dr_control_rejected": true,
+    "akr_table": true,
+    "lr_table": true
+  }
+}

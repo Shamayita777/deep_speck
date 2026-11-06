@@ -1,0 +1,277 @@
+"""
+G-CE5 design: does the bound Gohr depth-10 checkpoint's output agree more,
+within real pairs, with Benamira's average-key-rank distributional score than
+with the CE2 single-trail probability?
+
+Values marked NOT_YET_RECORDED must be filled before approval: four from the
+primary sources (read by the operator; docs/SOURCE_VERIFICATION.md), two table
+hashes, and two values set by the non-confirmatory benchmark and calibration.
+pending_items() lists them and production_authorisation() refuses while any
+remain, while the approval does not match the design hash, without the confirm
+token, or without an OpenTimestamps proof of the preregistration file.
+"""
+
+from __future__ import annotations
+
+import copy
+import hashlib
+import json
+from pathlib import Path
+
+EXPERIMENT_ID = "GOHR-CE5-DISTRIBUTIONAL-COMPARATOR"
+DESIGN_VERSION = "Gohr-CE5-design-2026-11-r2"
+PREREGISTRATION_RELPATH = "experiments/ce5/preregistration/preregistration.json"
+CONFIRM_TOKEN = "RUN_GCE5_PRODUCTION"
+
+PROPOSED = "PROPOSED_PENDING_APPROVAL"
+UNSET = "NOT_YET_RECORDED"
+
+REFERENCE_CHECKPOINT_SHA256 = "256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737"
+OTS_MAGIC = b"\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94"
+
+_DESIGN = {
+    "experiment_id": EXPERIMENT_ID,
+    "version": DESIGN_VERSION,
+    "dimension": "CE",
+    "claim": "G1",
+    "question": (
+        "Within real 5-round pairs, is the rank association between the bound network's output N and "
+        "the average-key-rank score D greater than, smaller than, or practically equal to its rank "
+        "association with the CE2 single-trail probability T?"),
+    "why": (
+        "G-CE2 (median Spearman 0.807 between N and T, 20/20 positive) excludes the registered "
+        "alternatives of CE2 but not a distributional account: Benamira et al. build a key-averaged "
+        "distinguisher from a masked difference distribution that closely matches the network's "
+        "5-round accuracy. CE5 tests which registered account agrees better with the fixed network."),
+    "hypotheses_wording": (
+        "Both D and T are differential-cryptanalytic quantities. CE5 compares two cryptanalytic "
+        "explanations of the network's score; it does not test whether the signal is cryptographic, a "
+        "result favouring one account does not disprove the other, and no outcome establishes a causal "
+        "mechanism."),
+    "model": {
+        "checkpoint": "Archive/best5depth10.h5",
+        "sha256": REFERENCE_CHECKPOINT_SHA256,
+        "binding": "audit.cryptography.ce234.production.verify_reference_model(behavioural=True), unmodified",
+        "provenance": ("output of the authors' re-execution of Gohr's train_nets.py (depth 10, 5 rounds, "
+                       "200 epochs), commit 2b54425; not Gohr's released weights"),
+        "retraining": "none",
+    },
+    "cipher": {"name": "SPECK32/64", "rounds": 5, "input_difference": ["0x0040", "0x0000"],
+               "conventions": "audit.cryptography.gohr.speck (Gohr's code); word order (l, r); MSB-first encoding"},
+    "trail_proxy_T": {
+        "source": ("audit.cryptography.ce234.production.generate_theory_data(n, with_factors=True), "
+                   "imported unmodified: product of the per-round xdp+ factors of the realised trail"),
+        "domain": ("real pairs only: T needs the realised intermediate differences, which a random pair "
+                   "does not have; the primary comparison is therefore conditional on real pairs"),
+        "persisted": "T and the per-round factors F; the verifier checks T = prod(F) for feasible pairs",
+    },
+    "baseline_D": {
+        "construction": "average-key-rank distinguisher, Benamira et al. 2021, Sect. 4.5 / Table 7",
+        "source_location": UNSET,
+        "mask": ["0xff8f", "0xff8f"],
+        "mask_weight": 26,
+        "table_rounds": 4,
+        "table_pairs": 10_000_000,
+        "table_generation": ("real pairs, Gohr's generator conventions, one random 64-bit key and plaintext "
+                             "per pair from os.urandom; uint32 counts stored and hashed"),
+        "subkeys": ("average over all 2^16 last-round subkeys, computed exactly over the 2^13 classes of "
+                    "subkeys that agree on bits 0-12 (bits 13-15 cannot change the masked decryption; "
+                    "docs/CRYPTO_CORRECTNESS.md section 3); equality with the literal 2^16 average is tested"),
+        "subkey_enumeration_in_source": UNSET,
+        "score": "mean over subkeys of count[(X0 xor X1) & M] / table_pairs (continuous, pre-threshold)",
+        "decision": "real iff score >= 2^-26 (published rule; used by the gate)",
+        "smoothing": "none; unseen differences contribute 0",
+        "table_check": (
+            "an independent 10^5-pair sample from reference.py (own SPECK, own random stream) is compared "
+            "with the recorded table over its 200 most frequent cells plus a pooled remainder; PASS iff "
+            "chi-square p >= 0.001 at 4 rounds and p < 1e-12 at 3 and at 5 rounds"),
+        "implementation": "experiments/ce5/akr.py; independent scalar reference experiments/ce5/reference.py",
+        "table_sha256": "a9b35972a82707081bc24ccec9747ae58accab20b45152c5746014dc43c5f058",
+        "table_record": "experiments/ce5/tables/tables_manifest.json (built 2026-11-05T10:20:16Z; table check PASS)",
+    },
+    "secondary_comparator_LR": {
+        "construction": ("count of the masked 5-round ciphertext difference in a second, independent 5-round "
+                         "table of 10^7 pairs, no key guessing; secondary, not a published distinguisher"),
+        "table_sha256": "d8010a5d9e2bc6ec2098bba6775e4effd10ee7aafe046047bd1d11882bf69e2f",
+    },
+    "instrument_order": (
+        "tables are built once, hashed and recorded here before calibration; calibration, gate and "
+        "production all use the recorded tables"),
+    "not_run": ["M-ODT/LightGBM (its masks are derived from the network, so it is not an independent baseline)"],
+    "gate": {
+        "purpose": "the baseline must reproduce the published aKR accuracy before any confirmatory data exist",
+        "published_akr_accuracy": UNSET,
+        "published_akr_source_location": UNSET,
+        "published_ddt_accuracy": 0.911,
+        "published_ddt_source": "Gohr 2019, 5-round DDT distinguisher",
+        "published_ddt_source_location": UNSET,
+        "pairs_per_class": 50_000,
+        "data": "fresh pairs from os.urandom after approval, independent of the tables and of every replicate",
+        "interval_rule": (
+            "PASS iff the Clopper-Pearson 95% interval of the aKR accuracy lies inside [a - g/2, a + g/2], "
+            "a = published aKR accuracy, g = a - published DDT accuracy. The lower limit is the midpoint "
+            "between the two published distinguishers, so a PASS excludes the ordinary DDT's level."),
+        "reported": "accuracy, TPR, TNR, full confusion matrix",
+        "on_failure": ("CE5 is UNADJUDICATED and the failure is reported; no replicate is run and no "
+                       "substitute baseline is run under this design"),
+    },
+    "replicate": {
+        "unit": "replicate (independent fresh data); never the pair",
+        "real_pairs_per_replicate": 1_000_000,
+        "real_pairs_record": ("validation/benchmark.json: 0.160 ms and 36.3 bytes per real pair (generation, "
+                              "inference, scoring of both classes); 2.7 h and 2.2 GB at R = 60"),
+        "random_pairs_per_replicate": "equal to real_pairs_per_replicate",
+        "n_replicates": UNSET,
+        "minimum_valid_replicates": "all registered replicates",
+        "rules": {
+            "real_pairs_per_replicate": (
+                "largest of 10^4, 3x10^4, 10^5, 3x10^5, 10^6 whose projected production time (trail "
+                "generation, network inference and aKR scoring of real and random pairs, each measured by the "
+                "benchmark) at the worst-case R = 60 is at most 12 hours on the registered machine and whose "
+                "raw files at R = 60 fit in 10 GB; fixed before calibration"),
+            "n_replicates": (
+                "smallest R in {20, 25, ..., 60} for which, under a normal model with SD equal to the 80% "
+                "upper confidence bound of the calibration SD of Delta, P(EQUIVALENT | Delta = 0) >= 0.80, "
+                "P(DISTRIBUTION_GREATER | Delta = 2m) >= 0.80 and P(TRAIL_GREATER | Delta = -2m) >= 0.80; "
+                "60 if none, with the shortfall reported"),
+            "calibration": ("5 blinded replicates at the chosen pair count on fresh data, after the margin is "
+                            "fixed: only the spread of Delta is kept, its location and all correlations are "
+                            "discarded; never evidence"),
+        },
+        "data": "fresh per replicate from os.urandom; raw arrays persisted before analysis",
+    },
+    "primary": {
+        "statistic": (
+            "Delta_r = atanh(rho_s(N, D | real)) - atanh(rho_s(N, T | real)) on the same real pairs of "
+            "replicate r, rho_s = Spearman with average ranks for ties"),
+        "dependence": ("the two correlations share N and the pairs; their dependence is absorbed by taking "
+                       "the paired difference within each replicate and inferring across independent replicates"),
+        "interval": ("distribution-free interval for the median of Delta_r from binomial order statistics, "
+                     "coverage >= 95% (95.9% at R = 20)"),
+        "margin": 0.10,
+        "margin_rationale": (
+            "on the Fisher-z scale, which roughly stabilises the variance of a correlation; at the G-CE2 "
+            "level (rho = 0.807) 0.10 moves rho by about 0.03 and the squared rank association by about "
+            "0.05, the smallest difference treated as practically meaningful. The operator must confirm "
+            "or replace this value before approval."),
+        "margin_sensitivity": [0.05, 0.20],
+        "outcomes": {
+            "DISTRIBUTION_GREATER": "lower limit > 0 and upper limit >= margin",
+            "TRAIL_GREATER": "upper limit < 0 and lower limit <= -margin",
+            "EQUIVALENT": "-margin < lower limit and upper limit < margin",
+            "INCONCLUSIVE": "otherwise; a non-significant difference is never read as equivalence",
+        },
+        "alpha": 0.05,
+    },
+    "secondary": {
+        "resolution_matched": (
+            "T takes few distinct values and D is nearly continuous, which caps rho(N, T) below rho(N, D) for "
+            "reasons of resolution alone. Delta_matched_r uses D re-ranked with T's tie structure (D's order, "
+            "T's tie groups) in place of D; same interval and outcomes, descriptive"),
+        "margin_sensitivity": "the primary outcome at each margin in primary.margin_sensitivity, descriptive",
+        "class_conditional": (
+            "rho_s(N, D | real) and rho_s(N, D | random), descriptive; T is undefined for random pairs"),
+        "lr_comparator": "Delta_LR_r = atanh(rho_s(N, LR)) - atanh(rho_s(N, T)), same interval, descriptive",
+        "incremental_value": {
+            "target": "van der Waerden normal scores of N",
+            "features": "normal scores of T and D, each with degree-3 polynomial terms; M_TD adds T*D",
+            "fit": "ordinary least squares on the first half of each replicate's real pairs",
+            "loss": "mean squared error on the second half; the same evaluation pairs for all three models",
+            "statistics": "Delta_D = L(M_T) - L(M_TD); Delta_T = L(M_D) - L(M_TD)",
+            "test": "exact two-sided sign test over replicates for each; Holm over the two",
+            "interpretation": ("predictive information about N beyond the competing predictor; not causal "
+                               "reliance or mechanism"),
+        },
+    },
+    "anchoring": ("preregistration.json must have an OpenTimestamps proof preregistration.json.ots whose "
+                  "embedded SHA-256 equals the file's; production refuses otherwise"),
+    "verification": (
+        "verify.py consumes the raw files and the tables only. It recomputes table hashes, the table check, "
+        "gate accuracy and confusion matrix, D for 32 random pairs per class per replicate with reference.py "
+        "(literal 2^16 enumeration), T = prod(F), every correlation, Fisher transform, paired difference, "
+        "interval, incremental value and decision, and optionally N for 256 pairs per replicate from the "
+        "checkpoint. Any mismatch makes the certificate NOT_VERIFIED"),
+    "exclusions": "a replicate is re-drawn only after an infrastructure failure, kept in the log",
+    "environment_requirement": "Python 3.11, TensorFlow 2.21, Keras 3, numpy 2.x, scipy 1.17, CPU",
+    "not_claimed": [
+        "that the network computes D or T",
+        "that rejecting the single-trail account rejects cryptographic learning",
+        "anything about other checkpoints, rounds or input differences",
+    ],
+}
+
+
+def canonical_json(obj) -> bytes:
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+
+
+def design() -> dict:
+    return copy.deepcopy(_DESIGN)
+
+
+def design_sha256(d: dict | None = None) -> str:
+    return hashlib.sha256(canonical_json(design() if d is None else d)).hexdigest()
+
+
+def pending_items(d=None, path: str = "") -> list[str]:
+    d = design() if d is None else d
+    out = []
+    if isinstance(d, dict):
+        for k, v in d.items():
+            out += pending_items(v, f"{path}.{k}" if path else k)
+    elif isinstance(d, list):
+        for i, v in enumerate(d):
+            out += pending_items(v, f"{path}[{i}]")
+    elif d == UNSET:
+        out.append(path)
+    return out
+
+
+def render_preregistration(d: dict | None = None) -> dict:
+    d = design() if d is None else d
+    return {"design": d, "approval": {"status": PROPOSED, "design_sha256": design_sha256(d),
+                                      "approved_by": None, "approved_utc": None}}
+
+
+def load_preregistration(path: Path) -> dict:
+    return json.loads(Path(path).read_text())
+
+
+def ots_digest(path: Path) -> str | None:
+    """SHA-256 embedded in an OpenTimestamps detached proof, or None."""
+    p = Path(path)
+    if not p.exists():
+        return None
+    b = p.read_bytes()
+    n = len(OTS_MAGIC)
+    if b[:n] != OTS_MAGIC or b[n:n + 1] != b"\x01" or b[n + 1:n + 2] != b"\x08":
+        return None
+    return b[n + 2:n + 34].hex()
+
+
+def production_authorisation(prereg: dict, token: str | None, *, prereg_path: Path | None = None) -> tuple[bool, str]:
+    d = prereg.get("design", {})
+    a = prereg.get("approval", {})
+    if pending_items(d):
+        return False, f"design has unset items: {pending_items(d)}"
+    if a.get("status") != "APPROVED":
+        return False, f"approval status is {a.get('status')!r}, not APPROVED"
+    if a.get("design_sha256") != design_sha256(d):
+        return False, "approval hash does not match the design"
+    if not a.get("approved_by") or not a.get("approved_utc"):
+        return False, "approval has no approver or time"
+    if token != CONFIRM_TOKEN:
+        return False, "confirm token missing or wrong"
+    if prereg_path is not None:
+        digest = hashlib.sha256(Path(prereg_path).read_bytes()).hexdigest()
+        if ots_digest(Path(str(prereg_path) + ".ots")) != digest:
+            return False, "no OpenTimestamps proof matching the preregistration file"
+    return True, "approved"
+
+
+def gate_interval(d: dict) -> tuple[float, float]:
+    a = float(d["gate"]["published_akr_accuracy"])
+    g = a - float(d["gate"]["published_ddt_accuracy"])
+    if g <= 0:
+        raise ValueError("published aKR accuracy must exceed the DDT accuracy")
+    return a - g / 2, a + g / 2

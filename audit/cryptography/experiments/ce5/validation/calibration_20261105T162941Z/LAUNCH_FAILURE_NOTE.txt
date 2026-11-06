@@ -1,0 +1,1 @@
+launch failed before calibration started: zsh did not word-split $CMD; /usr/bin/time exit 127; calibration.json not created

@@ -1,0 +1,15 @@
+{
+  "verified": true,
+  "status": "VERIFIED",
+  "sd": {
+    "accuracy": 0.00048544309656227977,
+    "tpr": 0.0008672196953483047,
+    "tnr": 0.0006851277253183945
+  },
+  "proposed_tolerance": {
+    "accuracy": 0.005,
+    "rates": 0.01
+  },
+  "scalar_rescored_pairs": 80,
+  "problems": []
+}

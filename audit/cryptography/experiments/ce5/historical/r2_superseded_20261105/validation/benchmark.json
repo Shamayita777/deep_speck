@@ -1,0 +1,57 @@
+{
+  "classes_equal_literal_exactly": true,
+  "created_utc": "2026-11-05T10:22:58Z",
+  "environment": {
+    "cpu_count": 8,
+    "machine": "arm64",
+    "numpy": "2.4.6",
+    "platform": "macOS-13.5-arm64-arm-64bit",
+    "python": "3.11.14",
+    "scipy": "1.17.1"
+  },
+  "excluded_from_evidence": true,
+  "full_replicate": {
+    "cpu_utilisation": 1.7847292089149385,
+    "raw_bytes_per_real_pair": 36.32854,
+    "real_pairs": 50000,
+    "seconds_per_real_pair": 0.00015985570168006234,
+    "wall_seconds": 7.992785084003117
+  },
+  "note": "timing only; the replicate built here is discarded and no statistic is computed from it",
+  "pairs_rule_at_R60": {
+    "budget_bytes": 10000000000.0,
+    "budget_hours": 12.0,
+    "chosen": 1000000,
+    "projected_bytes": {
+      "10000": 21797123.999999996,
+      "30000": 65391371.99999999,
+      "100000": 217971239.99999997,
+      "300000": 653913720.0,
+      "1000000": 2179712400.0
+    },
+    "projected_hours": {
+      "10000": 0.026642616946677057,
+      "30000": 0.07992785084003116,
+      "100000": 0.26642616946677056,
+      "300000": 0.7992785084003117,
+      "1000000": 2.664261694667706
+    }
+  },
+  "peak_rss_mib": 942.2,
+  "scalar_reference_max_abs_difference": 0.0,
+  "scalar_reference_seconds_per_pair": 0.1763207290059654,
+  "timings": {
+    "classes_2^13": {
+      "cpu_utilisation": 0.7903714844060512,
+      "pairs": 2048,
+      "seconds_per_pair": 0.00010680116795924732,
+      "wall_seconds": 0.21872879198053852
+    },
+    "literal_2^16": {
+      "cpu_utilisation": 0.8860814795205169,
+      "pairs": 256,
+      "seconds_per_pair": 0.0006482412109107827,
+      "wall_seconds": 0.16594974999316037
+    }
+  }
+}

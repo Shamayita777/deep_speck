@@ -1,0 +1,53 @@
+File sha256 hash: 069c0bc5c51f69ea678c8543427929e8a9005f423c8f19cea6db4c3f02235c5d
+Timestamp:
+append 76e43ad7301208457f4a85156b8d029a
+sha256
+prepend 19e4da9f85213df230a03f6c8dd6adfbe2aac3acd8da24c8fe2ff6e431d55ab7
+sha256
+append 236ff6631281af3e2781b0d382d5e5f056da657eeb40e84e2c3d83e9d3b7592d
+sha256
+ -> append 08d85b60d5d2624833b4e6f13db9dd58
+    sha256
+    prepend 86e9d27634c802827eaaa43641f44f1f24cd900e08ccb0a85123740032b18964
+    sha256
+    prepend 84cd0f04ef42e3edb16d63aa1ddc6802d175a25ca74795d9633e7fd23dc6faf9
+    sha256
+    prepend 573019229d662c887e95a43074a02e2bd42d719e8d147dd06e4c5e0f8a7cd022
+    sha256
+    prepend 6aec2446
+    append f217602e12a2b566
+    verify PendingAttestation('https://finney.calendar.eternitywall.com')
+ -> append 6bb4ad891d66f5a5
+    sha256
+    append c1f5ba55e7512550937e204f931fcfa0
+    sha256
+    prepend 6cddc01c2125a25cc677a6d5acf166b150f4eef259df6deb2148544fa8d8a54c
+    sha256
+    prepend d6cd9bbad2cfefb35612a82b399530aa8790ea67dd87acee5e7b26fdfcee4723
+    sha256
+    prepend 57d7cf612f6db1e5b0d23fbf70a42f6d1a230d1a06d1948da238df9ffcf3e0f7
+    sha256
+    prepend 6aec2446
+    append 3098c51106af547e
+    verify PendingAttestation('https://bob.btc.calendar.opentimestamps.org')
+ -> append 9927e78438e48afb
+    sha256
+    append 14724a58cdb63a0daa6aec4bb5d923ec
+    sha256
+    prepend 60031e5cc62406c00962dbf421c70637d4d1d3e7e8331ca10dccf9b4bbe25c58
+    sha256
+    prepend a27c8f21540b6b7961893af6b450a775e31d02af98185226dd9e56c495c33219
+    sha256
+    prepend 6aec2447
+    append 062b736cdc4847c0
+    verify PendingAttestation('https://alice.btc.calendar.opentimestamps.org')
+ -> append ccfd891b6dfc30eacec24d3e5f2e10af
+    sha256
+    append 085be5fed459c4126c9f7f9a3183509b9df76c3ce1dc5e21d7e5a12a1070d731
+    sha256
+    append 17b1f5dedbb791e543ebdd30db85949e27e9e7b39679808f3ecc48077461fe02
+    sha256
+    prepend 6aec2447
+    append 3ac3d3fc1bee5668
+    verify PendingAttestation('https://btc.calendar.catallaxy.com')
+

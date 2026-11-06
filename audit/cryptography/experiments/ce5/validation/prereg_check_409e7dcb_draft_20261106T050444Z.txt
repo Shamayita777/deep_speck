@@ -1,0 +1,27 @@
+draft preregistration_409e7dcb_draft_20261106T050444Z.json 81991d2c4a8c3833442a0adc84bfc69bd88992ca51b49ddf4bb3efb26fc16a5e
+  leaf differences from calibration design: ['anchoring', 'design_history[0]', 'design_history[1]', 'design_history[2]', 'design_history[3]', 'gate.tolerance_rule', 'replicate.n_replicates', 'replicate.n_replicates_record.basis', 'replicate.n_replicates_record.calibration', 'replicate.n_replicates_record.calibration_sha256', 'replicate.n_replicates_record.verification', 'replicate.n_replicates_record.verification_sha256']
+  verify_calibration now: {'status': 'VERIFIED', 'chosen': 20, 'sigma_plan': 0.0016756144609137759, 'problems': []}
+PASS design in draft identical to design.py
+PASS design hash 409e7dcb = approval.design_sha256
+PASS approval block unapproved (PROPOSED, no approver, no time)
+PASS document_status says not approved
+PASS no unset design fields
+PASS only anchoring and design_history differ from 654bc102: ['anchoring', 'design_history[3]']
+PASS archived calibration design hashes to b5c4ac4f
+PASS vs calibration design: only n_replicates (+provenance), design_history, tolerance_rule and anchoring wording
+PASS no numerical parameter differs from calibration design
+PASS calibration and verification record hashes
+PASS calibration re-verifies now under this design; chosen R = 20
+PASS design n_replicates = 20 = disclosure
+PASS tables, table validation, checkpoint, PDF identical to the approved 654bc102 registration
+PASS table files on disk match registered hashes
+PASS source manifest = files on disk (production integrity PASS)
+PASS manifest covers every CE5 .py file outside historical/
+PASS explicit-path loader accepts only with its own hash
+PASS production refuses this draft: approval status is 'PROPOSED_PENDING_APPROVAL', not APPROVED
+PASS approved 654bc102 file unchanged (41347a84)
+PASS supersedes_draft names the approved file and its hash
+PASS no default preregistration.json path in the anchoring text
+PASS no AI/assistant wording
+PASS no .ots or verification record exists for this draft
+TOTAL 23 / 23

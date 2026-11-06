@@ -1,0 +1,39 @@
+{
+  "classes_equal_literal_exactly": true,
+  "created_utc": "2026-11-05T10:21:45Z",
+  "environment": {
+    "cpu_count": 8,
+    "machine": "arm64",
+    "numpy": "2.4.6",
+    "platform": "macOS-13.5-arm64-arm-64bit",
+    "python": "3.11.14",
+    "scipy": "1.17.1"
+  },
+  "excluded_from_evidence": true,
+  "pairs_rule_at_R60": {
+    "budget_hours": 12.0,
+    "chosen": 100000,
+    "projected_hours": {
+      "10000": 0.03633110205214507,
+      "30000": 0.10899330615643521,
+      "100000": 0.3633110205214507
+    }
+  },
+  "peak_rss_mib": 614.2,
+  "scalar_reference_max_abs_difference": 0.0,
+  "scalar_reference_seconds_per_pair": 0.1739547292527277,
+  "timings": {
+    "classes_2^13": {
+      "cpu_utilisation": 0.781351739645082,
+      "pairs": 2048,
+      "seconds_per_pair": 0.00010899330615643521,
+      "wall_seconds": 0.2232182910083793
+    },
+    "literal_2^16": {
+      "cpu_utilisation": 0.9775205813269908,
+      "pairs": 256,
+      "seconds_per_pair": 0.0005890660818295146,
+      "wall_seconds": 0.15080091694835573
+    }
+  }
+}

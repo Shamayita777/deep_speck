@@ -1,0 +1,101 @@
+{
+  "created_utc": "2026-11-05T10:20:16Z",
+  "environment": {
+    "cpu_count": 8,
+    "machine": "arm64",
+    "numpy": "2.4.6",
+    "platform": "macOS-13.5-arm64-arm-64bit",
+    "python": "3.11.14",
+    "scipy": "1.17.1"
+  },
+  "files": {
+    "akr": {
+      "build_seconds": 1.3,
+      "cpu_seconds": 2.6,
+      "file": "addt_r4_counts.npz",
+      "max_count": 172315,
+      "nonzero_cells": 698251,
+      "rounds": 4,
+      "sha256": "a9b35972a82707081bc24ccec9747ae58accab20b45152c5746014dc43c5f058",
+      "table_check": {
+        "by_rounds": {
+          "3": {
+            "cells": 200,
+            "chi2": 53377.714708861495,
+            "df": 200,
+            "n_sample": 100000,
+            "p_value": 0.0,
+            "rounds": 3,
+            "seed": 20261105
+          },
+          "4": {
+            "cells": 200,
+            "chi2": 216.74936267764784,
+            "df": 200,
+            "n_sample": 100000,
+            "p_value": 0.19813990319709482,
+            "rounds": 4,
+            "seed": 20261105
+          },
+          "5": {
+            "cells": 200,
+            "chi2": 53377.714708861495,
+            "df": 200,
+            "n_sample": 100000,
+            "p_value": 0.0,
+            "rounds": 5,
+            "seed": 20261105
+          }
+        },
+        "decision": "PASS"
+      }
+    },
+    "lr": {
+      "build_seconds": 1.7,
+      "cpu_seconds": 3.5,
+      "file": "ddt_r5_counts.npz",
+      "max_count": 7326,
+      "nonzero_cells": 3112571,
+      "rounds": 5,
+      "sha256": "d8010a5d9e2bc6ec2098bba6775e4effd10ee7aafe046047bd1d11882bf69e2f",
+      "table_check": {
+        "by_rounds": {
+          "4": {
+            "cells": 200,
+            "chi2": 3407.419234152244,
+            "df": 200,
+            "n_sample": 100000,
+            "p_value": 0.0,
+            "rounds": 4,
+            "seed": 20261105
+          },
+          "5": {
+            "cells": 200,
+            "chi2": 206.5530489819102,
+            "df": 200,
+            "n_sample": 100000,
+            "p_value": 0.36039914281884017,
+            "rounds": 5,
+            "seed": 20261105
+          },
+          "6": {
+            "cells": 200,
+            "chi2": 3407.419234152244,
+            "df": 200,
+            "n_sample": 100000,
+            "p_value": 0.0,
+            "rounds": 6,
+            "seed": 20261105
+          }
+        },
+        "decision": "PASS"
+      }
+    }
+  },
+  "mask": [
+    "0xff8f",
+    "0xff8f"
+  ],
+  "n_pairs": 10000000,
+  "peak_rss_mib": 647.5
+}

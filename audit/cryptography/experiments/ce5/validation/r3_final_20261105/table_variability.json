@@ -1,0 +1,111 @@
+{
+  "created_utc": "2026-11-05T11:59:28Z",
+  "environment": {
+    "cpu_count": 8,
+    "machine": "arm64",
+    "numpy": "2.4.6",
+    "platform": "macOS-13.5-arm64-arm-64bit",
+    "python": "3.11.14",
+    "scipy": "1.17.1"
+  },
+  "excluded_from_evidence": true,
+  "n_eval_per_class": 100000,
+  "n_tables": 5,
+  "peak_rss_mib": 532.7,
+  "proposed_tolerance": {
+    "accuracy": 0.005,
+    "rates": 0.01
+  },
+  "randomness": "os.urandom, fresh per table and per evaluation set",
+  "rows": [
+    {
+      "accuracy": 0.928365,
+      "confusion": {
+        "fn": 9234,
+        "fp": 5093,
+        "tn": 94907,
+        "tp": 90766
+      },
+      "scores_sha256": "d99086ccf12a9a5aa94e6304733c060bb7b23b5c6cffbf585c6031e6b9d806c5",
+      "seconds": 10.0,
+      "table": 0,
+      "table_sha256": "d0d593df516c90f9991a4d97d5b9e723b3d4f0681f1d9c4fbf8d7a6f3af65c15",
+      "tnr": 0.94907,
+      "tpr": 0.90766
+    },
+    {
+      "accuracy": 0.92913,
+      "confusion": {
+        "fn": 9123,
+        "fp": 5051,
+        "tn": 94949,
+        "tp": 90877
+      },
+      "scores_sha256": "bc095bbe951fb04de83f6202293185f54d6f7c85215142e28139d4ef76eff2c0",
+      "seconds": 10.1,
+      "table": 1,
+      "table_sha256": "2c9d3991daeefa048174a9e073cf257478e74794d7b782de0940695c264b077a",
+      "tnr": 0.94949,
+      "tpr": 0.90877
+    },
+    {
+      "accuracy": 0.92889,
+      "confusion": {
+        "fn": 9283,
+        "fp": 4939,
+        "tn": 95061,
+        "tp": 90717
+      },
+      "scores_sha256": "8c7e67e83129151e6fe14c6c90126bb5df09e8a97d2910c898e4e361165e84f6",
+      "seconds": 10.1,
+      "table": 2,
+      "table_sha256": "c005b809577d06b31c821b9e21341c63d70638230d54de0de7539879888e95ea",
+      "tnr": 0.95061,
+      "tpr": 0.90717
+    },
+    {
+      "accuracy": 0.92947,
+      "confusion": {
+        "fn": 9119,
+        "fp": 4987,
+        "tn": 95013,
+        "tp": 90881
+      },
+      "scores_sha256": "4bdb65c8f455dd1c57248519a98a40ca103b2aeea99f14925864e1eadcc06663",
+      "seconds": 10.0,
+      "table": 3,
+      "table_sha256": "feb260caa5d816763dd6198c7719af04c21ffb900cc06117947f47b78977dddc",
+      "tnr": 0.95013,
+      "tpr": 0.90881
+    },
+    {
+      "accuracy": 0.928995,
+      "confusion": {
+        "fn": 9269,
+        "fp": 4932,
+        "tn": 95068,
+        "tp": 90731
+      },
+      "scores_sha256": "c3b35709a6ead73d4fa7c13e6da198630525d0cba8f77425dbbe31f8c5a15df0",
+      "seconds": 10.1,
+      "table": 4,
+      "table_sha256": "452947dbce9d0c2009cb87aefe1fdcebe003ed9cbb05ec189285ba7c398f5f7f",
+      "tnr": 0.95068,
+      "tpr": 0.90731
+    }
+  ],
+  "rule": "tau = max(0.005, 3 * sigma_t(accuracy)) and tau_rate = max(0.010, 3 * max(sigma_t(TPR), sigma_t(TNR))), fixed from table_variability before approval; the floors 0.005 and 0.010 are proposals awaiting the operator's decision",
+  "sd": {
+    "accuracy": 0.0004026940526007396,
+    "tnr": 0.0007029082443676457,
+    "tpr": 0.0007927673050775931
+  },
+  "status": "proposal; floors 0.005 and 0.010 are not approved values",
+  "table_pairs": 10000000,
+  "table_rounds": 4,
+  "three_sd": {
+    "accuracy": 0.0012080821578022189,
+    "tnr": 0.002108724733102937,
+    "tpr": 0.002378301915232779
+  }
+}
