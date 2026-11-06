@@ -42,7 +42,9 @@ B1 and B1-S are different measurements. They are counted separately.
 | S2 | 0.5001 | −0.4290 | [0.4979, 0.5023] |
 | H1 | 0.4159 | −0.5132 | [0.4137, 0.4181] |
 
-## 2. H1 = 0.4159 versus K3 = 0.9290: investigation
+## 2. H1 = 0.4159 versus K3 = 0.9290: exploratory investigation (unexplained)
+
+**Status.** This section is **exploratory and post-run**, and the finding **remains unexplained**. It is not part of the registered benchmark and supports no conclusion about the H1 checkpoint beyond the raw values reported here.
 
 **Method.**
 - Diagnostic script `post_run/h1_diagnostics.py`. Raw values are in `h1_diagnostics.json` (`1ff981bb…`) and `h1_diagnostics_extra.json` (`d3a8161d…`).
@@ -83,7 +85,13 @@ B1 and B1-S are different measurements. They are counted separately.
 
 ## 3. Corrected reading of "7/7 detected"
 
-The registered C-level output was reached for all 7 defect inputs. Their character differs, so they are reported separately:
+**What "7/7" means.** Seven registered **detector responses**: the component-level (C) output was reached for all 7 defect inputs.
+
+**What it does not mean: complete claim-level adjudication.**
+- A claim-level (R) outcome is registered for only three of the seven: S1, S3 and S6. Even those are **fixture claims** built to exercise the roll-up and precedence rules, not adjudications of any real claim.
+- H1, S2, S4 and S5 have no claim-level outcome.
+
+The seven cases differ in character, so they are reported separately:
 
 | case | kind | what the match shows |
 |---|---|---|
@@ -96,8 +104,17 @@ The registered C-level output was reached for all 7 defect inputs. Their charact
 | S4 | **reduced-scale algorithm conformance** | D2-N rank-p and gates give EXCESS on a 20,000-row fixture with 59 null draws. It is not D2-N evidence and not confirmatory DI evidence |
 
 **These are conformance results on designed inputs, not a detection rate.**
-- The 0/7 false alarms are 7 clean component controls.
-- The 7/7 abstention matches are 7 constructed controls: 3 run real components, 1 reads a real certificate, and 3 test decision rules only.
+- **False alarms (0/7):** these are 7 clean **component** controls. A clean component response is not a dimension PASS or a claim PASS.
+- **Abstention (7/7):** the U cases are 7 constructed controls, and their registered responses are at different levels:
+
+| case | registered response | level |
+|---|---|---|
+| U1, U6 | the real component (D4 rule; EV chain with too few valid units) returns INCONCLUSIVE; roll-up and the fixture claim give INCONCLUSIVE | C, D, R |
+| **U4** | **verifier refusal only**: the frozen PAR1 verifier returns NOT_VERIFIED on the edited run. It is **not** a claim-level INCONCLUSIVE; no claim consequence is registered, because the manuscript has no invalid-evidence rule (gap G2) | **C only** |
+| U2 | claim-rule INCONCLUSIVE (L2 < L3) from a real A3 certificate field plus declared inputs | R |
+| U3, U5, U7 | claim-rule INCONCLUSIVE on declared inputs | R |
+
+- **Positive control (P1):** a claim-rule SUPPORTED on declared inputs, with one real E6 certificate field. It is not a clean empirical claim.
 
 ## 4. Corrected statement about historical evidence
 
@@ -179,4 +196,9 @@ tar -xzf <archives>/sdb_v2_results_20261106T171400Z.tar.gz
     --result audit/framework_validation/sdb_v2/results/20261106T171400Z/result.json --repo-root .
 ```
 
-**Publication of the 11 arrays.** A commit adding them at their exact registered paths is prepared but **not pushed** (see the report to the operator). Pushing it, or depositing the supplementary archive elsewhere, awaits review.
+**Publication of the 11 arrays.**
+- Commit `3c6f041f37a4526cca247968b3d9a9bf3f092a68` adds them at their exact registered paths, alongside the run directory and this folder.
+- All 11 match their registered SHA-256 values.
+- A clean checkout of that commit verifies with no external restore (VERIFIED, 0 problems).
+- This wording revision is a direct child of that commit and changes only this file.
+- The supplementary archive and the restore script remain as an alternative restoration route.
