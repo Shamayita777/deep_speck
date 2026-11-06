@@ -1,0 +1,47 @@
+{
+  "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+  "arm_id": "reference",
+  "best_checkpoint": null,
+  "best_checkpoint_epoch": null,
+  "best_checkpoint_sha256": null,
+  "best_monitor": "val_loss",
+  "best_monitor_mode": "min",
+  "best_monitor_value": 0.22,
+  "block_id": "block3",
+  "committed_epoch": null,
+  "committed_sha256": null,
+  "committed_slot": null,
+  "corruption_repairs": [],
+  "epochs_completed": 3,
+  "epochs_total": 3,
+  "interruptions": [],
+  "reconciliation_notes": [
+    "no commit manifest: this arm has not started"
+  ],
+  "recovery_decisions": [
+    {
+      "degraded": false,
+      "epoch": null,
+      "noted_at_utc": "2026-11-06T17:10:19Z",
+      "notes": [
+        "no commit manifest: this arm has not started"
+      ],
+      "resume_from_epoch": 0,
+      "sha256": null,
+      "slot": null,
+      "source": "fresh"
+    }
+  ],
+  "recovery_version": "arm-recovery-v2",
+  "seed": 900006,
+  "sessions": [
+    {
+      "session_id": "2026-11-06T171010.758544+0000"
+    }
+  ],
+  "started_at_utc": null,
+  "status": "TRAINED",
+  "updated_at_utc": "2026-11-06T17:10:19Z",
+  "was_degraded": false,
+  "was_interrupted": false
+}

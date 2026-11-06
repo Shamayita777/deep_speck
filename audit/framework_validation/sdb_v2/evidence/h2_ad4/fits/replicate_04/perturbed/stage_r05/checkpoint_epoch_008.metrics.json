@@ -1,0 +1,81 @@
+{
+  "adapter": {
+    "module": "audit.dataset.adapters.autond_d4",
+    "record_schema": "d4-autond-epoch-record-2",
+    "selection_rule": "per_round_argmin_val_loss_ties_earliest_carried_to_next_round_stop_when_round_max_val_acc_at_most_threshold_comparison_round_selected_reloaded",
+    "selection_schema": "d4-autond-selection-2",
+    "state_schema": "d4-autond-fit-state-2"
+  },
+  "checkpoint": "stage_r05/checkpoint_epoch_008.keras",
+  "checkpoint_sha256": "fca056895d1866a48a886e775eaa9f53df47a011ab42a8a28b133aecee3cce88",
+  "condition": "perturbed",
+  "config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f",
+  "evaluation_digest": "f34865413a842f2cbcd65a65671ef01968627622141720d9f654970a83749708",
+  "logs": {
+    "acc": 0.5011283159255981,
+    "loss": 0.250053346157074,
+    "val_acc": 0.5005699992179871,
+    "val_loss": 0.25017473101615906
+  },
+  "model": {
+    "architecture": "dbitnet",
+    "batch_size": 5000,
+    "builder": "dbitnet.make_model(2 * plain_bits)",
+    "cipher": "speck3264",
+    "comparison_round": 5,
+    "delta_plain_hex": "0x400000",
+    "epochs_per_round": 10,
+    "input_bits": 64,
+    "loss": "mse",
+    "metrics": [
+      "acc"
+    ],
+    "optimizer": "Adam(amsgrad=True)",
+    "round_rows": [
+      10000000,
+      10000000,
+      10000000,
+      10000000,
+      10000000
+    ],
+    "rounds": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "shuffle": true,
+    "stop_threshold": 0.505,
+    "upstream_commit": "8d66e0a43a9e6fbbb3624d68296c1b77aa2da779"
+  },
+  "previous_record_sha256": "0d3ad372899f8fddc0b19b8f923ac219957b63a4b5c3b54c540341e002157a6c",
+  "replicate": 4,
+  "round_train_digests": [
+    "07432696312772ba4c428f2798c6a247eb9ff48d51de067a5544fc832480dd9c",
+    "10d4db394681be95d05d1a50bbe8b74f570f400b6af70448ac7f6b7c95f46cc3",
+    "5c2f12db9e2f3786291edbb7752dd977c68983412c274cb9fb21d72e94ae2adc",
+    "45fa84b2aa4d5037681e51560533015e91db0c6e03a05de4b3bf0c0060517056",
+    "ba6e5176951b061f6801bdba65e0f355f0d55f484ae847799df7528ead270d51"
+  ],
+  "run_binding": {
+    "all_partitions_digest": "dbfbfbc6e8f49003288965041aa690fd85bddaee11386cbaea364d2fd44c10f6",
+    "preflight_sha256": "14a2459a3cb138d53cc002a38a7f41991d35d1b274d34a0e80953a2b39c6e783",
+    "run_config_hash": "955d427b15e11ff5d9023dd57b5eef38feb214095ff6fd6312c9bb5cf0b2613f"
+  },
+  "schema_version": "d4-autond-epoch-record-2",
+  "seed": 3685993406,
+  "stage_epoch": 8,
+  "stage_round": 5,
+  "step": 8,
+  "train_digest": "4dcbccc45ec4b3f5af4855fc63df010e22f70ef8731357bb8f34b7d3663689fa",
+  "val_acc": 0.5005699992179871,
+  "val_loss": 0.25017473101615906,
+  "validation_digests": [
+    "60c119957b88d0e7bc95ccff6e549dc61f5b50e1b27883d060a55fd6fe636340",
+    "bccb869337299946219ae10c86e2ca50b4871b2c15c2d2234265472c29bacc60",
+    "5e62d7b346cba2b3a02a0cddb308f25a8b3c07df6950b332ca7ae07a557bf63b",
+    "37e9cd694e707ff7dc6d85bd63098830d1a70b3b52b3f0328ac9dfed9d38052d",
+    "4494056665a5eff226a6751176745f6736ce3ea70b711b023458827bed4f4511"
+  ]
+}

@@ -1,0 +1,60 @@
+{
+ "b2": {
+  "C1": {
+   "status": "E"
+  },
+  "C2": {
+   "status": "E"
+  },
+  "C3": {
+   "status": "E"
+  },
+  "C4": {
+   "reason": "stored-prediction rescoring is B1-S, not B1",
+   "status": "NS"
+  },
+  "C5": {
+   "reason": "cipher code not allowlisted",
+   "status": "NS"
+  },
+  "C6": {
+   "reason": "partitions not allowlisted",
+   "status": "NS"
+  },
+  "C7": {
+   "status": "E"
+  },
+  "C8": {
+   "reason": ".keras checkpoints are not loaded by policy",
+   "status": "NS"
+  }
+ },
+ "case": "H2",
+ "certificate": "audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/result/d4_certificate.json",
+ "environment": {
+  "keras": "3.13.2",
+  "note": "constructed for the fixture; uninformative about any real publication",
+  "numpy": "2.1.3",
+  "python": "3.13.0",
+  "tensorflow": "2.20.0"
+ },
+ "evidence_bundle": "audit/framework_validation/sdb_v2/evidence/h2_ad4",
+ "files": [
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/BUNDLE_MANIFEST.json",
+  "audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/result/d4_certificate.json",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/dataset/test_y.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_01_baseline.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_01_perturbed.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_02_baseline.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_02_perturbed.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_03_baseline.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_03_perturbed.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_04_baseline.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_04_perturbed.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_05_baseline.npy",
+  "audit/framework_validation/sdb_v2/evidence/h2_ad4/fits/predictions/replicate_05_perturbed.npy"
+ ],
+ "published_checksums": {
+  "audit/dataset/evidence/d4_autond_speck3264_3ad26073acf0/result/d4_certificate.json": "b4527041ff788e53f9781095897841aadb6bfaa4e0287aa3627c3bfbffbbd244"
+ }
+}

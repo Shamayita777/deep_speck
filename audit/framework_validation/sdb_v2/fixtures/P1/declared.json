@@ -1,0 +1,38 @@
+{
+ "asserted_inputs": [
+  {
+   "L": 3,
+   "ce": [
+    {
+     "control": false,
+     "control_from": {
+      "certificate": "audit/adversarial/evidence/e6_ce2_20261105/e6_certificate.json",
+      "control_satisfied_unless": "ADMITTED",
+      "field": [
+       "interpretation",
+       "ce2_admission"
+      ]
+     },
+     "id": "CE2",
+     "outcome": "SUPPORTED",
+     "powered": true,
+     "prereg": true,
+     "required": false
+    }
+   ],
+   "dims": {
+    "DI": "PASS",
+    "EV": "PASS",
+    "II": "PASS"
+   },
+   "id": "P1",
+   "predictive": true,
+   "reproduction": "COMPLETE",
+   "required": [
+    "DI",
+    "EV",
+    "II"
+   ]
+  }
+ ]
+}

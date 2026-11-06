@@ -1,0 +1,56 @@
+{
+ "asserted_inputs": [
+  {
+   "L": 3,
+   "ce": [
+    {
+     "control": false,
+     "id": "CE2",
+     "outcome": "SUPPORTED",
+     "powered": true,
+     "prereg": false,
+     "required": false
+    }
+   ],
+   "dims": {
+    "DI": "PASS",
+    "EV": "PASS",
+    "II": "PASS"
+   },
+   "id": "a",
+   "predictive": true,
+   "reproduction": "COMPLETE",
+   "required": [
+    "DI",
+    "EV",
+    "II"
+   ]
+  },
+  {
+   "L": 3,
+   "ce": [
+    {
+     "control": false,
+     "id": "CE2",
+     "outcome": "SUPPORTED",
+     "powered": false,
+     "prereg": true,
+     "required": false
+    }
+   ],
+   "dims": {
+    "DI": "PASS",
+    "EV": "PASS",
+    "II": "PASS"
+   },
+   "id": "b",
+   "predictive": true,
+   "reproduction": "COMPLETE",
+   "required": [
+    "DI",
+    "EV",
+    "II"
+   ]
+  }
+ ]
+}

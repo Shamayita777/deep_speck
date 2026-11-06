@@ -1,0 +1,48 @@
+{
+ "b2": {
+  "C1": {
+   "status": "E"
+  },
+  "C2": {
+   "status": "E"
+  },
+  "C3": {
+   "reason": "a certificate, not a publication",
+   "status": "NA"
+  },
+  "C4": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C5": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C6": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C7": {
+   "status": "E"
+  },
+  "C8": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  }
+ },
+ "case": "U2",
+ "certificate": "audit/adversarial/evidence/a3_20261006/a3_certificate.json",
+ "environment": {
+  "keras": "3.13.2",
+  "note": "constructed for the fixture; uninformative about any real publication",
+  "numpy": "2.1.3",
+  "python": "3.13.0",
+  "tensorflow": "2.20.0"
+ },
+ "files": [
+  "audit/adversarial/evidence/a3_20261006/a3_certificate.json"
+ ],
+ "published_checksums": {
+  "audit/adversarial/evidence/a3_20261006/a3_certificate.json": "d90ec393f69e785d91a0b90514091059f2109080bc4788e662cdc28f55b7a686"
+ }
+}

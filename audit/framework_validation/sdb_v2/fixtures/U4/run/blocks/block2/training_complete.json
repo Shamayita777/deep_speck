@@ -1,0 +1,58 @@
+{
+  "arms": {
+    "independent": {
+      "gpu_assignment": {
+        "cuda_visible_devices": "1",
+        "devices_seen": [],
+        "gpu": "1",
+        "host": "oishis-MacBook-Air.local",
+        "pid": 36802,
+        "session_id": "2026-11-06T171020.298150+0000"
+      },
+      "seed": 900005,
+      "terminal_model": {
+        "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+        "architecture_matches_declared": true,
+        "architecture_mismatch": null,
+        "hash": "9972e8ea505f705c564ae862dfb2b18e87a73479dd61f43b0bef8748f490cd7e",
+        "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/independent/terminal_model.keras",
+        "reload_weight_identical": true
+      }
+    },
+    "reference": {
+      "gpu_assignment": {
+        "cuda_visible_devices": "1",
+        "devices_seen": [],
+        "gpu": "1",
+        "host": "oishis-MacBook-Air.local",
+        "pid": 36802,
+        "session_id": "2026-11-06T171020.298150+0000"
+      },
+      "seed": 900004,
+      "terminal_model": {
+        "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+        "architecture_matches_declared": true,
+        "architecture_mismatch": null,
+        "hash": "ffccc7152bfa08832b487a59bcaef03e25279b39aeb67e501ecc8450010ffa55",
+        "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/reference/terminal_model.keras",
+        "reload_weight_identical": true
+      }
+    }
+  },
+  "block_id": "block2",
+  "block_index": 2,
+  "completed_at_utc": "2026-11-06T17:10:25.935848+00:00",
+  "dataset": {
+    "train": {
+      "hash": "741c3044a619519de00171ba84b988c24a7b33905d55616e766e70b74cbe6bf3",
+      "n": 100,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/data/train.json"
+    },
+    "validation": {
+      "hash": "741c3044a619519de00171ba84b988c24a7b33905d55616e766e70b74cbe6bf3",
+      "n": 10,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/data/train.json"
+    }
+  },
+  "experiment_fingerprint": "6d19c4e65f97335111afc908d5359528540dd5ed7d6ca9c79575ffec559fd3fc"
+}

@@ -1,0 +1,234 @@
+{
+  "block_id": "block0",
+  "blocks": {
+    "block0": {
+      "arms": {
+        "independent": {
+          "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+          "arm": "independent",
+          "arm_dir": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/independent",
+          "arm_identity": {
+            "impl": "independent"
+          },
+          "epoch_log": {
+            "committed_epoch": 2,
+            "completed_epochs": 3,
+            "contiguous": true,
+            "highest_logged_epoch": 2,
+            "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/independent/epochs.jsonl",
+            "reconciliation_notes": [],
+            "records": 3,
+            "sessions": [
+              "2026-11-06T171010.758544+0000"
+            ],
+            "total_checkpoint_seconds": 0.002,
+            "total_training_seconds": 0.003
+          },
+          "evaluation_rule": "terminal_epoch",
+          "gpu_assignment": {
+            "cuda_visible_devices": "1",
+            "devices_seen": [],
+            "gpu": "1",
+            "host": "oishis-MacBook-Air.local",
+            "pid": 36785,
+            "session_id": "2026-11-06T171010.758544+0000"
+          },
+          "recovery": {
+            "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+            "arm_id": "independent",
+            "best_checkpoint": null,
+            "best_checkpoint_epoch": null,
+            "best_checkpoint_sha256": null,
+            "best_monitor": "val_loss",
+            "best_monitor_mode": "min",
+            "best_monitor_value": 0.22,
+            "block_id": "block0",
+            "committed_epoch": null,
+            "committed_sha256": null,
+            "committed_slot": null,
+            "corruption_repairs": [],
+            "epochs_completed": 3,
+            "epochs_total": 3,
+            "interruptions": [],
+            "reconciliation_notes": [
+              "no commit manifest: this arm has not started"
+            ],
+            "recovery_decisions": [
+              {
+                "degraded": false,
+                "epoch": null,
+                "noted_at_utc": "2026-11-06T17:10:18Z",
+                "notes": [
+                  "no commit manifest: this arm has not started"
+                ],
+                "resume_from_epoch": 0,
+                "sha256": null,
+                "slot": null,
+                "source": "fresh"
+              }
+            ],
+            "recovery_version": "arm-recovery-v2",
+            "seed": 900001,
+            "sessions": [
+              {
+                "session_id": "2026-11-06T171010.758544+0000"
+              }
+            ],
+            "started_at_utc": null,
+            "status": "TRAINED",
+            "updated_at_utc": "2026-11-06T17:10:18Z",
+            "was_degraded": false,
+            "was_interrupted": false
+          },
+          "resumed_from_epoch": 0,
+          "secondary": {
+            "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+            "final_val_acc": 0.9293,
+            "max_val_acc_historical_descriptive_only": 0.9293,
+            "training_seconds": 0.01
+          },
+          "seed": 900001,
+          "session_id": "2026-11-06T171010.758544+0000",
+          "started_at_utc": "2026-11-06T17:10:17.947396+00:00",
+          "status": "TRAINED",
+          "terminal_epoch": 3,
+          "terminal_model": {
+            "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+            "architecture_matches_declared": true,
+            "architecture_mismatch": null,
+            "hash": "93198f2234484ac51914f35f41d2fa19d45ba2d86527cdd5b4d9efbfedd52535",
+            "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/independent/terminal_model.keras",
+            "reload_weight_identical": true
+          },
+          "trained_at_utc": "2026-11-06T17:10:18.564313+00:00",
+          "was_interrupted": false
+        },
+        "reference": {
+          "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+          "arm": "reference",
+          "arm_dir": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/reference",
+          "arm_identity": {
+            "impl": "reference"
+          },
+          "epoch_log": {
+            "committed_epoch": 2,
+            "completed_epochs": 3,
+            "contiguous": true,
+            "highest_logged_epoch": 2,
+            "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/reference/epochs.jsonl",
+            "reconciliation_notes": [],
+            "records": 3,
+            "sessions": [
+              "2026-11-06T171010.758544+0000"
+            ],
+            "total_checkpoint_seconds": 0.002,
+            "total_training_seconds": 0.003
+          },
+          "evaluation_rule": "terminal_epoch",
+          "gpu_assignment": {
+            "cuda_visible_devices": "1",
+            "devices_seen": [],
+            "gpu": "1",
+            "host": "oishis-MacBook-Air.local",
+            "pid": 36785,
+            "session_id": "2026-11-06T171010.758544+0000"
+          },
+          "recovery": {
+            "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+            "arm_id": "reference",
+            "best_checkpoint": null,
+            "best_checkpoint_epoch": null,
+            "best_checkpoint_sha256": null,
+            "best_monitor": "val_loss",
+            "best_monitor_mode": "min",
+            "best_monitor_value": 0.22,
+            "block_id": "block0",
+            "committed_epoch": null,
+            "committed_sha256": null,
+            "committed_slot": null,
+            "corruption_repairs": [],
+            "epochs_completed": 3,
+            "epochs_total": 3,
+            "interruptions": [],
+            "reconciliation_notes": [
+              "no commit manifest: this arm has not started"
+            ],
+            "recovery_decisions": [
+              {
+                "degraded": false,
+                "epoch": null,
+                "noted_at_utc": "2026-11-06T17:10:17Z",
+                "notes": [
+                  "no commit manifest: this arm has not started"
+                ],
+                "resume_from_epoch": 0,
+                "sha256": null,
+                "slot": null,
+                "source": "fresh"
+              }
+            ],
+            "recovery_version": "arm-recovery-v2",
+            "seed": 900000,
+            "sessions": [
+              {
+                "session_id": "2026-11-06T171010.758544+0000"
+              }
+            ],
+            "started_at_utc": null,
+            "status": "TRAINED",
+            "updated_at_utc": "2026-11-06T17:10:17Z",
+            "was_degraded": false,
+            "was_interrupted": false
+          },
+          "resumed_from_epoch": 0,
+          "secondary": {
+            "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+            "final_val_acc": 0.92949,
+            "max_val_acc_historical_descriptive_only": 0.92949,
+            "training_seconds": 0.01
+          },
+          "seed": 900000,
+          "session_id": "2026-11-06T171010.758544+0000",
+          "started_at_utc": "2026-11-06T17:10:17.317270+00:00",
+          "status": "TRAINED",
+          "terminal_epoch": 3,
+          "terminal_model": {
+            "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+            "architecture_matches_declared": true,
+            "architecture_mismatch": null,
+            "hash": "6d6cd7ec5f22f4af08c28115f938bb65eb7deb2f05446e463298d29ab3618461",
+            "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/reference/terminal_model.keras",
+            "reload_weight_identical": true
+          },
+          "trained_at_utc": "2026-11-06T17:10:17.943132+00:00",
+          "was_interrupted": false
+        }
+      },
+      "block_index": 0,
+      "dataset": {
+        "train": {
+          "hash": "afd4533b276d109cc9cc30b7a0253c4c69826414bc6aa94d5f4bde0b442f3a7a",
+          "n": 100,
+          "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/data/train.json"
+        },
+        "validation": {
+          "hash": "afd4533b276d109cc9cc30b7a0253c4c69826414bc6aa94d5f4bde0b442f3a7a",
+          "n": 10,
+          "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/data/train.json"
+        }
+      }
+    }
+  },
+  "experiment_fingerprint": "6d19c4e65f97335111afc908d5359528540dd5ed7d6ca9c79575ffec559fd3fc",
+  "scheduler": "ii4-parallel-scheduler-v1",
+  "sessions": [
+    {
+      "gpu": "1",
+      "host": "oishis-MacBook-Air.local",
+      "pid": 36785,
+      "session_id": "2026-11-06T171010.758544+0000",
+      "started_at_utc": "2026-11-06T17:10:17.316469+00:00"
+    }
+  ],
+  "updated_at_utc": "2026-11-06T17:10:18.564611+00:00"
+}

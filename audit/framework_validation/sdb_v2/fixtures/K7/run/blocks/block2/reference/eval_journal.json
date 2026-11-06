@@ -1,0 +1,11 @@
+{
+  "accuracy": 0.92967,
+  "arm_id": "reference",
+  "artifact": "sealed-eval-journal-v1",
+  "block_id": "block2",
+  "sealed_test_hash": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+  "session_id": "2026-11-06T171010.758544+0000",
+  "state": "RECORDED",
+  "terminal_model_hash": "ffccc7152bfa08832b487a59bcaef03e25279b39aeb67e501ecc8450010ffa55",
+  "updated_at_utc": "2026-11-06T17:10:20Z"
+}

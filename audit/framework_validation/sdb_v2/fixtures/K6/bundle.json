@@ -1,0 +1,60 @@
+{
+ "b2": {
+  "C1": {
+   "status": "E"
+  },
+  "C2": {
+   "status": "E"
+  },
+  "C3": {
+   "status": "E"
+  },
+  "C4": {
+   "reason": "no approved B1 tolerance; B1 is descriptive",
+   "status": "NS"
+  },
+  "C5": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C6": {
+   "status": "E"
+  },
+  "C7": {
+   "status": "E"
+  },
+  "C8": {
+   "reason": "no model exists",
+   "status": "NS"
+  }
+ },
+ "case": "K6",
+ "d2n": {
+  "alpha": 0.05,
+  "alpha_per": 0.016666666666666666,
+  "null_draws": 59,
+  "null_model": "uniform i.i.d. bits, fresh draw",
+  "null_seed_base": 20261200,
+  "partitions_in_family": 3,
+  "queries": 2048,
+  "query_seed_base": 20261300,
+  "radius": 8,
+  "ratio_gate": 1.25
+ },
+ "environment": {
+  "keras": "3.13.2",
+  "note": "constructed for the fixture; uninformative about any real publication",
+  "numpy": "2.1.3",
+  "python": "3.13.0",
+  "tensorflow": "2.20.0"
+ },
+ "files": [
+  "audit/framework_validation/sdb_v2/fixtures/K6/partitions.npz"
+ ],
+ "partitions": "audit/framework_validation/sdb_v2/fixtures/K6/partitions.npz",
+ "planted_one_bit_near_duplicates": 0,
+ "published_checksums": {
+  "audit/framework_validation/sdb_v2/fixtures/K6/partitions.npz": "b748b8200f1abce1f3ff0753bd9173e68e02659f528fe7ee8bf5112b3012fa0a"
+ },
+ "reported_accuracy": 0.9291
+}

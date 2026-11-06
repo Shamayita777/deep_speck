@@ -1,0 +1,30 @@
+{
+  "amendment_id": "II-4-GOHR-IMPL-V1-PAR1",
+  "analysis_sha256": "0e5e80d90b8760827dc383f2b7b032a463855cbd4850fdb8635aaec43befe458",
+  "experiment_fingerprint": "6d19c4e65f97335111afc908d5359528540dd5ed7d6ca9c79575ffec559fd3fc",
+  "scheduler": "ii4-parallel-scheduler-v1",
+  "sessions": [
+    {
+      "finished_at_utc": "2026-11-06T17:10:20.266086+00:00",
+      "gpus": [
+        "0",
+        "1"
+      ],
+      "pending_blocks": [
+        "block0",
+        "block1",
+        "block2",
+        "block3"
+      ],
+      "scheduler": "ii4-parallel-scheduler-v1",
+      "session_id": "2026-11-06T171010.758544+0000",
+      "started_at_utc": "2026-11-06T17:10:14.191105+00:00",
+      "worker_exit_codes": {
+        "0": 0,
+        "1": 0
+      }
+    }
+  ],
+  "source_manifest_sha256": "eacbd0909404be926383449fdd21610be8cc3a96c1a2ce6326d653ef6269838e",
+  "written_at_utc": "2026-11-06T17:10:20.288283+00:00"
+}

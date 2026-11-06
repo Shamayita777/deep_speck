@@ -1,0 +1,48 @@
+{
+ "b2": {
+  "C1": {
+   "status": "E"
+  },
+  "C2": {
+   "status": "E"
+  },
+  "C3": {
+   "status": "E"
+  },
+  "C4": {
+   "reason": "no approved B1 tolerance; B1 is descriptive",
+   "status": "NS"
+  },
+  "C5": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C6": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C7": {
+   "status": "E"
+  },
+  "C8": {
+   "reason": "no model exists",
+   "status": "NS"
+  }
+ },
+ "case": "S5",
+ "environment": {
+  "keras": "3.13.2",
+  "note": "constructed for the fixture; uninformative about any real publication",
+  "numpy": "2.1.3",
+  "python": "3.13.0",
+  "tensorflow": "2.20.0"
+ },
+ "files": [
+  "audit/framework_validation/sdb_v2/fixtures/S5/fits.json"
+ ],
+ "published_checksums": {
+  "audit/framework_validation/sdb_v2/fixtures/S5/fits.json": "c8e6f5249886e7f9008acccdad3146e68744f9b37cef8b695d0a80eb68883e41"
+ },
+ "records": "audit/framework_validation/sdb_v2/fixtures/S5/fits.json",
+ "reported_accuracy": 0.9291
+}
