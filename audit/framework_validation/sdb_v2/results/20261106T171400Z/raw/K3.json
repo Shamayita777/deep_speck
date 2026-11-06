@@ -1,0 +1,45 @@
+{
+ "binding_report": {
+  "behavioural_binding": {
+   "accuracy_by_rounds": {
+    "5": 0.93034,
+    "6": 0.50208,
+    "7": 0.49115
+   },
+   "declared_rounds": 5,
+   "differential": [
+    64,
+    0
+   ],
+   "gohr_reported_accuracy": 0.9291,
+   "verdict": "PASS"
+  },
+  "path": "audit/cryptography/Archive/best5depth10.h5",
+  "properties": {
+   "conv1d_layers": 21,
+   "input_shape": [
+    null,
+    64
+   ],
+   "l2_values": [
+    1e-05
+   ],
+   "output_shape": [
+    null,
+    1
+   ],
+   "residual_merges": 10
+  },
+  "realized_depth": 10,
+  "sha256": "256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737"
+ },
+ "probe": {
+  "derived_depth": 10,
+  "n_add_layers": 10,
+  "n_batchnorm_layers": 23,
+  "n_conv1d_layers": 21,
+  "n_dense_layers": 3,
+  "path": "/Users/oishimoitra/Documents/deep_speck/audit/cryptography/Archive/best5depth10.h5",
+  "sha256": "256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737"
+ }
+}

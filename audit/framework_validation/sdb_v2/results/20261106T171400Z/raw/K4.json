@@ -1,0 +1,22 @@
+{
+ "key_schedule": {
+  "master_keys_checked": 1000,
+  "round_keys_compared": 5000,
+  "rounds": 5,
+  "status": "PASS"
+ },
+ "published_vector": {
+  "ciphertext": [
+   "0xa868",
+   "0x42f2"
+  ],
+  "key_schedule_rounds_checked": 22,
+  "status": "PASS"
+ },
+ "round_traces": {
+  "rounds": 5,
+  "samples": 1000,
+  "status": "PASS",
+  "word_states_compared": 10000
+ }
+}

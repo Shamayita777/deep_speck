@@ -1,0 +1,48 @@
+{
+ "verifier_report": {
+  "blocks": [
+   "block0",
+   "block1",
+   "block2",
+   "block3"
+  ],
+  "cross_gpu_training_overlap_seconds": 2.487,
+  "dual_gpu_required": true,
+  "experiment_fingerprint": "6d19c4e65f97335111afc908d5359528540dd5ed7d6ca9c79575ffec559fd3fc",
+  "gpus_used": [
+   "0",
+   "1"
+  ],
+  "overlap_basis": "arm start and end times",
+  "problems": [
+   "analysis.json changed after the run"
+  ],
+  "recomputed": {
+   "ci90": [
+    0.00013081202292363218,
+    0.0005791879770763007
+   ],
+   "ci95": [
+    5.1831271878798404e-05,
+    0.0006581687281211346
+   ],
+   "df": 3,
+   "equivalence": "EQUIVALENT_WITHIN_MARGIN",
+   "materiality": "NO_DIRECTIONAL_CLAIM",
+   "mean": 0.00035499999999996645,
+   "n": 4,
+   "p": 0.03365512969227802,
+   "sd": 0.00019052558883257475,
+   "se": 9.526279441628738e-05,
+   "sign_flip_p": null,
+   "sufficient": true,
+   "t": 3.726533555678176,
+   "tost_p": 1.0620659982011753e-06,
+   "tost_p_lower": 8.582782058397243e-07,
+   "tost_p_upper": 1.0620659982011753e-06
+  },
+  "run_dir": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/U4/run",
+  "status": "NOT_VERIFIED",
+  "valid_blocks": 4
+ }
+}

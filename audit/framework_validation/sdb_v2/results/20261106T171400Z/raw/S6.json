@@ -1,0 +1,54 @@
+{
+ "assessment": {
+  "formal_practical_equivalence": "INCONCLUSIVE",
+  "justification": "SDB-V2 fixture margin",
+  "threshold": 0.01,
+  "tost": {
+   "alpha": 0.05,
+   "degrees_of_freedom": 5,
+   "epsilon": 0.01,
+   "equivalent": false,
+   "mean_diff": -0.05000000000000001,
+   "method": "TOST (Schuirmann 1987; Lakens 2017)",
+   "n_pairs": 6,
+   "p_lower": 0.9999999932991996,
+   "p_tost": 0.9999999932991996,
+   "p_upper": 8.835587688628518e-10,
+   "se_diff": 0.0005916079783099529
+  }
+ },
+ "decide_final": "SUPPORTED",
+ "difference": "SUPPORTED",
+ "paired": {
+  "confidence_interval": {
+   "high": -0.048479223277138925,
+   "low": -0.051520776722861095,
+   "method": "t_distribution"
+  },
+  "degrees_of_freedom": 5,
+  "effect_size_cohens_dz": -34.50327796711823,
+  "mean_diff": -0.05000000000000001,
+  "n_pairs": 6,
+  "p_value": 4.39514016711166e-09,
+  "sd_diff": 0.0014491376746189222,
+  "se_diff": 0.0005916079783099529,
+  "secondary_bootstrap_ci": {
+   "high": -0.04899999999999999,
+   "low": -0.05108333333333329,
+   "note": "Sensitivity check only; does not drive any decision."
+  },
+  "statistic": -84.51542547285294,
+  "test_name": "paired_t_test",
+  "warnings": [
+   "n_pairs=6 is small; the paired t-test relies on approximate normality of the sampling distribution of the mean (CLT) or normality of the differences themselves. Interpret with appropriate caution and consult the secondary bootstrap CI below."
+  ]
+ },
+ "sufficiency": {
+  "failed_replicates": 0,
+  "failure_reasons": [],
+  "minimum_required": 5,
+  "not_run_replicates": 0,
+  "requested_replicates": 6,
+  "valid_replicates": 6
+ }
+}
