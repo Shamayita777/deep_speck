@@ -1,0 +1,126 @@
+{
+ "aggregates_recomputed": {
+  "B2_flagged_clean": [],
+  "B2_flagged_defects": [
+   "H1",
+   "S1",
+   "S2",
+   "S3"
+  ],
+  "H2": {
+   "D": true,
+   "R": true,
+   "replay": true
+  },
+  "P1": true,
+  "abstention_correct": [
+   "U1",
+   "U2",
+   "U3",
+   "U4",
+   "U5",
+   "U6",
+   "U7"
+  ],
+  "detected": [
+   "H1",
+   "S1",
+   "S2",
+   "S3",
+   "S4",
+   "S5",
+   "S6"
+  ],
+  "false_alarms": []
+ },
+ "anchor": "39c25819240a0784c0bf37c686aecc19da2643de",
+ "anchor_committed_at": "2026-11-06T22:43:43+05:30",
+ "manifest_sha256": "09253359d51a6fb2efa67b2c81c96133bb148b6bbd9e81887c28bbcaee25e8d5",
+ "match_flags": {
+  "H1": {
+   "C": true
+  },
+  "H2": {
+   "D": true,
+   "R": true,
+   "replay": true
+  },
+  "K2": {
+   "C": true
+  },
+  "K3": {
+   "C": true
+  },
+  "K4": {
+   "C": true
+  },
+  "K5": {
+   "C": true
+  },
+  "K6": {
+   "C": true
+  },
+  "K7": {
+   "C": true
+  },
+  "K8": {
+   "C": true
+  },
+  "P1": {
+   "R": true
+  },
+  "S1": {
+   "C": true,
+   "D": true,
+   "R": true
+  },
+  "S2": {
+   "C": true
+  },
+  "S3": {
+   "C": true,
+   "D": true,
+   "R": true
+  },
+  "S4": {
+   "C": true
+  },
+  "S5": {
+   "C": true
+  },
+  "S6": {
+   "C": true,
+   "D": true,
+   "R": true
+  },
+  "U1": {
+   "C": true,
+   "D": true,
+   "R": true
+  },
+  "U2": {
+   "R": true
+  },
+  "U3": {
+   "R": true
+  },
+  "U4": {
+   "C": true
+  },
+  "U5": {
+   "R": true
+  },
+  "U6": {
+   "C": true,
+   "D": true,
+   "R": true
+  },
+  "U7": {
+   "R": true
+  }
+ },
+ "problems": [],
+ "registration_sha256": "95fd1ce54a2d70c47eee25f030327d02aafab83e3755ac27e9d64e5f24577ac8",
+ "result_sha256": "db6f6502a2879cdc6779c59228bfef96ec930b27058fee908f2fd31853a570f8",
+ "status": "VERIFIED"
+}

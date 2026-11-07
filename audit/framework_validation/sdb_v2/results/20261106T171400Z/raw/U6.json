@@ -1,0 +1,28 @@
+{
+ "decide_final": "INCONCLUSIVE",
+ "sufficiency": {
+  "failed_replicates": 4,
+  "failure_reasons": [
+   {
+    "reason": "divergence",
+    "replicate_id": "u3"
+   },
+   {
+    "reason": "divergence",
+    "replicate_id": "u4"
+   },
+   {
+    "reason": "divergence",
+    "replicate_id": "u5"
+   },
+   {
+    "reason": "divergence",
+    "replicate_id": "u6"
+   }
+  ],
+  "minimum_required": 5,
+  "not_run_replicates": 0,
+  "requested_replicates": 6,
+  "valid_replicates": 2
+ }
+}

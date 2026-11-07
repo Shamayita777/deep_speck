@@ -1,0 +1,52 @@
+{
+ "alpha": 0.05,
+ "design": "single declared factor; a = original, b = changed",
+ "epsilon": 0.01,
+ "epsilon_predeclared": true,
+ "minimum_valid": 5,
+ "statistics_seed": 20261110,
+ "units": [
+  {
+   "a": 0.9201,
+   "b": 0.8721,
+   "failure_reason": null,
+   "status": "valid",
+   "unit": "u1"
+  },
+  {
+   "a": 0.9188,
+   "b": 0.8668,
+   "failure_reason": null,
+   "status": "valid",
+   "unit": "u2"
+  },
+  {
+   "a": 0.9195,
+   "b": 0.8705,
+   "failure_reason": null,
+   "status": "valid",
+   "unit": "u3"
+  },
+  {
+   "a": 0.921,
+   "b": 0.87,
+   "failure_reason": null,
+   "status": "valid",
+   "unit": "u4"
+  },
+  {
+   "a": 0.9179,
+   "b": 0.8684,
+   "failure_reason": null,
+   "status": "valid",
+   "unit": "u5"
+  },
+  {
+   "a": 0.9204,
+   "b": 0.8699,
+   "failure_reason": null,
+   "status": "valid",
+   "unit": "u6"
+  }
+ ]
+}

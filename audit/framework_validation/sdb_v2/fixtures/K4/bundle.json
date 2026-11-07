@@ -1,0 +1,47 @@
+{
+ "b2": {
+  "C1": {
+   "status": "E"
+  },
+  "C2": {
+   "status": "E"
+  },
+  "C3": {
+   "status": "E"
+  },
+  "C4": {
+   "reason": "no approved B1 tolerance; B1 is descriptive",
+   "status": "NS"
+  },
+  "C5": {
+   "status": "E"
+  },
+  "C6": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C7": {
+   "status": "E"
+  },
+  "C8": {
+   "reason": "no model exists",
+   "status": "NS"
+  }
+ },
+ "case": "K4",
+ "cipher_module": "audit/implementation/reference/speck.py",
+ "environment": {
+  "keras": "3.13.2",
+  "note": "constructed for the fixture; uninformative about any real publication",
+  "numpy": "2.1.3",
+  "python": "3.13.0",
+  "tensorflow": "2.20.0"
+ },
+ "files": [
+  "audit/implementation/reference/speck.py"
+ ],
+ "published_checksums": {
+  "audit/implementation/reference/speck.py": "59296f7b7990ec3886fc524ff49256005d360eb3748d3b1570351d669acbb8ce"
+ },
+ "reported_accuracy": 0.9291
+}

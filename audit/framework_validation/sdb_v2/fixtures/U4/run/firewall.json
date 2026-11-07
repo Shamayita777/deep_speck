@@ -1,0 +1,29 @@
+{
+  "confirmatory_data_mode": "SHARED",
+  "consumed_evaluation_keys": [
+    "independent:block0",
+    "independent:block1",
+    "independent:block2",
+    "independent:block3",
+    "reference:block0",
+    "reference:block1",
+    "reference:block2",
+    "reference:block3"
+  ],
+  "experiment_id": "TEST-COMPARISON-SMOKE",
+  "freeze_record": {
+    "frozen_at_utc": "2026-11-06T17:10:20.364087+00:00",
+    "frozen_config_hash": "6d19c4e65f97335111afc908d5359528540dd5ed7d6ca9c79575ffec559fd3fc",
+    "frozen_permutation_hash": null,
+    "frozen_replicate_plan_hash": "99aeb4171ce023f9a7ce46bfbadc76b8ac2e02d4e2e8475bf45e7eaf57addb17",
+    "frozen_statistical_plan_hash": "d3f98fbf8f650908ee25a3df14131761fc44631d03a3f84fe09dcb891381d273"
+  },
+  "frozen": true,
+  "sealed_dataset_hashes": {
+    "block0": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+    "block1": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+    "block2": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+    "block3": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+    "block4": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9"
+  }
+}

@@ -1,0 +1,763 @@
+{
+ "a1_recorded_dimensions": {
+  "v1": {
+   "DI": "INCONCLUSIVE",
+   "EV": "FAIL",
+   "II": "FAIL"
+  },
+  "v2": {
+   "DI": "INCONCLUSIVE",
+   "EV": "FAIL",
+   "II": "INCONCLUSIVE"
+  }
+ },
+ "artifact": "sdb-v2-registration-1",
+ "asserted_inputs": {
+  "P1": "audit/framework_validation/sdb_v2/fixtures/P1/declared.json",
+  "U2": "audit/framework_validation/sdb_v2/fixtures/U2/declared.json",
+  "U3": "audit/framework_validation/sdb_v2/fixtures/U3/declared.json",
+  "U5": "audit/framework_validation/sdb_v2/fixtures/U5/declared.json",
+  "U7": "audit/framework_validation/sdb_v2/fixtures/U7/declared.json"
+ },
+ "b1_status": {
+  "H1": "EXECUTED",
+  "H2": "B1-S",
+  "K2": "NOT_ASSESSED",
+  "K3": "EXECUTED",
+  "K4": "NOT_ASSESSED",
+  "K5": "NOT_ASSESSED",
+  "K6": "NOT_ASSESSED",
+  "K7": "NOT_ASSESSED",
+  "K8": "NOT_ASSESSED",
+  "P1": "NOT_APPLICABLE",
+  "S1": "NOT_ASSESSED",
+  "S2": "EXECUTED",
+  "S3": "NOT_ASSESSED",
+  "S4": "NOT_ASSESSED",
+  "S5": "NOT_ASSESSED",
+  "S6": "NOT_ASSESSED",
+  "U1": "NOT_APPLICABLE",
+  "U2": "NOT_APPLICABLE",
+  "U3": "NOT_APPLICABLE",
+  "U4": "NOT_APPLICABLE",
+  "U5": "NOT_APPLICABLE",
+  "U6": "NOT_APPLICABLE",
+  "U7": "NOT_APPLICABLE"
+ },
+ "baselines": {
+  "B1": "fresh-data inference on H1, S2, K3; descriptive; no decision threshold",
+  "B1S": "H2 stored-prediction rescoring; separate",
+  "B1_naive": "illustrative only; not executed",
+  "B2": "executed checklist C1-C8 with per-bundle applicability"
+ },
+ "case_groups": {
+  "H1": "historical_defect",
+  "H2": "historical_replay",
+  "K2": "clean_control",
+  "K3": "clean_control",
+  "K4": "clean_control",
+  "K5": "clean_control",
+  "K6": "clean_control",
+  "K7": "clean_control",
+  "K8": "clean_control",
+  "P1": "positive_decision_rule_control",
+  "S1": "synthetic_defect",
+  "S2": "synthetic_defect",
+  "S3": "synthetic_defect",
+  "S4": "synthetic_defect",
+  "S5": "synthetic_defect",
+  "S6": "synthetic_defect",
+  "U1": "abstention_control",
+  "U2": "abstention_control",
+  "U3": "abstention_control",
+  "U4": "abstention_control",
+  "U5": "abstention_control",
+  "U6": "abstention_control",
+  "U7": "abstention_control"
+ },
+ "case_levels": {
+  "H1": [
+   "C"
+  ],
+  "H2": [
+   "replay",
+   "D",
+   "R"
+  ],
+  "K2": [
+   "C"
+  ],
+  "K3": [
+   "C"
+  ],
+  "K4": [
+   "C"
+  ],
+  "K5": [
+   "C"
+  ],
+  "K6": [
+   "C"
+  ],
+  "K7": [
+   "C"
+  ],
+  "K8": [
+   "C"
+  ],
+  "P1": [
+   "R"
+  ],
+  "S1": [
+   "C",
+   "D",
+   "R"
+  ],
+  "S2": [
+   "C"
+  ],
+  "S3": [
+   "C",
+   "D",
+   "R"
+  ],
+  "S4": [
+   "C"
+  ],
+  "S5": [
+   "C"
+  ],
+  "S6": [
+   "C",
+   "D",
+   "R"
+  ],
+  "U1": [
+   "C",
+   "D",
+   "R"
+  ],
+  "U2": [
+   "R"
+  ],
+  "U3": [
+   "R"
+  ],
+  "U4": [
+   "C"
+  ],
+  "U5": [
+   "R"
+  ],
+  "U6": [
+   "C",
+   "D",
+   "R"
+  ],
+  "U7": [
+   "R"
+  ]
+ },
+ "case_order": [
+  "H1",
+  "H2",
+  "S1",
+  "S2",
+  "S3",
+  "S4",
+  "S5",
+  "S6",
+  "K2",
+  "K3",
+  "K4",
+  "K5",
+  "K6",
+  "K7",
+  "K8",
+  "P1",
+  "U1",
+  "U2",
+  "U3",
+  "U4",
+  "U5",
+  "U6",
+  "U7"
+ ],
+ "counts": {
+  "abstention_control": 7,
+  "clean_control": 7,
+  "historical_defect": 1,
+  "historical_replay": 1,
+  "positive_decision_rule_control": 1,
+  "synthetic_defect": 6,
+  "total": 23
+ },
+ "design": {
+  "path": "audit/framework_validation/SDB_V2_DESIGN_CLEAN_DRAFT.md",
+  "sha256": "cbcb658e469abf35cb2d6a3c1f8f7697756fa57924e172d6128de8fbfc0b1d9f"
+ },
+ "engine_tests": {
+  "B": "boundary literals",
+  "E1": 1960000,
+  "E2": 134,
+  "E3": 121,
+  "P": "pairwise, seed 20261106",
+  "R": "100000 draws, seed 20261107"
+ },
+ "excluded": {
+  "U8": "no conflict-resolution rule in the manuscript"
+ },
+ "expected_outcomes": {
+  "H1": {
+   "C": {
+    "binding": "REFUSED",
+    "binding_refusal_kind": "sha256",
+    "probe_derived_depth": 5,
+    "probe_n_add": 5,
+    "probe_n_conv1d": 11
+   }
+  },
+  "H2": {
+   "D": {
+    "DI_for_A1": "INCONCLUSIVE"
+   },
+   "R": {
+    "v1": {
+     "blocking": [
+      "EV",
+      "II"
+     ],
+     "verdict": "NOT_SUPPORTED"
+    },
+    "v2": {
+     "blocking": [
+      "EV"
+     ],
+     "verdict": "NOT_SUPPORTED"
+    }
+   },
+   "replay": {
+    "autond_overall_outcome": "INCONCLUSIVE",
+    "baseline_adequacy_gate": "PASSED",
+    "criterion": {
+     "baseline": true,
+     "met": false,
+     "perturbed": false
+    },
+    "engine_overall_d4_outcome": "INCONCLUSIVE",
+    "fits": {
+     "baseline#1": {
+      "best_round": 8,
+      "rounds_max_val_acc": [
+       0.9184899926185608,
+       0.7738469839096069,
+       0.6046149730682373,
+       0.5085740089416504,
+       0.5012649893760681
+      ],
+      "rounds_trained": [
+       5,
+       6,
+       7,
+       8,
+       9
+      ],
+      "selected_epoch": 10,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 9
+     },
+     "baseline#2": {
+      "best_round": 8,
+      "rounds_max_val_acc": [
+       0.9184769988059998,
+       0.7837550044059753,
+       0.6117630004882812,
+       0.5104529857635498,
+       0.5008130073547363
+      ],
+      "rounds_trained": [
+       5,
+       6,
+       7,
+       8,
+       9
+      ],
+      "selected_epoch": 10,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 9
+     },
+     "baseline#3": {
+      "best_round": 8,
+      "rounds_max_val_acc": [
+       0.9186310172080994,
+       0.7838190197944641,
+       0.6088520288467407,
+       0.5096359848976135,
+       0.5009890198707581
+      ],
+      "rounds_trained": [
+       5,
+       6,
+       7,
+       8,
+       9
+      ],
+      "selected_epoch": 10,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 9
+     },
+     "baseline#4": {
+      "best_round": 8,
+      "rounds_max_val_acc": [
+       0.918599009513855,
+       0.7738249897956848,
+       0.6054869890213013,
+       0.5085160136222839,
+       0.5008730292320251
+      ],
+      "rounds_trained": [
+       5,
+       6,
+       7,
+       8,
+       9
+      ],
+      "selected_epoch": 10,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 9
+     },
+     "baseline#5": {
+      "best_round": 8,
+      "rounds_max_val_acc": [
+       0.9187620282173157,
+       0.7835100293159485,
+       0.6107630133628845,
+       0.5098350048065186,
+       0.5002449750900269
+      ],
+      "rounds_trained": [
+       5,
+       6,
+       7,
+       8,
+       9
+      ],
+      "selected_epoch": 10,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 9
+     },
+     "perturbed#1": {
+      "best_round": null,
+      "rounds_max_val_acc": [
+       0.5048360228538513
+      ],
+      "rounds_trained": [
+       5
+      ],
+      "selected_epoch": 10,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 5
+     },
+     "perturbed#2": {
+      "best_round": 5,
+      "rounds_max_val_acc": [
+       0.5060949921607971,
+       0.5022460222244263
+      ],
+      "rounds_trained": [
+       5,
+       6
+      ],
+      "selected_epoch": 7,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 6
+     },
+     "perturbed#3": {
+      "best_round": 5,
+      "rounds_max_val_acc": [
+       0.5052779912948608,
+       0.501039981842041
+      ],
+      "rounds_trained": [
+       5,
+       6
+      ],
+      "selected_epoch": 9,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 6
+     },
+     "perturbed#4": {
+      "best_round": 5,
+      "rounds_max_val_acc": [
+       0.505282998085022,
+       0.5037109851837158
+      ],
+      "rounds_trained": [
+       5,
+       6
+      ],
+      "selected_epoch": 9,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 6
+     },
+     "perturbed#5": {
+      "best_round": null,
+      "rounds_max_val_acc": [
+       0.5001569986343384
+      ],
+      "rounds_trained": [
+       5
+      ],
+      "selected_epoch": 7,
+      "selected_stage_round": 5,
+      "status": "stopped_at_threshold",
+      "stop_round": 5
+     }
+    },
+    "perturbed_passed_round5_and_stopped_round6": 3
+   }
+  },
+  "K2": {
+   "C": {
+    "ev_decision": "EQUIVALENT",
+    "sufficient": true
+   }
+  },
+  "K3": {
+   "C": {
+    "behavioural_verdict": "PASS",
+    "binding": "ACCEPTED",
+    "probe_n_add": 10,
+    "probe_n_conv1d": 21
+   }
+  },
+  "K4": {
+   "C": {
+    "key_schedule": "PASS",
+    "published_vector": "PASS",
+    "round_traces": "PASS"
+   }
+  },
+  "K5": {
+   "C": {
+    "d1_outcome": "PASS"
+   }
+  },
+  "K6": {
+   "C": {
+    "d2n_outcome": "NO_EXCESS"
+   }
+  },
+  "K7": {
+   "C": {
+    "par1_verifier": "VERIFIED"
+   }
+  },
+  "K8": {
+   "C": {
+    "baseline_best_rounds": [
+     8,
+     8,
+     8,
+     8,
+     8
+    ],
+    "baseline_component": true,
+    "baseline_stop_rounds": [
+     9,
+     9,
+     9,
+     9,
+     9
+    ],
+    "criterion_met": true,
+    "perturbed_best_rounds": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "perturbed_component": true,
+    "perturbed_stop_rounds": [
+     5,
+     5,
+     5,
+     5,
+     5
+    ]
+   }
+  },
+  "P1": {
+   "R": {
+    "input_e6_ce2_admission": "ADMITTED",
+    "level": 3,
+    "rule": "4",
+    "verdict": "SUPPORTED"
+   }
+  },
+  "S1": {
+   "C": {
+    "key_schedule": "FAIL",
+    "published_vector": "FAIL",
+    "round_traces": "FAIL"
+   },
+   "D": {
+    "II": "FAIL"
+   },
+   "R": {
+    "rule": "1",
+    "verdict": "NOT_SUPPORTED"
+   }
+  },
+  "S2": {
+   "C": {
+    "binding": "REFUSED",
+    "binding_refusal_kind": "sha256"
+   }
+  },
+  "S3": {
+   "C": {
+    "d1_outcome": "FAIL"
+   },
+   "D": {
+    "DI": "FAIL"
+   },
+   "R": {
+    "rule": "1",
+    "verdict": "NOT_SUPPORTED"
+   }
+  },
+  "S4": {
+   "C": {
+    "d2n_outcome": "EXCESS"
+   }
+  },
+  "S5": {
+   "C": {
+    "baseline_best_rounds": [
+     8,
+     8,
+     8,
+     8,
+     8
+    ],
+    "baseline_component": true,
+    "baseline_stop_rounds": [
+     9,
+     9,
+     9,
+     9,
+     9
+    ],
+    "criterion_met": false,
+    "perturbed_best_rounds": [
+     5,
+     5,
+     5,
+     5,
+     5
+    ],
+    "perturbed_component": false,
+    "perturbed_stop_rounds": [
+     6,
+     6,
+     6,
+     6,
+     6
+    ]
+   }
+  },
+  "S6": {
+   "C": {
+    "ev_decision": "EFFECT",
+    "sufficient": true
+   },
+   "D": {
+    "EV": "FAIL"
+   },
+   "R": {
+    "rule": "1",
+    "verdict": "NOT_SUPPORTED"
+   }
+  },
+  "U1": {
+   "C": {
+    "baseline": "PASSED",
+    "d4_outcome": "INCONCLUSIVE",
+    "fit_states": [
+     "INDETERMINATE",
+     "INDETERMINATE",
+     "INDETERMINATE",
+     "INDETERMINATE",
+     "INDETERMINATE"
+    ],
+    "primary": "INCONCLUSIVE"
+   },
+   "D": {
+    "DI": "INCONCLUSIVE"
+   },
+   "R": {
+    "rule": "2",
+    "verdict": "INCONCLUSIVE"
+   }
+  },
+  "U2": {
+   "R": {
+    "input_a3_ce3_adversarial_outcome": "NOT_CAUGHT",
+    "input_a3_ce3_scientific_decision": "SUPPORTED",
+    "level": 2,
+    "rule": "3",
+    "verdict": "INCONCLUSIVE"
+   }
+  },
+  "U3": {
+   "R": {
+    "rule": "2",
+    "verdict": "INCONCLUSIVE"
+   }
+  },
+  "U4": {
+   "C": {
+    "par1_verifier": "NOT_VERIFIED",
+    "problem_mentions": "analysis.json changed after the run"
+   }
+  },
+  "U5": {
+   "R": {
+    "blocking": [
+     "EV: missing_prerequisite"
+    ],
+    "rule": "2",
+    "verdict": "INCONCLUSIVE"
+   }
+  },
+  "U6": {
+   "C": {
+    "ev_decision": "INCONCLUSIVE",
+    "sufficient": false
+   },
+   "D": {
+    "EV": "INCONCLUSIVE"
+   },
+   "R": {
+    "rule": "2",
+    "verdict": "INCONCLUSIVE"
+   }
+  },
+  "U7": {
+   "R": {
+    "a": {
+     "level": 2,
+     "rule": "3",
+     "verdict": "INCONCLUSIVE"
+    },
+    "b": {
+     "level": 2,
+     "rule": "3",
+     "verdict": "INCONCLUSIVE"
+    }
+   }
+  },
+  "_H2_B1S": {
+   "replicate_01_baseline.npy": {
+    "correct": 918209,
+    "label_0_correct": 478219,
+    "label_1_correct": 439990,
+    "test_examples": 1000000
+   },
+   "replicate_01_perturbed.npy": {
+    "correct": 500785,
+    "label_0_correct": 181171,
+    "label_1_correct": 319614,
+    "test_examples": 1000000
+   },
+   "replicate_02_baseline.npy": {
+    "correct": 917995,
+    "label_0_correct": 477360,
+    "label_1_correct": 440635,
+    "test_examples": 1000000
+   },
+   "replicate_02_perturbed.npy": {
+    "correct": 505379,
+    "label_0_correct": 323303,
+    "label_1_correct": 182076,
+    "test_examples": 1000000
+   },
+   "replicate_03_baseline.npy": {
+    "correct": 918226,
+    "label_0_correct": 477252,
+    "label_1_correct": 440974,
+    "test_examples": 1000000
+   },
+   "replicate_03_perturbed.npy": {
+    "correct": 504909,
+    "label_0_correct": 140797,
+    "label_1_correct": 364112,
+    "test_examples": 1000000
+   },
+   "replicate_04_baseline.npy": {
+    "correct": 918061,
+    "label_0_correct": 475951,
+    "label_1_correct": 442110,
+    "test_examples": 1000000
+   },
+   "replicate_04_perturbed.npy": {
+    "correct": 505455,
+    "label_0_correct": 359447,
+    "label_1_correct": 146008,
+    "test_examples": 1000000
+   },
+   "replicate_05_baseline.npy": {
+    "correct": 918288,
+    "label_0_correct": 477786,
+    "label_1_correct": 440502,
+    "test_examples": 1000000
+   },
+   "replicate_05_perturbed.npy": {
+    "correct": 500049,
+    "label_0_correct": 2721,
+    "label_1_correct": 497328,
+    "test_examples": 1000000
+   }
+  }
+ },
+ "fixture_claim_template": {
+  "L": 2,
+  "others": "N/A",
+  "predictive": true,
+  "reproduction": "COMPLETE"
+ },
+ "h2": {
+  "bundle_manifest_sha256": "dd2245f3224470a72a9762d2643fc60560d2ee7509fd40c1239139c75004ff0f",
+  "checkpoint_hash_records_all_match": true,
+  "claim_mapping": "A1. Under v1 every AutoND DI experiment bears on A1 and A2; the A1-only assignment of retraining experiments was first recorded after the A-D4 result (D2-N registration 5fb47d3, 2026-11-05 04:12 UTC; A-D4 evidence ad8c5d8, 2026-11-04). Not preregistered. No historical assignment or verdict is changed.",
+  "scored_as": "replay MATCH/MISMATCH, separate from detection, false alarms and claim outcomes",
+  "source_archive_sha256": "3be7c5d5cc69e4b47fad73e0e0c28cdc88d4d13fc1f955829b477a9e0daa0be4"
+ },
+ "manifest_sha256": "09253359d51a6fb2efa67b2c81c96133bb148b6bbd9e81887c28bbcaee25e8d5",
+ "registered_at_utc": "2026-11-06T17:12:57.033800+00:00",
+ "specification_gaps_unspecified": {
+  "X1": "SUBSTANTIAL reproduction for a component that is not reproduction-only",
+  "X2": "PARTIAL reproduction",
+  "X3": "a required dimension with an inadmissible FAIL when L* <= L1",
+  "X4": "a required CE test that is INCONCLUSIVE (identified during implementation; not in the design draft)",
+  "conflict": "no rule; U8 excluded",
+  "d4_progression_to_di": "no rule; S5 detector-level only",
+  "invalid_evidence": "no rule; U4 detector-level only"
+ },
+ "v1_unchanged": {
+  "claim_engine.py": "821c8e2953ed50c5e2e270f9a2063e8a6b9885282bdc3966c99b3f170110699c",
+  "registration_sdb_v1.json": "d9df4816ac10ee6d9e4b584ac00b1158e8449742ec5b3746e32c60b9b1f5d048",
+  "seeded_defects.py": "c4d5ffd883a4387e6cb6e1a56539eed78f9505371b04c05372e30728a97a2f65"
+ }
+}

@@ -1,0 +1,104 @@
+{
+ "audit_duplicates": {
+  "audit_id": "D1",
+  "audit_name": "Exact Duplicate and Partition Overlap Census",
+  "partition_overlap": {
+   "train_test": 200,
+   "train_validation": 0,
+   "validation_test": 0
+  },
+  "partitions": {
+   "test": {
+    "duplicate_groups": 0,
+    "duplicate_samples": 0,
+    "label_consistency": {
+     "consistent": true,
+     "label_conflict_groups": 0
+    },
+    "maximum_multiplicity": 1,
+    "total_samples": 1000,
+    "unique_samples": 1000
+   },
+   "train": {
+    "duplicate_groups": 0,
+    "duplicate_samples": 0,
+    "label_consistency": {
+     "consistent": true,
+     "label_conflict_groups": 0
+    },
+    "maximum_multiplicity": 1,
+    "total_samples": 5000,
+    "unique_samples": 5000
+   },
+   "validation": {
+    "duplicate_groups": 0,
+    "duplicate_samples": 0,
+    "label_consistency": {
+     "consistent": true,
+     "label_conflict_groups": 0
+    },
+    "maximum_multiplicity": 1,
+    "total_samples": 1000,
+    "unique_samples": 1000
+   }
+  },
+  "schema": {
+   "cross_partition_feature_mismatches": {},
+   "expected_feature_mismatches": {},
+   "expected_feature_schema": null,
+   "expected_label_schema": null,
+   "feature_encoding": null,
+   "features": {
+    "test": {
+     "dtype": "uint8",
+     "ndim": 2,
+     "sample_shape": [
+      64
+     ]
+    },
+    "train": {
+     "dtype": "uint8",
+     "ndim": 2,
+     "sample_shape": [
+      64
+     ]
+    },
+    "validation": {
+     "dtype": "uint8",
+     "ndim": 2,
+     "sample_shape": [
+      64
+     ]
+    }
+   },
+   "label_mismatches": {},
+   "labels": {
+    "test": {
+     "dtype": "uint8",
+     "ndim": 1,
+     "sample_shape": []
+    },
+    "train": {
+     "dtype": "uint8",
+     "ndim": 1,
+     "sample_shape": []
+    },
+    "validation": {
+     "dtype": "uint8",
+     "ndim": 1,
+     "sample_shape": []
+    }
+   },
+   "representation_convention": null,
+   "valid": true
+  }
+ },
+ "evaluate_d1": {
+  "duplicate_samples": 0,
+  "exact_partition_overlap": 200,
+  "label_conflict_groups": 0,
+  "outcome": "FAIL",
+  "rule": "PASS iff all audited feature/label schemas are consistent, every audited partition contains zero exact duplicate samples, and every compatible audited partition pair contains zero exact feature overlap.",
+  "schema_valid": true
+ }
+}

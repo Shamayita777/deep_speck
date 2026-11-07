@@ -1,0 +1,6 @@
+{
+ "X_sha256": "c121b9d9649a64d9b8fd4cf06fa1505dd4b12bf6dc1757d41e1adb7695a67796",
+ "Y_sha256": "8b57e9db5681f72c44fadc54631d9f3cd0bec6208f711dddd0b1459472acb28c",
+ "generator": "speck.py:make_train_data",
+ "model_sha256": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea"
+}

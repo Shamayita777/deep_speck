@@ -1,0 +1,28 @@
+{
+ "asserted_inputs": [
+  {
+   "L": 3,
+   "ce": [
+    {
+     "control": false,
+     "id": "CE2",
+     "outcome": "SUPPORTED",
+     "powered": true,
+     "prereg": true,
+     "required": false
+    }
+   ],
+   "dims": {
+    "DI": "INCONCLUSIVE",
+    "EV": "N/A",
+    "II": "N/A"
+   },
+   "id": "U3",
+   "predictive": true,
+   "reproduction": "COMPLETE",
+   "required": [
+    "DI"
+   ]
+  }
+ ]
+}

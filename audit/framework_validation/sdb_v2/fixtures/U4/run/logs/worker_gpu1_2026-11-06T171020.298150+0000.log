@@ -1,0 +1,6 @@
+{"devices_seen": [], "event": "worker_start", "gpu": "1", "session": "2026-11-06T171020.298150+0000", "utc": "2026-11-06T17:10:21.062681+00:00"}
+{"block": "block0", "event": "claimed", "gpu": "1", "utc": "2026-11-06T17:10:21.063070+00:00"}
+{"arm_status": {"independent": "TRAINED", "reference": "TRAINED"}, "block_id": "block0", "event": "block_done", "utc": "2026-11-06T17:10:24.616633+00:00"}
+{"block": "block2", "event": "claimed", "gpu": "1", "utc": "2026-11-06T17:10:24.617591+00:00"}
+{"arm_status": {"independent": "TRAINED", "reference": "TRAINED"}, "block_id": "block2", "event": "block_done", "utc": "2026-11-06T17:10:25.937316+00:00"}
+{"blocks_trained_this_session": 2, "event": "worker_finished", "gpu": "1", "utc": "2026-11-06T17:10:25.937579+00:00"}

@@ -1,0 +1,745 @@
+{
+  "adopted_evaluations": [],
+  "analysis": {
+    "alpha": 0.05,
+    "analysis_version": "ii4-analysis-v1",
+    "confirmatory": {
+      "ci90": {
+        "high": 0.0005791879770763007,
+        "low": 0.00013081202292363218
+      },
+      "ci95": {
+        "high": 0.0006581687281211346,
+        "low": 5.1831271878798404e-05
+      },
+      "cohens_dz": 1.863266777839088,
+      "equivalence": {
+        "margin": 0.01,
+        "method": "TOST (Schuirmann 1987; Lakens 2017), alpha-level two one-sided t-tests",
+        "note": "Computed independently of the difference test. Equivalence is never inferred from a non-significant difference test.",
+        "p_lower": 8.582782058397243e-07,
+        "p_tost": 1.0620659982011753e-06,
+        "p_upper": 1.0620659982011753e-06,
+        "verdict": "EQUIVALENT_WITHIN_MARGIN"
+      },
+      "estimand": "E[Delta] ; Delta_k = Y_k(declared) - Y_k(realized)",
+      "experimental_unit": "dataset block",
+      "materiality": {
+        "delta": 0.01,
+        "directional_claim_alpha": 0.025,
+        "rule": "signed 95% CI: MATERIALLY_HIGHER iff L > +delta; MATERIALLY_LOWER iff U < -delta",
+        "verdict": "NO_DIRECTIONAL_CLAIM"
+      },
+      "mean_difference": 0.00035499999999996645,
+      "paired_t": {
+        "df": 3,
+        "p_value": 0.03365512969227802,
+        "statistic": 3.726533555678176
+      },
+      "sd_difference": 0.00019052558883257475,
+      "se_difference": 9.526279441628738e-05
+    },
+    "replication": {
+      "min_valid_required": 3,
+      "n_blocks_requested": 4,
+      "n_blocks_valid": 4,
+      "sufficient": true
+    },
+    "secondary_robustness": {
+      "sign_flip_feasible": false,
+      "sign_flip_min_attainable_p": 0.125,
+      "sign_flip_p": null
+    },
+    "warnings": [
+      "Exact sign-flip test cannot reach alpha=0.05 with 4 blocks (minimum attainable two-sided p = 0.1250); reported as infeasible rather than as a non-significant result.",
+      "n_blocks=4: t-based inference relies on approximate normality of the block differences, which is assumed rather than testable at this sample size. The sign-flip analysis is the assumption-free cross-check."
+    ]
+  },
+  "artifact": "ii4-comparison-runner-v1",
+  "block_order": [
+    "block0",
+    "block1",
+    "block2",
+    "block3"
+  ],
+  "blocks": [
+    {
+      "arm_ids": [
+        "reference",
+        "independent"
+      ],
+      "block_id": "block0",
+      "dataset_hash": "afd4533b276d109cc9cc30b7a0253c4c69826414bc6aa94d5f4bde0b442f3a7a",
+      "failures": [],
+      "is_valid": true,
+      "replaces_block_id": null,
+      "secondary": {
+        "independent": {
+          "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+          "final_val_acc": 0.9293,
+          "max_val_acc_historical_descriptive_only": 0.9293,
+          "training_seconds": 0.01
+        },
+        "reference": {
+          "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+          "final_val_acc": 0.92949,
+          "max_val_acc_historical_descriptive_only": 0.92949,
+          "training_seconds": 0.01
+        }
+      },
+      "seeds": {
+        "independent": 900001,
+        "reference": 900000
+      },
+      "signed_difference": 0.00019000000000002348,
+      "values": {
+        "independent": 0.9293,
+        "reference": 0.92949
+      }
+    },
+    {
+      "arm_ids": [
+        "reference",
+        "independent"
+      ],
+      "block_id": "block1",
+      "dataset_hash": "119d4b29a53010d25a810c5a5bc9516fb19f76ff5cfff6c09cf8f1c7c75b8d2d",
+      "failures": [],
+      "is_valid": true,
+      "replaces_block_id": null,
+      "secondary": {
+        "independent": {
+          "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+          "final_val_acc": 0.92906,
+          "max_val_acc_historical_descriptive_only": 0.92906,
+          "training_seconds": 0.01
+        },
+        "reference": {
+          "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+          "final_val_acc": 0.92958,
+          "max_val_acc_historical_descriptive_only": 0.92958,
+          "training_seconds": 0.01
+        }
+      },
+      "seeds": {
+        "independent": 900003,
+        "reference": 900002
+      },
+      "signed_difference": 0.0005199999999999649,
+      "values": {
+        "independent": 0.92906,
+        "reference": 0.92958
+      }
+    },
+    {
+      "arm_ids": [
+        "reference",
+        "independent"
+      ],
+      "block_id": "block2",
+      "dataset_hash": "741c3044a619519de00171ba84b988c24a7b33905d55616e766e70b74cbe6bf3",
+      "failures": [],
+      "is_valid": true,
+      "replaces_block_id": null,
+      "secondary": {
+        "independent": {
+          "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+          "final_val_acc": 0.92915,
+          "max_val_acc_historical_descriptive_only": 0.92915,
+          "training_seconds": 0.01
+        },
+        "reference": {
+          "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+          "final_val_acc": 0.92967,
+          "max_val_acc_historical_descriptive_only": 0.92967,
+          "training_seconds": 0.01
+        }
+      },
+      "seeds": {
+        "independent": 900005,
+        "reference": 900004
+      },
+      "signed_difference": 0.0005199999999999649,
+      "values": {
+        "independent": 0.92915,
+        "reference": 0.92967
+      }
+    },
+    {
+      "arm_ids": [
+        "reference",
+        "independent"
+      ],
+      "block_id": "block3",
+      "dataset_hash": "c451887c6597853afdbb183139181a519bea481743f7963a114b64af8a3a0d18",
+      "failures": [],
+      "is_valid": true,
+      "replaces_block_id": null,
+      "secondary": {
+        "independent": {
+          "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+          "final_val_acc": 0.9292400000000001,
+          "max_val_acc_historical_descriptive_only": 0.9292400000000001,
+          "training_seconds": 0.01
+        },
+        "reference": {
+          "best_val_loss_checkpoint_hash_provenance_only": "bebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebebe",
+          "final_val_acc": 0.92943,
+          "max_val_acc_historical_descriptive_only": 0.92943,
+          "training_seconds": 0.01
+        }
+      },
+      "seeds": {
+        "independent": 900007,
+        "reference": 900006
+      },
+      "signed_difference": 0.00018999999999991246,
+      "values": {
+        "independent": 0.9292400000000001,
+        "reference": 0.92943
+      }
+    }
+  ],
+  "comparison_axis": {
+    "arm_a": {
+      "arm_id": "reference",
+      "identity": {
+        "impl": "reference"
+      },
+      "label": "reference implementation",
+      "provenance_note": "",
+      "source_paths": [
+        "a/ref_model.py",
+        "a/ref_train.py"
+      ]
+    },
+    "arm_b": {
+      "arm_id": "independent",
+      "identity": {
+        "impl": "independent"
+      },
+      "label": "independent implementation",
+      "provenance_note": "",
+      "source_paths": [
+        "b/ind_model.py",
+        "b/ind_train.py"
+      ]
+    },
+    "arm_ids": [
+      "reference",
+      "independent"
+    ],
+    "component_kind": "FORMAL_IMPLEMENTATION_COMPARISON",
+    "finding_id": null,
+    "kind": "IMPLEMENTATION",
+    "name": "implementation",
+    "satisfies_stage_ii4": true,
+    "schema_version": "ii4-comparison-v1",
+    "scientific_question": "Do the two implementations agree under identical protocols?",
+    "sign_convention": "reference minus independent",
+    "stage_consequence": "A completed run along this axis compares two independently written implementations under identical experimental protocols and therefore addresses methodology Section 3.5.3's null hypothesis directly. It can satisfy Stage II-4 and supply the statistical assessment for Stage II-5.",
+    "verification_method": "source hashes pinned; deterministic components verified in II-2"
+  },
+  "config_fingerprint": "8f569631a49563328bd9377b674abc72d3d1a46f473b60449f9acc0f448e7194",
+  "corrupt_arm_state": [],
+  "degraded_recoveries": [],
+  "epoch_logs": {
+    "block0/independent": {
+      "committed_epoch": 2,
+      "completed_epochs": 3,
+      "contiguous": true,
+      "highest_logged_epoch": 2,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/independent/epochs.jsonl",
+      "reconciliation_notes": [],
+      "records": 3,
+      "sessions": [
+        "2026-11-06T171010.758544+0000"
+      ],
+      "total_checkpoint_seconds": 0.002,
+      "total_training_seconds": 0.003
+    },
+    "block0/reference": {
+      "committed_epoch": 2,
+      "completed_epochs": 3,
+      "contiguous": true,
+      "highest_logged_epoch": 2,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block0/reference/epochs.jsonl",
+      "reconciliation_notes": [],
+      "records": 3,
+      "sessions": [
+        "2026-11-06T171010.758544+0000"
+      ],
+      "total_checkpoint_seconds": 0.002,
+      "total_training_seconds": 0.003
+    },
+    "block1/independent": {
+      "committed_epoch": 2,
+      "completed_epochs": 3,
+      "contiguous": true,
+      "highest_logged_epoch": 2,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block1/independent/epochs.jsonl",
+      "reconciliation_notes": [],
+      "records": 3,
+      "sessions": [
+        "2026-11-06T171010.758544+0000"
+      ],
+      "total_checkpoint_seconds": 0.002,
+      "total_training_seconds": 0.003
+    },
+    "block1/reference": {
+      "committed_epoch": 2,
+      "completed_epochs": 3,
+      "contiguous": true,
+      "highest_logged_epoch": 2,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block1/reference/epochs.jsonl",
+      "reconciliation_notes": [],
+      "records": 3,
+      "sessions": [
+        "2026-11-06T171010.758544+0000"
+      ],
+      "total_checkpoint_seconds": 0.002,
+      "total_training_seconds": 0.003
+    },
+    "block2/independent": {
+      "committed_epoch": 2,
+      "completed_epochs": 3,
+      "contiguous": true,
+      "highest_logged_epoch": 2,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block2/independent/epochs.jsonl",
+      "reconciliation_notes": [],
+      "records": 3,
+      "sessions": [
+        "2026-11-06T171010.758544+0000"
+      ],
+      "total_checkpoint_seconds": 0.002,
+      "total_training_seconds": 0.003
+    },
+    "block2/reference": {
+      "committed_epoch": 2,
+      "completed_epochs": 3,
+      "contiguous": true,
+      "highest_logged_epoch": 2,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block2/reference/epochs.jsonl",
+      "reconciliation_notes": [],
+      "records": 3,
+      "sessions": [
+        "2026-11-06T171010.758544+0000"
+      ],
+      "total_checkpoint_seconds": 0.002,
+      "total_training_seconds": 0.003
+    },
+    "block3/independent": {
+      "committed_epoch": 2,
+      "completed_epochs": 3,
+      "contiguous": true,
+      "highest_logged_epoch": 2,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block3/independent/epochs.jsonl",
+      "reconciliation_notes": [],
+      "records": 3,
+      "sessions": [
+        "2026-11-06T171010.758544+0000"
+      ],
+      "total_checkpoint_seconds": 0.002,
+      "total_training_seconds": 0.003
+    },
+    "block3/reference": {
+      "committed_epoch": 2,
+      "completed_epochs": 3,
+      "contiguous": true,
+      "highest_logged_epoch": 2,
+      "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/blocks/block3/reference/epochs.jsonl",
+      "reconciliation_notes": [],
+      "records": 3,
+      "sessions": [
+        "2026-11-06T171010.758544+0000"
+      ],
+      "total_checkpoint_seconds": 0.002,
+      "total_training_seconds": 0.003
+    }
+  },
+  "execution_mode": "SMOKE",
+  "experiment_fingerprint": "6d19c4e65f97335111afc908d5359528540dd5ed7d6ca9c79575ffec559fd3fc",
+  "experiment_id": "TEST-COMPARISON-SMOKE",
+  "firewall": {
+    "confirmatory_data_mode": "SHARED",
+    "consumed_evaluation_keys": [
+      "independent:block0",
+      "independent:block1",
+      "independent:block2",
+      "independent:block3",
+      "reference:block0",
+      "reference:block1",
+      "reference:block2",
+      "reference:block3"
+    ],
+    "experiment_id": "TEST-COMPARISON-SMOKE",
+    "freeze_record": {
+      "frozen_at_utc": "2026-11-06T17:10:14.187404+00:00",
+      "frozen_config_hash": "6d19c4e65f97335111afc908d5359528540dd5ed7d6ca9c79575ffec559fd3fc",
+      "frozen_permutation_hash": null,
+      "frozen_replicate_plan_hash": "99aeb4171ce023f9a7ce46bfbadc76b8ac2e02d4e2e8475bf45e7eaf57addb17",
+      "frozen_statistical_plan_hash": "d3f98fbf8f650908ee25a3df14131761fc44631d03a3f84fe09dcb891381d273"
+    },
+    "frozen": true,
+    "sealed_dataset_hashes": {
+      "block0": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+      "block1": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+      "block2": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+      "block3": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+      "block4": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9"
+    }
+  },
+  "frozen_record": null,
+  "frozen_record_verified": false,
+  "generated_at_utc": "2026-11-06T17:10:20.287019+00:00",
+  "interpretation": {
+    "conclusion": "IMPLEMENTATIONS_EQUIVALENT",
+    "equivalence": "EQUIVALENT_WITHIN_MARGIN",
+    "materiality": "NO_DIRECTIONAL_CLAIM",
+    "meaning": "The two implementations produce statistically equivalent experimental outcomes within the preregistered margin, on this endpoint and this sealed test set. This is the condition methodology Section 3.5.6 Rule I states.",
+    "rule_version": "II4-IMPL-INTERPRETATION-V1"
+  },
+  "interrupted_arms": [],
+  "n_blocks_valid": 4,
+  "non_evidentiary": true,
+  "preregistration_sha256": "6f9dfddee03b351f2388b06d8f2748a06a34d712548adb933a34846467ab85ad",
+  "recorded_deviations": [],
+  "recovery_exactness": {
+    "authority": "The commit manifest (durable_state.CommittedCheckpointStore) is the single source of truth for what has been committed. The epoch log is a derived record with no authority over resumability, so a lagging or torn log is reconciled and noted rather than fatal.",
+    "conditions": [
+      "the arm is reseeded to its recorded seed immediately before fit() on every session, including a resume (the adapter does this inside train_arm, so the guarantee does not depend on the runner's call order)",
+      "the committed checkpoint is a FULL model save; a weights-only checkpoint would lose the optimizer moments and is refused",
+      "a crash before the manifest commit recovers the previous committed epoch; a crash at or after it recovers the new one"
+    ],
+    "consequence": "On the verified stack an interrupted-and-resumed arm is a bit-exact continuation, so resuming does not alter the arm's scientific status. This is nonetheless RECORDED rather than assumed: every interruption is appended to the arm record and surfaced on the block, the stage component and the certificate, together with the TensorFlow and Keras versions the run actually used, so a reader can check the claim against the environment instead of taking it on trust. If the exactness test fails on another stack, the arm is still correct - the design declares same_training_shuffle_stream=False and exact_replay_available=false - but it must then be reported as a non-bit-exact continuation.",
+    "fail_closed": "Degradation is bounded and explicit. If the committed slot fails hash verification the previous slot is used and the loss of one epoch is recorded. If BOTH slots fail, or the manifest is unreadable, recovery REFUSES rather than restarting the arm from zero while reporting a resume.",
+    "granularity": "epoch",
+    "not_recovered": [
+      "within-epoch position: recovery is at EPOCH granularity, so an interruption part-way through an epoch redoes that epoch from its start. No partial-epoch record is ever written, so a redone epoch cannot be mistaken for a completed one.",
+      "the METRICS ROW of an epoch committed in the instant before the log append: the manifest is replaced before the row is written, so a kill in between leaves the epoch committed and hash-verified while its val_loss and val_accuracy - which existed only in memory - are gone. They are not reconstructed. A marker row with status COMMITTED_METRICS_LOST is appended on resume so the gap is explained in the log itself, and no consumer counts that row as a completed epoch. The confirmatory analysis reads the TERMINAL model's sealed-test accuracy, not the per-epoch log, so a lost row costs a line of the training trace and nothing in the result."
+    ],
+    "recovered_exactly": [
+      "model weights (two-slot committed checkpoint, reloaded and compared element-wise)",
+      "optimizer state including Adam's step counter and both moment estimates, compared variable by variable across the reload",
+      "completed epoch index (fit resumes at initial_epoch; the log is a contiguous 0..N-1 history with exactly one record per epoch)",
+      "learning-rate schedule: the rate in force at every epoch of a resumed run equals the rate at the same epoch of an uninterrupted control run",
+      "best-monitored-value record, restored into the checkpoint callback so a resume cannot overwrite a better checkpoint with a worse one",
+      "per-epoch minibatch shuffle permutation: Keras derives each epoch's permutation from the absolute epoch index, so a resumed arm reseeded to its recorded seed reproduces the uninterrupted run's batch sequence - and its final weights - bit-for-bit"
+    ],
+    "verified_on": {
+      "basis": "RE-MEASURED ON THE STACK THAT RUNS THE EXPERIMENT. No TensorFlow or Keras version is named here on purpose: this record feeds the preregistration hash, so pinning a version would make that hash depend on the machine and a freeze taken on one host would never match execution on another. The versions actually measured are recorded per run in the environment details of the run manifest, which is where provenance belongs.",
+      "enforced_by": "test_arm_recovery_keras.py, which the launch gate runs on the training host before execution is permitted and which treats a skip as a failure.",
+      "note": "The shuffle property is an empirical property of the Keras version in use, not a documented guarantee. It is re-measured rather than assumed, so a Keras version that behaves differently fails the suite instead of silently invalidating the claim."
+    },
+    "version": "arm-recovery-v2"
+  },
+  "replacements": [],
+  "sealed_test_set": {
+    "generated_at_utc": "2026-11-06T17:10:14.188095+00:00",
+    "hash": "018d536a7a4f58f2167a0c9e4109d0f99c8a04043d89b52224de0f9bf84d2ad9",
+    "n": 1000,
+    "path": "/Users/oishimoitra/Documents/deep_speck/audit/framework_validation/sdb_v2/fixtures/K7/run/sealed_test/sealed.json",
+    "scope": "GLOBAL_SHARED",
+    "sealed_under": [
+      "block0",
+      "block1",
+      "block2",
+      "block3",
+      "block4"
+    ]
+  },
+  "session_environments": [
+    {
+      "software_stack": {
+        "keras": "3.13.2",
+        "numpy": "2.1.3",
+        "python": "3.13.0",
+        "scipy": "1.16.3",
+        "tensorflow": "2.20.0"
+      },
+      "started_at_utc": "2026-11-06T17:10:14.187518+00:00"
+    },
+    {
+      "resumed_at_utc": "2026-11-06T17:10:20.269902+00:00",
+      "software_stack": {
+        "keras": "3.13.2",
+        "numpy": "2.1.3",
+        "python": "3.13.0",
+        "scipy": "1.16.3",
+        "tensorflow": "2.20.0"
+      }
+    }
+  ],
+  "shared_components": {
+    "data_generation": "shared; justified by II-2 deterministic checks"
+  },
+  "sigkill_test_scope": {
+    "does_not_establish": [
+      "DURABILITY against power loss or kernel panic. SIGKILL destroys the process but leaves the page cache intact, so data written-but-not-fsynced still reaches disk. Only a crash of the whole machine, or a fault-injecting filesystem, distinguishes fsynced from merely written. The fsync calls are therefore reasoned, not measured.",
+      "atomicity of os.replace on a non-POSIX or network filesystem. On Kaggle's or Colab's overlay/network-backed working directories, rename may not be atomic and fsync may not reach stable storage; the whole protocol rests on both.",
+      "a kill INSIDE a third-party write. A SIGKILL during Keras's multi-file zip write, or inside the real firewall's own save, cannot be scheduled deterministically; those are covered by writing through our own atomic wrapper instead.",
+      "anything about concurrent writers. One process per run directory is assumed and not enforced by a lock."
+    ],
+    "establishes": [
+      "that the ORDERING of operations is correct: whatever a later process finds on disk is a state the protocol can interpret, at every named boundary",
+      "that no `except`, `finally` or `atexit` path is relied upon, because SIGKILL runs none of them",
+      "that a partially written file, an orphaned inflight file, a lagging log or a torn trailing line is recoverable rather than fatal",
+      "that the recovered epoch's weights and optimizer state correspond to that epoch, checked by reading the committed slot's contents"
+    ]
+  },
+  "software_stack": {
+    "keras": "3.13.2",
+    "numpy": "2.1.3",
+    "python": "3.13.0",
+    "scipy": "1.16.3",
+    "tensorflow": "2.20.0"
+  },
+  "source_manifest": {
+    "architecture_signature": {
+      "bytes": 14724,
+      "path": "audit/implementation/architecture_signature.py",
+      "sha256": "8feec132754106aa4361b9df6447402868ef3ca70f693e4b8c00de2f0f8e449f"
+    },
+    "arm_recovery": {
+      "bytes": 35063,
+      "path": "audit/implementation/arm_recovery.py",
+      "sha256": "bad7f6aea04c5d01d8e84798356c43be404578c74cae65821f6e20b362daabf1"
+    },
+    "common_ids": {
+      "bytes": 3110,
+      "path": "audit/common/ids.py",
+      "sha256": "f975b4a9c61a2e2afa503d0a58a129e8cb9d437276bf8fed25d5324fba2fe387"
+    },
+    "common_outcomes": {
+      "bytes": 4469,
+      "path": "audit/common/outcomes.py",
+      "sha256": "3e860ae76d8965f6282c1ff9ea19206943b772623d636cf2c66611763e4a0979"
+    },
+    "common_provenance": {
+      "bytes": 12755,
+      "path": "audit/common/provenance.py",
+      "sha256": "7cf33f8ed32f999cb58345f20e01b442f8b0c4e12c732e2bb95a08ce4c6b0eb2"
+    },
+    "common_run_manifest": {
+      "bytes": 5425,
+      "path": "audit/common/run_manifest.py",
+      "sha256": "3c40f96987de7edae337ff199ac918f0bbb9635c1d60503949bfbbeac99e1ab9"
+    },
+    "common_strict_json": {
+      "bytes": 2347,
+      "path": "audit/common/strict_json.py",
+      "sha256": "cb02f0113caf88cd86b2a3f6624d866afaf74b358ea443ebaf111f7311a2bbcf"
+    },
+    "comparison": {
+      "bytes": 20019,
+      "path": "audit/implementation/comparison.py",
+      "sha256": "1a45b1007b65a91c8c996b75ecbeaec7663c3bb730f1c5a3ad8cf0e2d8c00c63"
+    },
+    "conformance": {
+      "bytes": 8493,
+      "path": "audit/implementation/conformance.py",
+      "sha256": "bc7afe84853ad9ae76c7cf4c93302a4f96351f4937b0fb3dab179c13182ebfff"
+    },
+    "declared_architecture": {
+      "bytes": 70553,
+      "path": "audit/implementation/adapters/gohr_declared_architecture.json",
+      "sha256": "525152f1d77b53a9ee91a68fa613162f162a5ea1c950541d6160719bd5ff9347"
+    },
+    "durable_state": {
+      "bytes": 55046,
+      "path": "audit/implementation/durable_state.py",
+      "sha256": "beb6c74e544fde6f585a6e7f75c07a56c3cfac83d187cab84d1d69b7e427a2b0"
+    },
+    "fake_adapter": {
+      "bytes": 11038,
+      "path": "audit/implementation/ii4_analysis.py",
+      "sha256": "46068721044e9e01b4c8e7241e4aadaf299c933de2d08eb057b6e4f04a05912a"
+    },
+    "framework_firewall": {
+      "bytes": 9253,
+      "path": "audit/experimental_validity/framework/firewall.py",
+      "sha256": "6e40ad7c8f6119a6c50eb12155db980a76e6afb0a73a9ee2b93b97b2b17a6b62"
+    },
+    "ii4_analysis": {
+      "bytes": 11038,
+      "path": "audit/implementation/ii4_analysis.py",
+      "sha256": "46068721044e9e01b4c8e7241e4aadaf299c933de2d08eb057b6e4f04a05912a"
+    },
+    "ii4_comparison_certificate": {
+      "bytes": 13792,
+      "path": "audit/implementation/ii4_comparison_certificate.py",
+      "sha256": "5eaa8bf5f12328666936b4a3da612d0c4e34746a9cc1515ddf152224390d557c"
+    },
+    "ii4_comparison_design": {
+      "bytes": 21087,
+      "path": "audit/implementation/ii4_comparison_design.py",
+      "sha256": "b8c543b841bab9968babb5bcd6440bbb1a688bebdba5a69631b0f56a95be505c"
+    },
+    "ii4_comparison_power": {
+      "bytes": 17890,
+      "path": "audit/implementation/ii4_comparison_power.py",
+      "sha256": "c4a80d53b560dfd02495dc657c929b29122b683a2232b1c0c67574ae06585400"
+    },
+    "ii4_comparison_runner": {
+      "bytes": 70486,
+      "path": "audit/implementation/ii4_comparison_runner.py",
+      "sha256": "bd184ada0efdcdfc0fc4a9025e8270d79648c5d070599b75671464bf41137856"
+    },
+    "ii4_design": {
+      "bytes": 13731,
+      "path": "audit/implementation/ii4_design.py",
+      "sha256": "58ecd2baeceb7bd6bac982bdf580caca5c180badc59e8386b65497c86e220863"
+    },
+    "ii4_experiment": {
+      "bytes": 10756,
+      "path": "audit/implementation/ii4_experiment.py",
+      "sha256": "74099c6065a9be4ce7902d5add81e5b83e15666425e821ce162d549f8f15e8db"
+    },
+    "ii4_runner": {
+      "bytes": 25786,
+      "path": "audit/implementation/ii4_runner.py",
+      "sha256": "a2eb572ccfde67290091b1678de5794d964814a31d38cc9ff6bd4960fdf44931"
+    },
+    "kill_worker": {
+      "bytes": 8702,
+      "path": "audit/tests/kill_worker.py",
+      "sha256": "c10b2b6d332c15688ffa5e8bc05b03746d575e21622ce58bb66b51960985bd88"
+    },
+    "launcher": {
+      "bytes": 30070,
+      "path": "audit/implementation/run_ii4_impl.py",
+      "sha256": "05eff1b5d69c77b025c45808e0d8dd1ffc13b12bcf990fef1b57b5d52690095b"
+    },
+    "package_init": {
+      "bytes": 680,
+      "path": "audit/__init__.py",
+      "sha256": "cc747356c0411c375a46974fe4c5d92835538acdf4af0ceaf7447d9c76fdefbb"
+    },
+    "parallel_launcher": {
+      "bytes": 11367,
+      "path": "audit/implementation/ii4_parallel/launcher.py",
+      "sha256": "9590210b497c14476f21348364d0395c5c89945ac364ab21c738fa61a4001e8a"
+    },
+    "parallel_package": {
+      "bytes": 150,
+      "path": "audit/implementation/ii4_parallel/__init__.py",
+      "sha256": "6b383c682e6f944513f42a8fc24a505b4370504b51898d47ce6e0e2bf387ab6d"
+    },
+    "parallel_scheduler": {
+      "bytes": 20572,
+      "path": "audit/implementation/ii4_parallel/scheduler.py",
+      "sha256": "061e8f923534ab286e9bc25df4b614e4048598c7c11673f9729ef013f480dcfa"
+    },
+    "parallel_test_fixtures": {
+      "bytes": 1990,
+      "path": "audit/implementation/ii4_parallel/tests/ii4_parallel_fixtures.py",
+      "sha256": "ddeaf958f35c06e55076c081f2628869181322e799dca7d834b4562e5d17a7bb"
+    },
+    "parallel_tests": {
+      "bytes": 20739,
+      "path": "audit/implementation/ii4_parallel/tests/test_ii4_parallel.py",
+      "sha256": "75bfa20ef549f31064f0f776a3ac862a6563c05f72fab5e981c7fa5d8b0b7128"
+    },
+    "parallel_tests_package": {
+      "bytes": 0,
+      "path": "audit/implementation/ii4_parallel/tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "parallel_verifier": {
+      "bytes": 19957,
+      "path": "audit/implementation/ii4_parallel/verify.py",
+      "sha256": "18a11a8fb52f229511352186848d8b8017c3943fcd6fc00fbef4a5db5213c778"
+    },
+    "parallel_worker": {
+      "bytes": 4193,
+      "path": "audit/implementation/ii4_parallel/worker.py",
+      "sha256": "41db44ea4f1d732205ec40c022f80e11cba765148bb867ce84bdeb909be9fe03"
+    },
+    "preflight": {
+      "bytes": 39147,
+      "path": "audit/implementation/preflight.py",
+      "sha256": "78f33185dd78fdfe5395dee9be13e90e69d85a5dbe1e096b00d66decdcf2b118"
+    },
+    "preregistration": {
+      "bytes": 20806,
+      "path": "audit/implementation/preregistrations/ii4_impl_gohr_v1.py",
+      "sha256": "09d8a105d4ca8f64cfcdb39a97ab8f8be0273901e1c947e4c8009afafef7bd2c"
+    },
+    "stages": {
+      "bytes": 14064,
+      "path": "audit/implementation/stages.py",
+      "sha256": "4a57419cd218f2b407701827bd0a5c16d2658395174142e956a3e956149ee093"
+    },
+    "test_arm_recovery": {
+      "bytes": 17901,
+      "path": "audit/tests/test_arm_recovery.py",
+      "sha256": "43fc4271b70524291fedbbcb812d1ddbaa47acb0029dadcd3fc4cd9bec2ee499"
+    },
+    "test_arm_recovery_keras": {
+      "bytes": 30759,
+      "path": "audit/tests/test_arm_recovery_keras.py",
+      "sha256": "a7e84318ab6d76b5b1f144bddeb63d786433dd20cab5379452283928418d694d"
+    },
+    "test_durable_state": {
+      "bytes": 53253,
+      "path": "audit/tests/test_durable_state.py",
+      "sha256": "a3109c570c804fbddc606ce8cbfd8f00706faf95785dbbd6a15291d7e5f6b084"
+    },
+    "test_execute_gate": {
+      "bytes": 16438,
+      "path": "audit/tests/test_execute_gate.py",
+      "sha256": "05a2038c20853a43fae914a693edef11533257d0dd416452ecec45fd09a7e879"
+    },
+    "test_firewall_crash_recovery": {
+      "bytes": 21668,
+      "path": "audit/tests/test_firewall_crash_recovery.py",
+      "sha256": "545f6cb02f3d3ee65e3b4bcf04c45d7173fa5dd974ef9d8ac8db8f9512addd7b"
+    },
+    "test_firewall_real_integration": {
+      "bytes": 24273,
+      "path": "audit/tests/test_firewall_real_integration.py",
+      "sha256": "a4bf9f380f89b51eecc64ccc647c40d65a09cfa446051df1c69338fbce377c0e"
+    },
+    "test_freeze_manifest_coverage": {
+      "bytes": 21390,
+      "path": "audit/tests/test_freeze_manifest_coverage.py",
+      "sha256": "9b9942bcb23a931949ccc1dacfe479ad3b59abc22a3faf41ff96688e69b7a223"
+    },
+    "test_ii4_comparison": {
+      "bytes": 43086,
+      "path": "audit/tests/test_ii4_comparison.py",
+      "sha256": "330d828deacf4730529627fc7d6679f47f080e63867aa681b89e989e85b8eb71"
+    },
+    "test_ii4_interruption": {
+      "bytes": 13192,
+      "path": "audit/tests/test_ii4_interruption.py",
+      "sha256": "529d150dcf18849921b5e7a4c3f56fdbcf7139ae3f78a0e3a62c5358fc820620"
+    },
+    "test_journal_exactly_once": {
+      "bytes": 20000,
+      "path": "audit/tests/test_journal_exactly_once.py",
+      "sha256": "8a384db9bfec0987847efc1f81fb631d2df491e585ed3a41db435e13d9d67030"
+    },
+    "test_preflight_filesystem": {
+      "bytes": 41200,
+      "path": "audit/tests/test_preflight_filesystem.py",
+      "sha256": "5981d436b0e821e51808123f7a0b5ab012e5376c852f30cf3d16303bbd39f7fd"
+    },
+    "test_repeated_interruption": {
+      "bytes": 16589,
+      "path": "audit/tests/test_repeated_interruption.py",
+      "sha256": "7376498a30b16624e4f3834aece8920e6c18b4bbe4034915c28251f1228e2d88"
+    },
+    "test_suite_integrity": {
+      "bytes": 14575,
+      "path": "audit/tests/test_suite_integrity.py",
+      "sha256": "7f7cd11fbab45981169190624d49a9b5df784f18fbe98e16a954a945e21e76c1"
+    },
+    "test_unrecoverable_state": {
+      "bytes": 20806,
+      "path": "audit/tests/test_unrecoverable_state.py",
+      "sha256": "aa2558797476b4c41fc79b8a421385018f427a30bcddd823ccbdb612a03ac383"
+    }
+  },
+  "source_manifest_sha256": "eacbd0909404be926383449fdd21610be8cc3a96c1a2ce6326d653ef6269838e"
+}

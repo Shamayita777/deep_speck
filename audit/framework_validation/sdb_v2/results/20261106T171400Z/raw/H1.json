@@ -1,0 +1,12 @@
+{
+ "binding_refusal": "checkpoint sha256 de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea != frozen 256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737. Refusing to substitute a different model.",
+ "probe": {
+  "derived_depth": 5,
+  "n_add_layers": 5,
+  "n_batchnorm_layers": 13,
+  "n_conv1d_layers": 11,
+  "n_dense_layers": 3,
+  "path": "/Users/oishimoitra/Documents/deep_speck/audit/cryptography/evidence/ce1/best5depth10 (10).h5",
+  "sha256": "de630afcf95e7d0d40c33ff70623a7dda9290c6ae7e80133323ceb80997ad2ea"
+ }
+}

@@ -1,0 +1,48 @@
+{
+ "b2": {
+  "C1": {
+   "status": "E"
+  },
+  "C2": {
+   "status": "E"
+  },
+  "C3": {
+   "status": "E"
+  },
+  "C4": {
+   "reason": "no approved B1 tolerance; B1 is descriptive",
+   "status": "NS"
+  },
+  "C5": {
+   "status": "E"
+  },
+  "C6": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C7": {
+   "status": "E"
+  },
+  "C8": {
+   "reason": "no model exists",
+   "status": "NS"
+  }
+ },
+ "case": "S1",
+ "cipher_module": "audit/framework_validation/sdb_v2/fixtures/S1/speck_mutated.py",
+ "environment": {
+  "keras": "3.13.2",
+  "note": "constructed for the fixture; uninformative about any real publication",
+  "numpy": "2.1.3",
+  "python": "3.13.0",
+  "tensorflow": "2.20.0"
+ },
+ "files": [
+  "audit/framework_validation/sdb_v2/fixtures/S1/speck_mutated.py"
+ ],
+ "mutation": "ALPHA 7 -> 8 in a copy of audit/implementation/reference/speck.py",
+ "published_checksums": {
+  "audit/framework_validation/sdb_v2/fixtures/S1/speck_mutated.py": "71afc1867e50a58a142e84f44666a6382e069e4a4f9ecb63b6c4db30c226a473"
+ },
+ "reported_accuracy": 0.9291
+}

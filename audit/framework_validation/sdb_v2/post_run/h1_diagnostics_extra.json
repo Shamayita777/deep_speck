@@ -1,0 +1,22 @@
+{
+ "H1": {
+  "standard": 0.41881,
+  "transposed_16x4": 0.50013
+ },
+ "K3": {
+  "standard": 0.92938,
+  "transposed_16x4": 0.50309
+ },
+ "companion_pickled_history": {
+  "epochs": 200,
+  "path": "audit/cryptography/evidence/ce1/hist5r_depth10 (10).p",
+  "read_with": "pickle.Unpickler refusing every class (no code executed)",
+  "sha256": "729604e4b708e709082f02b46b77f007e05a9eafcb41f9cb142bb0f5d924054d",
+  "val_acc_first_max_last": [
+   0.9183,
+   0.9291,
+   0.929
+  ],
+  "val_loss_last": 0.0543
+ }
+}

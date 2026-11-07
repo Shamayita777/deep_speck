@@ -1,0 +1,21 @@
+{
+  "architecture_digest": "2dda1ff55212bba10316c04dd585ac79ae74c1af66ac8a24a77e95f9de5285d3",
+  "arm_id": "reference",
+  "best_checkpoint_epoch": 2,
+  "best_monitor": "val_loss",
+  "best_monitor_mode": "min",
+  "best_monitor_value": 0.22,
+  "block_id": "block3",
+  "committed_at_utc": "2026-11-06T17:10:25Z",
+  "committed_epoch": 2,
+  "committed_sha256": "d54cfe4fd1590e988995f75a564722d91c4b2a6901fa97aedd30cdff5b85309a",
+  "committed_slot": "a",
+  "epochs_total": 3,
+  "manifest_version": "durable-state-v1",
+  "previous_epoch": 1,
+  "previous_sha256": "b370a73047cb6e1c833e2c2cf122e2ae3dde09d02a60c5f30f2bdec41d45a902",
+  "previous_slot": "b",
+  "repairs": [],
+  "seed": 900006,
+  "session_id": "2026-11-06T171020.298150+0000"
+}

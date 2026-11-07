@@ -1,0 +1,2698 @@
+{
+ "anchor": {
+  "commit": "39c25819240a0784c0bf37c686aecc19da2643de",
+  "committed_at": "2026-11-06T22:43:43+05:30",
+  "in_origin_audit_framework": true,
+  "manifest_sdb_v2.json_matches_anchor": true,
+  "registration_sdb_v2.json_matches_anchor": true
+ },
+ "artifact": "sdb-v2-result-1",
+ "baselines": {
+  "B1": {
+   "H1": {
+    "accuracy": 0.41589,
+    "correct": 83178,
+    "decision_threshold": null,
+    "delta": -0.51321,
+    "delta_wilson95": [
+     -0.5153684434553891,
+     -0.5110483255556555
+    ],
+    "mode": "fresh-data inference with an existing model",
+    "n": 200000,
+    "reported_accuracy": 0.9291,
+    "reported_accuracy_uncertainty": "none published",
+    "se": 0.0011021014197885783,
+    "status": "EXECUTED",
+    "wilson95": [
+     0.41373155654461086,
+     0.4180516744443446
+    ]
+   },
+   "K3": {
+    "accuracy": 0.92904,
+    "correct": 185808,
+    "decision_threshold": null,
+    "delta": -6.0000000000060005e-05,
+    "delta_wilson95": [
+     -0.0011935308451567206,
+     0.0010570497667892198
+    ],
+    "mode": "fresh-data inference with an existing model",
+    "n": 200000,
+    "reported_accuracy": 0.9291,
+    "reported_accuracy_uncertainty": "none published",
+    "se": 0.0005741283758881806,
+    "status": "EXECUTED",
+    "wilson95": [
+     0.9279064691548433,
+     0.9301570497667893
+    ]
+   },
+   "S2": {
+    "accuracy": 0.500085,
+    "correct": 100017,
+    "decision_threshold": null,
+    "delta": -0.42901500000000004,
+    "delta_wilson95": [
+     -0.431206286908137,
+     -0.4268237163570403
+    ],
+    "mode": "fresh-data inference with an existing model",
+    "n": 200000,
+    "reported_accuracy": 0.9291,
+    "reported_accuracy_uncertainty": "none published",
+    "se": 0.0011180339725943038,
+    "status": "EXECUTED",
+    "wilson95": [
+     0.49789371309186303,
+     0.5022762836429597
+    ]
+   }
+  },
+  "B1S": {
+   "matches_certificate": true,
+   "observed": {
+    "replicate_01_baseline.npy": {
+     "correct": 918209,
+     "label_0_correct": 478219,
+     "label_1_correct": 439990,
+     "test_examples": 1000000
+    },
+    "replicate_01_perturbed.npy": {
+     "correct": 500785,
+     "label_0_correct": 181171,
+     "label_1_correct": 319614,
+     "test_examples": 1000000
+    },
+    "replicate_02_baseline.npy": {
+     "correct": 917995,
+     "label_0_correct": 477360,
+     "label_1_correct": 440635,
+     "test_examples": 1000000
+    },
+    "replicate_02_perturbed.npy": {
+     "correct": 505379,
+     "label_0_correct": 323303,
+     "label_1_correct": 182076,
+     "test_examples": 1000000
+    },
+    "replicate_03_baseline.npy": {
+     "correct": 918226,
+     "label_0_correct": 477252,
+     "label_1_correct": 440974,
+     "test_examples": 1000000
+    },
+    "replicate_03_perturbed.npy": {
+     "correct": 504909,
+     "label_0_correct": 140797,
+     "label_1_correct": 364112,
+     "test_examples": 1000000
+    },
+    "replicate_04_baseline.npy": {
+     "correct": 918061,
+     "label_0_correct": 475951,
+     "label_1_correct": 442110,
+     "test_examples": 1000000
+    },
+    "replicate_04_perturbed.npy": {
+     "correct": 505455,
+     "label_0_correct": 359447,
+     "label_1_correct": 146008,
+     "test_examples": 1000000
+    },
+    "replicate_05_baseline.npy": {
+     "correct": 918288,
+     "label_0_correct": 477786,
+     "label_1_correct": 440502,
+     "test_examples": 1000000
+    },
+    "replicate_05_perturbed.npy": {
+     "correct": 500049,
+     "label_0_correct": 2721,
+     "label_1_correct": 497328,
+     "test_examples": 1000000
+    }
+   }
+  },
+  "B1_naive": "illustrative policy only; not executed or scored",
+  "B1_status": {
+   "H1": "EXECUTED",
+   "H2": "B1-S",
+   "K2": "NOT_ASSESSED",
+   "K3": "EXECUTED",
+   "K4": "NOT_ASSESSED",
+   "K5": "NOT_ASSESSED",
+   "K6": "NOT_ASSESSED",
+   "K7": "NOT_ASSESSED",
+   "K8": "NOT_ASSESSED",
+   "P1": "NOT_APPLICABLE",
+   "S1": "NOT_ASSESSED",
+   "S2": "EXECUTED",
+   "S3": "NOT_ASSESSED",
+   "S4": "NOT_ASSESSED",
+   "S5": "NOT_ASSESSED",
+   "S6": "NOT_ASSESSED",
+   "U1": "NOT_APPLICABLE",
+   "U2": "NOT_APPLICABLE",
+   "U3": "NOT_APPLICABLE",
+   "U4": "NOT_APPLICABLE",
+   "U5": "NOT_APPLICABLE",
+   "U6": "NOT_APPLICABLE",
+   "U7": "NOT_APPLICABLE"
+  },
+  "B2": {
+   "H1": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 2,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "ciphertext": [
+       "0xa868",
+       "0x42f2"
+      ],
+      "result": "PASS"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "reason": "no published checksum exists for the historical file",
+      "result": "NOT_ASSESSED"
+     },
+     "C8": {
+      "differs": {
+       "add": [
+        5,
+        10
+       ],
+       "conv1d": [
+        11,
+        21
+       ],
+       "params": [
+        70177,
+        102497
+       ]
+      },
+      "observed": {
+       "add": 5,
+       "conv1d": 11,
+       "params": 70177
+      },
+      "result": "FAIL"
+     }
+    },
+    "output": "FLAGGED"
+   },
+   "H2": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 13,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "stored-prediction rescoring is B1-S, not B1",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "cipher code not allowlisted",
+      "result": "NOT_ASSESSED"
+     },
+     "C6": {
+      "reason": "partitions not allowlisted",
+      "result": "NOT_ASSESSED"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": ".keras checkpoints are not loaded by policy",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "K2": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "K3": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 2,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "ciphertext": [
+       "0xa868",
+       "0x42f2"
+      ],
+      "result": "PASS"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "differs": {},
+      "observed": {
+       "add": 10,
+       "conv1d": 21,
+       "params": 102497
+      },
+      "result": "PASS"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "K4": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "ciphertext": [
+       "0xa868",
+       "0x42f2"
+      ],
+      "result": "PASS"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "K5": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "overlaps": {
+       "test/train": 0,
+       "test/validation": 0,
+       "train/validation": 0
+      },
+      "result": "PASS"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "K6": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "overlaps": {
+       "test/train": 0
+      },
+      "result": "PASS"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "K7": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 88,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "fake adapter; no model file",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "K8": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "P1": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C3": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C4": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C8": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     }
+    },
+    "output": "NO_ISSUE_FOUND"
+   },
+   "S1": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "ciphertext": [
+       "0x3dbb",
+       "0x1fed"
+      ],
+      "result": "FAIL"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "FLAGGED"
+   },
+   "S2": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 2,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "ciphertext": [
+       "0xa868",
+       "0x42f2"
+      ],
+      "result": "PASS"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [
+       "audit/cryptography/evidence/ce1/signal_destroyed.h5"
+      ],
+      "result": "FAIL"
+     },
+     "C8": {
+      "differs": {
+       "add": [
+        5,
+        10
+       ],
+       "conv1d": [
+        11,
+        21
+       ],
+       "params": [
+        70177,
+        102497
+       ]
+      },
+      "observed": {
+       "add": 5,
+       "conv1d": 11,
+       "params": 70177
+      },
+      "result": "FAIL"
+     }
+    },
+    "output": "FLAGGED"
+   },
+   "S3": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "overlaps": {
+       "test/train": 200,
+       "test/validation": 0,
+       "train/validation": 0
+      },
+      "result": "FAIL"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "FLAGGED"
+   },
+   "S4": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "overlaps": {
+       "test/train": 0
+      },
+      "result": "PASS"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "S5": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "S6": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no approved B1 tolerance; B1 is descriptive",
+      "result": "NOT_ASSESSED"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "no model exists",
+      "result": "NOT_ASSESSED"
+     }
+    },
+    "output": "NOT_ASSESSED"
+   },
+   "U1": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     }
+    },
+    "output": "NO_ISSUE_FOUND"
+   },
+   "U2": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "reason": "a certificate, not a publication",
+      "result": "NOT_APPLICABLE"
+     },
+     "C4": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     }
+    },
+    "output": "NO_ISSUE_FOUND"
+   },
+   "U3": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C3": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C4": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C8": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     }
+    },
+    "output": "NO_ISSUE_FOUND"
+   },
+   "U4": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 88,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "no reported accuracy",
+      "result": "NOT_APPLICABLE"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [
+       "audit/framework_validation/sdb_v2/fixtures/U4/run/analysis.json"
+      ],
+      "result": "FAIL"
+     },
+     "C8": {
+      "reason": "no model",
+      "result": "NOT_APPLICABLE"
+     }
+    },
+    "output": "FLAGGED"
+   },
+   "U5": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C3": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C4": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C8": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     }
+    },
+    "output": "NO_ISSUE_FOUND"
+   },
+   "U6": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "loaded": 1,
+      "result": "PASS"
+     },
+     "C3": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C4": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "mismatched": [],
+      "result": "PASS"
+     },
+     "C8": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     }
+    },
+    "output": "NO_ISSUE_FOUND"
+   },
+   "U7": {
+    "items": {
+     "C1": {
+      "missing": [],
+      "result": "PASS"
+     },
+     "C2": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C3": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C4": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C5": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C6": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C7": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     },
+     "C8": {
+      "reason": "subject absent by construction",
+      "result": "NOT_APPLICABLE"
+     }
+    },
+    "output": "NO_ISSUE_FOUND"
+   }
+  }
+ },
+ "cases": {
+  "H1": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "binding": "REFUSED",
+     "binding_refusal_kind": "sha256",
+     "probe_derived_depth": 5,
+     "probe_n_add": 5,
+     "probe_n_conv1d": 11
+    }
+   },
+   "group": "historical_defect",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "binding": "REFUSED",
+     "binding_refusal_kind": "sha256",
+     "probe_derived_depth": 5,
+     "probe_n_add": 5,
+     "probe_n_conv1d": 11
+    }
+   },
+   "seconds": 2.685746192932129
+  },
+  "H2": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "D": {
+     "DI_for_A1": "INCONCLUSIVE"
+    },
+    "R": {
+     "v1": {
+      "blocking": [
+       "EV",
+       "II"
+      ],
+      "verdict": "NOT_SUPPORTED"
+     },
+     "v2": {
+      "blocking": [
+       "EV"
+      ],
+      "verdict": "NOT_SUPPORTED"
+     }
+    },
+    "replay": {
+     "autond_overall_outcome": "INCONCLUSIVE",
+     "baseline_adequacy_gate": "PASSED",
+     "criterion": {
+      "baseline": true,
+      "met": false,
+      "perturbed": false
+     },
+     "engine_overall_d4_outcome": "INCONCLUSIVE",
+     "fits": {
+      "baseline#1": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.9184899926185608,
+        0.7738469839096069,
+        0.6046149730682373,
+        0.5085740089416504,
+        0.5012649893760681
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "baseline#2": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.9184769988059998,
+        0.7837550044059753,
+        0.6117630004882812,
+        0.5104529857635498,
+        0.5008130073547363
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "baseline#3": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.9186310172080994,
+        0.7838190197944641,
+        0.6088520288467407,
+        0.5096359848976135,
+        0.5009890198707581
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "baseline#4": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.918599009513855,
+        0.7738249897956848,
+        0.6054869890213013,
+        0.5085160136222839,
+        0.5008730292320251
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "baseline#5": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.9187620282173157,
+        0.7835100293159485,
+        0.6107630133628845,
+        0.5098350048065186,
+        0.5002449750900269
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "perturbed#1": {
+       "best_round": null,
+       "rounds_max_val_acc": [
+        0.5048360228538513
+       ],
+       "rounds_trained": [
+        5
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 5
+      },
+      "perturbed#2": {
+       "best_round": 5,
+       "rounds_max_val_acc": [
+        0.5060949921607971,
+        0.5022460222244263
+       ],
+       "rounds_trained": [
+        5,
+        6
+       ],
+       "selected_epoch": 7,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 6
+      },
+      "perturbed#3": {
+       "best_round": 5,
+       "rounds_max_val_acc": [
+        0.5052779912948608,
+        0.501039981842041
+       ],
+       "rounds_trained": [
+        5,
+        6
+       ],
+       "selected_epoch": 9,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 6
+      },
+      "perturbed#4": {
+       "best_round": 5,
+       "rounds_max_val_acc": [
+        0.505282998085022,
+        0.5037109851837158
+       ],
+       "rounds_trained": [
+        5,
+        6
+       ],
+       "selected_epoch": 9,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 6
+      },
+      "perturbed#5": {
+       "best_round": null,
+       "rounds_max_val_acc": [
+        0.5001569986343384
+       ],
+       "rounds_trained": [
+        5
+       ],
+       "selected_epoch": 7,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 5
+      }
+     },
+     "perturbed_passed_round5_and_stopped_round6": 3
+    }
+   },
+   "group": "historical_replay",
+   "levels": [
+    "replay",
+    "D",
+    "R"
+   ],
+   "match": {
+    "D": true,
+    "R": true,
+    "replay": true
+   },
+   "observed": {
+    "D": {
+     "DI_for_A1": "INCONCLUSIVE"
+    },
+    "R": {
+     "v1": {
+      "blocking": [
+       "EV",
+       "II"
+      ],
+      "verdict": "NOT_SUPPORTED"
+     },
+     "v2": {
+      "blocking": [
+       "EV"
+      ],
+      "verdict": "NOT_SUPPORTED"
+     }
+    },
+    "replay": {
+     "autond_overall_outcome": "INCONCLUSIVE",
+     "baseline_adequacy_gate": "PASSED",
+     "criterion": {
+      "baseline": true,
+      "met": false,
+      "perturbed": false
+     },
+     "engine_overall_d4_outcome": "INCONCLUSIVE",
+     "fits": {
+      "baseline#1": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.9184899926185608,
+        0.7738469839096069,
+        0.6046149730682373,
+        0.5085740089416504,
+        0.5012649893760681
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "baseline#2": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.9184769988059998,
+        0.7837550044059753,
+        0.6117630004882812,
+        0.5104529857635498,
+        0.5008130073547363
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "baseline#3": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.9186310172080994,
+        0.7838190197944641,
+        0.6088520288467407,
+        0.5096359848976135,
+        0.5009890198707581
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "baseline#4": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.918599009513855,
+        0.7738249897956848,
+        0.6054869890213013,
+        0.5085160136222839,
+        0.5008730292320251
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "baseline#5": {
+       "best_round": 8,
+       "rounds_max_val_acc": [
+        0.9187620282173157,
+        0.7835100293159485,
+        0.6107630133628845,
+        0.5098350048065186,
+        0.5002449750900269
+       ],
+       "rounds_trained": [
+        5,
+        6,
+        7,
+        8,
+        9
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 9
+      },
+      "perturbed#1": {
+       "best_round": null,
+       "rounds_max_val_acc": [
+        0.5048360228538513
+       ],
+       "rounds_trained": [
+        5
+       ],
+       "selected_epoch": 10,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 5
+      },
+      "perturbed#2": {
+       "best_round": 5,
+       "rounds_max_val_acc": [
+        0.5060949921607971,
+        0.5022460222244263
+       ],
+       "rounds_trained": [
+        5,
+        6
+       ],
+       "selected_epoch": 7,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 6
+      },
+      "perturbed#3": {
+       "best_round": 5,
+       "rounds_max_val_acc": [
+        0.5052779912948608,
+        0.501039981842041
+       ],
+       "rounds_trained": [
+        5,
+        6
+       ],
+       "selected_epoch": 9,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 6
+      },
+      "perturbed#4": {
+       "best_round": 5,
+       "rounds_max_val_acc": [
+        0.505282998085022,
+        0.5037109851837158
+       ],
+       "rounds_trained": [
+        5,
+        6
+       ],
+       "selected_epoch": 9,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 6
+      },
+      "perturbed#5": {
+       "best_round": null,
+       "rounds_max_val_acc": [
+        0.5001569986343384
+       ],
+       "rounds_trained": [
+        5
+       ],
+       "selected_epoch": 7,
+       "selected_stage_round": 5,
+       "status": "stopped_at_threshold",
+       "stop_round": 5
+      }
+     },
+     "perturbed_passed_round5_and_stopped_round6": 3
+    }
+   },
+   "seconds": 0.5330460071563721
+  },
+  "K2": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "ev_decision": "EQUIVALENT",
+     "sufficient": true
+    }
+   },
+   "group": "clean_control",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "ev_decision": "EQUIVALENT",
+     "sufficient": true
+    }
+   },
+   "seconds": 0.07666707038879395
+  },
+  "K3": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "behavioural_verdict": "PASS",
+     "binding": "ACCEPTED",
+     "probe_n_add": 10,
+     "probe_n_conv1d": 21
+    }
+   },
+   "group": "clean_control",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "behavioural_verdict": "PASS",
+     "binding": "ACCEPTED",
+     "probe_derived_depth": 10,
+     "probe_n_add": 10,
+     "probe_n_conv1d": 21
+    }
+   },
+   "seconds": 4.362282037734985
+  },
+  "K4": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "key_schedule": "PASS",
+     "published_vector": "PASS",
+     "round_traces": "PASS"
+    }
+   },
+   "group": "clean_control",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "key_schedule": "PASS",
+     "published_vector": "PASS",
+     "round_traces": "PASS"
+    }
+   },
+   "seconds": 0.0024979114532470703
+  },
+  "K5": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "d1_outcome": "PASS"
+    }
+   },
+   "group": "clean_control",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "d1_outcome": "PASS"
+    }
+   },
+   "seconds": 0.11697816848754883
+  },
+  "K6": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "d2n_outcome": "NO_EXCESS"
+    }
+   },
+   "group": "clean_control",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "d2n_outcome": "NO_EXCESS"
+    }
+   },
+   "seconds": 11.104816913604736
+  },
+  "K7": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "par1_verifier": "VERIFIED"
+    }
+   },
+   "group": "clean_control",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "par1_verifier": "VERIFIED"
+    }
+   },
+   "seconds": 0.023520231246948242
+  },
+  "K8": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "baseline_best_rounds": [
+      8,
+      8,
+      8,
+      8,
+      8
+     ],
+     "baseline_component": true,
+     "baseline_stop_rounds": [
+      9,
+      9,
+      9,
+      9,
+      9
+     ],
+     "criterion_met": true,
+     "perturbed_best_rounds": [
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "perturbed_component": true,
+     "perturbed_stop_rounds": [
+      5,
+      5,
+      5,
+      5,
+      5
+     ]
+    }
+   },
+   "group": "clean_control",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "baseline_best_rounds": [
+      8,
+      8,
+      8,
+      8,
+      8
+     ],
+     "baseline_component": true,
+     "baseline_stop_rounds": [
+      9,
+      9,
+      9,
+      9,
+      9
+     ],
+     "criterion_met": true,
+     "perturbed_best_rounds": [
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "perturbed_component": true,
+     "perturbed_stop_rounds": [
+      5,
+      5,
+      5,
+      5,
+      5
+     ]
+    }
+   },
+   "seconds": 0.0007150173187255859
+  },
+  "P1": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "R": {
+     "input_e6_ce2_admission": "ADMITTED",
+     "level": 3,
+     "rule": "4",
+     "verdict": "SUPPORTED"
+    }
+   },
+   "group": "positive_decision_rule_control",
+   "levels": [
+    "R"
+   ],
+   "match": {
+    "R": true
+   },
+   "observed": {
+    "R": {
+     "blocking": [],
+     "input_e6_ce2_admission": "ADMITTED",
+     "level": 3,
+     "rule": "4",
+     "verdict": "SUPPORTED"
+    }
+   },
+   "seconds": 0.0004832744598388672
+  },
+  "S1": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "key_schedule": "FAIL",
+     "published_vector": "FAIL",
+     "round_traces": "FAIL"
+    },
+    "D": {
+     "II": "FAIL"
+    },
+    "R": {
+     "rule": "1",
+     "verdict": "NOT_SUPPORTED"
+    }
+   },
+   "group": "synthetic_defect",
+   "levels": [
+    "C",
+    "D",
+    "R"
+   ],
+   "match": {
+    "C": true,
+    "D": true,
+    "R": true
+   },
+   "observed": {
+    "C": {
+     "key_schedule": "FAIL",
+     "published_vector": "FAIL",
+     "round_traces": "FAIL"
+    },
+    "D": {
+     "II": "FAIL"
+    },
+    "R": {
+     "rule": "1",
+     "verdict": "NOT_SUPPORTED"
+    }
+   },
+   "seconds": 0.005968809127807617
+  },
+  "S2": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "binding": "REFUSED",
+     "binding_refusal_kind": "sha256"
+    }
+   },
+   "group": "synthetic_defect",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "binding": "REFUSED",
+     "binding_refusal_kind": "sha256",
+     "probe_derived_depth": 5,
+     "probe_n_add": 5,
+     "probe_n_conv1d": 11
+    }
+   },
+   "seconds": 0.00205230712890625
+  },
+  "S3": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "d1_outcome": "FAIL"
+    },
+    "D": {
+     "DI": "FAIL"
+    },
+    "R": {
+     "rule": "1",
+     "verdict": "NOT_SUPPORTED"
+    }
+   },
+   "group": "synthetic_defect",
+   "levels": [
+    "C",
+    "D",
+    "R"
+   ],
+   "match": {
+    "C": true,
+    "D": true,
+    "R": true
+   },
+   "observed": {
+    "C": {
+     "d1_outcome": "FAIL"
+    },
+    "D": {
+     "DI": "FAIL"
+    },
+    "R": {
+     "rule": "1",
+     "verdict": "NOT_SUPPORTED"
+    }
+   },
+   "seconds": 0.11423802375793457
+  },
+  "S4": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "d2n_outcome": "EXCESS"
+    }
+   },
+   "group": "synthetic_defect",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "d2n_outcome": "EXCESS"
+    }
+   },
+   "seconds": 9.98853611946106
+  },
+  "S5": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "baseline_best_rounds": [
+      8,
+      8,
+      8,
+      8,
+      8
+     ],
+     "baseline_component": true,
+     "baseline_stop_rounds": [
+      9,
+      9,
+      9,
+      9,
+      9
+     ],
+     "criterion_met": false,
+     "perturbed_best_rounds": [
+      5,
+      5,
+      5,
+      5,
+      5
+     ],
+     "perturbed_component": false,
+     "perturbed_stop_rounds": [
+      6,
+      6,
+      6,
+      6,
+      6
+     ]
+    }
+   },
+   "group": "synthetic_defect",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "baseline_best_rounds": [
+      8,
+      8,
+      8,
+      8,
+      8
+     ],
+     "baseline_component": true,
+     "baseline_stop_rounds": [
+      9,
+      9,
+      9,
+      9,
+      9
+     ],
+     "criterion_met": false,
+     "perturbed_best_rounds": [
+      5,
+      5,
+      5,
+      5,
+      5
+     ],
+     "perturbed_component": false,
+     "perturbed_stop_rounds": [
+      6,
+      6,
+      6,
+      6,
+      6
+     ]
+    }
+   },
+   "seconds": 0.0006461143493652344
+  },
+  "S6": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "ev_decision": "EFFECT",
+     "sufficient": true
+    },
+    "D": {
+     "EV": "FAIL"
+    },
+    "R": {
+     "rule": "1",
+     "verdict": "NOT_SUPPORTED"
+    }
+   },
+   "group": "synthetic_defect",
+   "levels": [
+    "C",
+    "D",
+    "R"
+   ],
+   "match": {
+    "C": true,
+    "D": true,
+    "R": true
+   },
+   "observed": {
+    "C": {
+     "ev_decision": "EFFECT",
+     "sufficient": true
+    },
+    "D": {
+     "EV": "FAIL"
+    },
+    "R": {
+     "rule": "1",
+     "verdict": "NOT_SUPPORTED"
+    }
+   },
+   "seconds": 0.08869719505310059
+  },
+  "U1": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "baseline": "PASSED",
+     "d4_outcome": "INCONCLUSIVE",
+     "fit_states": [
+      "INDETERMINATE",
+      "INDETERMINATE",
+      "INDETERMINATE",
+      "INDETERMINATE",
+      "INDETERMINATE"
+     ],
+     "primary": "INCONCLUSIVE"
+    },
+    "D": {
+     "DI": "INCONCLUSIVE"
+    },
+    "R": {
+     "rule": "2",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "group": "abstention_control",
+   "levels": [
+    "C",
+    "D",
+    "R"
+   ],
+   "match": {
+    "C": true,
+    "D": true,
+    "R": true
+   },
+   "observed": {
+    "C": {
+     "baseline": "PASSED",
+     "d4_outcome": "INCONCLUSIVE",
+     "fit_states": [
+      "INDETERMINATE",
+      "INDETERMINATE",
+      "INDETERMINATE",
+      "INDETERMINATE",
+      "INDETERMINATE"
+     ],
+     "primary": "INCONCLUSIVE"
+    },
+    "D": {
+     "DI": "INCONCLUSIVE"
+    },
+    "R": {
+     "rule": "2",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "seconds": 0.0038399696350097656
+  },
+  "U2": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "R": {
+     "input_a3_ce3_adversarial_outcome": "NOT_CAUGHT",
+     "input_a3_ce3_scientific_decision": "SUPPORTED",
+     "level": 2,
+     "rule": "3",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "group": "abstention_control",
+   "levels": [
+    "R"
+   ],
+   "match": {
+    "R": true
+   },
+   "observed": {
+    "R": {
+     "blocking": [
+      "L2 < L3"
+     ],
+     "input_a3_ce3_adversarial_outcome": "NOT_CAUGHT",
+     "input_a3_ce3_scientific_decision": "SUPPORTED",
+     "level": 2,
+     "rule": "3",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "seconds": 0.00044798851013183594
+  },
+  "U3": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "R": {
+     "rule": "2",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "group": "abstention_control",
+   "levels": [
+    "R"
+   ],
+   "match": {
+    "R": true
+   },
+   "observed": {
+    "R": {
+     "blocking": [
+      "DI"
+     ],
+     "level": null,
+     "rule": "2",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "seconds": 0.00012493133544921875
+  },
+  "U4": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "par1_verifier": "NOT_VERIFIED",
+     "problem_mentions": "analysis.json changed after the run"
+    }
+   },
+   "group": "abstention_control",
+   "levels": [
+    "C"
+   ],
+   "match": {
+    "C": true
+   },
+   "observed": {
+    "C": {
+     "par1_verifier": "NOT_VERIFIED",
+     "problem_mentions": "analysis.json changed after the run"
+    }
+   },
+   "seconds": 0.009532928466796875
+  },
+  "U5": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "R": {
+     "blocking": [
+      "EV: missing_prerequisite"
+     ],
+     "rule": "2",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "group": "abstention_control",
+   "levels": [
+    "R"
+   ],
+   "match": {
+    "R": true
+   },
+   "observed": {
+    "R": {
+     "blocking": [
+      "EV: missing_prerequisite"
+     ],
+     "level": null,
+     "rule": "2",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "seconds": 0.00012803077697753906
+  },
+  "U6": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "C": {
+     "ev_decision": "INCONCLUSIVE",
+     "sufficient": false
+    },
+    "D": {
+     "EV": "INCONCLUSIVE"
+    },
+    "R": {
+     "rule": "2",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "group": "abstention_control",
+   "levels": [
+    "C",
+    "D",
+    "R"
+   ],
+   "match": {
+    "C": true,
+    "D": true,
+    "R": true
+   },
+   "observed": {
+    "C": {
+     "ev_decision": "INCONCLUSIVE",
+     "sufficient": false
+    },
+    "D": {
+     "EV": "INCONCLUSIVE"
+    },
+    "R": {
+     "rule": "2",
+     "verdict": "INCONCLUSIVE"
+    }
+   },
+   "seconds": 0.0002880096435546875
+  },
+  "U7": {
+   "all_levels_match": true,
+   "error": null,
+   "expected": {
+    "R": {
+     "a": {
+      "level": 2,
+      "rule": "3",
+      "verdict": "INCONCLUSIVE"
+     },
+     "b": {
+      "level": 2,
+      "rule": "3",
+      "verdict": "INCONCLUSIVE"
+     }
+    }
+   },
+   "group": "abstention_control",
+   "levels": [
+    "R"
+   ],
+   "match": {
+    "R": true
+   },
+   "observed": {
+    "R": {
+     "a": {
+      "blocking": [
+       "L2 < L3"
+      ],
+      "level": 2,
+      "rule": "3",
+      "verdict": "INCONCLUSIVE"
+     },
+     "b": {
+      "blocking": [
+       "L2 < L3"
+      ],
+      "level": 2,
+      "rule": "3",
+      "verdict": "INCONCLUSIVE"
+     }
+    }
+   },
+   "seconds": 0.0001480579376220703
+  }
+ },
+ "environment": {
+  "numpy": "2.1.3",
+  "platform": "macOS-13.5-arm64-arm-64bit-Mach-O",
+  "python": "3.13.0"
+ },
+ "finished_at_utc": "2026-11-06T17:14:36.594235+00:00",
+ "manifest_sha256": "09253359d51a6fb2efa67b2c81c96133bb148b6bbd9e81887c28bbcaee25e8d5",
+ "metrics": {
+  "B1": {
+   "B1S_matches_certificate": true,
+   "status_counts": {
+    "B1-S": 1,
+    "EXECUTED": 3,
+    "NOT_APPLICABLE": 8,
+    "NOT_ASSESSED": 11
+   }
+  },
+  "B2": {
+   "abstention_cases_output": {
+    "U1": "NO_ISSUE_FOUND",
+    "U2": "NO_ISSUE_FOUND",
+    "U3": "NO_ISSUE_FOUND",
+    "U4": "FLAGGED",
+    "U5": "NO_ISSUE_FOUND",
+    "U6": "NO_ISSUE_FOUND",
+    "U7": "NO_ISSUE_FOUND"
+   },
+   "coverage_items": {
+    "H1": {
+     "FAIL": 1,
+     "NOT_APPLICABLE": 1,
+     "NOT_ASSESSED": 2,
+     "PASS": 4
+    },
+    "H2": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 0,
+     "NOT_ASSESSED": 4,
+     "PASS": 4
+    },
+    "K2": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 2,
+     "NOT_ASSESSED": 2,
+     "PASS": 4
+    },
+    "K3": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 1,
+     "NOT_ASSESSED": 1,
+     "PASS": 6
+    },
+    "K4": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 1,
+     "NOT_ASSESSED": 2,
+     "PASS": 5
+    },
+    "K5": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 1,
+     "NOT_ASSESSED": 2,
+     "PASS": 5
+    },
+    "K6": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 1,
+     "NOT_ASSESSED": 2,
+     "PASS": 5
+    },
+    "K7": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 2,
+     "NOT_ASSESSED": 2,
+     "PASS": 4
+    },
+    "K8": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 2,
+     "NOT_ASSESSED": 2,
+     "PASS": 4
+    },
+    "P1": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 7,
+     "NOT_ASSESSED": 0,
+     "PASS": 1
+    },
+    "S1": {
+     "FAIL": 1,
+     "NOT_APPLICABLE": 1,
+     "NOT_ASSESSED": 2,
+     "PASS": 4
+    },
+    "S2": {
+     "FAIL": 2,
+     "NOT_APPLICABLE": 1,
+     "NOT_ASSESSED": 1,
+     "PASS": 4
+    },
+    "S3": {
+     "FAIL": 1,
+     "NOT_APPLICABLE": 1,
+     "NOT_ASSESSED": 2,
+     "PASS": 4
+    },
+    "S4": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 1,
+     "NOT_ASSESSED": 2,
+     "PASS": 5
+    },
+    "S5": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 2,
+     "NOT_ASSESSED": 2,
+     "PASS": 4
+    },
+    "S6": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 2,
+     "NOT_ASSESSED": 2,
+     "PASS": 4
+    },
+    "U1": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 4,
+     "NOT_ASSESSED": 0,
+     "PASS": 4
+    },
+    "U2": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 5,
+     "NOT_ASSESSED": 0,
+     "PASS": 3
+    },
+    "U3": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 7,
+     "NOT_ASSESSED": 0,
+     "PASS": 1
+    },
+    "U4": {
+     "FAIL": 1,
+     "NOT_APPLICABLE": 4,
+     "NOT_ASSESSED": 0,
+     "PASS": 3
+    },
+    "U5": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 7,
+     "NOT_ASSESSED": 0,
+     "PASS": 1
+    },
+    "U6": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 4,
+     "NOT_ASSESSED": 0,
+     "PASS": 4
+    },
+    "U7": {
+     "FAIL": 0,
+     "NOT_APPLICABLE": 7,
+     "NOT_ASSESSED": 0,
+     "PASS": 1
+    }
+   },
+   "detection": {
+    "flagged": [
+     "H1",
+     "S1",
+     "S2",
+     "S3"
+    ],
+    "n": 7
+   },
+   "false_alarms": {
+    "flagged": [],
+    "n": 7
+   },
+   "outputs": {
+    "H1": "FLAGGED",
+    "H2": "NOT_ASSESSED",
+    "K2": "NOT_ASSESSED",
+    "K3": "NOT_ASSESSED",
+    "K4": "NOT_ASSESSED",
+    "K5": "NOT_ASSESSED",
+    "K6": "NOT_ASSESSED",
+    "K7": "NOT_ASSESSED",
+    "K8": "NOT_ASSESSED",
+    "P1": "NO_ISSUE_FOUND",
+    "S1": "FLAGGED",
+    "S2": "FLAGGED",
+    "S3": "FLAGGED",
+    "S4": "NOT_ASSESSED",
+    "S5": "NOT_ASSESSED",
+    "S6": "NOT_ASSESSED",
+    "U1": "NO_ISSUE_FOUND",
+    "U2": "NO_ISSUE_FOUND",
+    "U3": "NO_ISSUE_FOUND",
+    "U4": "FLAGGED",
+    "U5": "NO_ISSUE_FOUND",
+    "U6": "NO_ISSUE_FOUND",
+    "U7": "NO_ISSUE_FOUND"
+   }
+  },
+  "framework": {
+   "abstention": {
+    "cases": [
+     "U1",
+     "U2",
+     "U3",
+     "U4",
+     "U5",
+     "U6",
+     "U7"
+    ],
+    "correct": [
+     "U1",
+     "U2",
+     "U3",
+     "U4",
+     "U5",
+     "U6",
+     "U7"
+    ],
+    "n": 7
+   },
+   "d_and_r_level_matches": {
+    "H2": {
+     "D": true,
+     "R": true
+    },
+    "P1": {
+     "R": true
+    },
+    "S1": {
+     "D": true,
+     "R": true
+    },
+    "S3": {
+     "D": true,
+     "R": true
+    },
+    "S6": {
+     "D": true,
+     "R": true
+    },
+    "U1": {
+     "D": true,
+     "R": true
+    },
+    "U2": {
+     "R": true
+    },
+    "U3": {
+     "R": true
+    },
+    "U5": {
+     "R": true
+    },
+    "U6": {
+     "D": true,
+     "R": true
+    },
+    "U7": {
+     "R": true
+    }
+   },
+   "detection": {
+    "cases": [
+     "H1",
+     "S1",
+     "S2",
+     "S3",
+     "S4",
+     "S5",
+     "S6"
+    ],
+    "detected": [
+     "H1",
+     "S1",
+     "S2",
+     "S3",
+     "S4",
+     "S5",
+     "S6"
+    ],
+    "n": 7
+   },
+   "errors": [],
+   "false_alarms": {
+    "cases": [
+     "K2",
+     "K3",
+     "K4",
+     "K5",
+     "K6",
+     "K7",
+     "K8"
+    ],
+    "false_alarms": [],
+    "n": 7
+   },
+   "h2_replay": {
+    "D": true,
+    "R": true,
+    "replay": true
+   },
+   "positive_control": {
+    "P1": true
+   }
+  }
+ },
+ "modules_loaded": [
+  "audit/__init__.py",
+  "audit/common/__init__.py",
+  "audit/common/provenance.py",
+  "audit/cryptography/__init__.py",
+  "audit/cryptography/ce234/__init__.py",
+  "audit/cryptography/ce234/frozen_plan.py",
+  "audit/cryptography/ce234/production.py",
+  "audit/cryptography/gohr/speck.py",
+  "audit/dataset/__init__.py",
+  "audit/dataset/adapters/autond_d4.py",
+  "audit/dataset/canonical.py",
+  "audit/dataset/common/__init__.py",
+  "audit/dataset/common/certificate.py",
+  "audit/dataset/common/provenance.py",
+  "audit/dataset/d1_duplicate_detection.py",
+  "audit/dataset/d2_sample_dependence.py",
+  "audit/dataset/d4_controlled_perturbation.py",
+  "audit/dataset/experiments/d0_autond_canonical.py",
+  "audit/dataset/experiments/d2n_fresh_draw_null.py",
+  "audit/dataset/experiments/d4_autond_label_shuffle.py",
+  "audit/dataset/integrity.py",
+  "audit/experimental_validity/framework/__init__.py",
+  "audit/experimental_validity/framework/certificate.py",
+  "audit/experimental_validity/framework/confidence_intervals.py",
+  "audit/experimental_validity/framework/effect_sizes.py",
+  "audit/experimental_validity/framework/experiment.py",
+  "audit/experimental_validity/framework/failures.py",
+  "audit/experimental_validity/framework/manifest.py",
+  "audit/experimental_validity/framework/provenance.py",
+  "audit/experimental_validity/framework/replication.py",
+  "audit/experimental_validity/framework/seeds.py",
+  "audit/experimental_validity/framework/statistics.py",
+  "audit/framework_validation/__init__.py",
+  "audit/framework_validation/sdb_v2/__init__.py",
+  "audit/framework_validation/sdb_v2/baselines_v2.py",
+  "audit/framework_validation/sdb_v2/cases_v2.py",
+  "audit/framework_validation/sdb_v2/engine_v2.py",
+  "audit/framework_validation/sdb_v2/run_v2.py",
+  "audit/implementation/__init__.py",
+  "audit/implementation/gohr_adapter.py",
+  "audit/implementation/ii2_independent/__init__.py",
+  "audit/implementation/ii2_independent/dataset_independent.py",
+  "audit/implementation/ii2_independent/model_independent.py",
+  "audit/implementation/ii2_independent/speck_independent.py",
+  "audit/implementation/ii2_independent/verify_m1.py",
+  "audit/implementation/ii4_parallel/__init__.py",
+  "audit/implementation/ii4_parallel/verify.py"
+ ],
+ "modules_loaded_not_in_manifest": [],
+ "registration_sha256": "95fd1ce54a2d70c47eee25f030327d02aafab83e3755ac27e9d64e5f24577ac8",
+ "run_id": "20261106T171400Z",
+ "started_at_utc": "2026-11-06T17:14:00.421055+00:00"
+}

@@ -1,0 +1,32 @@
+{
+ "replicate_01_baseline.npy": {
+  "sha256": "bf4a6a7f84af4c4539f87932cba13b61e697f844d8502686d24ddb1c753fbc4d"
+ },
+ "replicate_01_perturbed.npy": {
+  "sha256": "d8d74b7928ba35805c5e6d04961f404dd6e868dbbba1850997477d422efb6ba9"
+ },
+ "replicate_02_baseline.npy": {
+  "sha256": "0695ec2931e968c224aeb9facb47182679025cc48cadf6bca375c5a81c049f41"
+ },
+ "replicate_02_perturbed.npy": {
+  "sha256": "abd35bf799a3e4e125bfd7a9f37d4f7ae86b3d07f509179d881f17d261f2a4af"
+ },
+ "replicate_03_baseline.npy": {
+  "sha256": "8b7c807ef681cbf41125f3220a5f45a943ca59d8b6c5a5a60ed7aa5b442e1a7a"
+ },
+ "replicate_03_perturbed.npy": {
+  "sha256": "fa0ea12ce023e3ff571dfbf346d2fe5a26a79d8d31a4428f7ee9c65f98ea6e6a"
+ },
+ "replicate_04_baseline.npy": {
+  "sha256": "3b25e62ea69c283ae7a671485a8277ac34d72bf962fa830ae42abcf8ef38020f"
+ },
+ "replicate_04_perturbed.npy": {
+  "sha256": "b9567122ef3a876d03ca785ea3a64838c824066b5742a1aeaede60e963c7d74e"
+ },
+ "replicate_05_baseline.npy": {
+  "sha256": "9ff80bf14dd63b3ffb97e35d2754b5c053acbbc410583614ffe26b4d42bc7dc3"
+ },
+ "replicate_05_perturbed.npy": {
+  "sha256": "0cd40af16b9724edee78993154a32196bdfad7562e279ade58b959fe8a3cfde7"
+ }
+}

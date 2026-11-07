@@ -1,0 +1,48 @@
+{
+ "b2": {
+  "C1": {
+   "status": "E"
+  },
+  "C2": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C3": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C4": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C5": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C6": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C7": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C8": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  }
+ },
+ "case": "U7",
+ "declarations_only": true,
+ "environment": {
+  "keras": "3.13.2",
+  "note": "constructed for the fixture; uninformative about any real publication",
+  "numpy": "2.1.3",
+  "python": "3.13.0",
+  "tensorflow": "2.20.0"
+ },
+ "files": [
+  "audit/framework_validation/sdb_v2/fixtures/U7/declared.json"
+ ],
+ "published_checksums": {}
+}

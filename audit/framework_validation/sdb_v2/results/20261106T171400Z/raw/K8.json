@@ -1,0 +1,210 @@
+{
+ "criterion": {
+  "baseline_pass_the_starting_round": true,
+  "met": true,
+  "perturbed_stop_at_starting_round_without_best_round": true,
+  "rule": "every perturbed fit stops at the starting round with no best_round, and every baseline fit passes at least its starting round (best_round is not None)"
+ },
+ "fits": [
+  {
+   "best_round": null,
+   "best_val_acc": null,
+   "condition": "perturbed",
+   "executed_steps": 10,
+   "replicate": 1,
+   "rounds_max_val_acc": [
+    0.503
+   ],
+   "rounds_trained": [
+    5
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 5,
+   "threshold": 0.505
+  },
+  {
+   "best_round": null,
+   "best_val_acc": null,
+   "condition": "perturbed",
+   "executed_steps": 10,
+   "replicate": 2,
+   "rounds_max_val_acc": [
+    0.503
+   ],
+   "rounds_trained": [
+    5
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 5,
+   "threshold": 0.505
+  },
+  {
+   "best_round": null,
+   "best_val_acc": null,
+   "condition": "perturbed",
+   "executed_steps": 10,
+   "replicate": 3,
+   "rounds_max_val_acc": [
+    0.503
+   ],
+   "rounds_trained": [
+    5
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 5,
+   "threshold": 0.505
+  },
+  {
+   "best_round": null,
+   "best_val_acc": null,
+   "condition": "perturbed",
+   "executed_steps": 10,
+   "replicate": 4,
+   "rounds_max_val_acc": [
+    0.503
+   ],
+   "rounds_trained": [
+    5
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 5,
+   "threshold": 0.505
+  },
+  {
+   "best_round": null,
+   "best_val_acc": null,
+   "condition": "perturbed",
+   "executed_steps": 10,
+   "replicate": 5,
+   "rounds_max_val_acc": [
+    0.503
+   ],
+   "rounds_trained": [
+    5
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 5,
+   "threshold": 0.505
+  },
+  {
+   "best_round": 8,
+   "best_val_acc": 0.5086,
+   "condition": "baseline",
+   "executed_steps": 50,
+   "replicate": 1,
+   "rounds_max_val_acc": [
+    0.9185,
+    0.7738,
+    0.6046,
+    0.5086,
+    0.5013
+   ],
+   "rounds_trained": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 9,
+   "threshold": 0.505
+  },
+  {
+   "best_round": 8,
+   "best_val_acc": 0.5086,
+   "condition": "baseline",
+   "executed_steps": 50,
+   "replicate": 2,
+   "rounds_max_val_acc": [
+    0.9185,
+    0.7738,
+    0.6046,
+    0.5086,
+    0.5013
+   ],
+   "rounds_trained": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 9,
+   "threshold": 0.505
+  },
+  {
+   "best_round": 8,
+   "best_val_acc": 0.5086,
+   "condition": "baseline",
+   "executed_steps": 50,
+   "replicate": 3,
+   "rounds_max_val_acc": [
+    0.9185,
+    0.7738,
+    0.6046,
+    0.5086,
+    0.5013
+   ],
+   "rounds_trained": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 9,
+   "threshold": 0.505
+  },
+  {
+   "best_round": 8,
+   "best_val_acc": 0.5086,
+   "condition": "baseline",
+   "executed_steps": 50,
+   "replicate": 4,
+   "rounds_max_val_acc": [
+    0.9185,
+    0.7738,
+    0.6046,
+    0.5086,
+    0.5013
+   ],
+   "rounds_trained": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 9,
+   "threshold": 0.505
+  },
+  {
+   "best_round": 8,
+   "best_val_acc": 0.5086,
+   "condition": "baseline",
+   "executed_steps": 50,
+   "replicate": 5,
+   "rounds_max_val_acc": [
+    0.9185,
+    0.7738,
+    0.6046,
+    0.5086,
+    0.5013
+   ],
+   "rounds_trained": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "status": "stopped_at_threshold",
+   "stop_round": 9,
+   "threshold": 0.505
+  }
+ ]
+}

@@ -1,0 +1,145 @@
+{
+ "b2": {
+  "C1": {
+   "status": "E"
+  },
+  "C2": {
+   "status": "E"
+  },
+  "C3": {
+   "status": "E"
+  },
+  "C4": {
+   "reason": "no reported accuracy",
+   "status": "NA"
+  },
+  "C5": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C6": {
+   "reason": "subject absent by construction",
+   "status": "NA"
+  },
+  "C7": {
+   "status": "E"
+  },
+  "C8": {
+   "reason": "no model",
+   "status": "NA"
+  }
+ },
+ "case": "U4",
+ "edit_after_run": {
+  "after": 0.93949,
+  "before": 0.92949,
+  "json_path": [
+   "blocks",
+   0,
+   "values",
+   "reference"
+  ]
+ },
+ "environment": {
+  "keras": "3.13.2",
+  "note": "constructed for the fixture; uninformative about any real publication",
+  "numpy": "2.1.3",
+  "python": "3.13.0",
+  "tensorflow": "2.20.0"
+ },
+ "files": [
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/analysis.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/claims/2026-11-06T171020.298150+0000.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/data/train.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/independent/ckpt_a.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/independent/ckpt_b.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/independent/commit.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/independent/epochs.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/independent/eval_journal.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/independent/recovery.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/independent/terminal_model.keras",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/independent/worker_sessions.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/reference/ckpt_a.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/reference/ckpt_b.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/reference/commit.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/reference/epochs.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/reference/eval_journal.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/reference/recovery.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/reference/terminal_model.keras",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/reference/worker_sessions.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/training_complete.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block0/training_state.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/claims/2026-11-06T171020.298150+0000.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/data/train.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/independent/ckpt_a.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/independent/ckpt_b.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/independent/commit.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/independent/epochs.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/independent/eval_journal.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/independent/recovery.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/independent/terminal_model.keras",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/independent/worker_sessions.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/reference/ckpt_a.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/reference/ckpt_b.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/reference/commit.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/reference/epochs.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/reference/eval_journal.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/reference/recovery.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/reference/terminal_model.keras",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/reference/worker_sessions.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/training_complete.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block1/training_state.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/claims/2026-11-06T171020.298150+0000.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/data/train.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/independent/ckpt_a.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/independent/ckpt_b.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/independent/commit.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/independent/epochs.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/independent/eval_journal.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/independent/recovery.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/independent/terminal_model.keras",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/independent/worker_sessions.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/reference/ckpt_a.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/reference/ckpt_b.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/reference/commit.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/reference/epochs.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/reference/eval_journal.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/reference/recovery.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/reference/terminal_model.keras",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/reference/worker_sessions.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/training_complete.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block2/training_state.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/claims/2026-11-06T171020.298150+0000.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/data/train.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/independent/ckpt_a.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/independent/ckpt_b.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/independent/commit.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/independent/epochs.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/independent/eval_journal.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/independent/recovery.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/independent/terminal_model.keras",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/independent/worker_sessions.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/reference/ckpt_a.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/reference/ckpt_b.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/reference/commit.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/reference/epochs.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/reference/eval_journal.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/reference/recovery.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/reference/terminal_model.keras",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/reference/worker_sessions.jsonl",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/training_complete.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/blocks/block3/training_state.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/firewall.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/logs/worker_gpu0_2026-11-06T171020.298150+0000.log",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/logs/worker_gpu1_2026-11-06T171020.298150+0000.log",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/parallel_execution.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/preregistration.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/sealed_test/sealed.json",
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/state.json"
+ ],
+ "published_checksums": {
+  "audit/framework_validation/sdb_v2/fixtures/U4/run/analysis.json": "2154daaf167a3005d5c4acbbd2570c7b224b92aacf311548d7444b15f3aff6c3"
+ },
+ "reported_accuracy": null,
+ "run_dir": "audit/framework_validation/sdb_v2/fixtures/U4/run"
+}

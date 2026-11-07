@@ -1,0 +1,18 @@
+{
+ "asserted_inputs": [
+  {
+   "L": 2,
+   "ce": [],
+   "dims": {
+    "DI": "PASS",
+    "II": "PASS"
+   },
+   "id": "U5",
+   "predictive": true,
+   "reproduction": "COMPLETE",
+   "required": [
+    "EV"
+   ]
+  }
+ ]
+}

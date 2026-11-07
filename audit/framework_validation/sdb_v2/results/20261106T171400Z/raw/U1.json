@@ -1,0 +1,286 @@
+{
+ "decision": {
+  "baseline": {
+   "alpha": 0.05,
+   "outcome": "PASSED",
+   "replicates": [
+    {
+     "accuracy": 0.918001,
+     "adequacy_level": 0.05,
+     "correct": 918001,
+     "inadequacy_level": 0.01,
+     "one_sided_lower_bound": 0.9175483180394974,
+     "one_sided_upper_bound": 0.9186381152161506,
+     "pvalue_h0_at_or_above_threshold": 1.0,
+     "pvalue_h0_at_or_below_threshold": 0.0,
+     "state": "ADEQUATE",
+     "test_examples": 1000000,
+     "threshold": 0.9
+    },
+    {
+     "accuracy": 0.918002,
+     "adequacy_level": 0.05,
+     "correct": 918002,
+     "inadequacy_level": 0.01,
+     "one_sided_lower_bound": 0.9175493205433382,
+     "one_sided_upper_bound": 0.9186391116679358,
+     "pvalue_h0_at_or_above_threshold": 1.0,
+     "pvalue_h0_at_or_below_threshold": 0.0,
+     "state": "ADEQUATE",
+     "test_examples": 1000000,
+     "threshold": 0.9
+    },
+    {
+     "accuracy": 0.918003,
+     "adequacy_level": 0.05,
+     "correct": 918003,
+     "inadequacy_level": 0.01,
+     "one_sided_lower_bound": 0.9175503230471995,
+     "one_sided_upper_bound": 0.918640108119691,
+     "pvalue_h0_at_or_above_threshold": 1.0,
+     "pvalue_h0_at_or_below_threshold": 0.0,
+     "state": "ADEQUATE",
+     "test_examples": 1000000,
+     "threshold": 0.9
+    },
+    {
+     "accuracy": 0.918004,
+     "adequacy_level": 0.05,
+     "correct": 918004,
+     "inadequacy_level": 0.01,
+     "one_sided_lower_bound": 0.9175513255510819,
+     "one_sided_upper_bound": 0.9186411045714189,
+     "pvalue_h0_at_or_above_threshold": 1.0,
+     "pvalue_h0_at_or_below_threshold": 0.0,
+     "state": "ADEQUATE",
+     "test_examples": 1000000,
+     "threshold": 0.9
+    },
+    {
+     "accuracy": 0.918005,
+     "adequacy_level": 0.05,
+     "correct": 918005,
+     "inadequacy_level": 0.01,
+     "one_sided_lower_bound": 0.9175523280549817,
+     "one_sided_upper_bound": 0.9186421010231195,
+     "pvalue_h0_at_or_above_threshold": 1.0,
+     "pvalue_h0_at_or_below_threshold": 0.0,
+     "state": "ADEQUATE",
+     "test_examples": 1000000,
+     "threshold": 0.9
+    }
+   ],
+   "threshold": 0.9
+  },
+  "outcome": "INCONCLUSIVE",
+  "overall_supported": false,
+  "paired_endpoint_role": "secondary",
+  "primary": {
+   "alpha": 0.05,
+   "chance": 0.5,
+   "margin": 0.005,
+   "outcome": "INCONCLUSIVE",
+   "replicates": [
+    {
+     "accuracy": 0.5053,
+     "band": [
+      0.495,
+      0.505
+     ],
+     "correct": 505300,
+     "departure_interval": [
+      0.5040116349421158,
+      0.5065883146107679
+     ],
+     "departure_level_per_side": 0.005,
+     "departure_pvalue_above_band": 0.2745771788561276,
+     "departure_pvalue_below_band": 1.0,
+     "equivalence_interval": [
+      0.5044771088196605,
+      0.5061228685104199
+     ],
+     "equivalence_level": 0.05,
+     "state": "INDETERMINATE",
+     "test_examples": 1000000,
+     "tost_pvalue_h0_at_or_above_upper": 0.7260892951397449,
+     "tost_pvalue_h0_at_or_below_lower": 1.3908834062488408e-94
+    },
+    {
+     "accuracy": 0.5053,
+     "band": [
+      0.495,
+      0.505
+     ],
+     "correct": 505300,
+     "departure_interval": [
+      0.5040116349421158,
+      0.5065883146107679
+     ],
+     "departure_level_per_side": 0.005,
+     "departure_pvalue_above_band": 0.2745771788561276,
+     "departure_pvalue_below_band": 1.0,
+     "equivalence_interval": [
+      0.5044771088196605,
+      0.5061228685104199
+     ],
+     "equivalence_level": 0.05,
+     "state": "INDETERMINATE",
+     "test_examples": 1000000,
+     "tost_pvalue_h0_at_or_above_upper": 0.7260892951397449,
+     "tost_pvalue_h0_at_or_below_lower": 1.3908834062488408e-94
+    },
+    {
+     "accuracy": 0.5053,
+     "band": [
+      0.495,
+      0.505
+     ],
+     "correct": 505300,
+     "departure_interval": [
+      0.5040116349421158,
+      0.5065883146107679
+     ],
+     "departure_level_per_side": 0.005,
+     "departure_pvalue_above_band": 0.2745771788561276,
+     "departure_pvalue_below_band": 1.0,
+     "equivalence_interval": [
+      0.5044771088196605,
+      0.5061228685104199
+     ],
+     "equivalence_level": 0.05,
+     "state": "INDETERMINATE",
+     "test_examples": 1000000,
+     "tost_pvalue_h0_at_or_above_upper": 0.7260892951397449,
+     "tost_pvalue_h0_at_or_below_lower": 1.3908834062488408e-94
+    },
+    {
+     "accuracy": 0.5053,
+     "band": [
+      0.495,
+      0.505
+     ],
+     "correct": 505300,
+     "departure_interval": [
+      0.5040116349421158,
+      0.5065883146107679
+     ],
+     "departure_level_per_side": 0.005,
+     "departure_pvalue_above_band": 0.2745771788561276,
+     "departure_pvalue_below_band": 1.0,
+     "equivalence_interval": [
+      0.5044771088196605,
+      0.5061228685104199
+     ],
+     "equivalence_level": 0.05,
+     "state": "INDETERMINATE",
+     "test_examples": 1000000,
+     "tost_pvalue_h0_at_or_above_upper": 0.7260892951397449,
+     "tost_pvalue_h0_at_or_below_lower": 1.3908834062488408e-94
+    },
+    {
+     "accuracy": 0.5053,
+     "band": [
+      0.495,
+      0.505
+     ],
+     "correct": 505300,
+     "departure_interval": [
+      0.5040116349421158,
+      0.5065883146107679
+     ],
+     "departure_level_per_side": 0.005,
+     "departure_pvalue_above_band": 0.2745771788561276,
+     "departure_pvalue_below_band": 1.0,
+     "equivalence_interval": [
+      0.5044771088196605,
+      0.5061228685104199
+     ],
+     "equivalence_level": 0.05,
+     "state": "INDETERMINATE",
+     "test_examples": 1000000,
+     "tost_pvalue_h0_at_or_above_upper": 0.7260892951397449,
+     "tost_pvalue_h0_at_or_below_lower": 1.3908834062488408e-94
+    }
+   ]
+  },
+  "rule": "near_chance_baseline_gated_v4",
+  "supporting": {
+   "alpha": 0.05,
+   "effect_threshold": 0.01,
+   "established": true,
+   "replicates": [
+    {
+     "conditional_delta_interval": [
+      -0.4138001552939639,
+      -0.41219510283290306
+     ],
+     "delta": -0.413,
+     "discordant": 505000,
+     "mcnemar_b": 46000,
+     "mcnemar_c": 459000,
+     "one_sided_pvalue": 0.0,
+     "practical": true,
+     "significant": true,
+     "two_sided_pvalue": 0.0
+    },
+    {
+     "conditional_delta_interval": [
+      -0.4138001552939639,
+      -0.41219510283290306
+     ],
+     "delta": -0.413,
+     "discordant": 505000,
+     "mcnemar_b": 46000,
+     "mcnemar_c": 459000,
+     "one_sided_pvalue": 0.0,
+     "practical": true,
+     "significant": true,
+     "two_sided_pvalue": 0.0
+    },
+    {
+     "conditional_delta_interval": [
+      -0.4138001552939639,
+      -0.41219510283290306
+     ],
+     "delta": -0.413,
+     "discordant": 505000,
+     "mcnemar_b": 46000,
+     "mcnemar_c": 459000,
+     "one_sided_pvalue": 0.0,
+     "practical": true,
+     "significant": true,
+     "two_sided_pvalue": 0.0
+    },
+    {
+     "conditional_delta_interval": [
+      -0.4138001552939639,
+      -0.41219510283290306
+     ],
+     "delta": -0.413,
+     "discordant": 505000,
+     "mcnemar_b": 46000,
+     "mcnemar_c": 459000,
+     "one_sided_pvalue": 0.0,
+     "practical": true,
+     "significant": true,
+     "two_sided_pvalue": 0.0
+    },
+    {
+     "conditional_delta_interval": [
+      -0.4138001552939639,
+      -0.41219510283290306
+     ],
+     "delta": -0.413,
+     "discordant": 505000,
+     "mcnemar_b": 46000,
+     "mcnemar_c": 459000,
+     "one_sided_pvalue": 0.0,
+     "practical": true,
+     "significant": true,
+     "two_sided_pvalue": 0.0
+    }
+   ],
+   "role": "secondary_non_gating"
+  }
+ }
+}

@@ -1,0 +1,286 @@
+{
+ "autond_decision_on_certificate": {
+  "autond_overall_outcome": "INCONCLUSIVE",
+  "engine_overall_d4_outcome": "INCONCLUSIVE",
+  "overall_supported": false,
+  "pipeline_progression_role": "co_primary",
+  "progression_criterion": {
+   "baseline_pass_the_starting_round": true,
+   "met": false,
+   "perturbed_stop_at_starting_round_without_best_round": false,
+   "rule": "every perturbed fit stops at the starting round with no best_round, and every baseline fit passes at least its starting round (best_round is not None)"
+  },
+  "progression_gates_outcome": true
+ },
+ "claim_mapping_provenance": "A-D4 bears on A1 only under v2, first recorded after the A-D4 result (D2-N registration 5fb47d3, 2026-11-05; A-D4 evidence ad8c5d8, 2026-11-04). Under v1 every AutoND DI experiment bears on A1 and A2. Not preregistered.",
+ "criterion_recomputed": {
+  "baseline_pass_the_starting_round": true,
+  "met": false,
+  "perturbed_stop_at_starting_round_without_best_round": false,
+  "rule": "every perturbed fit stops at the starting round with no best_round, and every baseline fit passes at least its starting round (best_round is not None)"
+ },
+ "pipeline_progression_on_certificate": {
+  "fits": [
+   {
+    "best_round": 8,
+    "best_val_acc": 0.5085740089416504,
+    "condition": "baseline",
+    "replicate": 1,
+    "rounds_max_val_acc": [
+     0.9184899926185608,
+     0.7738469839096069,
+     0.6046149730682373,
+     0.5085740089416504,
+     0.5012649893760681
+    ],
+    "rounds_trained": [
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 9
+   },
+   {
+    "best_round": null,
+    "best_val_acc": null,
+    "condition": "perturbed",
+    "replicate": 1,
+    "rounds_max_val_acc": [
+     0.5048360228538513
+    ],
+    "rounds_trained": [
+     5
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 5
+   },
+   {
+    "best_round": 8,
+    "best_val_acc": 0.5104529857635498,
+    "condition": "baseline",
+    "replicate": 2,
+    "rounds_max_val_acc": [
+     0.9184769988059998,
+     0.7837550044059753,
+     0.6117630004882812,
+     0.5104529857635498,
+     0.5008130073547363
+    ],
+    "rounds_trained": [
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 9
+   },
+   {
+    "best_round": 5,
+    "best_val_acc": 0.5060949921607971,
+    "condition": "perturbed",
+    "replicate": 2,
+    "rounds_max_val_acc": [
+     0.5060949921607971,
+     0.5022460222244263
+    ],
+    "rounds_trained": [
+     5,
+     6
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 6
+   },
+   {
+    "best_round": 8,
+    "best_val_acc": 0.5096359848976135,
+    "condition": "baseline",
+    "replicate": 3,
+    "rounds_max_val_acc": [
+     0.9186310172080994,
+     0.7838190197944641,
+     0.6088520288467407,
+     0.5096359848976135,
+     0.5009890198707581
+    ],
+    "rounds_trained": [
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 9
+   },
+   {
+    "best_round": 5,
+    "best_val_acc": 0.5052779912948608,
+    "condition": "perturbed",
+    "replicate": 3,
+    "rounds_max_val_acc": [
+     0.5052779912948608,
+     0.501039981842041
+    ],
+    "rounds_trained": [
+     5,
+     6
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 6
+   },
+   {
+    "best_round": 8,
+    "best_val_acc": 0.5085160136222839,
+    "condition": "baseline",
+    "replicate": 4,
+    "rounds_max_val_acc": [
+     0.918599009513855,
+     0.7738249897956848,
+     0.6054869890213013,
+     0.5085160136222839,
+     0.5008730292320251
+    ],
+    "rounds_trained": [
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 9
+   },
+   {
+    "best_round": 5,
+    "best_val_acc": 0.505282998085022,
+    "condition": "perturbed",
+    "replicate": 4,
+    "rounds_max_val_acc": [
+     0.505282998085022,
+     0.5037109851837158
+    ],
+    "rounds_trained": [
+     5,
+     6
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 6
+   },
+   {
+    "best_round": 8,
+    "best_val_acc": 0.5098350048065186,
+    "condition": "baseline",
+    "replicate": 5,
+    "rounds_max_val_acc": [
+     0.9187620282173157,
+     0.7835100293159485,
+     0.6107630133628845,
+     0.5098350048065186,
+     0.5002449750900269
+    ],
+    "rounds_trained": [
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 9
+   },
+   {
+    "best_round": null,
+    "best_val_acc": null,
+    "condition": "perturbed",
+    "replicate": 5,
+    "rounds_max_val_acc": [
+     0.5001569986343384
+    ],
+    "rounds_trained": [
+     5
+    ],
+    "status": "stopped_at_threshold",
+    "stop_round": 5
+   }
+  ],
+  "role": "co_primary",
+  "rule": "upstream train_neural_distinguisher: stop when a round's max val_acc <= 0.505; best_round is the last round above it (None if the first round stops)",
+  "stop_threshold": 0.505,
+  "summary": {
+   "baseline_best_rounds": [
+    8,
+    8,
+    8,
+    8,
+    8
+   ],
+   "baseline_stop_rounds": [
+    9,
+    9,
+    9,
+    9,
+    9
+   ],
+   "cap_reached": [],
+   "perturbed_stopped_at_first_round": 2,
+   "perturbed_with_no_best_round": 2
+  }
+ },
+ "records_per_fit": {
+  "baseline#1": {
+   "n_records": 50,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+   "selected_checkpoint_sha256": "1f9312d7f3050190e60f477b2317cb82209c3cecec962c842de51ad7ac2b2037"
+  },
+  "baseline#2": {
+   "n_records": 50,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+   "selected_checkpoint_sha256": "4ab0b0a6a2aad4cf72eb35e4b76aeef722af34e9b4a9e6e31559e3f753e35ee3"
+  },
+  "baseline#3": {
+   "n_records": 50,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+   "selected_checkpoint_sha256": "ba5a9ab6167521d235835244ebab6f7afc08f43bd2bd6cb0f05417b8e0ada23e"
+  },
+  "baseline#4": {
+   "n_records": 50,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+   "selected_checkpoint_sha256": "ebe586eff45ff98d1be56341681d3b142aee1668f0aae66688e2f83afcd799f7"
+  },
+  "baseline#5": {
+   "n_records": 50,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+   "selected_checkpoint_sha256": "b192d1fa57251737fb8712949f7ae57dc3511cd9be3eabff78e7182fa1357bb2"
+  },
+  "perturbed#1": {
+   "n_records": 10,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_010.keras",
+   "selected_checkpoint_sha256": "536e63a8cf95ac9889ae638ba8ebb29d280d5e754f01d5ba678259b92ebcb6bc"
+  },
+  "perturbed#2": {
+   "n_records": 20,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_007.keras",
+   "selected_checkpoint_sha256": "b96c4f8bdae3a33f8f1d9d9e2796bf286a0f7807b53aeaba70e50e0e5c1a5408"
+  },
+  "perturbed#3": {
+   "n_records": 20,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+   "selected_checkpoint_sha256": "f8f9425d5f2a560c65ef485058e77117ae1a289caf1e4dc1150bc88a9c88a911"
+  },
+  "perturbed#4": {
+   "n_records": 20,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_009.keras",
+   "selected_checkpoint_sha256": "73049443490bfed653c310b7e2cf2b00cc9be09f2aaca7fe27e24cf259208476"
+  },
+  "perturbed#5": {
+   "n_records": 10,
+   "selected_checkpoint": "stage_r05/checkpoint_epoch_007.keras",
+   "selected_checkpoint_sha256": "4c11dcd7ed975c50cc7698b78936aa81dbec30f8c1c87710c1b510cb28c89a66"
+  }
+ }
+}

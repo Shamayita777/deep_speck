@@ -1,0 +1,45 @@
+{
+ "asserted_inputs": [
+  {
+   "L": 3,
+   "ce": [
+    {
+     "control_from": {
+      "certificate": "audit/adversarial/evidence/a3_20261006/a3_certificate.json",
+      "control_satisfied_if": "NOT_CAUGHT",
+      "field": [
+       "dimensions",
+       "CE3",
+       "adversarial_outcome"
+      ]
+     },
+     "id": "CE3",
+     "outcome_from": {
+      "certificate": "audit/adversarial/evidence/a3_20261006/a3_certificate.json",
+      "field": [
+       "dimensions",
+       "CE3",
+       "scientific_decision"
+      ]
+     },
+     "powered": true,
+     "prereg": true,
+     "required": false
+    }
+   ],
+   "dims": {
+    "DI": "PASS",
+    "EV": "PASS",
+    "II": "PASS"
+   },
+   "id": "U2",
+   "predictive": true,
+   "reproduction": "COMPLETE",
+   "required": [
+    "DI",
+    "EV",
+    "II"
+   ]
+  }
+ ]
+}
