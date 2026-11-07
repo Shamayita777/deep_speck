@@ -1,0 +1,1 @@
+/Users/oishimoitra/.venvs/ots/bin/ots stamp audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json

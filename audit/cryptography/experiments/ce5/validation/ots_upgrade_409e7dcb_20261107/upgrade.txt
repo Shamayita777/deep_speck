@@ -1,0 +1,6 @@
+Upgrading preregistration_409e7dcb_APPROVED.json.ots
+Got 2 attestation(s) from cache
+    BitcoinBlockHeaderAttestation(974769)
+    BitcoinBlockHeaderAttestation(974770)
+Got new timestamp data; renaming existing timestamp to 'preregistration_409e7dcb_APPROVED.json.ots.bak'
+Success! Timestamp complete

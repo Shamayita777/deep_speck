@@ -1,0 +1,17 @@
+"""For each Bitcoin attestation in an .ots proof, the commitment it asserts (the block's Merkle root, display byte order)."""
+import hashlib, json, sys
+from opentimestamps.core.serialize import StreamDeserializationContext
+from opentimestamps.core.timestamp import DetachedTimestampFile
+from opentimestamps.core.notary import BitcoinBlockHeaderAttestation, PendingAttestation
+proof, src = sys.argv[1], sys.argv[2]
+with open(proof, "rb") as f:
+    d = DetachedTimestampFile.deserialize(StreamDeserializationContext(f))
+digest = hashlib.sha256(open(src, "rb").read()).hexdigest()
+out = {"file_digest_in_proof": d.file_digest.hex(), "source_sha256": digest, "match": d.file_digest.hex() == digest,
+       "bitcoin": [], "pending": []}
+for msg, att in d.timestamp.all_attestations():
+    if isinstance(att, BitcoinBlockHeaderAttestation):
+        out["bitcoin"].append({"height": att.height, "merkle_root_expected": msg[::-1].hex()})
+    elif isinstance(att, PendingAttestation):
+        out["pending"].append(att.uri)
+print(json.dumps(out, indent=1))

@@ -1,0 +1,21 @@
+{
+ "file_digest_in_proof": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+ "source_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+ "match": true,
+ "bitcoin": [
+  {
+   "height": 974769,
+   "merkle_root_expected": "b8c7f16aae9c3da5387844d274159f0ecda6e12b7dcaec88b4431c74b12e52ab"
+  },
+  {
+   "height": 974770,
+   "merkle_root_expected": "cf99bb05a4faa860b338e8ccb7393473c5369ad0c82a6a4798443c7d683004ea"
+  }
+ ],
+ "pending": [
+  "https://btc.calendar.catallaxy.com",
+  "https://alice.btc.calendar.opentimestamps.org",
+  "https://bob.btc.calendar.opentimestamps.org",
+  "https://finney.calendar.eternitywall.com"
+ ]
+}

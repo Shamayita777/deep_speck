@@ -1,0 +1,43 @@
+File sha256 hash: 0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d
+Timestamp:
+append 5660daa5c382cfee9678e7925ddf08f2
+sha256
+ -> append 0a531b5cc1730ed792d7fe953413a9cc
+    sha256
+    prepend 6aed6777
+    append abd78ef161297333
+    verify PendingAttestation('https://btc.calendar.catallaxy.com')
+ -> append 5d7d46f4e78c58a8
+    sha256
+    append 27b0526904b2377c970de1dc57ac0f6c
+    sha256
+    append 47bfaee01b0cffa60780855439af874ecf54fcf9b36f2dc1665aae2388ef7549
+    sha256
+    prepend 5509cc4dc256a8dbcc72b12fde4a15d8d8570ce77943550ce5c03b61736af3e1
+    sha256
+    append d8f364d9f4349e8f024260caf1b45067c58218d76d27dba40cca61ce8e47692a
+    sha256
+    prepend 6aed6777
+    append 003ffb0caf1541c7
+    verify PendingAttestation('https://alice.btc.calendar.opentimestamps.org')
+ -> append caf97a52370eae15
+    sha256
+    append 11dd20c3b2b0b460e2f7b63fc6c8a0d2
+    sha256
+    prepend 15138124fb68386a23b990b35e5f6a089b8df4dc06c269580b315102361a8d96
+    sha256
+    prepend 6aed6776
+    append 67b0110c7827391d
+    verify PendingAttestation('https://bob.btc.calendar.opentimestamps.org')
+ -> append debc8b0492d2a0282c913cd42dd6086b
+    sha256
+    append adc42a15990c748c789c33379335fc61ef582779e290aec3d49cf44df9d52840
+    sha256
+    prepend ff3fac6e4de49bf03ad49ada75090dbbc0a1e59f33234e0965a1180f9db311ac
+    sha256
+    append 723128cc92c673c0536a6fda6eda916c4cf7b004bd26b1b0829033c66eafd62f
+    sha256
+    prepend 6aed6776
+    append d8f99a1f26ae4644
+    verify PendingAttestation('https://finney.calendar.eternitywall.com')
+

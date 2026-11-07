@@ -1,0 +1,29 @@
+{
+ "file": "audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json",
+ "file_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+ "expected_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+ "proof": "audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json.ots",
+ "proof_sha256": "c28ed1308feca26e2e9496bdc355f47958d320f4720a91230b417aee37f84326",
+ "proof_bytes": 700,
+ "embedded_digest": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+ "embedded_digest_matches_file": true,
+ "attestations_in_proof": {
+  "bitcoin": 0,
+  "pending": 4
+ },
+ "status": "PENDING: calendar commitments only; no Bitcoin attestation yet",
+ "head_at_stamp": "d9f9cf1d5a61a7781b1b9503612452ce6b71fc8e",
+ "calendars": [
+  "https://btc.calendar.catallaxy.com",
+  "https://alice.btc.calendar.opentimestamps.org",
+  "https://bob.btc.calendar.opentimestamps.org",
+  "https://finney.calendar.eternitywall.com"
+ ],
+ "attempts": {
+  "1": "ots stamp; exit 1; 0 calendar replies; no proof written",
+  "attempt_2": "ots stamp --timeout 60; exit 1; 0 replies; no proof written",
+  "attempt_3": "SSL_CERT_FILE=/etc/ssl/cert.pem ots stamp --timeout 60; exit 0; proof written"
+ },
+ "cause_of_failed_attempts": "the ots environment's Python had no CA bundle (default cafile None), so HTTPS certificate verification failed for every calendar; attempt 3 used the system bundle with verification on",
+ "production_authorisation_now": "OpenTimestamps proof has no Bitcoin attestation yet (run ots upgrade, then ots verify)"
+}

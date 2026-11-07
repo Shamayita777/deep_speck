@@ -1,0 +1,21 @@
+{
+ "corrects": "STATUS.json in this directory (kept unchanged)",
+ "field": "remaining_pending_attestations",
+ "recorded_value": 2,
+ "correct_value": 4,
+ "correction": "The upgraded proof keeps all four calendar PendingAttestation entries (btc.calendar.catallaxy.com, alice.btc.calendar.opentimestamps.org, bob.btc.calendar.opentimestamps.org, finney.calendar.eternitywall.com) and adds two BitcoinBlockHeaderAttestation entries, at heights 974769 and 974770 (see info_after.txt). One Bitcoin attestation suffices; the CONFIRMED status is unaffected.",
+ "upgrade_source_note": "upgrade.txt reports the two Bitcoin attestations were obtained from the local client cache; they were checked independently of that cache as described below.",
+ "verification_method": "Bitcoin inclusion was checked through public block explorers and raw block headers, NOT a local Bitcoin node. For each attestation, the commitment computed from the proof (expected_roots.json, by expected_roots.py) equals the merkle_root reported by blockstream.info and mempool.space (explorer_crosscheck.txt); for both explorers, the double SHA-256 of the raw 80-byte header equals the block hash and the header's Merkle-root field equals the proof commitment (header_check.txt). ots verify against a local Bitcoin node was not run.",
+ "files": {
+  "approved_preregistration": "audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json",
+  "approved_preregistration_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+  "upgraded_proof": "audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json.ots",
+  "upgraded_proof_sha256": "852fe259c326ed725018582f8e3fe979b94de66ec59463f012758500b711e986",
+  "original_proof": "audit/cryptography/experiments/ce5/validation/ots_upgrade_409e7dcb_20261107/original_proof/preregistration_409e7dcb_APPROVED.json.ots",
+  "original_proof_sha256": "c28ed1308feca26e2e9496bdc355f47958d320f4720a91230b417aee37f84326",
+  "stamping_records": "audit/cryptography/experiments/ce5/validation/ots_stamp_409e7dcb_20261106T053537Z/ (attempts 1 and 2 failed, attempt 3 wrote the original proof)"
+ },
+ "path_note": "SHA256SUMS and SHA256SUMS_after list three files relative to the preregistration directory and the original-proof backup by its absolute path outside the repository at the time; that backup is the file under original_proof/ here (same SHA-256).",
+ "written_utc": "2026-11-07",
+ "file_name_note": "expected_roots.py from the upgrade session is stored here as expected_roots.py.txt, byte-identical. CE5's registered source-integrity check (runner.source_integrity) treats every *.py file under audit/cryptography/experiments/ce5/ outside historical/ as registered source, so a .py file here would make production refuse. Run it as: python expected_roots.py.txt <proof.ots> <file>. Other files keep their names; SHA256SUMS and SHA256SUMS_after are unchanged."
+}
