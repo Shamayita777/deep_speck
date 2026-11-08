@@ -1,0 +1,32 @@
+{
+  "checks": {
+    "table_check_addt_r4_counts.npz": {
+      "cells": 200,
+      "chi2": 215.90361027491528,
+      "df": 200,
+      "n_sample": 100000,
+      "p_value": 0.20950036910348588,
+      "rounds": 4,
+      "seed": 20261105
+    },
+    "table_check_addt_r5_counts.npz": {
+      "cells": 200,
+      "chi2": 151.91076108817995,
+      "df": 200,
+      "n_sample": 100000,
+      "p_value": 0.9952798762987232,
+      "rounds": 5,
+      "seed": 20261105
+    }
+  },
+  "interval": [
+    0.4085969717849516,
+    0.4101938366701172
+  ],
+  "model_recomputed": true,
+  "problems": [],
+  "recomputed_decision": "DISTRIBUTION_GREATER",
+  "reference_score_checks": 1344,
+  "status": "VERIFIED",
+  "verified": true
+}

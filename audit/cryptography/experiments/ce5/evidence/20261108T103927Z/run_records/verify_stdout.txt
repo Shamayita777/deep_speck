@@ -1,0 +1,13 @@
+{
+  "verified": true,
+  "status": "VERIFIED",
+  "recomputed_decision": "DISTRIBUTION_GREATER",
+  "interval": [
+    0.4085969717849516,
+    0.4101938366701172
+  ],
+  "reference_score_checks": 1344,
+  "model_recomputed": true,
+  "problems": [],
+  "written_to": "verification.json"
+}

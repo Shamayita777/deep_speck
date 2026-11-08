@@ -1,0 +1,4 @@
+cwd: /Users/oishimoitra/Documents/deep_speck
+started_utc: 2026-11-08T11:13:14Z
+command: /Users/oishimoitra/.venvs/gohr-tf221-validation-20261031/bin/python -m audit.cryptography.experiments.ce5.verify audit/cryptography/experiments/ce5/evidence/20261108T103927Z --tables audit/cryptography/experiments/ce5/tables --prereg audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json --amendment audit/cryptography/experiments/ce5/preregistration/amendment_01_ots_verification_method.json --model
+2026-11-08T11:15:48Z

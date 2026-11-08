@@ -1,0 +1,35 @@
+{
+ "schema": "gohr-ce5-production-authorisation-1",
+ "authorises": "CE5 production under amendment 01 (Java OTS verification method)",
+ "statement": "I approve Amendment 01 for CE5 production under the Java OTS verification method.",
+ "approved_by": "human-approver-01",
+ "recorded_utc": "2026-11-08T10:39:14Z",
+ "recorded_utc_note": "time this record was written, immediately after the operator gave the statement in writing and after the pre-production checks passed; it is not backdated",
+ "artifact_reviewed": {
+  "amendment": "preregistration/amendment_01_ots_verification_method.json",
+  "amendment_sha256": "c795f7eccabaefd4b8e74df2b5087731936bd1c83cea5bc5db779e083bd3eb97",
+  "amendment_body_sha256": "e1f2c4c86b39a59be86879d00f48aad5ac0f3730bc4fd0db4c2de6b44bb9f29e"
+ },
+ "bound_to": {
+  "preregistration_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+  "design_sha256": "409e7dcb53c5eba7a623a584ec302f2aa3a26e84b3efcf9e6c021e5629fde5c5",
+  "proof_sha256": "852fe259c326ed725018582f8e3fe979b94de66ec59463f012758500b711e986",
+  "java_verification_record_sha256": "64d15d644102f3b8a809e84012f92fd345b4edbb9020255192c5aa14292d988b",
+  "repository_head": "3535545455fd4bfba4e92ac04e102031e891be20"
+ },
+ "approval_history": [
+  {
+   "what": "approval to pursue the method (Option 1)",
+   "where": "approval entry inside the amendment",
+   "approved_utc_recorded": "2026-11-08T08:37:30Z",
+   "statement": "Proceed with Option 1. I approve pursuing the Java OTS explorer-assisted verification plus independent second-endpoint raw-header corroboration.",
+   "note": "given before the amendment file existed; not a review of the final artifact"
+  },
+  {
+   "what": "approval of the final amendment artifact for production",
+   "where": "this record",
+   "note": "given after commit 3535545; the amendment file is unchanged (its hash is bound by the Java verification record)"
+  }
+ ],
+ "pre_production_checks": "26/26 PASS (amendment, preregistration, design, proof, Java record, sources, tables, checkpoint, gate)"
+}

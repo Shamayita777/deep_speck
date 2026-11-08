@@ -1,0 +1,4 @@
+cwd: /Users/oishimoitra/Documents/deep_speck
+started_utc: 2026-11-08T10:39:27Z
+git_head: 3535545455fd4bfba4e92ac04e102031e891be20
+command: caffeinate -i /Users/oishimoitra/.venvs/gohr-tf221-validation-20261031/bin/python -m audit.cryptography.experiments.ce5.runner production audit/cryptography/experiments/ce5/evidence/20261108T103927Z --tables audit/cryptography/experiments/ce5/tables --confirm RUN_GCE5_PRODUCTION --prereg audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json --prereg-sha256 0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d --amendment audit/cryptography/experiments/ce5/preregistration/amendment_01_ots_verification_method.json --amendment-sha256 c795f7eccabaefd4b8e74df2b5087731936bd1c83cea5bc5db779e083bd3eb97

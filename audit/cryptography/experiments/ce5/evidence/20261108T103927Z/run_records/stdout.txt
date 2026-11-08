@@ -1,0 +1,212 @@
+  gate: accuracy 0.93030 CP95 {'accuracy': [0.9291752591298038, 0.9314122497775145], 'tpr': [0.9067364958985958, 0.9103197679412979], 'tnr': [0.950717702590947, 0.953375998912846]} -> PASS
+  rep00: delta=+0.4084 (100.0s)
+  rep01: delta=+0.4100 (98.2s)
+  rep02: delta=+0.4111 (99.4s)
+  rep03: delta=+0.4094 (98.1s)
+  rep04: delta=+0.4108 (102.8s)
+  rep05: delta=+0.4092 (98.3s)
+  rep06: delta=+0.4078 (99.2s)
+  rep07: delta=+0.4097 (98.5s)
+  rep08: delta=+0.4095 (98.4s)
+  rep09: delta=+0.4106 (99.1s)
+  rep10: delta=+0.4085 (98.2s)
+  rep11: delta=+0.4102 (98.3s)
+  rep12: delta=+0.4084 (97.7s)
+  rep13: delta=+0.4091 (97.7s)
+  rep14: delta=+0.4100 (97.5s)
+  rep15: delta=+0.4112 (101.1s)
+  rep16: delta=+0.4100 (98.4s)
+  rep17: delta=+0.4086 (98.4s)
+  rep18: delta=+0.4077 (98.1s)
+  rep19: delta=+0.4105 (99.3s)
+{
+  "design_sha256": "409e7dcb53c5eba7a623a584ec302f2aa3a26e84b3efcf9e6c021e5629fde5c5",
+  "preregistration_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+  "started_utc": "2026-11-08T10:39:35Z",
+  "environment": {
+    "python": "3.11.14",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1",
+    "platform": "macOS-13.5-arm64-arm-64bit",
+    "machine": "arm64",
+    "cpu_count": 8
+  },
+  "model_binding": {
+    "path": "audit/cryptography/Archive/best5depth10.h5",
+    "sha256": "256eb4a5ba93414f0a46ffd498d6121a03705698ac2a81764c2375207c5d6737",
+    "properties": {
+      "conv1d_layers": 21,
+      "residual_merges": 10,
+      "l2_values": [
+        1e-05
+      ],
+      "input_shape": [
+        null,
+        64
+      ],
+      "output_shape": [
+        null,
+        1
+      ]
+    },
+    "realized_depth": 10,
+    "behavioural_binding": {
+      "accuracy_by_rounds": {
+        "5": 0.93008,
+        "6": 0.49917,
+        "7": 0.49417
+      },
+      "declared_rounds": 5,
+      "differential": [
+        64,
+        0
+      ],
+      "gohr_reported_accuracy": 0.9291,
+      "verdict": "PASS"
+    }
+  },
+  "available_memory_bytes": 2341732352,
+  "algorithm": "P1 Algorithms 1 and 2 (p. 32), literal 2^12 candidate loop, strict threshold",
+  "preregistration_path": "audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json",
+  "source_integrity": {
+    "decision": "PASS",
+    "files": 13,
+    "dependencies": 3
+  },
+  "source_manifest": {
+    "code_sha256": {
+      "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "akr.py": "adb4875d67a521745e37d03ed994a2f36566b0c14227cb35d418b4c322b8c75d",
+      "analysis.py": "27630b36abd91a4c58afbb3c62ae5f69439ce1bf7047de2467ef7d72b03fe716",
+      "design.py": "82ea2f10dce2851e3a56a50bb3694da3075737755178f373064d28c3b1b8eca8",
+      "reference.py": "1fdb23029e04f174747299254910516ddb525c6429ca2ca40f9d92975cbbc5ff",
+      "runner.py": "afb83cc98a66536b8e8d44f13f1a48aebd4e7f661b5aef35b196c0f170e69ff5",
+      "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests/test_crypto.py": "12082d6a06b52b5fbaae2f06c0c19a60091d64b763b6be63d5ad66234edeba8c",
+      "tests/test_ots_amendment.py": "d56b30a41de78a01c2cc7b5c0527c9fe2001c38e4fefdbd62bd2a9230779e856",
+      "tests/test_pipeline.py": "26b5e0172f04f6013f95b8e5e35823c670ac11a07ac72522d340f9860003aeb7",
+      "tests/test_statistics.py": "4b9129ad04f444726e16bade48d6f9dbe85bdedfc073c738f0c357342beb06b5",
+      "validation/r3_1_broad_suite_20261105/clone_conftest.py": "09e1881bb7809d566f8ed92d078de5b980429ff3222ed03456233aeed6f9ac79",
+      "verify.py": "29dc3a00fc36a5aa1890089518fad491c95ad3ccaac4e5a06e6d698d79ee72a1"
+    },
+    "frozen_dependencies_sha256": {
+      "ce234/production.py": "46d269cfd5ccfea7ad59443aee49c87384b0cb4266fed78082808ef066e661c9",
+      "ce234/frozen_plan.py": "4280d8eddb9881421787116fc3564930083e2903db188c6446cdd7d98bbeb585",
+      "gohr/speck.py": "e4f2324f7900d7d13dcb28f98188b5c045d4f6b723147a26ac2d39211d7a8805"
+    }
+  },
+  "amendment_sha256": "c795f7eccabaefd4b8e74df2b5087731936bd1c83cea5bc5db779e083bd3eb97",
+  "ots_attestations": {
+    "bitcoin": 2,
+    "pending": 4
+  },
+  "tables": {
+    "akr": "09ff9388871fc6e41d2099d3a41619430528e49ce78c6ee5e919531f2cf54be6",
+    "lr": "2ba703dbfaf4e5d5bfb0f1c83135dbae890dd816725ce1a791187a97f9d91e48"
+  },
+  "table_validation": {
+    "record": "validation/r3_final_20261105_tablecheck_v2/table_validation.json",
+    "sha256": "28808b8a5f34831d4a075b26019b84c4ba9eb2c051f1c6de77abc3dcc72099cf",
+    "decision": "PASS"
+  },
+  "gate": {
+    "accuracy": 0.9303,
+    "tpr": 0.90854,
+    "tnr": 0.95206,
+    "n": 200000,
+    "cp95": {
+      "accuracy": [
+        0.9291752591298038,
+        0.9314122497775145
+      ],
+      "tpr": [
+        0.9067364958985958,
+        0.9103197679412979
+      ],
+      "tnr": [
+        0.950717702590947,
+        0.953375998912846
+      ]
+    },
+    "confusion": {
+      "tp": 90854,
+      "fn": 9146,
+      "tn": 95206,
+      "fp": 4794
+    },
+    "acceptance": {
+      "accuracy": [
+        0.9248,
+        0.9348
+      ],
+      "tpr": [
+        0.8976,
+        0.9176
+      ],
+      "tnr": [
+        0.9422,
+        0.9622
+      ],
+      "separation_lower": 0.9204
+    },
+    "reproduced": true,
+    "separated": true,
+    "decision": "PASS",
+    "raw_sha256": "7864dfa784fdf28cd31ac74c428c037aa81400bb42f84d79354433e91c851fee"
+  },
+  "analysis": {
+    "decision": "DISTRIBUTION_GREATER",
+    "qualifier": null,
+    "n_valid": 20,
+    "primary": {
+      "deltas": [
+        0.40838359559849446,
+        0.40999315457648167,
+        0.411111114318212,
+        0.4093670495748294,
+        0.4107885231328958,
+        0.40921671564078466,
+        0.407774615653391,
+        0.409688208650858,
+        0.40949247932975763,
+        0.41057688507372947,
+        0.40848004615577915,
+        0.41019383667010323,
+        0.40837669368281904,
+        0.4091411780600853,
+        0.410031459060497,
+        0.4112353045043471,
+        0.40995198768666485,
+        0.4085969717849365,
+        0.40769242562818486,
+        0.4105088968708799
+      ],
+      "interval": {
+        "lower": 0.4085969717849365,
+        "upper": 0.41019383667010323,
+        "coverage": 0.9586105346679688,
+        "k": 6,
+        "R": 20,
+        "median": 0.4095903439903078
+      },
+      "margin": 0.1,
+      "test": "exact binomial sign test",
+      "alternative": "two-sided",
+      "n_effective": 20,
+      "n_positive": 20,
+      "n_negative": 0,
+      "p_value": 1.9073486328125e-06,
+      "smallest_attainable_p": 1.9073486328125e-06
+    },
+    "secondary": {
+      "delta_matched": {
+        "interval": {
+          "lower": 0.4037345189475259,
+          "upper": 0.40501276238291095,
+          "coverage": 0.9586105346679688,
+          "k": 6,
+          "R": 20,
+          "median": 0.4043757910400254
+        },
+        "outcome": "DISTRIBUTION_GREATER",
+        "
