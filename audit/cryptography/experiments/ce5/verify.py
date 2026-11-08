@@ -142,7 +142,8 @@ def _bits(words) -> np.ndarray:
 
 def verify(out: Path, tdir: Path, *, seed: int = 0, model_check: bool = False,
            table_sample: int = 100_000, subsample: int = SUBSAMPLE, prereg_path: Path | None = None,
-           checkpoint: Path | None = None, source_root: Path | None = None) -> dict:
+           checkpoint: Path | None = None, source_root: Path | None = None,
+           amendment_path: Path | None = None) -> dict:
     man = json.loads((out / "manifest.json").read_text())
     d = DS.design()
     problems, checks = [], {}
@@ -165,12 +166,22 @@ def verify(out: Path, tdir: Path, *, seed: int = 0, model_check: bool = False,
         proof = Path(str(prereg) + ".ots")
         need(DS.ots_digest(proof) == _sha(prereg), "timestamp proof does not commit to the preregistration")
         need(DS.ots_attestations(proof)["bitcoin"] >= 1, "timestamp proof has no Bitcoin attestation")
-        ok_ots, why_ots = DS.ots_verification_ok(Path(str(proof) + ".verification.json"), prereg)
+        amendment = None
+        if amendment_path is None:
+            need(man.get("amendment_sha256") is None, "manifest names an amendment but none was supplied")
+            ok_ots, why_ots = DS.ots_verification_ok(Path(str(proof) + ".verification.json"), prereg)
+        else:   # amendment 01: the Java OTS record replaces the ots verify record
+            asha = _sha(amendment_path)
+            amendment = json.loads(Path(amendment_path).read_text())
+            need(man.get("amendment_sha256") == asha, "manifest was not made under this amendment")
+            ok_ots, why_ots = DS.amendment_ok(amendment, prereg)
+            if ok_ots:
+                ok_ots, why_ots = DS.java_ots_verification_ok(Path(str(proof) + DS.JAVA_EVIDENCE_SUFFIX), prereg, asha)
         need(ok_ots, f"ots verify record: {why_ots}")
     need(man.get("tables") == {"akr": d["baseline_D"]["table_sha256"], "lr": d["secondary_comparator_LR"]["table_sha256"]},
          "manifest tables are not the registered tables")
     if prereg.exists():
-        reg = json.loads(prereg.read_text()).get("registered_identities", {})
+        reg = (amendment or json.loads(prereg.read_text())).get("registered_identities", {})
         src = Path(source_root or Path(__file__).resolve().parent)
         on_disk = {str(p.relative_to(src)): _sha(p) for p in sorted(src.rglob("*.py"))
                    if "historical" not in p.relative_to(src).parts and "__pycache__" not in p.parts}
@@ -524,8 +535,9 @@ def main(argv=None) -> int:
     ap.add_argument("--tables", type=Path, required=True)
     ap.add_argument("--prereg", type=Path, required=True, help="path of the approved preregistration")
     ap.add_argument("--model", action="store_true", help="recompute N for a subsample from the checkpoint")
+    ap.add_argument("--amendment", type=Path, help="approved CE5 amendment the production ran under")
     a = ap.parse_args(argv)
-    r = verify(a.out, a.tables, model_check=a.model, prereg_path=a.prereg)
+    r = verify(a.out, a.tables, model_check=a.model, prereg_path=a.prereg, amendment_path=a.amendment)
     print(json.dumps({k: v for k, v in r.items() if k != "checks"}, indent=2)[:4000])
     return 0 if r["verified"] else 1
 

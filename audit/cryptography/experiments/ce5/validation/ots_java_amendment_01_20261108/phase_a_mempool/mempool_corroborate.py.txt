@@ -1,0 +1,45 @@
+"""Fetch raw 80-byte headers for the attested heights from mempool.space and check them locally."""
+import hashlib, json, os, re, ssl, sys, urllib.request, datetime
+
+import certifi
+
+OUT, JAVA_STDERR, EXPECTED = sys.argv[1:4]
+API = "https://mempool.space/api"
+ctx = ssl.create_default_context(cafile=certifi.where())
+java = {bh: {"merkle_root": mr, "time": int(t)}
+        for mr, bh, t in re.findall(r"BlockHeader\{merkleroot='(\w+)', blockHash='(\w+)', time='(\d+)'\}", open(JAVA_STDERR).read())}
+heights = {int(h): bh for h, bh in re.findall(r"blockstream\.info/api/block-height/(\d+) (\w+)", open(JAVA_STDERR).read())}
+expected = {b["height"]: b["merkle_root_expected"] for b in json.load(open(EXPECTED))["bitcoin"]}
+
+
+def get(path):
+    with urllib.request.urlopen(API + path, timeout=30, context=ctx) as r:
+        body = r.read()
+    open(os.path.join(OUT, path.strip("/").replace("/", "_") + ".raw"), "xb").write(body)
+    return body.decode().strip()
+
+
+res = {"endpoint": API, "retrieved_utc": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+       "blocks": []}
+ok = set(expected) == set(heights)
+for height in sorted(expected):
+    bh = get(f"/block-height/{height}")
+    hdr_hex = get(f"/block/{bh}/header")
+    hdr = bytes.fromhex(hdr_hex)
+    computed = hashlib.sha256(hashlib.sha256(hdr).digest()).digest()[::-1].hex()
+    merkle = hdr[36:68][::-1].hex()
+    t = int.from_bytes(hdr[68:72], "little")
+    j = java.get(heights.get(height), {})
+    b = {"height": height, "block_hash_reported": bh, "header_hex": hdr_hex, "header_len": len(hdr),
+         "sha256d_header": computed, "header_hash_matches": computed == bh,
+         "merkle_root_from_header": merkle, "header_time": t,
+         "merkle_matches_proof_commitment": merkle == expected[height],
+         "java_block_hash": heights.get(height), "java_merkle_root": j.get("merkle_root"), "java_time": j.get("time"),
+         "agrees_with_java_blockstream": heights.get(height) == bh and j.get("merkle_root") == merkle and j.get("time") == t}
+    b["ok"] = len(hdr) == 80 and b["header_hash_matches"] and b["merkle_matches_proof_commitment"] and b["agrees_with_java_blockstream"]
+    ok &= b["ok"]
+    res["blocks"].append(b)
+res["all_ok"] = ok
+json.dump(res, open(os.path.join(OUT, "mempool_corroboration.json"), "x"), indent=1)
+print(json.dumps(res, indent=1))
+sys.exit(0 if ok else 1)

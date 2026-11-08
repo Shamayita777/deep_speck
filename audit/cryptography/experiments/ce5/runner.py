@@ -327,6 +327,63 @@ def record_ots_verification(prereg_path: Path, *, ots_bin: str = "ots", out: Pat
     return rec
 
 
+def _https_get(url: str, timeout: int = 120) -> str:
+    import ssl
+    import urllib.request
+    try:
+        import certifi
+        ctx = ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        ctx = ssl.create_default_context()
+    with urllib.request.urlopen(url, timeout=timeout, context=ctx) as r:
+        return r.read().decode()
+
+
+def record_java_ots_verification(prereg_path: Path, amendment_sha256: str, *, java: str, jar: Path,
+                                 out: Path | None = None, fetch=_https_get, timeout: int = 900) -> dict:
+    """Amendment 01 recorder. Run the pinned Java OpenTimestamps CLI
+    (`java -jar OtsCli.jar -v verify -f <prereg> <prereg>.ots`), then fetch the
+    hash and raw header of every Bitcoin-attested block from the second
+    endpoint, and record everything raw: command, exit code, stdout, stderr,
+    runtime and CLI versions, jar hash, each response body, and the file and
+    proof hashes before and after. Judges nothing (java_ots_verification_ok
+    does); reads the proof only; writes only the new record."""
+    import subprocess
+    prereg_path = Path(prereg_path)
+    proof = Path(str(prereg_path) + ".ots")
+    out = Path(out) if out else Path(str(proof) + DS.JAVA_EVIDENCE_SUFFIX)
+    require_fresh(out)
+    before = {"file_sha256": sha256_file(prereg_path), "proof_sha256": sha256_file(proof)}
+    version = subprocess.run([java, "-version"], capture_output=True, text=True, timeout=60)
+    cli_version = subprocess.run([java, "-jar", str(jar), "-V"], capture_output=True, text=True, timeout=60)
+    cmd = [java, "-jar", str(jar), "-v", "verify", "-f", str(prereg_path), str(proof)]
+    started = utc()
+    p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    java_rec = {"source_repository": DS.JAVA_OTS_REPOSITORY, "source_commit": DS.JAVA_OTS_COMMIT,
+                "jar": str(jar), "jar_sha256": sha256_file(Path(jar)),
+                "runtime_version_output": version.stdout + version.stderr,
+                "cli_version_output": cli_version.stdout + cli_version.stderr,
+                "endpoint": DS.JAVA_ENDPOINT, "command": cmd, "started_utc": started, "finished_utc": utc(),
+                "exit_code": p.returncode, "stdout": p.stdout, "stderr": p.stderr}
+    responses = []
+    for height, _ in DS.ots_bitcoin_commitments(proof):
+        path = f"/block-height/{height}"
+        responses.append({"path": path, "requested_utc": utc(), "body": fetch(DS.SECOND_ENDPOINT + path)})
+        path = f"/block/{responses[-1]['body'].strip()}/header"
+        responses.append({"path": path, "requested_utc": utc(), "body": fetch(DS.SECOND_ENDPOINT + path)})
+    after = {"file_sha256": sha256_file(prereg_path), "proof_sha256": sha256_file(proof)}
+    if after != before:
+        raise SystemExit("Java OTS verification changed the file or proof; record not written")
+    rec = {"schema": DS.JAVA_EVIDENCE_SCHEMA, "method": DS.JAVA_METHOD_NAME, "amendment_id": DS.AMENDMENT_ID,
+           "amendment_sha256": amendment_sha256, "created_utc": utc(),
+           "not_equivalent_to": ["local Bitcoin Core consensus verification",
+                                 "a two-endpoint check inside the Java CLI (it queries one endpoint)",
+                                 "opentimestamps-client (Python) 'ots verify'"],
+           "java": java_rec, "second_endpoint": {"base": DS.SECOND_ENDPOINT, "responses": responses}, **before}
+    write_json_new(out, rec)
+    return rec
+
+
 # ---------------------------------------------------------------- non-confirmatory stages
 
 def validate_tables(out: Path, tdir: Path, *, seed: int = 20261106, n_sample: int = 100_000) -> dict:
@@ -521,10 +578,12 @@ def source_manifest(source_root: Path = SOURCE_ROOT, crypto_root: Path = CRYPTO_
                                            if (Path(crypto_root) / f).exists()}}
 
 
-def source_integrity(prereg: dict, *, source_root: Path = SOURCE_ROOT, crypto_root: Path = CRYPTO_ROOT) -> dict:
+def source_integrity(prereg: dict, *, source_root: Path = SOURCE_ROOT, crypto_root: Path = CRYPTO_ROOT,
+                     amendment: dict | None = None) -> dict:
     """The CE5 sources and frozen dependencies on disk must equal the manifest
-    registered in the preregistration: same file set, same hashes."""
-    reg = prereg.get("registered_identities", {})
+    registered in the preregistration (or, under an approved amendment, the
+    manifest that amendment registers): same file set, same hashes."""
+    reg = (amendment if amendment is not None else prereg).get("registered_identities", {})
     want_code, want_dep = reg.get("code_sha256"), reg.get("frozen_dependencies_sha256")
     if not want_code or not want_dep:
         raise SystemExit("production refused: the preregistration registers no source manifest")
@@ -558,17 +617,36 @@ def load_approved_preregistration(prereg_path: Path, prereg_sha256: str) -> dict
     return DS.load_preregistration(prereg_path)
 
 
+def load_amendment(amendment_path: Path | None, amendment_sha256: str | None) -> dict | None:
+    """Load exactly the amendment file identified by path and SHA-256, or None
+    when neither is given; one without the other refuses."""
+    if not amendment_path and not amendment_sha256:
+        return None
+    if not amendment_path or not amendment_sha256:
+        raise SystemExit("production refused: an amendment needs both its path and its SHA-256")
+    amendment_path = Path(amendment_path)
+    if not amendment_path.is_file():
+        raise SystemExit(f"production refused: amendment {amendment_path} does not exist")
+    actual = sha256_file(amendment_path)
+    if actual != amendment_sha256.lower():
+        raise SystemExit(f"production refused: amendment SHA-256 {actual} is not {amendment_sha256}")
+    return json.loads(amendment_path.read_text())
+
+
 def production(out: Path, tdir: Path, token: str | None, *, prereg_path: Path | None = None,
                prereg_sha256: str | None = None, binder=bind_model, replicate=one_replicate,
-               memory_probe=available_memory_bytes, source_root: Path = SOURCE_ROOT) -> dict:
+               memory_probe=available_memory_bytes, source_root: Path = SOURCE_ROOT,
+               amendment_path: Path | None = None, amendment_sha256: str | None = None) -> dict:
     prereg = load_approved_preregistration(prereg_path, prereg_sha256)
-    ok, why = DS.production_authorisation(prereg, token, prereg_path=prereg_path)
+    amendment = load_amendment(amendment_path, amendment_sha256)
+    ok, why = DS.production_authorisation(prereg, token, prereg_path=prereg_path, amendment=amendment,
+                                          amendment_sha256=amendment_sha256 and amendment_sha256.lower())
     if not ok:
         raise SystemExit(f"production refused: {why}")
     d = prereg["design"]
     if d != DS.design():
         raise SystemExit("production refused: preregistration design differs from design.py")
-    integrity = source_integrity(prereg, source_root=source_root)
+    integrity = source_integrity(prereg, source_root=source_root, amendment=amendment)
     out.mkdir(parents=True, exist_ok=True)
     man_path = out / "manifest.json"
     man = json.loads(man_path.read_text()) if man_path.exists() else None
@@ -587,7 +665,8 @@ def production(out: Path, tdir: Path, token: str | None, *, prereg_path: Path | 
                "started_utc": utc(), "environment": environment(), "model_binding": binding,
                "available_memory_bytes": avail, "algorithm": A.ALGORITHM,
                "preregistration_path": str(prereg_path), "source_integrity": integrity,
-               "source_manifest": prereg["registered_identities"],
+               "source_manifest": (amendment or prereg)["registered_identities"],
+               "amendment_sha256": amendment_sha256 and amendment_sha256.lower(),
                "ots_attestations": DS.ots_attestations(Path(str(prereg_path) + ".ots")),
                "tables": {k: v[2] for k, v in tables.items()}, "table_validation": validation, "replicates": {}}
         write_json(man_path, man)
@@ -641,14 +720,30 @@ def production(out: Path, tdir: Path, token: str | None, *, prereg_path: Path | 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="ce5")
-    ap.add_argument("stage", choices=["tables", "tablecheck", "benchmark", "variability", "calibrate", "production"])
+    ap.add_argument("stage", choices=["tables", "tablecheck", "benchmark", "variability", "calibrate", "production",
+                                      "javaots"])
     ap.add_argument("out", type=Path)
     ap.add_argument("--tables", type=Path)
     ap.add_argument("--table-pairs", type=int, default=10_000_000)
     ap.add_argument("--confirm")
     ap.add_argument("--prereg", type=Path, help="production: path of the approved preregistration (required)")
     ap.add_argument("--prereg-sha256", help="production: approved SHA-256 of that file (required)")
+    ap.add_argument("--amendment", type=Path, help="production, javaots: path of an approved CE5 amendment")
+    ap.add_argument("--amendment-sha256", help="production, javaots: SHA-256 of that amendment file")
+    ap.add_argument("--java", help="javaots: java executable of the pinned runtime")
+    ap.add_argument("--jar", type=Path, help="javaots: OtsCli.jar built from the pinned commit")
     a = ap.parse_args(argv)
+    if a.stage == "javaots":
+        amendment = load_amendment(a.amendment, a.amendment_sha256)
+        if amendment is None:
+            raise SystemExit("javaots needs --amendment and --amendment-sha256")
+        ok, why = DS.amendment_ok(amendment, a.prereg)
+        if not ok:
+            raise SystemExit(f"javaots refused: {why}")
+        record_java_ots_verification(a.prereg, a.amendment_sha256.lower(), java=a.java, jar=a.jar, out=a.out)
+        ok, why = DS.java_ots_verification_ok(a.out, a.prereg, a.amendment_sha256.lower())
+        print(json.dumps({"record": str(a.out), "sha256": sha256_file(a.out), "verified": ok, "reason": why}, indent=2))
+        return 0 if ok else 1
     if a.stage == "tables":
         r = build_tables(a.out, a.table_pairs)
     elif a.stage == "tablecheck":
@@ -662,7 +757,8 @@ def main(argv=None) -> int:
     elif a.stage == "calibrate":
         r = calibrate(a.out, a.tables, int(DS.design()["replicate"]["real_pairs_per_replicate"]))
     else:
-        r = production(a.out, a.tables, a.confirm, prereg_path=a.prereg, prereg_sha256=a.prereg_sha256)
+        r = production(a.out, a.tables, a.confirm, prereg_path=a.prereg, prereg_sha256=a.prereg_sha256,
+                       amendment_path=a.amendment, amendment_sha256=a.amendment_sha256)
     print(json.dumps({k: v for k, v in r.items() if k != "replicates"}, indent=2, default=str)[:6000])
     return 0
 

@@ -1,0 +1,39 @@
+{
+ "endpoint": "https://mempool.space/api",
+ "retrieved_utc": "2026-11-08T08:21:03Z",
+ "blocks": [
+  {
+   "height": 974769,
+   "block_hash_reported": "000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae",
+   "header_hex": "0000fc24646c6255b166fa283a7545f8440d4efb8482ce917f4301000000000000000000ab522eb1741c43b488ecca7d2be1a6cd0e9f1574d2447838a53d9cae6af1c7b8a370ed6aace50117403167a8",
+   "header_len": 80,
+   "sha256d_header": "000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae",
+   "header_hash_matches": true,
+   "merkle_root_from_header": "b8c7f16aae9c3da5387844d274159f0ecda6e12b7dcaec88b4431c74b12e52ab",
+   "header_time": 1793945763,
+   "merkle_matches_proof_commitment": true,
+   "java_block_hash": "000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae",
+   "java_merkle_root": "b8c7f16aae9c3da5387844d274159f0ecda6e12b7dcaec88b4431c74b12e52ab",
+   "java_time": 1793945763,
+   "agrees_with_java_blockstream": true,
+   "ok": true
+  },
+  {
+   "height": 974770,
+   "block_hash_reported": "00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe",
+   "header_hex": "00e04424ae16aae82112459dd205cf4e6af7c94e9e0f8ed5653901000000000000000000ea0430687d3c4498476a2ac8d09a36c5733439b7cce838b360a8faa405bb99cf4175ed6aace5011778a8270c",
+   "header_len": 80,
+   "sha256d_header": "00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe",
+   "header_hash_matches": true,
+   "merkle_root_from_header": "cf99bb05a4faa860b338e8ccb7393473c5369ad0c82a6a4798443c7d683004ea",
+   "header_time": 1793946945,
+   "merkle_matches_proof_commitment": true,
+   "java_block_hash": "00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe",
+   "java_merkle_root": "cf99bb05a4faa860b338e8ccb7393473c5369ad0c82a6a4798443c7d683004ea",
+   "java_time": 1793946945,
+   "agrees_with_java_blockstream": true,
+   "ok": true
+  }
+ ],
+ "all_ok": true
+}

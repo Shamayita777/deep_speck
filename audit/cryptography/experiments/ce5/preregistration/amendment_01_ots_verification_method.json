@@ -1,0 +1,147 @@
+{
+ "schema": "gohr-ce5-amendment-1",
+ "amendment_id": "CE5-AMENDMENT-01-OTS-VERIFICATION-METHOD",
+ "version": 1,
+ "title": "CE5 verification-method amendment: OpenTimestamps proof verification without a local Bitcoin node",
+ "amends": {
+  "preregistration": "preregistration/preregistration_409e7dcb_APPROVED.json",
+  "preregistration_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+  "design_sha256": "409e7dcb53c5eba7a623a584ec302f2aa3a26e84b3efcf9e6c021e5629fde5c5",
+  "proof": "preregistration/preregistration_409e7dcb_APPROVED.json.ots",
+  "proof_sha256": "852fe259c326ed725018582f8e3fe979b94de66ec59463f012758500b711e986",
+  "requirement_replaced": "OpenTimestamps proof at <--prereg file>.ots commits to this file and carries a Bitcoin attestation, and a successful ots verify run is recorded at <--prereg file>.ots.verification.json",
+  "replaced_by": "an amendment-01 Java OpenTimestamps record at <--prereg file>.ots.java_explorer_corroboration.json that design.java_ots_verification_ok accepts"
+ },
+ "reason": "No local Bitcoin node is available, so the registered 'ots verify' record cannot be produced; the registered gate refuses production (gate_before_amendment.json).",
+ "unchanged": [
+  "the design (hash 409e7dcb53c5eba7a623a584ec302f2aa3a26e84b3efcf9e6c021e5629fde5c5) and every statistical rule",
+  "the approved preregistration file and its upgraded proof (bytes and hashes above)",
+  "every other production check: approval, confirm token, proof digest, Bitcoin attestation, design equals design.py, source integrity, table validation, memory, checkpoint binding",
+  "the registered gate path: without --amendment, production still requires the ots verify record"
+ ],
+ "method": {
+  "name": "Java OpenTimestamps explorer-assisted verification plus independent second-endpoint raw-header corroboration",
+  "java_repository": "https://github.com/opentimestamps/java-opentimestamps",
+  "java_commit": "81863915ea218354e9c84cae0c522b85d1dc9f91",
+  "java_jar_sha256": "9e85a795ebfe9e0cedef7aa86f5945f9d8261e9d919076290ff15933f3535c1a",
+  "java_runtime": "Temurin-11.0.33+10",
+  "java_endpoint": "https://blockstream.info/api",
+  "second_endpoint": "https://mempool.space/api",
+  "evidence_schema": "gohr-ce5-java-ots-corroboration-1",
+  "evidence_record": "<--prereg file>.ots.java_explorer_corroboration.json",
+  "procedure": [
+   "run the pinned Java CLI: java -jar OtsCli.jar -v verify -f <prereg> <prereg>.ots (runner stage 'javaots'); with no bitcoin.conf it looks up each attested block at the Java endpoint",
+   "fetch /block-height/<h> and /block/<hash>/header for every Bitcoin attestation from the second endpoint",
+   "record all of it raw (runner.record_java_ots_verification); the recorder judges nothing",
+   "the gate (design.java_ots_verification_ok) recomputes from the record and the proof: proof operation tree evaluated from the file digest to each attested Merkle root; Java success line for the earliest height, exit code 0 and no failure output; Java endpoint block hash and Merkle root per height; second-endpoint header is 80 bytes, double-SHA-256 equals the same block hash, Merkle root equals the commitment, time equals the Java endpoint's"
+  ],
+  "is_not": [
+   "local Bitcoin Core consensus verification: no node validates the chain or the headers' proof of work against it; block validity is taken from two public explorers",
+   "a two-endpoint implementation inside the Java CLI: java-opentimestamps 8186391 (upstream HEAD on 2026-11-08) queries one Esplora endpoint (https://blockstream.info/api); its README still describes a two-endpoint rule whose code (MultiInsight) was removed in commit 91407bb (2020-04-26). The second endpoint is queried and checked by CE5 code, not by the Java CLI",
+   "opentimestamps-client (Python) 'ots verify'"
+  ],
+  "java_exit_code_caveat": "the Java CLI catches verification exceptions and exits 0 (phase_a_java_negative_wrong_file); exit code 0 is required but never sufficient"
+ },
+ "compatibility_demonstration": {
+  "directory": "validation/ots_java_amendment_01_20261108",
+  "java_verify": {
+   "verify.stdout": "46895496387347005d3c738d695aa60468f3fb6e7225a1bccfe9a0fde581f3f2",
+   "verify.stderr": "12ffe110f550ea9ce3dc84909d1ce7dd95792e1275dcf318c8947e6d539bb748",
+   "verify.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+   "sha_before.txt": "733a49be8a908e981348ab5c50c1e0e4cac835e4f704b4dc03e5c834c8411e58",
+   "sha_after.txt": "733a49be8a908e981348ab5c50c1e0e4cac835e4f704b4dc03e5c834c8411e58",
+   "java_version.txt": "d275680204b375c8b4bb899e13564d7d548cd189d454dd455eef484bc5dabd2d",
+   "version.stdout": "2058774757cdd364f3219c6a589388ef23cf3969c3713a8f0035cf7c3d0468ac"
+  },
+  "second_endpoint": {
+   "block-height_974769.raw": "0f872217288299de270fadf797a7c4f14e0069620d9e13835a885fdd0df68110",
+   "block-height_974770.raw": "6f779ad50d314a3887f56c27976644bd6381ad270c6e95cf3d2934a3c691cf3f",
+   "block_00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe_header.raw": "a9198d011e3de82fe748c3ed51ec4e764f3a05f0d31b287e62bb1c4698e94fc2",
+   "block_000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae_header.raw": "ff4b4cef877be3812b58cb430168310f092ce6b5763edbef9afb4fec8726468a",
+   "mempool_corroborate.py.txt": "1ddc8a3ac2c9113370d1107caca1cbbdcf1936f46eeda4b50dc4b4635e19a0d0",
+   "mempool_corroboration.json": "f58d32fcd5c6afc255184f7a682234f98a731a1dd901f60b6076de23bf28e273"
+  },
+  "java_negative_wrong_file": {
+   "README.txt": "d64c17378f4392ce70ebf487d625b387ed1caa85757049af122c80cbdd5c877c",
+   "inputs.sha256": "a29498ec9e59a091bc2344b9ae55bab8f69189191f0b25989259bb672cdeb789",
+   "verify.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+   "verify.stderr": "680d47768dbfe50eb387efeab0906a9e5b47f6bcc982d5c6aa5a85f1b9fec111",
+   "verify.stdout": "e8c979fb522a4104b5ab54069e887791d7f061991d3e788e85fde859fa58d952"
+  },
+  "result": "Java CLI: 'Success! Bitcoin block 974769'; blocks 974769 and 974770 looked up at the Java endpoint; second-endpoint raw headers hash to the same block hashes and carry the proof's Merkle roots"
+ },
+ "build_provenance": {
+  "upstream_head_2026_11_08": "81863915ea218354e9c84cae0c522b85d1dc9f91",
+  "source_tree": "d110143bb2f540693e734cc7e1d51a5396c00c51",
+  "pom_version": "1.20",
+  "git_describe": "1.20-1-g8186391",
+  "source": "git archive of the commit into a fresh directory (no local changes)",
+  "jdk": "Eclipse Temurin 11.0.33+10 aarch64 macOS (Adoptium API), tarball sha256 6ef5b027206691439b2dcb2fc05adc13cc7f5b6e75a08fce8f75ee188adc7751, matched the published checksum",
+  "maven": "Apache Maven 3.9.9, tarball sha512 matched apache-maven-3.9.9-bin.tar.gz.sha512",
+  "command": "mvn -B -Dmaven.repo.local=<isolated> -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true package",
+  "tests_skipped_reason": "upstream tests contact live calendars; not part of the verification method",
+  "installation": "isolated under ~/ce5_runs/java_ots; nothing installed system-wide",
+  "files": {
+   "build/adoptium_jdk11.json": "e8533c632ad6a23d0aa20478ac0785e0a6fedbfa8d1ea17d674082e78d8aef69",
+   "build/apache-maven-3.9.9-bin.tar.gz.sha512": "5c29d4cd7d82c636a0eb64623f459887fd5381500f72c58f5a4cbeb59ed0a1bb",
+   "build/build_8186391.log": "95df9874d7eeb67a37b4d5af954d3993fb5f563b371f8a4478a207c1cbbf7933",
+   "build/jars.sha256": "406c569a210f4acceed57e6cd54091c17fd89b5b7a65bd56379ded92f7322710",
+   "build/maven_repository_jars.sha256": "2f178bd9701f1bd46031707a1f8f6a670357002e0db581876aa2bcc25a4b1b81",
+   "build/source_archive.sha256": "6aca416b3727c8f72a90f155d4e0246a6dee04c16f181ea8b510c79deceb13eb",
+   "build/toolchain.sha256": "dc3a416a3dd18342fb5c67c99ebdf158bfe3a39b72881078cf9be137303b208c"
+  }
+ },
+ "historical_evidence_preserved": {
+  "approved_preregistration": {
+   "preregistration/preregistration_409e7dcb_APPROVED.json": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d"
+  },
+  "upgraded_proof": {
+   "preregistration/preregistration_409e7dcb_APPROVED.json.ots": "852fe259c326ed725018582f8e3fe979b94de66ec59463f012758500b711e986"
+  },
+  "original_proof": {
+   "validation/ots_upgrade_409e7dcb_20261107/original_proof/preregistration_409e7dcb_APPROVED.json.ots": "c28ed1308feca26e2e9496bdc355f47958d320f4720a91230b417aee37f84326"
+  },
+  "upgrade_records": "validation/ots_upgrade_409e7dcb_20261107",
+  "original_recorder_and_gate": {
+   "runner.record_ots_verification and design.ots_verification_ok": "kept unchanged in source and still used without --amendment",
+   "runner.py sha256 at the approved registration": "a3b8e1ceeeb7adc1c2298b03601138918f8f599280813520f7ce90ae6ebbd7fe",
+   "design.py sha256 at the approved registration": "dda7a365f0eeeb2b2b6c821a782027b581398a4f454dabf3f8005f8a9ffabd6e"
+  },
+  "previous_gate_result": {
+   "validation/ots_java_amendment_01_20261108/gate_before_amendment.json": "fcd08b680bde82502dd92ec1e6ec98d8d6aeaede703248cc2eea0cb3e0e404a7",
+   "reason": "no recorded 'ots verify' run (preregistration_409e7dcb_APPROVED.json.ots.verification.json); an attestation tag in the proof is not verification"
+  },
+  "registered_identities_of_the_preregistration": "unchanged in the preregistration file; superseded for source integrity only when this amendment is supplied"
+ },
+ "registered_identities": {
+  "code_sha256": {
+   "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "akr.py": "adb4875d67a521745e37d03ed994a2f36566b0c14227cb35d418b4c322b8c75d",
+   "analysis.py": "27630b36abd91a4c58afbb3c62ae5f69439ce1bf7047de2467ef7d72b03fe716",
+   "design.py": "82ea2f10dce2851e3a56a50bb3694da3075737755178f373064d28c3b1b8eca8",
+   "reference.py": "1fdb23029e04f174747299254910516ddb525c6429ca2ca40f9d92975cbbc5ff",
+   "runner.py": "afb83cc98a66536b8e8d44f13f1a48aebd4e7f661b5aef35b196c0f170e69ff5",
+   "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "tests/test_crypto.py": "12082d6a06b52b5fbaae2f06c0c19a60091d64b763b6be63d5ad66234edeba8c",
+   "tests/test_ots_amendment.py": "d56b30a41de78a01c2cc7b5c0527c9fe2001c38e4fefdbd62bd2a9230779e856",
+   "tests/test_pipeline.py": "26b5e0172f04f6013f95b8e5e35823c670ac11a07ac72522d340f9860003aeb7",
+   "tests/test_statistics.py": "4b9129ad04f444726e16bade48d6f9dbe85bdedfc073c738f0c357342beb06b5",
+   "validation/r3_1_broad_suite_20261105/clone_conftest.py": "09e1881bb7809d566f8ed92d078de5b980429ff3222ed03456233aeed6f9ac79",
+   "verify.py": "29dc3a00fc36a5aa1890089518fad491c95ad3ccaac4e5a06e6d698d79ee72a1"
+  },
+  "frozen_dependencies_sha256": {
+   "ce234/production.py": "46d269cfd5ccfea7ad59443aee49c87384b0cb4266fed78082808ef066e661c9",
+   "ce234/frozen_plan.py": "4280d8eddb9881421787116fc3564930083e2903db188c6446cdd7d98bbeb585",
+   "gohr/speck.py": "e4f2324f7900d7d13dcb28f98188b5c045d4f6b723147a26ac2d39211d7a8805"
+  }
+ },
+ "approval": {
+  "status": "APPROVED",
+  "approved_by": "human-approver-01",
+  "approved_utc": "2026-11-08T08:37:30Z",
+  "approval_statement": "Proceed with Option 1. I approve pursuing the Java OTS explorer-assisted verification plus independent second-endpoint raw-header corroboration.",
+  "scope": "the method above and its implementation as an amendment of the active gate; given in writing before this file existed, conditional on the Java CLI first verifying this exact proof (phase A)",
+  "approved_utc_note": "approved_utc is when the written approval was recorded into this file, not a signature time",
+  "amendment_body_sha256": "e1f2c4c86b39a59be86879d00f48aad5ac0f3730bc4fd0db4c2de6b44bb9f29e"
+ }
+}

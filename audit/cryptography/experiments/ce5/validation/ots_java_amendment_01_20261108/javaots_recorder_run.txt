@@ -1,0 +1,7 @@
+{
+  "record": "audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json.ots.java_explorer_corroboration.json",
+  "sha256": "64d15d644102f3b8a809e84012f92fd345b4edbb9020255192c5aa14292d988b",
+  "verified": true,
+  "reason": "verified (amendment 01)"
+}
+exit 0

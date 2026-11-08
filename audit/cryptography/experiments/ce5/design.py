@@ -351,7 +351,12 @@ def ots_attestations(path: Path) -> dict:
     return {"bitcoin": b.count(OTS_BITCOIN_TAG), "pending": b.count(OTS_PENDING_TAG)}
 
 
-def production_authorisation(prereg: dict, token: str | None, *, prereg_path: Path | None = None) -> tuple[bool, str]:
+def production_authorisation(prereg: dict, token: str | None, *, prereg_path: Path | None = None,
+                             amendment: dict | None = None, amendment_sha256: str | None = None) -> tuple[bool, str]:
+    """Without an amendment, the registered gate. With amendment 01 (loaded by
+    runner.load_amendment from an explicit path and SHA-256), the recorded
+    `ots verify` requirement is replaced by java_ots_verification_ok; no other
+    check changes."""
     d = prereg.get("design", {})
     a = prereg.get("approval", {})
     if pending_items(d):
@@ -372,10 +377,17 @@ def production_authorisation(prereg: dict, token: str | None, *, prereg_path: Pa
         return False, "no OpenTimestamps proof matching the preregistration file"
     if ots_attestations(proof)["bitcoin"] < 1:
         return False, "OpenTimestamps proof has no Bitcoin attestation yet (run ots upgrade, then ots verify)"
-    ok, why = ots_verification_ok(Path(str(proof) + ".verification.json"), Path(prereg_path))
+    if amendment is None:
+        ok, why = ots_verification_ok(Path(str(proof) + ".verification.json"), Path(prereg_path))
+        if not ok:
+            return False, why
+        return True, "approved"
+    ok, why = amendment_ok(amendment, Path(prereg_path))
+    if ok:
+        ok, why = java_ots_verification_ok(Path(str(proof) + JAVA_EVIDENCE_SUFFIX), Path(prereg_path), amendment_sha256)
     if not ok:
         return False, why
-    return True, "approved"
+    return True, "approved under amendment 01"
 
 
 OTS_FAILURE_MARKERS = ("File does not match original", "Could not connect", "verification failed",
@@ -406,6 +418,212 @@ def ots_verification_ok(record: Path, prereg_path: Path) -> tuple[bool, str]:
     if r.get("file_sha256") != file_sha or r.get("proof_sha256") != proof_sha:
         return False, "recorded 'ots verify' was made on different file or proof bytes"
     return True, "verified"
+
+
+# ---------------------------------------------------------------- amendment 01: OTS verification method
+# Replaces only the "successful ots verify run" requirement. Everything else in
+# production_authorisation and runner.production is unchanged. The method is not
+# Bitcoin Core consensus verification (no node validates the chain; both block
+# headers are taken from public explorers) and not a two-endpoint check inside
+# the Java CLI (java-opentimestamps 8186391 queries the one Esplora endpoint
+# below; the second endpoint is queried and checked by CE5 itself).
+
+AMENDMENT_SCHEMA = "gohr-ce5-amendment-1"
+AMENDMENT_ID = "CE5-AMENDMENT-01-OTS-VERIFICATION-METHOD"
+JAVA_EVIDENCE_SCHEMA = "gohr-ce5-java-ots-corroboration-1"
+JAVA_EVIDENCE_SUFFIX = ".java_explorer_corroboration.json"   # next to the proof: <prereg>.ots + suffix
+JAVA_METHOD_NAME = ("Java OpenTimestamps explorer-assisted verification plus independent "
+                    "second-endpoint raw-header corroboration")
+JAVA_OTS_REPOSITORY = "https://github.com/opentimestamps/java-opentimestamps"
+JAVA_OTS_COMMIT = "81863915ea218354e9c84cae0c522b85d1dc9f91"
+JAVA_OTS_JAR_SHA256 = "9e85a795ebfe9e0cedef7aa86f5945f9d8261e9d919076290ff15933f3535c1a"
+JAVA_RUNTIME = "Temurin-11.0.33+10"
+JAVA_ENDPOINT = "https://blockstream.info/api"
+SECOND_ENDPOINT = "https://mempool.space/api"
+# The Java CLI catches verification exceptions and still exits 0, so its exit
+# code is necessary but never sufficient; these lines in its output refuse.
+JAVA_FAILURE_MARKERS = ("File does not match original", "verification failed", "Exception", "\tat ",
+                        "No valid file", "Invalid", "SEVERE", "Pending")
+
+
+def _varuint(b: bytes, i: int) -> tuple[int, int]:
+    v = shift = 0
+    while True:
+        if i >= len(b):
+            raise ValueError("truncated varuint")
+        c = b[i]
+        i += 1
+        v |= (c & 0x7F) << shift
+        if not c & 0x80:
+            return v, i
+        shift += 7
+
+
+def _varbytes(b: bytes, i: int, limit: int = 8192) -> tuple[bytes, int]:
+    n, i = _varuint(b, i)
+    if n > limit or i + n > len(b):
+        raise ValueError("bad varbytes length")
+    return b[i:i + n], i + n
+
+
+def ots_bitcoin_commitments(path: Path) -> list[tuple[int, str]]:
+    """Evaluate the proof's operation tree from its file digest and return
+    (height, Merkle root as an explorer displays it) for every Bitcoin
+    attestation. Only sha256, append and prepend are accepted; any other
+    operation, a truncated tree or trailing bytes raise ValueError."""
+    b = Path(path).read_bytes()
+    n = len(OTS_MAGIC)
+    if b[:n] != OTS_MAGIC or b[n:n + 2] != b"\x01\x08" or len(b) < n + 34:
+        raise ValueError("not a version-1 SHA-256 OpenTimestamps proof")
+    out: list[tuple[int, str]] = []
+
+    def node(msg: bytes, i: int) -> int:
+        tag, i = b[i], i + 1
+        while tag == 0xFF:
+            i = branch(msg, b[i], i + 1)
+            tag, i = b[i], i + 1
+        return branch(msg, tag, i)
+
+    def branch(msg: bytes, tag: int, i: int) -> int:
+        if tag == 0x00:
+            kind, i = b[i:i + 8], i + 8
+            payload, i = _varbytes(b, i)
+            if kind == OTS_BITCOIN_TAG:
+                height, j = _varuint(payload, 0)
+                if j != len(payload) or len(msg) != 32:
+                    raise ValueError("malformed Bitcoin attestation")
+                out.append((height, msg[::-1].hex()))
+            return i
+        if tag == 0x08:
+            return node(hashlib.sha256(msg).digest(), i)
+        if tag in (0xF0, 0xF1):
+            arg, i = _varbytes(b, i, 4096)
+            return node(msg + arg if tag == 0xF0 else arg + msg, i)
+        raise ValueError(f"unsupported proof operation 0x{tag:02x}")
+
+    try:
+        end = node(b[n + 2:n + 34], n + 34)
+    except IndexError:
+        raise ValueError("truncated proof") from None
+    if end != len(b):
+        raise ValueError("trailing bytes after the proof")
+    return out
+
+
+def amendment_body_sha256(amendment: dict) -> str:
+    return hashlib.sha256(canonical_json({k: v for k, v in amendment.items() if k != "approval"})).hexdigest()
+
+
+def amendment_ok(amendment: dict, prereg_path: Path) -> tuple[bool, str]:
+    """Amendment 01 counts only if it is approved over its own body hash, amends
+    exactly this preregistration file, design and proof, and names this method
+    with these pinned identities and endpoints."""
+    a = amendment.get("approval", {})
+    m = amendment.get("method", {})
+    tgt = amendment.get("amends", {})
+    proof = Path(str(prereg_path) + ".ots")
+    if amendment.get("schema") != AMENDMENT_SCHEMA or amendment.get("amendment_id") != AMENDMENT_ID:
+        return False, "not CE5 amendment 01"
+    if a.get("status") != "APPROVED" or not a.get("approved_by") or not a.get("approved_utc"):
+        return False, "amendment is not approved (status, approver and time required)"
+    if a.get("amendment_body_sha256") != amendment_body_sha256(amendment):
+        return False, "amendment approval hash does not match the amendment body"
+    if tgt.get("preregistration_sha256") != hashlib.sha256(Path(prereg_path).read_bytes()).hexdigest():
+        return False, "amendment does not amend this preregistration file"
+    if tgt.get("design_sha256") != design_sha256():
+        return False, "amendment does not amend this design"
+    if not proof.exists() or tgt.get("proof_sha256") != hashlib.sha256(proof.read_bytes()).hexdigest():
+        return False, "amendment does not bind these proof bytes"
+    want = {"name": JAVA_METHOD_NAME, "java_repository": JAVA_OTS_REPOSITORY, "java_commit": JAVA_OTS_COMMIT,
+            "java_jar_sha256": JAVA_OTS_JAR_SHA256, "java_runtime": JAVA_RUNTIME, "java_endpoint": JAVA_ENDPOINT,
+            "second_endpoint": SECOND_ENDPOINT, "evidence_schema": JAVA_EVIDENCE_SCHEMA}
+    bad = sorted(k for k, v in want.items() if m.get(k) != v)
+    if bad:
+        return False, f"amendment method differs from the registered method: {bad}"
+    if not amendment.get("registered_identities", {}).get("code_sha256"):
+        return False, "amendment registers no source manifest"
+    return True, "amendment approved"
+
+
+def java_ots_verification_ok(record: Path, prereg_path: Path, amendment_sha256: str) -> tuple[bool, str]:
+    """A recorded amendment-01 run (runner.record_java_ots_verification) counts
+    only if, recomputed here from its raw contents: the pinned Java CLI verified
+    the current file against the current proof with no failure output; for every
+    Bitcoin attestation in the proof, the Java endpoint's block hash and Merkle
+    root match the proof's commitment; and the second endpoint's raw 80-byte
+    header double-SHA-256es to that same block hash and carries that Merkle root
+    and time. The record must name this amendment."""
+    import re
+    if not record.exists():
+        return False, f"no recorded Java OTS verification ({record.name})"
+    try:
+        r = json.loads(record.read_text())
+    except ValueError:
+        return False, "Java OTS verification record is not JSON"
+    proof = Path(str(prereg_path) + ".ots")
+    file_sha = hashlib.sha256(Path(prereg_path).read_bytes()).hexdigest()
+    proof_sha = hashlib.sha256(proof.read_bytes()).hexdigest() if proof.exists() else None
+    j, s = r.get("java", {}), r.get("second_endpoint", {})
+    if r.get("schema") != JAVA_EVIDENCE_SCHEMA or r.get("method") != JAVA_METHOD_NAME:
+        return False, "record is not an amendment-01 Java OTS verification record"
+    if r.get("amendment_sha256") != amendment_sha256:
+        return False, "record was made under a different amendment"
+    if r.get("file_sha256") != file_sha or r.get("proof_sha256") != proof_sha:
+        return False, "Java OTS verification was made on different file or proof bytes"
+    if ots_digest(proof) != file_sha:
+        return False, "proof does not commit to the preregistration file"
+    if j.get("jar_sha256") != JAVA_OTS_JAR_SHA256 or j.get("source_commit") != JAVA_OTS_COMMIT:
+        return False, "record was not made with the pinned Java OpenTimestamps build"
+    if JAVA_RUNTIME not in j.get("runtime_version_output", ""):
+        return False, "record was not made with the pinned Java runtime"
+    cmd = j.get("command", [])
+    if cmd[-5:-2] != ["-v", "verify", "-f"] or Path(cmd[-2]).name != Path(prereg_path).name \
+            or Path(cmd[-1]).name != proof.name:
+        return False, "recorded Java command is not 'verify -f <preregistration> <proof>'"
+    out, err = j.get("stdout", ""), j.get("stderr", "")
+    if j.get("exit_code") != 0:
+        return False, f"recorded Java verify exited {j.get('exit_code')}"
+    bad = [m for m in JAVA_FAILURE_MARKERS if m in out + err]
+    if bad:
+        return False, f"recorded Java verify output reports {bad}"
+    try:
+        commits = ots_bitcoin_commitments(proof)
+    except ValueError as e:
+        return False, f"proof cannot be evaluated: {e}"
+    if not commits:
+        return False, "proof has no Bitcoin attestation"
+    success = re.findall(r"^Success! Bitcoin block (\d+) attests", out, re.M)
+    if success != [str(min(h for h, _ in commits))]:
+        return False, "recorded Java verify has no success line for the proof's earliest Bitcoin attestation"
+    hashes = dict(re.findall(re.escape(JAVA_ENDPOINT) + r"/block-height/(\d+) ([0-9a-f]{64})$", err, re.M))
+    blocks = {bh: (mr, int(t)) for mr, bh, t in
+              re.findall(r"BlockHeader\{merkleroot='([0-9a-f]{64})', blockHash='([0-9a-f]{64})', time='(\d+)'\}", err)}
+    if s.get("base") != SECOND_ENDPOINT:
+        return False, "second endpoint is not the registered one"
+    resp = {q.get("path"): q.get("body", "") for q in s.get("responses", [])}
+    for height, root in commits:
+        bh = hashes.get(str(height))
+        if bh is None or bh not in blocks:
+            return False, f"Java verify did not look up Bitcoin block {height}"
+        if blocks[bh][0] != root:
+            return False, f"Java endpoint Merkle root for block {height} differs from the proof commitment"
+        if f"Lite-client verification, assuming block {bh} is valid" not in err:
+            return False, f"Java verify did not complete block {height}"
+        if resp.get(f"/block-height/{height}", "").strip() != bh:
+            return False, f"endpoints disagree on the hash of block {height}"
+        try:
+            hdr = bytes.fromhex(resp.get(f"/block/{bh}/header", "").strip())
+        except ValueError:
+            hdr = b""
+        if len(hdr) != 80:
+            return False, f"second endpoint returned no 80-byte header for block {height}"
+        if hashlib.sha256(hashlib.sha256(hdr).digest()).digest()[::-1].hex() != bh:
+            return False, f"second endpoint header for block {height} does not hash to the block hash"
+        if hdr[36:68][::-1].hex() != root:
+            return False, f"second endpoint header Merkle root for block {height} differs from the proof commitment"
+        if int.from_bytes(hdr[68:72], "little") != blocks[bh][1]:
+            return False, f"endpoints disagree on the time of block {height}"
+    return True, "verified (amendment 01)"
 
 
 def gate_spec(d: dict) -> dict:

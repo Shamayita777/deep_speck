@@ -960,3 +960,73 @@ def test_verifier_detects_source_change_after_production(lifecycle, tables, tmp_
     (src / "analysis.py").write_bytes((src / "analysis.py").read_bytes() + b"\n")
     v = V.verify(out, tables[0], prereg_path=pre, subsample=2, table_sample=20_000, source_root=src)
     assert any("sources on disk differ" in x for x in v["problems"])
+
+
+# ---- amendment 01 (OTS verification method), end to end
+
+def _leb128(n):
+    out = b""
+    while True:
+        b, n = n & 0x7F, n >> 7
+        out += bytes([b | (0x80 if n else 0)])
+        if not n:
+            return out
+
+
+def _amend(pre, tmp_path, height=900000, time=1790000000):
+    """Self-consistent amendment-01 evidence for a toy preregistration: a proof
+    committing sha256(file digest) at a Bitcoin height, an 80-byte header
+    carrying that Merkle root, and Java output and endpoint replies for it."""
+    digest = hashlib.sha256(pre.read_bytes()).digest()
+    payload = _leb128(height)
+    proof = Path(str(pre) + ".ots")
+    proof.write_bytes(DS.OTS_MAGIC + b"\x01\x08" + digest + b"\x08\x00" + DS.OTS_BITCOIN_TAG
+                      + _leb128(len(payload)) + payload)
+    msg = hashlib.sha256(digest).digest()
+    hdr = b"\x00" * 4 + b"\x11" * 32 + msg + time.to_bytes(4, "little") + b"\x00" * 8
+    bh, root = hashlib.sha256(hashlib.sha256(hdr).digest()).digest()[::-1].hex(), msg[::-1].hex()
+    a = {"schema": DS.AMENDMENT_SCHEMA, "amendment_id": DS.AMENDMENT_ID,
+         "amends": {"preregistration_sha256": _sha(pre), "design_sha256": DS.design_sha256(),
+                    "proof_sha256": _sha(proof)},
+         "method": {"name": DS.JAVA_METHOD_NAME, "java_repository": DS.JAVA_OTS_REPOSITORY,
+                    "java_commit": DS.JAVA_OTS_COMMIT, "java_jar_sha256": DS.JAVA_OTS_JAR_SHA256,
+                    "java_runtime": DS.JAVA_RUNTIME, "java_endpoint": DS.JAVA_ENDPOINT,
+                    "second_endpoint": DS.SECOND_ENDPOINT, "evidence_schema": DS.JAVA_EVIDENCE_SCHEMA},
+         "registered_identities": RU.source_manifest()}
+    a["approval"] = {"status": "APPROVED", "approved_by": "test-approver", "approved_utc": "2026-11-08T00:00:00Z",
+                     "amendment_body_sha256": DS.amendment_body_sha256(a)}
+    apath = tmp_path / "amendment.json"
+    apath.write_text(json.dumps(a))
+    err = (f"{DS.JAVA_ENDPOINT}/block-height/{height} {bh}\n{DS.JAVA_ENDPOINT}/block/{bh} BlockHeader{{merkleroot="
+           f"'{root}', blockHash='{bh}', time='{time}'}}\nLite-client verification, assuming block {bh} is valid\n")
+    rec = {"schema": DS.JAVA_EVIDENCE_SCHEMA, "method": DS.JAVA_METHOD_NAME, "amendment_sha256": _sha(apath),
+           "java": {"source_commit": DS.JAVA_OTS_COMMIT, "jar_sha256": DS.JAVA_OTS_JAR_SHA256,
+                    "runtime_version_output": f"OpenJDK Runtime Environment {DS.JAVA_RUNTIME}\n",
+                    "command": ["java", "-jar", "OtsCli.jar", "-v", "verify", "-f", str(pre), str(proof)],
+                    "exit_code": 0, "stdout": f"Success! Bitcoin block {height} attests data existed\n", "stderr": err},
+           "second_endpoint": {"base": DS.SECOND_ENDPOINT, "responses": [
+               {"path": f"/block-height/{height}", "body": bh}, {"path": f"/block/{bh}/header", "body": hdr.hex()}]},
+           "file_sha256": _sha(pre), "proof_sha256": _sha(proof)}
+    Path(str(proof) + DS.JAVA_EVIDENCE_SUFFIX).write_text(json.dumps(rec))
+    return apath
+
+
+def test_production_and_verifier_under_amendment_01(tables, tmp_path, monkeypatch):
+    tdir, hashes = tables
+    d = toy_design(hashes)
+    monkeypatch.setattr(DS, "_DESIGN", d)
+    pre = write_prereg(tmp_path / "preregistration.json", d, verified=False)
+    apath = _amend(pre, tmp_path)
+    kw = dict(prereg_path=pre, prereg_sha256=_sha(pre), binder=binder_ok, replicate=synthetic_replicate("D"),
+              memory_probe=PLENTY)
+    with pytest.raises(SystemExit, match="no recorded 'ots verify' run"):
+        RU.production(tmp_path / "plain", tdir, DS.CONFIRM_TOKEN, **kw)      # the registered gate is unchanged
+    with pytest.raises(SystemExit, match="both its path and its SHA-256"):
+        RU.production(tmp_path / "half", tdir, DS.CONFIRM_TOKEN, amendment_path=apath, **kw)
+    out = tmp_path / "run"
+    man = RU.production(out, tdir, DS.CONFIRM_TOKEN, amendment_path=apath, amendment_sha256=_sha(apath), **kw)
+    assert man["amendment_sha256"] == _sha(apath) and man["source_integrity"]["decision"] == "PASS"
+    assert V.verify(out, tdir, prereg_path=pre, subsample=2, table_sample=20_000,
+                    amendment_path=apath)["status"] == "VERIFIED"
+    v = V.verify(out, tdir, prereg_path=pre, subsample=2, table_sample=20_000)
+    assert any("names an amendment but none was supplied" in x for x in v["problems"])

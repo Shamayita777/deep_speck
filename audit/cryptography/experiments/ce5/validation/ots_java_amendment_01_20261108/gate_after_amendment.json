@@ -1,0 +1,44 @@
+{
+ "recorded_utc": "2026-11-08T08:46:41Z",
+ "git_head": "44441f5ea83568eccafd0aef958ea2cc33f7dd7e",
+ "preregistration_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+ "proof_sha256": "852fe259c326ed725018582f8e3fe979b94de66ec59463f012758500b711e986",
+ "amendment_sha256": "c795f7eccabaefd4b8e74df2b5087731936bd1c83cea5bc5db779e083bd3eb97",
+ "amendment_body_sha256": "e1f2c4c86b39a59be86879d00f48aad5ac0f3730bc4fd0db4c2de6b44bb9f29e",
+ "evidence_record_sha256": "64d15d644102f3b8a809e84012f92fd345b4edbb9020255192c5aa14292d988b",
+ "design_sha256": "409e7dcb53c5eba7a623a584ec302f2aa3a26e84b3efcf9e6c021e5629fde5c5",
+ "design_equals_design_py": true,
+ "proof_commitments": [
+  [
+   974769,
+   "b8c7f16aae9c3da5387844d274159f0ecda6e12b7dcaec88b4431c74b12e52ab"
+  ],
+  [
+   974770,
+   "cf99bb05a4faa860b338e8ccb7393473c5369ad0c82a6a4798443c7d683004ea"
+  ]
+ ],
+ "amendment_ok": [
+  true,
+  "amendment approved"
+ ],
+ "java_ots_verification_ok": [
+  true,
+  "verified (amendment 01)"
+ ],
+ "amended_gate": {
+  "authorised": true,
+  "reason": "approved under amendment 01"
+ },
+ "source_integrity_under_amendment": {
+  "decision": "PASS",
+  "files": 13,
+  "dependencies": 3
+ },
+ "registered_gate_without_amendment": {
+  "authorised": false,
+  "reason": "no recorded 'ots verify' run (preregistration_409e7dcb_APPROVED.json.ots.verification.json); an attestation tag in the proof is not verification",
+  "source_integrity": "production refused: source files differ from the registered manifest: {'unexpected': ['tests/test_ots_amendment.py'], 'changed': ['design.py', 'runner.py', 'tests/test_pipeline.py', 'verify.py']}"
+ },
+ "production_started": false
+}

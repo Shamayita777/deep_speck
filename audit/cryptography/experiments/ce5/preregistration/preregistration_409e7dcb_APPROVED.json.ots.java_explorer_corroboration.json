@@ -1,0 +1,63 @@
+{
+  "amendment_id": "CE5-AMENDMENT-01-OTS-VERIFICATION-METHOD",
+  "amendment_sha256": "c795f7eccabaefd4b8e74df2b5087731936bd1c83cea5bc5db779e083bd3eb97",
+  "created_utc": "2026-11-08T08:37:43Z",
+  "file_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+  "java": {
+    "cli_version_output": "Version: OtsCli v.1.0\n\n",
+    "command": [
+      "/Users/oishimoitra/ce5_runs/java_ots/toolchain/jdk-11.0.33+10/Contents/Home/bin/java",
+      "-jar",
+      "/Users/oishimoitra/ce5_runs/java_ots/build_8186391/target/OtsCli.jar",
+      "-v",
+      "verify",
+      "-f",
+      "audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json",
+      "audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json.ots"
+    ],
+    "endpoint": "https://blockstream.info/api",
+    "exit_code": 0,
+    "finished_utc": "2026-11-08T08:37:42Z",
+    "jar": "/Users/oishimoitra/ce5_runs/java_ots/build_8186391/target/OtsCli.jar",
+    "jar_sha256": "9e85a795ebfe9e0cedef7aa86f5945f9d8261e9d919076290ff15933f3535c1a",
+    "runtime_version_output": "openjdk version \"11.0.33\" 2026-10-20\nOpenJDK Runtime Environment Temurin-11.0.33+10 (build 11.0.33+10)\nOpenJDK 64-Bit Server VM Temurin-11.0.33+10 (build 11.0.33+10, mixed mode)\n",
+    "source_commit": "81863915ea218354e9c84cae0c522b85d1dc9f91",
+    "source_repository": "https://github.com/opentimestamps/java-opentimestamps",
+    "started_utc": "2026-11-08T08:37:39Z",
+    "stderr": "https://blockstream.info/api/block-height/974769 000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae\nhttps://blockstream.info/api/block/000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae BlockHeader{merkleroot='b8c7f16aae9c3da5387844d274159f0ecda6e12b7dcaec88b4431c74b12e52ab', blockHash='000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae', time='1793945763'}\nLite-client verification, assuming block 000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae is valid\nhttps://blockstream.info/api/block-height/974770 00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe\nhttps://blockstream.info/api/block/00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe BlockHeader{merkleroot='cf99bb05a4faa860b338e8ccb7393473c5369ad0c82a6a4798443c7d683004ea', blockHash='00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe', time='1793946945'}\nLite-client verification, assuming block 00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe is valid\n",
+    "stdout": "Assuming target filename is 'audit/cryptography/experiments/ce5/preregistration/preregistration_409e7dcb_APPROVED.json'\nSuccess! Bitcoin block 974769 attests data existed as of 2026-11-06 IST\n"
+  },
+  "method": "Java OpenTimestamps explorer-assisted verification plus independent second-endpoint raw-header corroboration",
+  "not_equivalent_to": [
+    "local Bitcoin Core consensus verification",
+    "a two-endpoint check inside the Java CLI (it queries one endpoint)",
+    "opentimestamps-client (Python) 'ots verify'"
+  ],
+  "proof_sha256": "852fe259c326ed725018582f8e3fe979b94de66ec59463f012758500b711e986",
+  "schema": "gohr-ce5-java-ots-corroboration-1",
+  "second_endpoint": {
+    "base": "https://mempool.space/api",
+    "responses": [
+      {
+        "body": "000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae",
+        "path": "/block-height/974769",
+        "requested_utc": "2026-11-08T08:37:42Z"
+      },
+      {
+        "body": "0000fc24646c6255b166fa283a7545f8440d4efb8482ce917f4301000000000000000000ab522eb1741c43b488ecca7d2be1a6cd0e9f1574d2447838a53d9cae6af1c7b8a370ed6aace50117403167a8",
+        "path": "/block/000000000000000000013965d58e0f9e4ec9f76a4ecf05d29d451221e8aa16ae/header",
+        "requested_utc": "2026-11-08T08:37:42Z"
+      },
+      {
+        "body": "00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe",
+        "path": "/block-height/974770",
+        "requested_utc": "2026-11-08T08:37:42Z"
+      },
+      {
+        "body": "00e04424ae16aae82112459dd205cf4e6af7c94e9e0f8ed5653901000000000000000000ea0430687d3c4498476a2ac8d09a36c5733439b7cce838b360a8faa405bb99cf4175ed6aace5011778a8270c",
+        "path": "/block/00000000000000000000e9d5b31e790333bc0b40af1d6bd7ec220d6d71371dbe/header",
+        "requested_utc": "2026-11-08T08:37:43Z"
+      }
+    ]
+  }
+}

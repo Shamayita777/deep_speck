@@ -1,0 +1,17 @@
+{
+ "recorded_utc": "2026-11-08T08:26:29Z",
+ "git_head": "44441f5ea83568eccafd0aef958ea2cc33f7dd7e",
+ "call": "design.production_authorisation(prereg, CONFIRM_TOKEN, prereg_path=<approved file>) with the registered (pre-amendment) gate",
+ "authorised": false,
+ "reason": "no recorded 'ots verify' run (preregistration_409e7dcb_APPROVED.json.ots.verification.json); an attestation tag in the proof is not verification",
+ "source_integrity": {
+  "decision": "PASS",
+  "files": 12,
+  "dependencies": 3
+ },
+ "design_equals_design_py": true,
+ "preregistration_sha256": "0aa8fd61e38a52c6d207c5b1e5e426ae358f3214df684458cc29d97a8942f26d",
+ "proof_sha256": "852fe259c326ed725018582f8e3fe979b94de66ec59463f012758500b711e986",
+ "design_py_sha256": "dda7a365f0eeeb2b2b6c821a782027b581398a4f454dabf3f8005f8a9ffabd6e",
+ "runner_py_sha256": "a3b8e1ceeeb7adc1c2298b03601138918f8f599280813520f7ce90ae6ebbd7fe"
+}
