@@ -1,0 +1,37 @@
+CAPTURED RETROSPECTIVELY on 2026-11-08T09:46:22Z, after the build, from the unchanged local clone
+/Users/oishimoitra/ce5_runs/java_ots/src of https://github.com/opentimestamps/java-opentimestamps that the build was exported from.
+
+$ git rev-parse HEAD
+81863915ea218354e9c84cae0c522b85d1dc9f91
+
+$ git rev-parse HEAD^{tree}
+d110143bb2f540693e734cc7e1d51a5396c00c51
+
+$ git describe --tags
+1.20-1-g8186391
+
+$ git status --porcelain   (empty = no local changes)
+
+$ git cat-file -p 81863915ea218354e9c84cae0c522b85d1dc9f91
+tree d110143bb2f540693e734cc7e1d51a5396c00c51
+parent 42878e7243959be9853a8780ef19c17e3d4b304d
+author Rebekkal <rebeccapancras@gmail.com> 1620193846 +0530
+committer GitHub <noreply@github.com> 1620193846 +0530
+gpgsig -----BEGIN PGP SIGNATURE-----
+ 
+ wsBcBAABCAAQBQJgkjI2CRBK7hj4Ov3rIwAAMgcIAGQ83BpMOmh0gA0YDEp1FNL3
+ 3/ZV3a961lOLrc+oNDiguTl595jusyTC+EFY3PJILcwU+X14IfkRFdAMT3zQ6oND
+ LhniDD6wnmer73qqXEXCJ/i3uD0W/SP2YnOELZpiX4lzdEYpEwc4RheAjh45qhGt
+ AYntjvwK/7ErzH4wVUNyfV3AmMjk6VmuknYiUuVHSb9vNmf01Vwuk9ndR+dOa0Kg
+ Jmtjr4caDeQmq29Zn8jxsNBkLToFQCGKb9xewoU2XGpDLeBCkwggiLixkap7YR59
+ MVbqwjYJRrTuX/uBSW5OYGHGTMIzYj04DaFU3cdCmhhvXSiYITBLGTbVjui9Qt0=
+ =UZwI
+ -----END PGP SIGNATURE-----
+ 
+
+Update stamp method in OtsCli.java
+
+Serialise DetachedTimestampFile object instead of TimeStamp object in Stamp function to stamp digest
+$ git ls-remote https://github.com/opentimestamps/java-opentimestamps HEAD refs/heads/master   (at capture time)
+81863915ea218354e9c84cae0c522b85d1dc9f91	HEAD
+81863915ea218354e9c84cae0c522b85d1dc9f91	refs/heads/master

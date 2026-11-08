@@ -1,0 +1,24 @@
+RECONSTRUCTED RETROSPECTIVELY on 2026-11-08T09:46:22Z: these lines were written into this file after the build.
+They are the commands exactly as issued in the working session on 2026-11-08 (IST); they were not
+captured by a wrapper at the time. The build output itself is build_8186391.log (sha256 95df9874d7eeb67a37b4d5af954d3993fb5f563b371f8a4478a207c1cbbf7933),
+which was captured at build time by the redirection shown below.
+
+# 1. Toolchain downloads (into ~/ce5_runs/java_ots/toolchain), 2026-11-08 ~13:46-13:48 IST
+curl -fsSL 'https://api.adoptium.net/v3/assets/latest/11/hotspot?architecture=aarch64&image_type=jdk&os=mac&vendor=eclipse' -o adoptium_jdk11.json
+curl -fsSL -o OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.33_10.tar.gz 'https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.33%2B10/OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.33_10.tar.gz'
+curl -fsSL -o apache-maven-3.9.9-bin.tar.gz https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
+curl -fsSL -o apache-maven-3.9.9-bin.tar.gz.sha512 https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz.sha512
+shasum -a 256 OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.33_10.tar.gz   # compared with package.checksum in adoptium_jdk11.json
+shasum -a 512 apache-maven-3.9.9-bin.tar.gz                          # compared with apache-maven-3.9.9-bin.tar.gz.sha512
+tar xzf OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.33_10.tar.gz
+tar xzf apache-maven-3.9.9-bin.tar.gz
+
+# 2. Source export and build (zsh), 2026-11-08, finished 13:50:05 IST per the log
+B=~/ce5_runs/java_ots/build_8186391; mkdir -p $B && git -C ~/ce5_runs/java_ots/src archive --format=tar 81863915ea218354e9c84cae0c522b85d1dc9f91 | tar -x -C $B && cd $B && export JAVA_HOME=~/ce5_runs/java_ots/toolchain/jdk-11.0.33+10/Contents/Home && ~/ce5_runs/java_ots/toolchain/apache-maven-3.9.9/bin/mvn -B -Dmaven.repo.local=$HOME/ce5_runs/java_ots/m2 -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true package > ../build_8186391.log 2>&1
+
+# Expanded paths on this machine
+#   JAVA_HOME          = /Users/oishimoitra/ce5_runs/java_ots/toolchain/jdk-11.0.33+10/Contents/Home
+#   mvn                = /Users/oishimoitra/ce5_runs/java_ots/toolchain/apache-maven-3.9.9/bin/mvn
+#   maven.repo.local   = /Users/oishimoitra/ce5_runs/java_ots/m2
+#   build directory    = /Users/oishimoitra/ce5_runs/java_ots/build_8186391
+# Result: exit 0, BUILD SUCCESS; target/OtsCli.jar sha256 9e85a795ebfe9e0cedef7aa86f5945f9d8261e9d919076290ff15933f3535c1a

@@ -1,0 +1,73 @@
+{
+ "schema": "gohr-ce5-amendment-01-build-provenance-addendum-1",
+ "created_utc": "2026-11-08T09:46:22Z",
+ "purpose": "evidence packaging only: completes the build provenance of amendment 01. Changes no source file, the amendment, the Java verification record, the preregistration or the proof, and does not alter the verification method or the gate",
+ "amendment": {
+  "path": "preregistration/amendment_01_ots_verification_method.json",
+  "sha256": "c795f7eccabaefd4b8e74df2b5087731936bd1c83cea5bc5db779e083bd3eb97"
+ },
+ "not_bound_by_amendment": "build_command.txt, mvn_version.txt, source_commit.txt and this addendum post-date the amendment and are not in its hash list; build_8186391.log is, with the hash below",
+ "records": {
+  "build/build_8186391.log": {
+   "sha256": "95df9874d7eeb67a37b4d5af954d3993fb5f563b371f8a4478a207c1cbbf7933",
+   "equals_amendment_listed_hash": true,
+   "timing": "captured at build time (stdout and stderr of mvn)",
+   "note": "omitted from commit 32db252 because .gitignore excludes *.log; added with git add -f",
+   "secret_scan": "no credentials, tokens, keys or e-mail addresses; contains the local home path /Users/oishimoitra and public Maven Central and repository.sonatype.org download URLs"
+  },
+  "build/build_command.txt": {
+   "sha256": "4a8d82be769f1f2de730c07a9ab1269e03d41a9639049b69f663709e39ec16c5",
+   "timing": "reconstructed retrospectively: the commands as issued, written down after the build"
+  },
+  "build/mvn_version.txt": {
+   "sha256": "6a0bbd3aaec02cdacb7ff8858e5d058d80f63b9ebf0c4610a2bd44de66ef0753",
+   "timing": "captured retrospectively from the same toolchain binaries"
+  },
+  "build/source_commit.txt": {
+   "sha256": "f04f992d976e351029fecfc59191e170a56574109cfbff6e62b1789f18d91956",
+   "timing": "captured retrospectively from the unchanged source clone"
+  }
+ },
+ "source": {
+  "repository": "https://github.com/opentimestamps/java-opentimestamps",
+  "commit": "81863915ea218354e9c84cae0c522b85d1dc9f91",
+  "tree": "d110143bb2f540693e734cc7e1d51a5396c00c51",
+  "describe": "1.20-1-g8186391",
+  "pom_version": "1.20",
+  "export": "git archive --format=tar <commit> | tar -x (no working-copy files)",
+  "archive_sha256": "5a253fb5f19e9ae0ab00e3cbdfd1cb02aa08134c80fbc6487dbfc2f843c3a9f0"
+ },
+ "toolchain": {
+  "jdk": {
+   "distribution": "Eclipse Temurin",
+   "version": "11.0.33+10",
+   "platform": "macOS aarch64",
+   "url": "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.33%2B10/OpenJDK11U-jdk_aarch64_mac_hotspot_11.0.33_10.tar.gz",
+   "sha256": "6ef5b027206691439b2dcb2fc05adc13cc7f5b6e75a08fce8f75ee188adc7751",
+   "checked_against": "package.checksum in the Adoptium API reply (build/adoptium_jdk11.json)"
+  },
+  "maven": {
+   "version": "3.9.9",
+   "url": "https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz",
+   "checksum_url": "https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz.sha512",
+   "sha512": "a555254d6b53d267965a3404ecb14e53c3827c09c3b94b5678835887ab404556bfaf78dcfe03ba76fa2508649dca8531c74bca4d5846513522404d48e8c4ac8b",
+   "sha256": "7a9cdf674fc1703d6382f5f330b3d110ea1b512b51f1652846d9e4e8a588d766",
+   "checked_against": "the published .sha512 file from the same Apache archive"
+  },
+  "signature_verification": "publisher checksums were checked (Adoptium SHA-256, Apache SHA-512); GPG/PGP signatures (.sig / .asc) were NOT verified for either archive"
+ },
+ "build": {
+  "command": "mvn -B -Dmaven.repo.local=$HOME/ce5_runs/java_ots/m2 -DskipTests -Dmaven.javadoc.skip=true -Dgpg.skip=true package",
+  "java_home": "/Users/oishimoitra/ce5_runs/java_ots/toolchain/jdk-11.0.33+10/Contents/Home",
+  "working_directory": "/Users/oishimoitra/ce5_runs/java_ots/build_8186391",
+  "finished": "2026-11-08T13:50:05+05:30 (from the log)",
+  "result": "BUILD SUCCESS, exit 0",
+  "tests": "skipped (-DskipTests): upstream tests contact live calendars",
+  "dependency_jars": "build/maven_repository_jars.sha256 (381 jars in the isolated repository)",
+  "outputs_sha256": {
+   "OtsCli.jar": "9e85a795ebfe9e0cedef7aa86f5945f9d8261e9d919076290ff15933f3535c1a",
+   "java-opentimestamps-1.20.jar": "224ce6c1c89ab65744c10fbd4596a5b70e3c33e97cae01b079aa481a21cab87c",
+   "java-opentimestamps-1.20-sources.jar": "cca62f713b25b88b5c6b8c31c96c7ee197f6a75a3a326e9985059d6d1a160515"
+  }
+ }
+}
